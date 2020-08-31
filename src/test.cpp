@@ -9,6 +9,7 @@
 #include "stdarg.h"
 #include "assert.h"
 #include "vector.hpp"
+#include "2d.h"
 #include "test.h"
 
 using namespace std;
@@ -71,5 +72,22 @@ bool Test::test_vector(void) const {
     assert( (test9.get_vect() ).at(1) == 0);
     assert( (test9.get_vect() ).at(2) == 9);
     cout << test5 << test6 << test7 << test8 << test9 << endl;
+    return true;
+}
+
+bool Test::test_line(void) const {
+    int width  = 1920;
+    int height = 1080;
+    const TGAColor white = TGAColor(255, 255, 255, 255);
+    const TGAColor red   = TGAColor(255, 0,   0,   255);
+    TGAImage image(width, height, TGAImage::RGB);
+    // 左右对角线
+    line(0, 0, 1920, 1080, image, white);
+    line(0, 1080, 1920, 0, image, white);
+    // 居中水平线
+    line(0, 540, 1920, 540, image, white);
+    // 居中铅锤线
+    line(960, 0, 960, 1080, image, white);
+    image.write_tga_file("test_line.tga");
     return true;
 }

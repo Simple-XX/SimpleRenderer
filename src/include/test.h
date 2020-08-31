@@ -13,6 +13,7 @@ public:
     Test(void);
     ~Test(void);
     bool test_vector(void) const;
+    bool test_line() const;
     bool test_tga(void) const;
 };
 
