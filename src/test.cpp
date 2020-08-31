@@ -76,6 +76,7 @@ bool Test::test_vector(void) const {
 }
 
 bool Test::test_line(void) const {
+    cout << "==========Test line==========" << endl;
     int width  = 1920;
     int height = 1080;
     TGAColor white = TGAColor(255, 255, 255, 255);

@@ -9,6 +9,11 @@
 using namespace std;
 
 TwoD::TwoD(TGAImage & _image, std::string _filename) : image(_image), filename(_filename) {
+    for(auto w = 0 ; w < image.get_width() ; w++) {
+        for(auto h = 0 ; h < image.get_height() ; h++) {
+            image.set(w, h, color_bg);
+        }
+    }
     return;
 }
 
@@ -37,11 +42,9 @@ void TwoD::line(int _x0, int _y0, int _x1, int _y1) const {
     int y = _y0;
     for(int x = _x0 ; x <= _x1 ; x++) {
         if(steep == true) {
-            cout << "x: " << y << "y: " << x << endl;
             image.set(y, image.get_height() - x, color);
         }
         else {
-            cout << "x: " << x << "y: " << y << endl;
             image.set(x, image.get_height() - y, color);
         }
         de += abs(dy2);
@@ -58,8 +61,26 @@ void TwoD::set_color(TGAColor & _color) {
     return;
 }
 
+void TwoD::set_bg(TGAColor & _color_bg) {
+    color_bg = _color_bg;
+    for(auto w = 0 ; w < image.get_width() ; w++) {
+        for(auto h = 0 ; h < image.get_height() ; h++) {
+            image.set(w, h, color_bg);
+        }
+    }
+    return;
+}
+
 TGAColor TwoD::get_color(void) const {
     return color;
+}
+
+int TwoD::get_width(void) const {
+    return image.get_width();
+}
+
+int TwoD::get_height(void) const {
+    return image.get_height();
 }
 
 bool TwoD::save(string _filename) const {

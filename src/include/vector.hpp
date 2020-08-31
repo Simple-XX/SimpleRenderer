@@ -201,4 +201,9 @@ std::ostream & operator<< (std::ostream &_os, const Vector<T, N> &_v) {
     return _os;
 }
 
+typedef Vector<int, 2> Vectori2;
+typedef Vector<int, 3> Vectori3;
+typedef Vector<double, 2> Vectord2;
+typedef Vector<double, 3> Vectord3;
+
 #endif /* __VECTOR_HPP__ */
