@@ -78,16 +78,24 @@ bool Test::test_vector(void) const {
 bool Test::test_line(void) const {
     int width  = 1920;
     int height = 1080;
-    const TGAColor white = TGAColor(255, 255, 255, 255);
-    const TGAColor red   = TGAColor(255, 0,   0,   255);
-    TGAImage image(width, height, TGAImage::RGB);
+    TGAColor white = TGAColor(255, 255, 255, 255);
+    TGAColor red   = TGAColor(255, 0,   0,   255);
+    TGAImage image(width, height, TGAImage::RGBA);
+    TwoD twod(image);
     // 左右对角线
-    line(0, 0, 1920, 1080, image, white);
-    line(0, 1080, 1920, 0, image, white);
+    twod.line(0, 0, 1920, 1080);
+    twod.line(0, 1080, 1920, 0);
     // 居中水平线
-    line(0, 540, 1920, 540, image, white);
+    twod.set_color(red);
+    twod.line(0, 540, 1920, 540);
     // 居中铅锤线
-    line(960, 0, 960, 1080, image, white);
-    image.write_tga_file("test_line.tga");
+    twod.set_color(white);
+    twod.line(960, 0, 960, 1080);
+    twod.save("test_line.tga");
+    return true;
+}
+
+bool Test::test_2d(void) const {
+    test_line();
     return true;
 }

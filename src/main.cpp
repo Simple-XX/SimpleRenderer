@@ -20,7 +20,7 @@ const int height = 1080;
 int main(int argc, char * * argv) {
     Test test;
     test.test_vector();
-    test.test_line();
+    test.test_2d();
     // if(2 == argc) {
     //     model = new Model(argv[1]);
     // } else {

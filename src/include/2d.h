@@ -7,9 +7,22 @@
 #define __2D_H__
 
 #include "tga.h"
+#include "string"
 
-// 在给定 _image 上按照 _x0, _y0, _x1, _y1 给出的坐标绘制直线，颜色由 _color 指定
-// [(_x0, _y0), (_x1, _y1)) 左上角为原点
-void line(int _x0, int _y0, int _x1, int _y1, TGAImage &_image, const TGAColor &_color);
+class TwoD {
+private:
+    TGAImage &image;
+    // white
+    TGAColor color = TGAColor(255, 255, 255, 255);
+    std::string filename = "output.tga";
+
+public:
+    TwoD(TGAImage &_image, std::string _filename = "output.tga");
+    ~TwoD(void);
+    void line(int _x0, int _y0, int _x1, int _y1) const;
+    void set_color(TGAColor & _color);
+    TGAColor get_color(void) const;
+    bool save(std::string _filename = "output.tga") const;
+};
 
 #endif /* __2D_H__ */
