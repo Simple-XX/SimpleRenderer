@@ -3,9 +3,8 @@
 // Based on https://github.com/ssloy/tinyrenderer
 // tga.cpp for SimpleXX/SimpleRenderer.
 
-#include <iostream>
-#include <fstream>
-#include <cstring>
+#include "iostream"
+#include "cstring"
 #include "tga.h"
 
 using namespace std;

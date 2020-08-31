@@ -31,6 +31,5 @@ int main(int argc, char * * argv) {
     }
     Model model(filename, draw);
     model.to_tga();
-
     return 0;
 }
