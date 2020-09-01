@@ -9,7 +9,7 @@
 
 using namespace std;
 
-TwoD::TwoD(TGAImage & _image, std::string _filename) : image(_image), filename(_filename) {
+TwoD::TwoD(TGAImage &_image, const string &_filename) : image(_image), filename(_filename) {
     for(auto w = 0 ; w < image.get_width() ; w++) {
         for(auto h = 0 ; h < image.get_height() ; h++) {
             image.set(w, h, color_bg);
@@ -27,7 +27,7 @@ double TwoD::normalize(double _val) const {
 }
 
 // 推导过程见
-bool TwoD::is_barycentric(Vectori2 _vertex1, Vectori2 _vertex2, Vectori2 _vertex3, Vectori2 _p) const {
+bool TwoD::is_barycentric(const Vectori2 &_vertex1, const Vectori2 &_vertex2, const Vectori2 &_vertex3, const Vectori2 &_p) const {
     // 边向量
     Vectori2 edge1 = (_vertex3 - _vertex1);
     Vectori2 edge2 = (_vertex2 - _vertex1);
@@ -54,14 +54,14 @@ bool TwoD::is_barycentric(Vectori2 _vertex1, Vectori2 _vertex2, Vectori2 _vertex
     return true;
 }
 
-Vectori2 TwoD::get_min(Vectori2 _vertex1, Vectori2 _vertex2, Vectori2 _vertex3) const {
+Vectori2 TwoD::get_min(const Vectori2 &_vertex1, const Vectori2 &_vertex2, const Vectori2 &_vertex3) const {
     int x = min(_vertex1.get_vect()[0], min(_vertex2.get_vect()[0], _vertex3.get_vect()[0]) );
     int y = min(_vertex1.get_vect()[1], min(_vertex2.get_vect()[1], _vertex3.get_vect()[1]) );
     int tmp[2] = { x, y };
     return Vectori2(tmp);
 }
 
-Vectori2 TwoD::get_max(Vectori2 _vertex1, Vectori2 _vertex2, Vectori2 _vertex3) const {
+Vectori2 TwoD::get_max(const Vectori2 &_vertex1, const Vectori2 &_vertex2, const Vectori2 &_vertex3) const {
     int x = max(_vertex1.get_vect()[0], max(_vertex2.get_vect()[0], _vertex3.get_vect()[0]) );
     int y = max(_vertex1.get_vect()[1], max(_vertex2.get_vect()[1], _vertex3.get_vect()[1]) );
     int tmp[2] = { x, y };
@@ -70,7 +70,7 @@ Vectori2 TwoD::get_max(Vectori2 _vertex1, Vectori2 _vertex2, Vectori2 _vertex3) 
 
 // 在给定 _image 上按照 _x0, _y0, _x1, _y1 给出的坐标绘制直线，颜色由 _color 指定
 // [(_x0, _y0), (_x1, _y1)) 左上角为原点
-void TwoD::line(int _x0, int _y0, int _x1, int _y1) const {
+void TwoD::line(int _x0, int _y0, int _x1, int _y1, const TGAColor &_color) const {
     // 斜率大于 1
     bool steep = false;
     if(abs(_x0 - _x1) < abs(_y0 - _y1) ) {
@@ -89,10 +89,10 @@ void TwoD::line(int _x0, int _y0, int _x1, int _y1) const {
     int y = _y0;
     for(int x = _x0 ; x <= _x1 ; x++) {
         if(steep == true) {
-            image.set(y, image.get_height() - x, color_edge);
+            image.set(y, image.get_height() - x, _color);
         }
         else {
-            image.set(x, image.get_height() - y, color_edge);
+            image.set(x, image.get_height() - y, _color);
         }
         de += abs(dy2);
         if(de > 1) {
@@ -104,7 +104,7 @@ void TwoD::line(int _x0, int _y0, int _x1, int _y1) const {
 }
 
 // 绘制三角形，_vertex1 _vertex2 _vertex3 为三个顶点
-void TwoD::triangle(Vectori2 _vertex1, Vectori2 _vertex2, Vectori2 _vertex3) const {
+void TwoD::triangle(const Vectori2 &_vertex1, const Vectori2 &_vertex2, const Vectori2 &_vertex3, const TGAColor &_color) const {
     // 遍历平行四边形，如果在三角形内则填充
     Vectori2 min = get_min(_vertex1, _vertex2, _vertex3);
     Vectori2 max = get_max(_vertex1, _vertex2, _vertex3);
@@ -112,53 +112,21 @@ void TwoD::triangle(Vectori2 _vertex1, Vectori2 _vertex2, Vectori2 _vertex3) con
     for(p.set_vect(min.get_vect()[0], 0) ; p.get_vect()[0] <= max.get_vect()[0] ; p.set_vect(p.get_vect()[0] + 1, 0) ) {
         for(p.set_vect(min.get_vect()[1], 1) ; p.get_vect()[1] <= max.get_vect()[1] ; p.set_vect(p.get_vect()[1] + 1, 1) ) {
             if(is_barycentric(_vertex1, _vertex2, _vertex3, p) == true) {
-                image.set(p.get_vect()[0], image.get_height() - p.get_vect()[1], color_fill);
+                image.set(p.get_vect()[0], image.get_height() - p.get_vect()[1], _color);
             }
         }
     }
     return;
 }
 
-void TwoD::triangle(Vectori2 * _vertexes) const {
-    triangle(_vertexes[0], _vertexes[1], _vertexes[2]);
+void TwoD::triangle(const Vectori2 * _vertexes, const TGAColor &_color) const {
+    triangle(_vertexes[0], _vertexes[1], _vertexes[2], _color);
     return;
 }
 
 void TwoD::circle(int _x0, int _y0, double _r) const {
     assert(_r < 0);
     return;
-}
-
-void TwoD::set_edge(TGAColor _color_edge) {
-    color_edge = _color_edge;
-    return;
-}
-
-void TwoD::set_fill(TGAColor _color_fill) {
-    color_fill = _color_fill;
-    return;
-}
-
-void TwoD::set_bg(TGAColor _color_bg) {
-    color_bg = _color_bg;
-    for(auto w = 0 ; w < image.get_width() ; w++) {
-        for(auto h = 0 ; h < image.get_height() ; h++) {
-            image.set(w, h, color_bg);
-        }
-    }
-    return;
-}
-
-TGAColor TwoD::get_edge(void) const {
-    return color_edge;
-}
-
-TGAColor TwoD::get_fill(void) const {
-    return color_fill;
-}
-
-TGAColor TwoD::get_bg(void) const {
-    return color_bg;
 }
 
 int TwoD::get_width(void) const {

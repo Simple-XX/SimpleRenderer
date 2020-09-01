@@ -5,7 +5,7 @@
 
 #include "iostream"
 #include "cstring"
-#include "tga.h"
+#include "image.h"
 
 using namespace std;
 
@@ -293,6 +293,7 @@ void TGAImage::flip_horizontally() {
             set(width - 1 - i, j, c1);
         }
     }
+    return;
 }
 
 void TGAImage::flip_vertically() {
@@ -309,6 +310,7 @@ void TGAImage::flip_vertically() {
         std::copy(data.begin() + l2, data.begin() + l2 + bytes_per_line, data.begin() + l1);
         std::copy(line.begin(), line.end(), data.begin() + l2);
     }
+    return;
 }
 
 std::uint8_t * TGAImage::buffer() {
@@ -317,6 +319,7 @@ std::uint8_t * TGAImage::buffer() {
 
 void TGAImage::clear() {
     data = std::vector<std::uint8_t>(width * height * bytespp, 0);
+    return;
 }
 
 void TGAImage::scale(int _w, int _h) {
@@ -356,4 +359,5 @@ void TGAImage::scale(int _w, int _h) {
     data = tdata;
     width = _w;
     height = _h;
+    return;
 }

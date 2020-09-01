@@ -6,9 +6,11 @@
 #include "iostream"
 #include "vector.hpp"
 #include "2d.h"
-#include "tga.h"
+#include "image.h"
 #include "model.h"
 #include "test.h"
+#include "image.h"
+#include "renderer.h"
 
 using namespace std;
 
@@ -18,19 +20,17 @@ const int width  = 1920;
 const int height = 1080;
 
 int main(int argc, char * * argv) {
-    Test test;
-    test.test_vector();
-    test.test_2d();
-    TGAImage image(width, height, TGAImage::RGBA);
-    TwoD draw(image);
     string filename;
     if(2 == argc) {
         filename = argv[1];
     } else {
         filename = "obj/african_head.obj";
     }
-    Model model(filename, draw);
-    // model.to_tga_line();
-    model.to_tga_fill();
+    Model model(filename);
+    TGAImage image(width, height, TGAImage::RGBA);
+    TwoD painter(image);
+    Renderer render = Renderer(painter, model);
+    render.render();
+    render.save();
     return 0;
 }

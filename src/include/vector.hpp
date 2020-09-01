@@ -1,7 +1,7 @@
 
 // This file is a part of SimpleXX/SimpleRenderer (https://github.com/SimpleXX/SimpleRenderer).
 //
-// Vector.hpp for SimpleXX/SimpleRenderer.
+// vector.hpp for SimpleXX/SimpleRenderer.
 
 #ifndef __VECTOR_HPP__
 #define __VECTOR_HPP__

@@ -1,10 +1,10 @@
 
 // This file is a part of SimpleXX/SimpleRenderer (https://github.com/SimpleXX/SimpleRenderer).
 // Based on https://github.com/ssloy/tinyrenderer
-// tga.h for SimpleXX/SimpleRenderer.
+// image.h for SimpleXX/SimpleRenderer.
 
-#ifndef __TGA_H__
-#define __TGA_H__
+#ifndef __IMAGE_H__
+#define __IMAGE_H__
 
 #include "cstdint"
 #include "fstream"
@@ -12,18 +12,18 @@
 
 #pragma pack(push,1)
 struct TGA_Header {
-    std::uint8_t		idlength{ };
-    std::uint8_t		colormaptype{ };
-    std::uint8_t		datatypecode{ };
-    std::uint16_t		colormaporigin{ };
-    std::uint16_t		colormaplength{ };
-    std::uint8_t		colormapdepth{ };
-    std::uint16_t		x_origin{ };
-    std::uint16_t		y_origin{ };
-    std::uint16_t		width{ };
-    std::uint16_t		height{ };
-    std::uint8_t		bitsperpixel{ };
-    std::uint8_t		imagedescriptor{ };
+    std::uint8_t		idlength { };
+    std::uint8_t		colormaptype { };
+    std::uint8_t		datatypecode { };
+    std::uint16_t		colormaporigin { };
+    std::uint16_t		colormaplength { };
+    std::uint8_t		colormapdepth { };
+    std::uint16_t		x_origin { };
+    std::uint16_t		y_origin { };
+    std::uint16_t		width { };
+    std::uint16_t		height { };
+    std::uint8_t		bitsperpixel { };
+    std::uint8_t		imagedescriptor { };
 };
 #pragma pack(pop)
 
@@ -34,8 +34,8 @@ struct TGAColor {
     TGAColor(const std::uint8_t _R, const std::uint8_t _G, const std::uint8_t _B, const std::uint8_t _A = 255);
     TGAColor(const std::uint8_t _v);
     TGAColor(const std::uint8_t * _p, const std::uint8_t _bpp);
-    std::uint8_t & operator[] (const int _i);
-    TGAColor operator* (const double _intensity) const;
+    std::uint8_t &	operator[] (const int _i);
+    TGAColor operator* (const double _intensity)const;
 };
 
 class TGAImage {
@@ -69,4 +69,4 @@ public:
     void clear();
 };
 
-#endif // __TGA_H__
+#endif /* __IMAGE_H__ */

@@ -9,24 +9,20 @@
 #include "vector"
 #include "string"
 #include "vector.hpp"
-#include "tga.h"
 #include "2d.h"
 
 class Model {
 private:
     std::vector<Vectord3> verts;
     std::vector<std::vector<int> > faces;
-    int nverts(void);
-    int nfaces(void);
-    Vectord3 vert(int i);
-    std::vector<int> face(int _idx);
-    TwoD &twod;
 
 public:
-    Model(std::string _filename, TwoD &_twod);
+    Model(const std::string &_filename);
     ~Model(void);
-    void to_tga_line(std::string _filename = "model2tga_line.tga");
-    void to_tga_fill(std::string _filename = "model2tga_fill.tga");
+    int nverts(void) const;
+    int nfaces(void) const;
+    Vectord3 vert(int i) const;
+    std::vector<int> face(int _idx) const;
 };
 
 #endif /* __MODEL_H__ */

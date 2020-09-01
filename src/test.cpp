@@ -83,50 +83,40 @@ bool Test::test_vector(void) const {
 
 bool Test::test_line(void) const {
     cout << "==========Test line==========" << endl;
-    int width  = 1920;
-    int height = 1080;
-    TGAColor white = TGAColor(255, 255, 255, 255);
-    TGAColor red   = TGAColor(255, 0,   0,   255);
     TGAImage image(width, height, TGAImage::RGBA);
     TwoD twod(image);
     // 左右对角线
-    twod.line(0, 0, 1920, 1080);
-    twod.line(0, 1080, 1920, 0);
+    twod.line(0, 0, 1920, 1080, white);
+    twod.line(0, 1080, 1920, 0, white);
     // 居中水平线
-    twod.set_edge(red);
-    twod.line(0, 540, 1920, 540);
+    twod.line(0, 540, 1920, 540, white);
     // 居中铅锤线
-    twod.set_edge(white);
-    twod.line(960, 0, 960, 1080);
+    twod.line(960, 0, 960, 1080, white);
     twod.save("test_line.tga");
     return true;
 }
 
 bool Test::test_triangle(void) const {
     cout << "==========Test triangle==========" << endl;
-    int width  = 1920;
-    int height = 1080;
     TGAImage image(width, height, TGAImage::RGBA);
     TwoD twod(image);
-    twod.line(0, 0, 100, 100);
+    twod.line(0, 0, 100, 100, white);
     int a[] = { 0, 0 };
     int b[] = { 0, 540 };
     int c[] = { 960, 0 };
     Vectori2 A(a);
     Vectori2 B(b);
     Vectori2 C(c);
-    twod.triangle(A, B, C);
+    twod.triangle(A, B, C, white);
     twod.save("test_triangle.tga");
     return true;
 }
 
 bool Test::test_fill(void) const {
     cout << "==========Test fill==========" << endl;
-    int width  = 1920;
-    int height = 1080;
     TGAImage image(width, height, TGAImage::RGBA);
     TwoD twod(image);
-    twod.line(0, 0, 100, 100);
+    twod.line(0, 0, 100, 100, white);
     twod.save("test_triangle.tga");
     return true;
 }
