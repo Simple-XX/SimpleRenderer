@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Renderer::Renderer(TwoD &_painter, const Model &_model) : model(_model), painter(_painter) {
+Renderer::Renderer(Geometry &_painter, const Model &_model) : model(_model), painter(_painter) {
     width = painter.get_width();
     height = painter.get_height();
     zbuffer = new uint16_t[width * height];

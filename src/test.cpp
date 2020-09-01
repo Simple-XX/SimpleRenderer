@@ -9,7 +9,7 @@
 #include "stdarg.h"
 #include "assert.h"
 #include "vector.hpp"
-#include "2d.h"
+#include "geometry.h"
 #include "test.h"
 
 using namespace std;
@@ -84,40 +84,40 @@ bool Test::test_vector(void) const {
 bool Test::test_line(void) const {
     cout << "==========Test line==========" << endl;
     TGAImage image(width, height, TGAImage::RGBA);
-    TwoD twod(image);
+    Geometry painter(image);
     // 左右对角线
-    twod.line(0, 0, 1920, 1080, white);
-    twod.line(0, 1080, 1920, 0, white);
+    painter.line(0, 0, 1920, 1080, white);
+    painter.line(0, 1080, 1920, 0, white);
     // 居中水平线
-    twod.line(0, 540, 1920, 540, white);
+    painter.line(0, 540, 1920, 540, white);
     // 居中铅锤线
-    twod.line(960, 0, 960, 1080, white);
-    twod.save("test_line.tga");
+    painter.line(960, 0, 960, 1080, white);
+    painter.save("test_line.tga");
     return true;
 }
 
 bool Test::test_triangle(void) const {
     cout << "==========Test triangle==========" << endl;
     TGAImage image(width, height, TGAImage::RGBA);
-    TwoD twod(image);
-    twod.line(0, 0, 100, 100, white);
+    Geometry painter(image);
+    painter.line(0, 0, 100, 100, white);
     int a[] = { 0, 0 };
     int b[] = { 0, 540 };
     int c[] = { 960, 0 };
     Vectori2 A(a);
     Vectori2 B(b);
     Vectori2 C(c);
-    twod.triangle(A, B, C, white);
-    twod.save("test_triangle.tga");
+    painter.triangle(A, B, C, white);
+    painter.save("test_triangle.tga");
     return true;
 }
 
 bool Test::test_fill(void) const {
     cout << "==========Test fill==========" << endl;
     TGAImage image(width, height, TGAImage::RGBA);
-    TwoD twod(image);
-    twod.line(0, 0, 100, 100, white);
-    twod.save("test_triangle.tga");
+    Geometry painter(image);
+    painter.line(0, 0, 100, 100, white);
+    painter.save("test_triangle.tga");
     return true;
 }
 

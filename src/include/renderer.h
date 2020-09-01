@@ -9,7 +9,7 @@
 #include "vector"
 #include "model.h"
 #include "vector.hpp"
-#include "2d.h"
+#include "geometry.h"
 
 class Renderer {
 private:
@@ -17,7 +17,7 @@ private:
     const Model &model;
     // 着色器?
     // 绘制像素
-    TwoD &painter;
+    Geometry &painter;
     // 光照
     Vectord3 light_dir = Vectord3(0, 0, -1);
     // z-buffer 缓冲
@@ -32,7 +32,7 @@ private:
 protected:
 
 public:
-    Renderer(TwoD &_painter, const Model &_model);
+    Renderer(Geometry &_painter2, const Model &_model);
     ~Renderer(void);
     // 渲染
     bool render(void) const;

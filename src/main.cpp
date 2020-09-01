@@ -5,7 +5,7 @@
 
 #include "iostream"
 #include "vector.hpp"
-#include "2d.h"
+#include "geometry.h"
 #include "image.h"
 #include "model.h"
 #include "test.h"
@@ -28,7 +28,7 @@ int main(int argc, char * * argv) {
     }
     Model model(filename);
     TGAImage image(width, height, TGAImage::RGBA);
-    TwoD painter(image);
+    Geometry painter(image);
     Renderer render = Renderer(painter, model);
     render.render();
     render.save();
