@@ -9,6 +9,8 @@
 class Test {
 private:
     bool test_line(void) const;
+    bool test_triangle(void) const;
+    bool test_fill(void) const;
 
 public:
     Test(void);

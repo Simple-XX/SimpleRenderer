@@ -30,6 +30,7 @@ int main(int argc, char * * argv) {
         filename = "obj/african_head.obj";
     }
     Model model(filename, draw);
-    model.to_tga();
+    // model.to_tga_line();
+    model.to_tga_fill();
     return 0;
 }

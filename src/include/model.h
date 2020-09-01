@@ -25,7 +25,8 @@ private:
 public:
     Model(std::string _filename, TwoD &_twod);
     ~Model(void);
-    void to_tga(std::string _filename = "model2tga.tga");
+    void to_tga_line(std::string _filename = "model2tga_line.tga");
+    void to_tga_fill(std::string _filename = "model2tga_fill.tga");
 };
 
 #endif /* __MODEL_H__ */
