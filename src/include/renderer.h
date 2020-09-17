@@ -1,5 +1,6 @@
 
-// This file is a part of SimpleXX/SimpleRenderer (https://github.com/SimpleXX/SimpleRenderer).
+// This file is a part of SimpleXX/SimpleRenderer
+// (https://github.com/SimpleXX/SimpleRenderer).
 //
 // renderer.h for SimpleXX/SimpleRenderer.
 
@@ -21,16 +22,15 @@ private:
     // 光照
     Vectord3 light_dir = Vectord3(0, 0, -1);
     // z-buffer 缓冲
-    uint16_t * zbuffer;
+    uint16_t *zbuffer;
     // 大小
-    size_t width;
-    size_t height;
+    size_t         width;
+    size_t         height;
     const TGAColor black = TGAColor(0, 0, 0, 255);
     const TGAColor white = TGAColor(255, 255, 255, 255);
-    const TGAColor red   = TGAColor(255, 0,   0,   255);
+    const TGAColor red   = TGAColor(255, 0, 0, 255);
 
 protected:
-
 public:
     Renderer(Geometry &_painter2, const Model &_model);
     ~Renderer(void);

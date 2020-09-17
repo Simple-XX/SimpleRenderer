@@ -1,5 +1,6 @@
 
-// This file is a part of SimpleXX/SimpleRenderer (https://github.com/SimpleXX/SimpleRenderer).
+// This file is a part of SimpleXX/SimpleRenderer
+// (https://github.com/SimpleXX/SimpleRenderer).
 //
 // matrix.hpp for SimpleXX/SimpleRenderer.
 
@@ -11,7 +12,6 @@
 template <class T>
 class Matrix {
 private:
-
 public:
     Matrix(void);
     ~Matrix(void);

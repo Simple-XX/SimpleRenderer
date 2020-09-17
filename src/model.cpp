@@ -1,5 +1,6 @@
 
-// This file is a part of SimpleXX/SimpleRenderer (https://github.com/SimpleXX/SimpleRenderer).
+// This file is a part of SimpleXX/SimpleRenderer
+// (https://github.com/SimpleXX/SimpleRenderer).
 // Based on https://github.com/ssloy/tinyrenderer
 // model.cpp for SimpleXX/SimpleRenderer.
 
@@ -13,34 +14,36 @@ using namespace std;
 Model::Model(const string &_filename) : verts(), faces() {
     std::ifstream in;
     in.open(_filename, std::ifstream::in);
-    if(in.fail() ) return;
+    if (in.fail())
+        return;
     std::string line;
-    while(!in.eof() ) {
+    while (!in.eof()) {
         std::getline(in, line);
-        std::istringstream iss(line.c_str() );
-        char trash;
-        if(!line.compare(0, 2, "v ") ) {
+        std::istringstream iss(line.c_str());
+        char               trash;
+        if (!line.compare(0, 2, "v ")) {
             iss >> trash;
             std::vector<double> tmp;
-            for(int i = 0 ; i < 3 ; i++) {
+            for (int i = 0; i < 3; i++) {
                 double s;
                 iss >> s;
                 tmp.push_back(s);
             }
             Vectord3 v(tmp);
             verts.push_back(v);
-        } else if(!line.compare(0, 2, "f ") ) {
+        }
+        else if (!line.compare(0, 2, "f ")) {
             std::vector<int> f;
-            int itrash, idx;
+            int              itrash, idx;
             iss >> trash;
-            while(iss >> idx >> trash >> itrash >> trash >> itrash) {
+            while (iss >> idx >> trash >> itrash >> trash >> itrash) {
                 idx--; // in wavefront obj all indices start at 1, not zero
                 f.push_back(idx);
             }
             faces.push_back(f);
         }
     }
-    std::cerr << "# v# " << verts.size() << " f# "  << faces.size() << std::endl;
+    std::cerr << "# v# " << verts.size() << " f# " << faces.size() << std::endl;
     return;
 }
 
