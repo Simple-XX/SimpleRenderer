@@ -87,41 +87,31 @@ bool Geometry::is_barycentric(const Vectori3 &_vertex1,
 
 Vectori2 Geometry::get_min(const Vectori2 &_vertex1, const Vectori2 &_vertex2,
                            const Vectori2 &_vertex3) const {
-    int x = min(_vertex1.get_vect()[0],
-                min(_vertex2.get_vect()[0], _vertex3.get_vect()[0]));
-    int y = min(_vertex1.get_vect()[1],
-                min(_vertex2.get_vect()[1], _vertex3.get_vect()[1]));
+    int x = min(_vertex1.coord.x, min(_vertex2.coord.x, _vertex3.coord.x));
+    int y = min(_vertex1.coord.y, min(_vertex2.coord.y, _vertex3.coord.y));
     return Vectori2(x, y);
 }
 
 Vectori2 Geometry::get_max(const Vectori2 &_vertex1, const Vectori2 &_vertex2,
                            const Vectori2 &_vertex3) const {
-    int x = max(_vertex1.get_vect()[0],
-                max(_vertex2.get_vect()[0], _vertex3.get_vect()[0]));
-    int y = max(_vertex1.get_vect()[1],
-                max(_vertex2.get_vect()[1], _vertex3.get_vect()[1]));
+    int x = max(_vertex1.coord.x, max(_vertex2.coord.x, _vertex3.coord.x));
+    int y = max(_vertex1.coord.y, max(_vertex2.coord.y, _vertex3.coord.y));
     return Vectori2(x, y);
 }
 
 Vectori3 Geometry::get_min(const Vectori3 &_vertex1, const Vectori3 &_vertex2,
                            const Vectori3 &_vertex3) const {
-    int x = min(_vertex1.get_vect()[0],
-                min(_vertex2.get_vect()[0], _vertex3.get_vect()[0]));
-    int y = min(_vertex1.get_vect()[1],
-                min(_vertex2.get_vect()[1], _vertex3.get_vect()[1]));
-    int z = min(_vertex1.get_vect()[2],
-                min(_vertex2.get_vect()[2], _vertex3.get_vect()[2]));
+    int x = min(_vertex1.coord.x, min(_vertex2.coord.x, _vertex3.coord.x));
+    int y = min(_vertex1.coord.y, min(_vertex2.coord.y, _vertex3.coord.y));
+    int z = min(_vertex1.coord.z, min(_vertex2.coord.z, _vertex3.coord.z));
     return Vectori3(x, y, z);
 }
 
 Vectori3 Geometry::get_max(const Vectori3 &_vertex1, const Vectori3 &_vertex2,
                            const Vectori3 &_vertex3) const {
-    int x = max(_vertex1.get_vect()[0],
-                max(_vertex2.get_vect()[0], _vertex3.get_vect()[0]));
-    int y = max(_vertex1.get_vect()[1],
-                max(_vertex2.get_vect()[1], _vertex3.get_vect()[1]));
-    int z = max(_vertex1.get_vect()[2],
-                max(_vertex2.get_vect()[2], _vertex3.get_vect()[2]));
+    int x = max(_vertex1.coord.x, max(_vertex2.coord.x, _vertex3.coord.x));
+    int y = max(_vertex1.coord.y, max(_vertex2.coord.y, _vertex3.coord.y));
+    int z = max(_vertex1.coord.z, max(_vertex2.coord.z, _vertex3.coord.z));
     return Vectori3(x, y, z);
 }
 
@@ -170,14 +160,10 @@ void Geometry::triangle(const Vectori2 &_vertex1, const Vectori2 &_vertex2,
     Vectori2 min = get_min(_vertex1, _vertex2, _vertex3);
     Vectori2 max = get_max(_vertex1, _vertex2, _vertex3);
     Vectori2 p;
-    for (p.set_vect(min.get_vect()[0], 0); p.get_vect()[0] <= max.get_vect()[0];
-         p.set_vect(p.get_vect()[0] + 1, 0)) {
-        for (p.set_vect(min.get_vect()[1], 1);
-             p.get_vect()[1] <= max.get_vect()[1];
-             p.set_vect(p.get_vect()[1] + 1, 1)) {
+    for (p.coord.x = min.coord.x; p.coord.x <= max.coord.x; p.coord.x++) {
+        for (p.coord.y = min.coord.y; p.coord.y <= max.coord.y; p.coord.y++) {
             if (is_barycentric(_vertex1, _vertex2, _vertex3, p) == true) {
-                image.set(p.get_vect()[0], image.get_height() - p.get_vect()[1],
-                          _color);
+                image.set(p.coord.x, image.get_height() - p.coord.y, _color);
             }
         }
     }
@@ -196,14 +182,10 @@ void Geometry::triangle(const Vectori3 &_vertex1, const Vectori3 &_vertex2,
     Vectori3 min = get_min(_vertex1, _vertex2, _vertex3);
     Vectori3 max = get_max(_vertex1, _vertex2, _vertex3);
     Vectori3 p;
-    for (p.set_vect(min.get_vect()[0], 0); p.get_vect()[0] <= max.get_vect()[0];
-         p.set_vect(p.get_vect()[0] + 1, 0)) {
-        for (p.set_vect(min.get_vect()[1], 1);
-             p.get_vect()[1] <= max.get_vect()[1];
-             p.set_vect(p.get_vect()[1] + 1, 1)) {
+    for (p.coord.x = min.coord.x; p.coord.x <= max.coord.x; p.coord.x++) {
+        for (p.coord.y = min.coord.y; p.coord.y <= max.coord.y; p.coord.y++) {
             if (is_barycentric(_vertex1, _vertex2, _vertex3, p) == true) {
-                image.set(p.get_vect()[0], image.get_height() - p.get_vect()[1],
-                          _color);
+                image.set(p.coord.x, image.get_height() - p.coord.y, _color);
             }
         }
     }

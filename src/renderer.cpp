@@ -34,10 +34,10 @@ bool Renderer::line(void) const {
         for (int j = 0; j < 3; j++) {
             Vectord3 v0 = model.vert(face.at(j));
             Vectord3 v1 = model.vert(face.at((j + 1) % 3));
-            int      x0 = (v0.get_vect()[0] + 1.) * width / 3.;
-            int      y0 = height - (v0.get_vect()[1] + 1.) * height / 2.;
-            int      x1 = (v1.get_vect()[0] + 1.) * width / 3.;
-            int      y1 = height - (v1.get_vect()[1] + 1.) * height / 2.;
+            int      x0 = (v0.coord.x + 1.) * width / 3.;
+            int      y0 = height - (v0.coord.y + 1.) * height / 2.;
+            int      x1 = (v1.coord.x + 1.) * width / 3.;
+            int      y1 = height - (v1.coord.y + 1.) * height / 2.;
             painter.line(x0, y0, x1, y1, white);
         }
     }
@@ -52,14 +52,13 @@ bool Renderer::fill(void) const {
         for (int j = 0; j < 3; j++) {
             Vectord3 v = model.vert(face[j]);
             screen_coords[j] =
-                Vectori2((v.get_vect()[0] + 1.) * width / 3.,
-                         height - (v.get_vect()[1] + 1.) * height / 2.);
+                Vectori2((v.coord.x + 1.) * width / 3.,
+                         height - (v.coord.y + 1.) * height / 2.);
             world_coords[j] = v;
         }
         Vectord3 n = (world_coords[2] - world_coords[0]) ^
                      (world_coords[1] - world_coords[0]);
-        double intensity =
-            light_dir * Vectord3(const_cast<double *>(n.get_unit()));
+        double intensity = light_dir * n.unit();
         if (intensity > 0) {
             painter.triangle(screen_coords[0], screen_coords[1],
                              screen_coords[2],

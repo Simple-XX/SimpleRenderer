@@ -10,7 +10,6 @@
 #include "vector"
 #include "string"
 #include "vector.hpp"
-#include "geometry.h"
 
 class Model {
 private:
