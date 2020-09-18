@@ -11,6 +11,7 @@
 #include "assert.h"
 #include "vector.hpp"
 #include "geometry.h"
+#include "matrix.hpp"
 #include "test.h"
 
 using namespace std;
@@ -24,9 +25,6 @@ Test::~Test(void) {
 }
 
 bool Test::test_vector(void) const {
-    cout << "=========="
-         << "Test Vector<int, 2>"
-         << "==========" << endl;
     Vector<int, 2> test(vector<int>{2, 3});
     Vector<int, 2> test2(vector<int>{-1, 3});
     Vector<int, 2> test3 = test - test2;
@@ -46,10 +44,6 @@ bool Test::test_vector(void) const {
     assert(test == true);
     Vector<int, 2> test4;
     assert(test4 == false);
-    cout << test << test2 << test3 << test4 << endl;
-    cout << "=========="
-         << "Test Vector<int, 3>"
-         << "==========" << endl;
     Vector<int, 3> test5(vector<int>{2, 3, 4});
     Vector<int, 3> test6(vector<int>{-1, 3, -2});
     Vector<int, 3> test7 = test5 - test6;
@@ -78,13 +72,122 @@ bool Test::test_vector(void) const {
     assert(test9.coord.x == -18);
     assert(test9.coord.y == 0);
     assert(test9.coord.z == 9);
-    // assert( ( (++test9).get_vect() ).at(0) == -17);
-    // assert( (test9.get_vect() ).at(1) == 1);
-    // assert( (test9.get_vect() ).at(2) == 10);
-    // assert( ( (test9++).get_vect() ).at(0) == -17);
-    // assert( (test9.get_vect() ).at(1) == 2);
-    // assert( (test9.get_vect() ).at(2) == 11);
-    cout << test5 << test6 << test7 << test8 << test9 << endl;
+    int            tmp233[3] = {1, 2, 3};
+    Vector<int, 3> test10(tmp233);
+    assert(test10.coord.x == 1);
+    assert(test10.coord.y == 2);
+    assert(test10.coord.z == 3);
+    Vector<int, 3> test11(test10);
+    assert(test11.coord.x == 1);
+    assert(test11.coord.y == 2);
+    assert(test11.coord.z == 3);
+    return true;
+}
+
+bool Test::test_matrix(void) const {
+    Matrix<int, 3, 3> test1;
+    int               arr[12] = {233};
+    size_t            total   = test1.to_arr(arr);
+    assert(total == 9);
+    assert(arr[0] == 0);
+    assert(arr[3] == 0);
+    assert(arr[5] == 0);
+    assert(arr[7] == 0);
+    assert(arr[8] == 0);
+    assert(arr[9] == 0);
+    vector<vector<int>> tmp{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}};
+    Matrix<int, 3, 4>   test2(tmp);
+    total = test2.to_arr(arr);
+    assert(total == 12);
+    assert(arr[0] == 1);
+    assert(arr[3] == 4);
+    assert(arr[5] == 6);
+    assert(arr[7] == 8);
+    assert(arr[8] == 9);
+    assert(arr[9] == 10);
+    assert(arr[11] == 12);
+    Matrix<int, 4, 3> test3 = test2.transpose();
+    total                   = test3.to_arr(arr);
+    assert(total == 12);
+    assert(arr[0] == 1);
+    assert(arr[3] == 2);
+    assert(arr[5] == 10);
+    assert(arr[7] == 7);
+    assert(arr[8] == 11);
+    assert(arr[9] == 4);
+    assert(arr[11] == 12);
+    int               arr1[12] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+    Matrix<int, 3, 4> test4(arr1);
+    total = test4.to_arr(arr);
+    assert(total == 12);
+    assert(arr[0] == 1);
+    assert(arr[3] == 4);
+    assert(arr[5] == 6);
+    assert(arr[7] == 8);
+    assert(arr[8] == 9);
+    assert(arr[9] == 10);
+    assert(arr[11] == 12);
+    Matrix<int, 4, 3> test5 = test4.transpose();
+    total                   = test5.to_arr(arr);
+    assert(total == 12);
+    assert(arr[0] == 1);
+    assert(arr[3] == 2);
+    assert(arr[5] == 10);
+    assert(arr[7] == 7);
+    assert(arr[8] == 11);
+    assert(arr[9] == 4);
+    assert(arr[11] == 12);
+    Matrix<int, 3, 4> test6(test2);
+    total = test6.to_arr(arr);
+    assert(total == 12);
+    assert(arr[0] == 1);
+    assert(arr[3] == 4);
+    assert(arr[5] == 6);
+    assert(arr[7] == 8);
+    assert(arr[8] == 9);
+    assert(arr[9] == 10);
+    assert(arr[11] == 12);
+    Matrix<int, 3, 4> test7 = test2 + test2;
+    total                   = test7.to_arr(arr);
+    assert(total == 12);
+    assert(arr[0] == 2);
+    assert(arr[3] == 8);
+    assert(arr[5] == 12);
+    assert(arr[7] == 16);
+    assert(arr[8] == 18);
+    assert(arr[9] == 20);
+    assert(arr[11] == 24);
+    test7 = test2 - test2;
+    total = test7.to_arr(arr);
+    assert(total == 12);
+    assert(arr[0] == 0);
+    assert(arr[3] == 0);
+    assert(arr[5] == 0);
+    assert(arr[7] == 0);
+    assert(arr[8] == 0);
+    assert(arr[9] == 0);
+    assert(arr[11] == 0);
+    test7 = test2 * test2;
+    cout << test7 << endl;
+    // total = test7.to_arr(arr);
+    // assert(total == 12);
+    // assert(arr[0] == 1);
+    // assert(arr[3] == 16);
+    // assert(arr[5] == 36);
+    // assert(arr[7] == 64);
+    // assert(arr[8] == 81);
+    // assert(arr[9] == 100);
+    // assert(arr[11] == 144);
+    // test7 -= test7;
+    // total = test7.to_arr(arr);
+    // assert(total == 12);
+    // assert(arr[0] == 0);
+    // assert(arr[3] == 0);
+    // assert(arr[5] == 0);
+    // assert(arr[7] == 0);
+    // assert(arr[8] == 0);
+    // assert(arr[9] == 0);
+    // assert(arr[11] == 0);
     return true;
 }
 

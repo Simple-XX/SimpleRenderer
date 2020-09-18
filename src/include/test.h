@@ -23,6 +23,7 @@ public:
     Test(void);
     ~Test(void);
     bool test_vector(void) const;
+    bool test_matrix(void) const;
     bool test_2d() const;
     bool test_tga(void) const;
 };

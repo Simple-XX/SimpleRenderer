@@ -18,6 +18,7 @@ TGAColor  white  = TGAColor(255, 255, 255, 255);
 TGAColor  red    = TGAColor(255, 0, 0, 255);
 const int width  = 1920;
 const int height = 1080;
+Test      test;
 
 int main(int argc, char **argv) {
     string filename;
@@ -33,5 +34,7 @@ int main(int argc, char **argv) {
     Renderer render = Renderer(painter, model);
     render.render();
     render.save();
+    test.test_vector();
+    test.test_matrix();
     return 0;
 }

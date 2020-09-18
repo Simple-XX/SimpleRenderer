@@ -17,17 +17,21 @@ template <class T, size_t N = 3>
 class Vector {
 private:
 public:
-    struct {
-        T x;
-        T y;
-        T z;
-    } coord;
+    union {
+        T vect[N];
+        struct {
+            T x;
+            T y;
+            T z;
+        } coord;
+    };
 
     Vector(void);
-    Vector(T *_vect);
-    Vector(std::vector<T> _vect);
-    Vector(T _x, T _y);
-    Vector(T _x, T _y, T _z);
+    Vector(const T *const _vect);
+    Vector(const Vector<T, N> &_vector);
+    Vector(const std::vector<T> &_vect);
+    Vector(const T _x, const T _y);
+    Vector(const T _x, const T _y, const T _z);
     ~Vector(void);
     // 向量不为零向量
     operator bool(void) const;
@@ -46,10 +50,16 @@ public:
     Vector<double, N> unit(void) const;
     // 向量和
     Vector<T, N> operator+(const Vector<T, N> &_v) const;
+    // 向量自加
+    Vector<T, N> &operator+=(const Vector<T, N> &_v) const;
     // 向量差
     Vector<T, N> operator-(const Vector<T, N> &_v) const;
+    // 向量自减
+    Vector<T, N> &operator-=(const Vector<T, N> &_v) const;
     // 向量数乘
-    Vector<T, N> operator*(T _t) const;
+    Vector<T, N> operator*(const T _t) const;
+    // 向量自乘
+    Vector<T, N> &operator*=(const T _t) const;
     // 向量点积
     T operator*(const Vector<T, N> &_v) const;
     // 向量叉积
@@ -66,7 +76,7 @@ Vector<T, N>::Vector(void) {
 }
 
 template <class T, size_t N>
-Vector<T, N>::Vector(T *_vect) {
+Vector<T, N>::Vector(const T *const _vect) {
     coord.x = _vect[0];
     coord.y = _vect[1];
     if (N == 3) {
@@ -76,7 +86,17 @@ Vector<T, N>::Vector(T *_vect) {
 }
 
 template <class T, size_t N>
-Vector<T, N>::Vector(std::vector<T> _vect) {
+Vector<T, N>::Vector(const Vector<T, N> &_vector) : coord(_vector.coord) {
+    // coord.x = _vect[0];
+    // coord.y = _vect[1];
+    // if (N == 3) {
+    //     coord.z = _vect[2];
+    // }
+    return;
+}
+
+template <class T, size_t N>
+Vector<T, N>::Vector(const std::vector<T> &_vect) {
     coord.x = _vect.at(0);
     coord.y = _vect.at(1);
     if (N == 3) {
@@ -86,7 +106,7 @@ Vector<T, N>::Vector(std::vector<T> _vect) {
 }
 
 template <class T, size_t N>
-Vector<T, N>::Vector(T _x, T _y) {
+Vector<T, N>::Vector(const T _x, const T _y) {
     assert(N == 2);
     coord.x = _x;
     coord.y = _y;
@@ -94,7 +114,7 @@ Vector<T, N>::Vector(T _x, T _y) {
 }
 
 template <class T, size_t N>
-Vector<T, N>::Vector(T _x, T _y, T _z) {
+Vector<T, N>::Vector(const T _x, const T _y, const T _z) {
     assert(N == 3);
     coord.x = _x;
     coord.y = _y;
@@ -219,6 +239,16 @@ Vector<T, N> Vector<T, N>::operator+(const Vector<T, N> &_v) const {
 }
 
 template <class T, size_t N>
+Vector<T, N> &Vector<T, N>::operator+=(const Vector<T, N> &_v) const {
+    coord.x += _v.coord.x;
+    coord.y += _v.coord.y;
+    if (N == 3) {
+        coord.z += _v.coord.z;
+    }
+    return *this;
+}
+
+template <class T, size_t N>
 Vector<T, N> Vector<T, N>::operator-(const Vector<T, N> &_v) const {
     T tmp[N];
     tmp[0] = coord.x - _v.coord.x;
@@ -230,7 +260,17 @@ Vector<T, N> Vector<T, N>::operator-(const Vector<T, N> &_v) const {
 }
 
 template <class T, size_t N>
-Vector<T, N> Vector<T, N>::operator*(T _t) const {
+Vector<T, N> &Vector<T, N>::operator-=(const Vector<T, N> &_v) const {
+    coord.x -= _v.coord.x;
+    coord.y -= _v.coord.y;
+    if (N == 3) {
+        coord.z -= _v.coord.z;
+    }
+    return *this;
+}
+
+template <class T, size_t N>
+Vector<T, N> Vector<T, N>::operator*(const T _t) const {
     T tmp[N];
     tmp[0] = coord.x * _t;
     tmp[1] = coord.y * _t;
@@ -238,6 +278,16 @@ Vector<T, N> Vector<T, N>::operator*(T _t) const {
         tmp[2] = coord.z * _t;
     }
     return Vector<T, N>(tmp);
+}
+
+template <class T, size_t N>
+Vector<T, N> &Vector<T, N>::operator*=(const T _t) const {
+    coord.x *= _t;
+    coord.y *= _t;
+    if (N == 3) {
+        coord.z *= _t;
+    }
+    return *this;
 }
 
 template <class T, size_t N>
