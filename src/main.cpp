@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     Renderer render = Renderer(painter, model);
     render.render();
     render.save();
-    test.test_vector();
+    // test.test_vector();
     test.test_matrix();
     return 0;
 }
