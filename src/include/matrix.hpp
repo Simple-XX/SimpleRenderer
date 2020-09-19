@@ -51,7 +51,7 @@ public:
     // 矩阵转置
     Matrix<T> transpose(void) const;
     // 矩阵求逆
-    Matrix<T> inverse(void) const;
+    Matrix<double> inverse(void) const;
     // 转换为数组
     size_t to_arr(T *_arr) const;
     // 转换为向量
@@ -232,10 +232,80 @@ Matrix<T> Matrix<T>::transpose(void) const {
     return Matrix<T>(tmp);
 }
 
+// TODO: 换成 LU 分解法
 template <class T>
-Matrix<T> Matrix<T>::inverse(void) const {
-    std::vector<std::vector<T>> tmp;
-    return Matrix<T>(tmp);
+Matrix<double> Matrix<T>::inverse(void) const {
+    assert(rows == cols);
+    std::vector<std::vector<double>> tmp(rows,
+                                         std::vector<double>(cols * 2, 0));
+    // 设置增广矩阵 tmp = [mat i]
+    for (size_t i = 0; i < rows; i++) {
+        for (size_t j = 0; j < cols; j++) {
+            tmp.at(i).at(j) = mat.at(i).at(j);
+        }
+    }
+    for (size_t i = 0; i < rows; i++) {
+        tmp.at(i).at(i + cols) = 1;
+    }
+    // 处理左半边矩阵的左下角
+    for (size_t i = 0; i < rows; i++) {
+        double v = tmp.at(i).at(i);
+        // 左边矩阵原矩阵对角线元素为 1
+        if (v != 0) {
+            // 对角线元素归一化
+            for (size_t j = 0; j < cols * 2; j++) {
+                tmp.at(i).at(j) /= v;
+            }
+            // 左边矩阵左下角变为 0
+            for (size_t j = i + 1; j < rows; j++) {
+                double val = tmp.at(j).at(i);
+                for (size_t k = 0; k < cols * 2; k++) {
+                    tmp.at(j).at(k) -= tmp.at(i).at(k) * val;
+                }
+            }
+        }
+        // 左边矩阵原矩阵对角线元素存在 0
+        else {
+            // 寻找相同列不为 0 的元素
+            for (size_t j = 0; j < rows; j++) {
+                if (tmp.at(j).at(i) != 0) {
+                    // 将第 j 行加到 第 i 行，并进行归一化
+                }
+                tmp.at(i).at(j) /= v;
+            }
+
+            for (size_t j = 0; j < cols * 2; j++) {
+                tmp.at(i).at(j) /= v;
+            }
+            for (size_t j = i + 1; j < rows; j++) {
+                double val = tmp.at(j).at(i);
+                for (size_t k = 0; k < cols * 2; k++) {
+                    tmp.at(j).at(k) -= tmp.at(i).at(k) * val;
+                }
+            }
+        }
+        if (i == 1) {
+            return Matrix<double>(tmp);
+        }
+    }
+    return Matrix<double>(tmp);
+    // 处理左半边矩阵的右上角
+    for (size_t i = 1; i < rows; i++) {
+        for (size_t j = 0; j < i; j++) {
+            double val = tmp.at(j).at(i);
+            for (size_t k = 0; k < cols * 2; k++) {
+                tmp.at(j).at(k) -= tmp.at(i).at(k) * val;
+            }
+        }
+    }
+    // 取出矩阵右半边，即为原矩阵的逆矩阵
+    std::vector<std::vector<double>> tmp2(rows, std::vector<double>(cols, 0));
+    for (size_t i = 0; i < rows; i++) {
+        for (size_t j = 0; j < cols; j++) {
+            tmp2.at(i).at(j) = tmp.at(i).at(j + cols);
+        }
+    }
+    return Matrix<double>(tmp2);
 }
 
 template <class T>
@@ -263,7 +333,8 @@ std::ostream &operator<<(std::ostream &_os, const Matrix<T> &_mat) {
             _os << " ";
         }
         for (size_t j = 0; j < _mat.get_cols(); j++) {
-            _os << std::setw(4) << _mat.to_vector().at(i).at(j);
+            _os << std::setw(7) << std::setprecision(4)
+                << _mat.to_vector().at(i).at(j);
             if (j != _mat.get_cols() - 1) {
                 _os << " ";
             }

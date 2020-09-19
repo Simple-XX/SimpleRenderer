@@ -192,6 +192,30 @@ bool Test::test_matrix(void) const {
     assert(arr[5] == 278);
     assert(arr[7] == 278);
     assert(arr[8] == 446);
+    // int            arr2[9] = {2, 3, 3, 3, 4, 2, -2, -2, 3};
+    // Matrix<int>    test8(3, 3, arr2);
+    // Matrix<double> test9    = test8.inverse();
+    double arr3[16] = {233};
+    // total                   = test9.to_arr(arr3);
+    // assert(total == 9);
+    // assert(arr3[0] == -16);
+    // assert(arr3[3] == 13);
+    // assert(arr3[5] == -5);
+    // assert(arr3[7] == 2);
+    // assert(arr3[8] == 1);
+    int            arr4[9] = {3, 0, 2, 2, 0, -2, 0, 1, 1};
+    Matrix<int>    test10(3, 3, arr4);
+    Matrix<double> test11 = test10.inverse();
+    cout << test10 << endl;
+    cout << test11 << endl;
+    // total                 = test11.to_arr(arr3);
+    // assert(total == 9);
+    // assert(arr3[0] == -16);
+    // assert(arr3[3] == 13);
+    // assert(arr3[5] == -5);
+    // assert(arr3[7] == 2);
+    // assert(arr3[8] == 1);
+
     return true;
 }
 
