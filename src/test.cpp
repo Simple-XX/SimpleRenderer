@@ -203,9 +203,11 @@ bool Test::test_matrix(void) const {
     // assert(arr3[5] == -5);
     // assert(arr3[7] == 2);
     // assert(arr3[8] == 1);
-    int            arr4[9] = {3, 0, 2, 2, 0, -2, 0, 1, 1};
-    Matrix<int>    test10(3, 3, arr4);
-    Matrix<double> test11 = test10.inverse();
+    int         arr4[9] = {2, 6, 4, 5, 7, 9};
+    Matrix<int> test10(2, 3, arr4);
+    // Matrix<double> test11 = test10.inverse();
+    std::vector<std::vector<size_t>> p;
+    Matrix<int>                      test11 = test10.PLU(p);
     cout << test10 << endl;
     cout << test11 << endl;
     // total                 = test11.to_arr(arr3);

@@ -18,6 +18,7 @@ private:
     size_t                      cols;
     // 矩阵求行列式
     // 矩阵求余子式
+
 public:
     Matrix(size_t _rows = 4, size_t _cols = 4);
     Matrix(size_t _rows, size_t _cols, const T *const _mat);
@@ -56,7 +57,31 @@ public:
     size_t to_arr(T *_arr) const;
     // 转换为向量
     std::vector<std::vector<T>> to_vector(void) const;
+    // PLU 分解，返回分解好的矩阵，参数用于获取主元表
+    Matrix<T> PLU(std::vector<std::vector<size_t>> &_p);
 };
+
+template <class T>
+Matrix<T> Matrix<T>::PLU(std::vector<std::vector<size_t>> &_p) {
+    std::vector<std::vector<T>> tmp = mat;
+    // 对于非方阵，选取较小的
+    size_t n = std::min(rows, cols);
+    // 初始化置换矩阵 _p
+    _p = std::vector<std::vector<T>>(n, std::vector<size_t>(n, 0));
+    for (size_t i = 0; i < n; i++) {
+        _p.at(i).at(i) = 1;
+    }
+    // 首先进行行调整，按照升序从上到下排列
+    // 对每一行的 i i 位置进行比较
+    for (size_t i = 0; i < n; i++) {
+        // 如果主元为 0
+        if (tmp.at(i).at(i) == 0) {
+            // 选取非 0 主元进行交换
+        }
+    }
+
+    return Matrix<T>(tmp);
+}
 
 template <class T>
 Matrix<T>::Matrix(size_t _rows, size_t _cols)
@@ -238,74 +263,7 @@ Matrix<double> Matrix<T>::inverse(void) const {
     assert(rows == cols);
     std::vector<std::vector<double>> tmp(rows,
                                          std::vector<double>(cols * 2, 0));
-    // 设置增广矩阵 tmp = [mat i]
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            tmp.at(i).at(j) = mat.at(i).at(j);
-        }
-    }
-    for (size_t i = 0; i < rows; i++) {
-        tmp.at(i).at(i + cols) = 1;
-    }
-    // 处理左半边矩阵的左下角
-    for (size_t i = 0; i < rows; i++) {
-        double v = tmp.at(i).at(i);
-        // 左边矩阵原矩阵对角线元素为 1
-        if (v != 0) {
-            // 对角线元素归一化
-            for (size_t j = 0; j < cols * 2; j++) {
-                tmp.at(i).at(j) /= v;
-            }
-            // 左边矩阵左下角变为 0
-            for (size_t j = i + 1; j < rows; j++) {
-                double val = tmp.at(j).at(i);
-                for (size_t k = 0; k < cols * 2; k++) {
-                    tmp.at(j).at(k) -= tmp.at(i).at(k) * val;
-                }
-            }
-        }
-        // 左边矩阵原矩阵对角线元素存在 0
-        else {
-            // 寻找相同列不为 0 的元素
-            for (size_t j = 0; j < rows; j++) {
-                if (tmp.at(j).at(i) != 0) {
-                    // 将第 j 行加到 第 i 行，并进行归一化
-                }
-                tmp.at(i).at(j) /= v;
-            }
-
-            for (size_t j = 0; j < cols * 2; j++) {
-                tmp.at(i).at(j) /= v;
-            }
-            for (size_t j = i + 1; j < rows; j++) {
-                double val = tmp.at(j).at(i);
-                for (size_t k = 0; k < cols * 2; k++) {
-                    tmp.at(j).at(k) -= tmp.at(i).at(k) * val;
-                }
-            }
-        }
-        if (i == 1) {
-            return Matrix<double>(tmp);
-        }
-    }
     return Matrix<double>(tmp);
-    // 处理左半边矩阵的右上角
-    for (size_t i = 1; i < rows; i++) {
-        for (size_t j = 0; j < i; j++) {
-            double val = tmp.at(j).at(i);
-            for (size_t k = 0; k < cols * 2; k++) {
-                tmp.at(j).at(k) -= tmp.at(i).at(k) * val;
-            }
-        }
-    }
-    // 取出矩阵右半边，即为原矩阵的逆矩阵
-    std::vector<std::vector<double>> tmp2(rows, std::vector<double>(cols, 0));
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            tmp2.at(i).at(j) = tmp.at(i).at(j + cols);
-        }
-    }
-    return Matrix<double>(tmp2);
 }
 
 template <class T>
