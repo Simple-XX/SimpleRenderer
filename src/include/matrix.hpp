@@ -17,7 +17,11 @@ private:
     size_t                      rows;
     size_t                      cols;
     // 矩阵求行列式
+    T det(void) const;
     // 矩阵求余子式
+    T minor(const size_t _r, const size_t _c) const;
+    // 矩阵求代数余子式
+    T cofactor(const size_t _r, const size_t _c) const;
 
 public:
     Matrix(size_t _rows = 4, size_t _cols = 4);
@@ -58,29 +62,215 @@ public:
     // 转换为向量
     std::vector<std::vector<T>> to_vector(void) const;
     // PLU 分解，返回分解好的矩阵，参数用于获取主元表
-    Matrix<T> PLU(std::vector<std::vector<size_t>> &_p);
+    Matrix<double> PLU(std::vector<size_t> &_p);
+    // 矩阵求余子式矩阵
+    Matrix<T> minor(void) const;
+    // 矩阵求代数余子式矩阵
+    Matrix<T> cofactor(void) const;
+    // 矩阵求伴随矩阵
+    Matrix<T> adjugate(void) const;
 };
 
 template <class T>
-Matrix<T> Matrix<T>::PLU(std::vector<std::vector<size_t>> &_p) {
-    std::vector<std::vector<T>> tmp = mat;
-    // 对于非方阵，选取较小的
-    size_t n = std::min(rows, cols);
-    // 初始化置换矩阵 _p
-    _p = std::vector<std::vector<T>>(n, std::vector<size_t>(n, 0));
-    for (size_t i = 0; i < n; i++) {
-        _p.at(i).at(i) = 1;
-    }
-    // 首先进行行调整，按照升序从上到下排列
-    // 对每一行的 i i 位置进行比较
-    for (size_t i = 0; i < n; i++) {
-        // 如果主元为 0
-        if (tmp.at(i).at(i) == 0) {
-            // 选取非 0 主元进行交换
+Matrix<double> Matrix<T>::PLU(std::vector<size_t> &_p) {
+    std::vector<std::vector<double>> tmp(rows, std::vector<double>(cols, 0));
+    // 转换为 double 类型
+    for (size_t i = 0; i < rows; i++) {
+        for (size_t j = 0; j < cols; j++) {
+            tmp.at(i).at(j) = (double)mat.at(i).at(j);
         }
     }
 
+    // 对于非方阵，选取较小的
+    size_t n = std::min(rows, cols);
+    // 初始化置换矩阵 _p
+    _p = std::vector<size_t>(n, 0);
+    for (size_t i = 0; i < n; i++) {
+        _p.at(i) = i;
+    }
+
+    // 如果主元所在列的绝对值最大值不是当前行，进行行交换
+    for (size_t i = 0; i < n; i++) {
+        T imax = 0;
+        for (size_t j = i; j < n; j++) {
+            if (imax < std::abs(tmp.at(j).at(i))) {
+                imax = std::abs(tmp.at(j).at(i));
+                // 交换行
+                if (i != j) {
+                    std::swap(tmp.at(i), tmp.at(j));
+                    // 记录 _p
+                    _p.at(i) = j;
+                    _p.at(j) = i;
+                }
+            }
+        }
+    }
+    // 选主元完成
+    // L
+    // for (size_t i = n - 1; i >= 0; i--) {
+    //     // 变为单位下三角矩阵
+    //     // ii 归一化
+    //     if (tmp.at(i).at(i) != 1) {
+    //         T ii = tmp.at(i).at(i);
+    //         for (size_t j = n - 1; j >= 0; j--) {
+    //             assert(j < 0);
+    //             tmp.at(i).at(j) /= ii;
+    //         }
+    //     }
+    //     return Matrix<double>(tmp);
+    // }
+
+    // U
+    for (size_t i = 0; i < n; i++) {
+        // 变为上三角矩阵
+        // 首先确定主元
+        double ii = tmp.at(i).at(i);
+        // 下面一行-主元行*(行列/主元)
+        for (size_t j = i + 1; j < n; j++) {
+            for (size_t k = 0; k < n; k++) {
+                double scale = tmp.at(j).at(k) / ii;
+                tmp.at(j).at(k) -= tmp.at(i).at(k) * scale;
+            }
+        }
+
+        // return Matrix<double>(tmp);
+    }
+
+    return Matrix<double>(tmp);
+}
+
+template <class T>
+T Matrix<T>::det(void) const {
+    assert(rows == cols);
+    assert(rows != 0);
+    T res = 0;
+    if (rows == 1) {
+        res = mat.at(0).at(0);
+    }
+    else if (rows == 2) {
+        res = mat.at(0).at(0) * mat.at(1).at(1) -
+              mat.at(0).at(1) * mat.at(1).at(0);
+    }
+    else if (rows == 3) {
+        res = mat.at(0).at(0) * mat.at(1).at(1) * mat.at(2).at(2) +
+              mat.at(1).at(0) * mat.at(2).at(1) * mat.at(0).at(2) +
+              mat.at(2).at(0) * mat.at(0).at(1) * mat.at(1).at(2) -
+              mat.at(1).at(0) * mat.at(0).at(1) * mat.at(2).at(2) -
+              mat.at(2).at(0) * mat.at(1).at(1) * mat.at(0).at(2) -
+              mat.at(0).at(0) * mat.at(2).at(1) * mat.at(1).at(2);
+    }
+    else if (rows == 4) {
+        res = mat.at(0).at(0) * mat.at(1).at(1) * mat.at(2).at(2) *
+                  mat.at(3).at(3) +
+              mat.at(0).at(0) * mat.at(2).at(1) * mat.at(3).at(2) *
+                  mat.at(1).at(3) +
+              mat.at(0).at(0) * mat.at(3).at(1) * mat.at(1).at(2) *
+                  mat.at(2).at(3) +
+
+              mat.at(1).at(0) * mat.at(0).at(1) * mat.at(3).at(2) *
+                  mat.at(2).at(3) +
+              mat.at(1).at(0) * mat.at(3).at(1) * mat.at(2).at(2) *
+                  mat.at(0).at(3) +
+              mat.at(1).at(0) * mat.at(2).at(1) * mat.at(0).at(2) *
+                  mat.at(3).at(3) +
+
+              mat.at(2).at(0) * mat.at(3).at(1) * mat.at(0).at(2) *
+                  mat.at(1).at(3) +
+              mat.at(2).at(0) * mat.at(0).at(1) * mat.at(1).at(2) *
+                  mat.at(3).at(3) +
+              mat.at(2).at(0) * mat.at(1).at(1) * mat.at(3).at(2) *
+                  mat.at(0).at(3) +
+
+              mat.at(3).at(0) * mat.at(2).at(1) * mat.at(1).at(2) *
+                  mat.at(0).at(3) +
+              mat.at(3).at(0) * mat.at(1).at(1) * mat.at(0).at(2) *
+                  mat.at(2).at(3) +
+              mat.at(3).at(0) * mat.at(0).at(1) * mat.at(2).at(2) *
+                  mat.at(1).at(3) -
+
+              mat.at(0).at(0) * mat.at(1).at(1) * mat.at(3).at(2) *
+                  mat.at(2).at(3) -
+              mat.at(0).at(0) * mat.at(2).at(1) * mat.at(1).at(2) *
+                  mat.at(3).at(3) -
+              mat.at(0).at(0) * mat.at(3).at(1) * mat.at(2).at(2) *
+                  mat.at(1).at(3) -
+
+              mat.at(1).at(0) * mat.at(0).at(1) * mat.at(2).at(2) *
+                  mat.at(3).at(3) -
+              mat.at(1).at(0) * mat.at(3).at(1) * mat.at(0).at(2) *
+                  mat.at(2).at(3) -
+              mat.at(1).at(0) * mat.at(2).at(1) * mat.at(3).at(2) *
+                  mat.at(0).at(3) -
+
+              mat.at(2).at(0) * mat.at(3).at(1) * mat.at(1).at(2) *
+                  mat.at(0).at(3) -
+              mat.at(2).at(0) * mat.at(0).at(1) * mat.at(3).at(2) *
+                  mat.at(1).at(3) -
+              mat.at(2).at(0) * mat.at(1).at(1) * mat.at(0).at(2) *
+                  mat.at(3).at(3) -
+
+              mat.at(3).at(0) * mat.at(2).at(1) * mat.at(0).at(2) *
+                  mat.at(1).at(3) -
+              mat.at(3).at(0) * mat.at(1).at(1) * mat.at(2).at(2) *
+                  mat.at(0).at(3) -
+              mat.at(3).at(0) * mat.at(0).at(1) * mat.at(1).at(2) *
+                  mat.at(2).at(3);
+    }
+    return res;
+}
+
+template <class T>
+T Matrix<T>::minor(const size_t _r, const size_t _c) const {
+    std::vector<std::vector<T>> tmp(rows - 1, std::vector<T>(cols - 1, 0));
+    for (size_t i = 0; i < rows - 1; i++) {
+        for (size_t j = 0; j < cols - 1; j++) {
+            size_t idx_r = i;
+            size_t idx_c = j;
+            if (i >= _r) {
+                idx_r += 1;
+            }
+            if (j >= _c) {
+                idx_c += 1;
+            }
+            tmp.at(i).at(j) = mat.at(idx_r).at(idx_c);
+        }
+    }
+    // 计算行列式 tmp 的值
+    T res = Matrix<T>(tmp).det();
+    return res;
+}
+
+template <class T>
+Matrix<T> Matrix<T>::minor(void) const {
+    std::vector<std::vector<T>> tmp(rows, std::vector<T>(cols, 0));
+    for (size_t i = 0; i < rows; i++) {
+        for (size_t j = 0; j < cols; j++) {
+            tmp.at(i).at(j) = minor(i, j);
+        }
+    }
     return Matrix<T>(tmp);
+}
+
+template <class T>
+T Matrix<T>::cofactor(const size_t _r, const size_t _c) const {
+    assert(std::is_signed<T>::value);
+    return minor(_r, _c) * ((_r + _c) % 2 ? -1 : 1);
+}
+
+template <class T>
+Matrix<T> Matrix<T>::cofactor(void) const {
+    std::vector<std::vector<T>> tmp(rows, std::vector<T>(cols, 0));
+    for (size_t i = 0; i < rows; i++) {
+        for (size_t j = 0; j < cols; j++) {
+            tmp.at(i).at(j) = cofactor(i, j);
+        }
+    }
+    return Matrix<T>(tmp);
+}
+
+template <class T>
+Matrix<T> Matrix<T>::adjugate(void) const {
+    return cofactor().transpose();
 }
 
 template <class T>
@@ -261,8 +451,17 @@ Matrix<T> Matrix<T>::transpose(void) const {
 template <class T>
 Matrix<double> Matrix<T>::inverse(void) const {
     assert(rows == cols);
-    std::vector<std::vector<double>> tmp(rows,
-                                         std::vector<double>(cols * 2, 0));
+    std::vector<std::vector<double>> tmp(rows, std::vector<double>(cols, 0));
+    T                                d = det();
+    if (d == 0) {
+        return Matrix<double>(tmp);
+    }
+    Matrix<T> adj = adjugate();
+    for (size_t i = 0; i < rows; i++) {
+        for (size_t j = 0; j < cols; j++) {
+            tmp.at(i).at(j) = adj.mat.at(i).at(j) * (1. / d);
+        }
+    }
     return Matrix<double>(tmp);
 }
 
