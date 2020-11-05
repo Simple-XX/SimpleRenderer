@@ -21,7 +21,7 @@ all: $(SUB_DIR)
     	do $(MAKE) -C $$subdir all || exit 1; \
     done
 	@$(MAKE) renderer
-	@./renderer
+	@time ./renderer
 	@echo Leave $(CURR_DIR)
 
 .PHONY: remake

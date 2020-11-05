@@ -65,6 +65,8 @@ public:
     // 向量叉积
     Vector<T, N> operator^(const Vector<T, N> &_v) const;
     // 向量投影
+    // 下标访问
+    T &operator[](size_t _idx);
 };
 
 template <class T, size_t N>
@@ -311,6 +313,11 @@ Vector<T, N> Vector<T, N>::operator^(const Vector<T, N> &_v) const {
     return Vector<T, N>(tmp);
 }
 
+template <class T, size_t N>
+T &Vector<T, N>::operator[](size_t _idx) {
+    return vect[_idx];
+}
+
 // 输出
 template <class T, size_t N>
 std::ostream &operator<<(std::ostream &_os, const Vector<T, N> &_v) {
@@ -326,5 +333,6 @@ typedef Vector<int, 2>    Vectori2;
 typedef Vector<int, 3>    Vectori3;
 typedef Vector<double, 2> Vectord2;
 typedef Vector<double, 3> Vectord3;
+typedef Vector<double, 4> Vectord4;
 
 #endif /* __VECTOR_HPP__ */

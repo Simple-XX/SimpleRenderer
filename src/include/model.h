@@ -1,7 +1,7 @@
 
 // This file is a part of SimpleXX/SimpleRenderer
 // (https://github.com/SimpleXX/SimpleRenderer).
-// Based on https://github.com/ssloy/tinyrenderer
+//
 // model.h for SimpleXX/SimpleRenderer.
 
 #ifndef __MODEL_H__

@@ -22,7 +22,7 @@ private:
     // 光照
     Vectord3 light_dir = Vectord3(0, 0, -1);
     // z-buffer 缓冲
-    uint16_t *zbuffer;
+    double *zbuffer;
     // 大小
     size_t         width;
     size_t         height;
@@ -36,10 +36,13 @@ public:
     ~Renderer(void);
     // 渲染
     bool render(void) const;
+    bool render(void);
     // 描线
     bool line(void) const;
+    bool line_zbuffer();
     // 填充
     bool fill(void) const;
+    bool fill_zbuffer();
     // 保存
     bool save(const std::string &_filename = "output.tga") const;
     // 设置参数

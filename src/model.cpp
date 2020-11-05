@@ -14,8 +14,9 @@ using namespace std;
 Model::Model(const string &_filename) : verts(), faces() {
     std::ifstream in;
     in.open(_filename, std::ifstream::in);
-    if (in.fail())
+    if (in.fail()) {
         return;
+    }
     std::string line;
     while (!in.eof()) {
         std::getline(in, line);

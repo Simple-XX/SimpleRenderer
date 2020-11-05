@@ -277,6 +277,9 @@ template <class T>
 Matrix<T>::Matrix(size_t _rows, size_t _cols)
     : mat(std::vector<std::vector<T>>(_rows, std::vector<T>(_cols, 0))),
       rows(_rows), cols(_cols) {
+    for (size_t i = 0; i < rows; i++) {
+        mat.at(i).at(i) = 1;
+    }
     return;
 }
 
@@ -500,5 +503,7 @@ std::ostream &operator<<(std::ostream &_os, const Matrix<T> &_mat) {
     _os << std::setw(4) << "]";
     return _os;
 }
+
+typedef Matrix<double> Matrix4;
 
 #endif /* __MATRIX_HPP__ */

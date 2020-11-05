@@ -35,6 +35,6 @@ int main(int argc, char **argv) {
     render.render();
     render.save();
     // test.test_vector();
-    test.test_matrix();
+    // test.test_matrix();
     return 0;
 }
