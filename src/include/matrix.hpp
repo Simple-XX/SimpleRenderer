@@ -1,8 +1,8 @@
 
-// This file is a part of SimpleXX/SimpleRenderer
-// (https://github.com/SimpleXX/SimpleRenderer).
+// This file is a part of Simple-XX/SimpleRenderer
+// (https://github.com/Simple-XX/SimpleRenderer).
 //
-// matrix.hpp for SimpleXX/SimpleRenderer.
+// matrix.hpp for Simple-XX/SimpleRenderer.
 
 #ifndef __MATRIX_HPP__
 #define __MATRIX_HPP__
@@ -29,6 +29,8 @@ public:
     Matrix(const std::vector<std::vector<T>> &_mat);
     Matrix(const Matrix<T> &_matrix);
     ~Matrix(void);
+    // 赋值
+    Matrix<T> &operator=(const Matrix<T> &_matrix);
     // 矩阵间加法
     Matrix<T> operator+(const Matrix<T> &_matrix) const;
     // 矩阵间自加
@@ -56,13 +58,13 @@ public:
     // 矩阵转置
     Matrix<T> transpose(void) const;
     // 矩阵求逆
-    Matrix<double> inverse(void) const;
+    Matrix<float> inverse(void) const;
     // 转换为数组
     size_t to_arr(T *_arr) const;
     // 转换为向量
     std::vector<std::vector<T>> to_vector(void) const;
     // PLU 分解，返回分解好的矩阵，参数用于获取主元表
-    Matrix<double> PLU(std::vector<size_t> &_p);
+    Matrix<float> PLU(std::vector<size_t> &_p);
     // 矩阵求余子式矩阵
     Matrix<T> minor(void) const;
     // 矩阵求代数余子式矩阵
@@ -72,12 +74,12 @@ public:
 };
 
 template <class T>
-Matrix<double> Matrix<T>::PLU(std::vector<size_t> &_p) {
-    std::vector<std::vector<double>> tmp(rows, std::vector<double>(cols, 0));
-    // 转换为 double 类型
+Matrix<float> Matrix<T>::PLU(std::vector<size_t> &_p) {
+    std::vector<std::vector<float>> tmp(rows, std::vector<float>(cols, 0));
+    // 转换为 float 类型
     for (size_t i = 0; i < rows; i++) {
         for (size_t j = 0; j < cols; j++) {
-            tmp.at(i).at(j) = (double)mat.at(i).at(j);
+            tmp.at(i).at(j) = (float)mat.at(i).at(j);
         }
     }
 
@@ -124,11 +126,11 @@ Matrix<double> Matrix<T>::PLU(std::vector<size_t> &_p) {
     for (size_t i = 0; i < n; i++) {
         // 变为上三角矩阵
         // 首先确定主元
-        double ii = tmp.at(i).at(i);
+        float ii = tmp.at(i).at(i);
         // 下面一行-主元行*(行列/主元)
         for (size_t j = i + 1; j < n; j++) {
             for (size_t k = 0; k < n; k++) {
-                double scale = tmp.at(j).at(k) / ii;
+                float scale = tmp.at(j).at(k) / ii;
                 tmp.at(j).at(k) -= tmp.at(i).at(k) * scale;
             }
         }
@@ -136,7 +138,7 @@ Matrix<double> Matrix<T>::PLU(std::vector<size_t> &_p) {
         // return Matrix<double>(tmp);
     }
 
-    return Matrix<double>(tmp);
+    return Matrix<float>(tmp);
 }
 
 template <class T>
@@ -277,6 +279,9 @@ template <class T>
 Matrix<T>::Matrix(size_t _rows, size_t _cols)
     : mat(std::vector<std::vector<T>>(_rows, std::vector<T>(_cols, 0))),
       rows(_rows), cols(_cols) {
+    for (size_t i = 0; i < rows; i++) {
+        mat.at(i).at(i) = 1;
+    }
     return;
 }
 
@@ -307,6 +312,12 @@ Matrix<T>::Matrix(const Matrix<T> &_matrix)
 template <class T>
 Matrix<T>::~Matrix(void) {
     return;
+}
+
+template <class T>
+Matrix<T> &Matrix<T>::operator=(const Matrix<T> &_matrix) {
+    mat = _matrix.to_vector();
+    return *this;
 }
 
 template <class T>
@@ -449,12 +460,12 @@ Matrix<T> Matrix<T>::transpose(void) const {
 
 // TODO: 换成 LU 分解法
 template <class T>
-Matrix<double> Matrix<T>::inverse(void) const {
+Matrix<float> Matrix<T>::inverse(void) const {
     assert(rows == cols);
-    std::vector<std::vector<double>> tmp(rows, std::vector<double>(cols, 0));
-    T                                d = det();
+    std::vector<std::vector<float>> tmp(rows, std::vector<float>(cols, 0));
+    T                               d = det();
     if (d == 0) {
-        return Matrix<double>(tmp);
+        return Matrix<float>(tmp);
     }
     Matrix<T> adj = adjugate();
     for (size_t i = 0; i < rows; i++) {
@@ -462,7 +473,7 @@ Matrix<double> Matrix<T>::inverse(void) const {
             tmp.at(i).at(j) = adj.mat.at(i).at(j) * (1. / d);
         }
     }
-    return Matrix<double>(tmp);
+    return Matrix<float>(tmp);
 }
 
 template <class T>
@@ -500,5 +511,7 @@ std::ostream &operator<<(std::ostream &_os, const Matrix<T> &_mat) {
     _os << std::setw(4) << "]";
     return _os;
 }
+
+typedef Matrix<float> Matrixf4;
 
 #endif /* __MATRIX_HPP__ */

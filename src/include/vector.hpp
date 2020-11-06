@@ -1,8 +1,8 @@
 
-// This file is a part of SimpleXX/SimpleRenderer
-// (https://github.com/SimpleXX/SimpleRenderer).
+// This file is a part of Simple-XX/SimpleRenderer
+// (https://github.com/Simple-XX/SimpleRenderer).
 //
-// vector.hpp for SimpleXX/SimpleRenderer.
+// vector.hpp for Simple-XX/SimpleRenderer.
 
 #ifndef __VECTOR_HPP__
 #define __VECTOR_HPP__
@@ -45,26 +45,30 @@ public:
     // 向量取反
     Vector<T, N> operator-(void) const;
     // 范数
-    double norm(void) const;
+    float norm(void) const;
     // 单位向量
-    Vector<double, N> unit(void) const;
+    Vector<float, N> unit(void) const;
+    // 赋值
+    Vector<T, N> &operator=(const Vector<T, N> &_v);
     // 向量和
     Vector<T, N> operator+(const Vector<T, N> &_v) const;
     // 向量自加
-    Vector<T, N> &operator+=(const Vector<T, N> &_v) const;
+    Vector<T, N> &operator+=(const Vector<T, N> &_v);
     // 向量差
     Vector<T, N> operator-(const Vector<T, N> &_v) const;
     // 向量自减
-    Vector<T, N> &operator-=(const Vector<T, N> &_v) const;
+    Vector<T, N> &operator-=(const Vector<T, N> &_v);
     // 向量数乘
     Vector<T, N> operator*(const T _t) const;
     // 向量自乘
-    Vector<T, N> &operator*=(const T _t) const;
+    Vector<T, N> &operator*=(const T _t);
     // 向量点积
     T operator*(const Vector<T, N> &_v) const;
     // 向量叉积
     Vector<T, N> operator^(const Vector<T, N> &_v) const;
     // 向量投影
+    // 下标访问
+    T &operator[](size_t _idx);
 };
 
 template <class T, size_t N>
@@ -87,11 +91,6 @@ Vector<T, N>::Vector(const T *const _vect) {
 
 template <class T, size_t N>
 Vector<T, N>::Vector(const Vector<T, N> &_vector) : coord(_vector.coord) {
-    // coord.x = _vect[0];
-    // coord.y = _vect[1];
-    // if (N == 3) {
-    //     coord.z = _vect[2];
-    // }
     return;
 }
 
@@ -206,8 +205,8 @@ Vector<T, N> Vector<T, N>::operator-(void) const {
 }
 
 template <class T, size_t N>
-double Vector<T, N>::norm(void) const {
-    double res = 0;
+float Vector<T, N>::norm(void) const {
+    float res = 0;
     res += coord.x * coord.x;
     res += coord.y * coord.y;
     res += coord.z * coord.z;
@@ -216,15 +215,21 @@ double Vector<T, N>::norm(void) const {
 }
 
 template <class T, size_t N>
-Vector<double, N> Vector<T, N>::unit(void) const {
-    double tmp[N];
-    double norm = this->norm();
-    tmp[0]      = coord.x / norm;
-    tmp[1]      = coord.y / norm;
+Vector<float, N> Vector<T, N>::unit(void) const {
+    float tmp[N];
+    float norm = this->norm();
+    tmp[0]     = coord.x / norm;
+    tmp[1]     = coord.y / norm;
     if (N == 3) {
         tmp[2] = coord.z / norm;
     }
-    return Vector<double, N>(tmp);
+    return Vector<float, N>(tmp);
+}
+
+template <class T, size_t N>
+Vector<T, N> &Vector<T, N>::operator=(const Vector<T, N> &_v) {
+    coord = _v.coord;
+    return *this;
 }
 
 template <class T, size_t N>
@@ -239,7 +244,7 @@ Vector<T, N> Vector<T, N>::operator+(const Vector<T, N> &_v) const {
 }
 
 template <class T, size_t N>
-Vector<T, N> &Vector<T, N>::operator+=(const Vector<T, N> &_v) const {
+Vector<T, N> &Vector<T, N>::operator+=(const Vector<T, N> &_v) {
     coord.x += _v.coord.x;
     coord.y += _v.coord.y;
     if (N == 3) {
@@ -260,7 +265,7 @@ Vector<T, N> Vector<T, N>::operator-(const Vector<T, N> &_v) const {
 }
 
 template <class T, size_t N>
-Vector<T, N> &Vector<T, N>::operator-=(const Vector<T, N> &_v) const {
+Vector<T, N> &Vector<T, N>::operator-=(const Vector<T, N> &_v) {
     coord.x -= _v.coord.x;
     coord.y -= _v.coord.y;
     if (N == 3) {
@@ -281,7 +286,7 @@ Vector<T, N> Vector<T, N>::operator*(const T _t) const {
 }
 
 template <class T, size_t N>
-Vector<T, N> &Vector<T, N>::operator*=(const T _t) const {
+Vector<T, N> &Vector<T, N>::operator*=(const T _t) {
     coord.x *= _t;
     coord.y *= _t;
     if (N == 3) {
@@ -311,6 +316,11 @@ Vector<T, N> Vector<T, N>::operator^(const Vector<T, N> &_v) const {
     return Vector<T, N>(tmp);
 }
 
+template <class T, size_t N>
+T &Vector<T, N>::operator[](size_t _idx) {
+    return vect[_idx];
+}
+
 // 输出
 template <class T, size_t N>
 std::ostream &operator<<(std::ostream &_os, const Vector<T, N> &_v) {
@@ -322,9 +332,9 @@ std::ostream &operator<<(std::ostream &_os, const Vector<T, N> &_v) {
     return _os;
 }
 
-typedef Vector<int, 2>    Vectori2;
-typedef Vector<int, 3>    Vectori3;
-typedef Vector<double, 2> Vectord2;
-typedef Vector<double, 3> Vectord3;
+typedef Vector<size_t, 2> Vectors2;
+typedef Vector<float, 2>  Vectorf2;
+typedef Vector<float, 3>  Vectorf3;
+typedef Vector<float, 4>  Vectorf4;
 
 #endif /* __VECTOR_HPP__ */

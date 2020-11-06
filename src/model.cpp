@@ -14,8 +14,9 @@ using namespace std;
 Model::Model(const string &_filename) : verts(), faces() {
     std::ifstream in;
     in.open(_filename, std::ifstream::in);
-    if (in.fail())
+    if (in.fail()) {
         return;
+    }
     std::string line;
     while (!in.eof()) {
         std::getline(in, line);
@@ -23,13 +24,13 @@ Model::Model(const string &_filename) : verts(), faces() {
         char               trash;
         if (!line.compare(0, 2, "v ")) {
             iss >> trash;
-            std::vector<double> tmp;
+            std::vector<float> tmp;
             for (int i = 0; i < 3; i++) {
-                double s;
+                float s;
                 iss >> s;
                 tmp.push_back(s);
             }
-            Vectord3 v(tmp);
+            Vectorf3 v(tmp);
             verts.push_back(v);
         }
         else if (!line.compare(0, 2, "f ")) {
@@ -52,18 +53,18 @@ Model::~Model() {
     return;
 }
 
-int Model::nverts() const {
-    return (int)verts.size();
+size_t Model::nverts() const {
+    return verts.size();
 }
 
-int Model::nfaces() const {
-    return (int)faces.size();
+size_t Model::nfaces() const {
+    return faces.size();
 }
 
 std::vector<int> Model::face(int _idx) const {
     return faces.at(_idx);
 }
 
-Vectord3 Model::vert(int _i) const {
+Vectorf3 Model::vert(int _i) const {
     return verts.at(_i);
 }
