@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
         filename = argv[1];
     }
     else {
-        filename = "obj/african_head.obj";
+        filename = "../../src/obj/african_head.obj";
     }
     Model    model(filename);
     TGAImage image(width, height, TGAImage::RGBA);
