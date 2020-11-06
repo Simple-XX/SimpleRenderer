@@ -32,9 +32,9 @@ uint8_t &TGAColor::operator[](const int _i) {
     return bgra[_i];
 }
 
-TGAColor TGAColor::operator*(const double _intensity) const {
+TGAColor TGAColor::operator*(const float _intensity) const {
     TGAColor res     = *this;
-    double   clamped = std::max(0., std::min(_intensity, 1.));
+    float    clamped = std::max((float)0., std::min(_intensity, (float)1.));
     for (int i = 0; i < 4; i++) {
         res.bgra[i] = bgra[i] * clamped;
     }

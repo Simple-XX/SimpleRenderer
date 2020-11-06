@@ -45,9 +45,9 @@ public:
     // 向量取反
     Vector<T, N> operator-(void) const;
     // 范数
-    double norm(void) const;
+    float norm(void) const;
     // 单位向量
-    Vector<double, N> unit(void) const;
+    Vector<float, N> unit(void) const;
     // 向量和
     Vector<T, N> operator+(const Vector<T, N> &_v) const;
     // 向量自加
@@ -208,8 +208,8 @@ Vector<T, N> Vector<T, N>::operator-(void) const {
 }
 
 template <class T, size_t N>
-double Vector<T, N>::norm(void) const {
-    double res = 0;
+float Vector<T, N>::norm(void) const {
+    float res = 0;
     res += coord.x * coord.x;
     res += coord.y * coord.y;
     res += coord.z * coord.z;
@@ -218,15 +218,15 @@ double Vector<T, N>::norm(void) const {
 }
 
 template <class T, size_t N>
-Vector<double, N> Vector<T, N>::unit(void) const {
-    double tmp[N];
-    double norm = this->norm();
-    tmp[0]      = coord.x / norm;
-    tmp[1]      = coord.y / norm;
+Vector<float, N> Vector<T, N>::unit(void) const {
+    float tmp[N];
+    float norm = this->norm();
+    tmp[0]     = coord.x / norm;
+    tmp[1]     = coord.y / norm;
     if (N == 3) {
         tmp[2] = coord.z / norm;
     }
-    return Vector<double, N>(tmp);
+    return Vector<float, N>(tmp);
 }
 
 template <class T, size_t N>
@@ -331,6 +331,9 @@ std::ostream &operator<<(std::ostream &_os, const Vector<T, N> &_v) {
 
 typedef Vector<int, 2>    Vectori2;
 typedef Vector<int, 3>    Vectori3;
+typedef Vector<float, 2>  Vectorf2;
+typedef Vector<float, 3>  Vectorf3;
+typedef Vector<float, 4>  Vectorf4;
 typedef Vector<double, 2> Vectord2;
 typedef Vector<double, 3> Vectord3;
 typedef Vector<double, 4> Vectord4;

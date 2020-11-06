@@ -24,13 +24,13 @@ Model::Model(const string &_filename) : verts(), faces() {
         char               trash;
         if (!line.compare(0, 2, "v ")) {
             iss >> trash;
-            std::vector<double> tmp;
+            std::vector<float> tmp;
             for (int i = 0; i < 3; i++) {
-                double s;
+                float s;
                 iss >> s;
                 tmp.push_back(s);
             }
-            Vectord3 v(tmp);
+            Vectorf3 v(tmp);
             verts.push_back(v);
         }
         else if (!line.compare(0, 2, "f ")) {
@@ -65,6 +65,6 @@ std::vector<int> Model::face(int _idx) const {
     return faces.at(_idx);
 }
 
-Vectord3 Model::vert(int _i) const {
+Vectorf3 Model::vert(int _i) const {
     return verts.at(_i);
 }

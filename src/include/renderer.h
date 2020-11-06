@@ -8,6 +8,7 @@
 #define __RENDERER_H__
 
 #include "vector"
+#include "common.h"
 #include "model.h"
 #include "vector.hpp"
 #include "geometry.h"
@@ -20,15 +21,15 @@ private:
     // 绘制像素
     Geometry &painter;
     // 光照
-    Vectord3 light_dir = Vectord3(0, 0, -1);
+    Vectorf3 light_dir = Vectorf3(0, 0, -1);
     // z-buffer 缓冲
     double *zbuffer;
     // 大小
-    size_t         width;
-    size_t         height;
-    const TGAColor black = TGAColor(0, 0, 0, 255);
-    const TGAColor white = TGAColor(255, 255, 255, 255);
-    const TGAColor red   = TGAColor(255, 0, 0, 255);
+    size_t width;
+    size_t height;
+    // 由 obj 坐标转换为屏幕坐标
+    int get_x(float _x) const;
+    int get_y(float _y) const;
 
 protected:
 public:
@@ -37,19 +38,21 @@ public:
     // 渲染
     bool render(void) const;
     bool render(void);
-    // 描线
+    // 直线
     bool line(void) const;
     bool line_zbuffer();
-    // 填充
+    // 填充三角
     bool fill(void) const;
     bool fill_zbuffer();
+    // 圆
+    bool circle(void) const;
     // 保存
     bool save(const std::string &_filename = "output.tga") const;
     // 设置参数
-    bool set_light(const Vectord3 &_light);
+    bool set_light(const Vectorf3 &_light);
     bool set_size(size_t _w, size_t _h);
     // 读取参数
-    Vectord3 get_light(void) const;
+    Vectorf3 get_light(void) const;
     Vectori2 get_size(void) const;
 };
 
