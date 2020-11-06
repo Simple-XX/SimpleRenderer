@@ -1,0 +1,36 @@
+name: CMake
+
+on: 
+  - push
+  - pull_request
+  - release
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build_macos:
+    runs-on: macos-latest
+
+    steps:
+    - name: Get code
+      uses: actions/checkout@v2
+      
+    - name: Setup brew
+      shell: bash
+      run: |
+        brew install gcc
+
+    - name: Make build dir
+      shell: bash
+      run: |
+        mkdir ${{github.workspace}}/build
+    - name: cmake
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: cmake -DCMAKE_BUILD_TYPE=RELEASE ..
+
+    - name: make
+      shell: bash
+      working-directory: ${{github.workspace}}/build
+      run: make
