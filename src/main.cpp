@@ -1,8 +1,8 @@
 
-// This file is a part of SimpleXX/SimpleRenderer
-// (https://github.com/SimpleXX/SimpleRenderer).
+// This file is a part of Simple-XX/SimpleRenderer
+// (https://github.com/Simple-XX/SimpleRenderer).
 //
-// main.cpp for SimpleXX/SimpleRenderer.
+// main.cpp for Simple-XX/SimpleRenderer.
 
 #include "common.h"
 #include "geometry.h"

@@ -1,8 +1,8 @@
 
-// This file is a part of SimpleXX/SimpleRenderer
-// (https://github.com/SimpleXX/SimpleRenderer).
+// This file is a part of Simple-XX/SimpleRenderer
+// (https://github.com/Simple-XX/SimpleRenderer).
 //
-// test.h for SimpleXX/SimpleRenderer.
+// test.h for Simple-XX/SimpleRenderer.
 
 #ifndef __TEST_H__
 #define __TEST_H__

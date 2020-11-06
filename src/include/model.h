@@ -1,8 +1,8 @@
 
-// This file is a part of SimpleXX/SimpleRenderer
-// (https://github.com/SimpleXX/SimpleRenderer).
+// This file is a part of Simple-XX/SimpleRenderer
+// (https://github.com/Simple-XX/SimpleRenderer).
 //
-// model.h for SimpleXX/SimpleRenderer.
+// model.h for Simple-XX/SimpleRenderer.
 
 #ifndef __MODEL_H__
 #define __MODEL_H__
@@ -95,8 +95,8 @@ private:
 public:
     Model(const std::string &_filename);
     ~Model(void);
-    int              nverts(void) const;
-    int              nfaces(void) const;
+    size_t           nverts(void) const;
+    size_t           nfaces(void) const;
     Vectorf3         vert(int i) const;
     std::vector<int> face(int _idx) const;
 };
