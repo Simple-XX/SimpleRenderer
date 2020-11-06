@@ -4,6 +4,7 @@
 //
 // main.cpp for SimpleXX/SimpleRenderer.
 
+#include "common.h"
 #include "geometry.h"
 #include "image.h"
 #include "iostream"
@@ -14,11 +15,7 @@
 
 using namespace std;
 
-TGAColor  white  = TGAColor(255, 255, 255, 255);
-TGAColor  red    = TGAColor(255, 0, 0, 255);
-const int width  = 1920;
-const int height = 1080;
-Test      test;
+Test test;
 
 int main(int argc, char **argv) {
     string filename;
@@ -26,7 +23,7 @@ int main(int argc, char **argv) {
         filename = argv[1];
     }
     else {
-        filename = "obj/african_head.obj";
+        filename = "../../src/obj/african_head.obj";
     }
     Model    model(filename);
     TGAImage image(width, height, TGAImage::RGBA);

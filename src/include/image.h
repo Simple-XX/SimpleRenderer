@@ -38,7 +38,7 @@ struct TGAColor {
     TGAColor(const std::uint8_t _v);
     TGAColor(const std::uint8_t *_p, const std::uint8_t _bpp);
     std::uint8_t &operator[](const int _i);
-    TGAColor      operator*(const double _intensity) const;
+    TGAColor      operator*(const float _intensity) const;
 };
 
 class TGAImage {

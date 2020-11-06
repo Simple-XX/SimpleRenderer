@@ -4,11 +4,20 @@
 //
 // renderer.cpp for SimpleXX/SimpleRenderer.
 
-#include "renderer.h"
 #include "iostream"
 #include "limits"
+#include "renderer.h"
+#include "common.h"
 
 using namespace std;
+
+int Renderer::get_x(float _x) const {
+    return (_x + 1.) * width / 3.;
+}
+
+int Renderer::get_y(float _y) const {
+    return height - (_y + 1.) * height / 3.;
+}
 
 Renderer::Renderer(Geometry &_painter, const Model &_model)
     : model(_model), painter(_painter) {
@@ -16,7 +25,7 @@ Renderer::Renderer(Geometry &_painter, const Model &_model)
     height  = painter.get_height();
     zbuffer = new double[width * height];
     for (size_t i = 0; i < width * height; i++) {
-        zbuffer[i] = -std::numeric_limits<double>::max();
+        zbuffer[i] = -std::numeric_limits<float>::max();
     }
     return;
 }
@@ -27,28 +36,32 @@ Renderer::~Renderer(void) {
 }
 
 bool Renderer::render(void) const {
-    line();
-    // fill();
+    // line();
+    fill();
+    // circle();
     return true;
 }
 
 bool Renderer::render(void) {
     cout << "non-const" << endl;
-    line_zbuffer();
-    // fill_zbuffer();
+    // line_zbuffer();
+    fill_zbuffer();
     return true;
 }
 
 bool Renderer::line(void) const {
+    // 所有面
     for (int i = 0; i < model.nfaces(); i++) {
+        // 取出一个面
         vector<int> face = model.face(i);
+        // 处理 x y 坐标
         for (int j = 0; j < 3; j++) {
-            Vectord3 v0 = model.vert(face.at(j));
-            Vectord3 v1 = model.vert(face.at((j + 1) % 3));
-            int      x0 = (v0.coord.x + 1.) * width / 3.;
-            int      y0 = height - (v0.coord.y + 1.) * height / 2.;
-            int      x1 = (v1.coord.x + 1.) * width / 3.;
-            int      y1 = height - (v1.coord.y + 1.) * height / 2.;
+            Vectorf3 v0 = model.vert(face.at(j));
+            Vectorf3 v1 = model.vert(face.at((j + 1) % 3));
+            int      x0 = get_x(v0.coord.x);
+            int      y0 = get_y(v0.coord.y);
+            int      x1 = get_x(v1.coord.x);
+            int      y1 = get_y(v1.coord.y);
             painter.line(x0, y0, x1, y1, white);
         }
     }
@@ -59,14 +72,14 @@ bool Renderer::line_zbuffer(void) {
     for (int i = 0; i < model.nfaces(); i++) {
         vector<int> face = model.face(i);
         for (int j = 0; j < 3; j++) {
-            Vectord3 v0 = model.vert(face.at(j));
-            Vectord3 v1 = model.vert(face.at((j + 1) % 3));
-            int      x0 = (v0.coord.x + 1.) * width / 3.;
-            int      y0 = height - (v0.coord.y + 1.) * height / 2.;
-            int      x1 = (v1.coord.x + 1.) * width / 3.;
-            int      y1 = height - (v1.coord.y + 1.) * height / 2.;
-            double   z0 = v0.coord.z;
-            double   z1 = v1.coord.z;
+            Vectorf3 v0 = model.vert(face.at(j));
+            Vectorf3 v1 = model.vert(face.at((j + 1) % 3));
+            int      x0 = get_x(v0.coord.x);
+            int      y0 = get_y(v0.coord.y);
+            int      x1 = get_x(v1.coord.x);
+            int      y1 = get_y(v1.coord.y);
+            float    z0 = v0.coord.z;
+            float    z1 = v1.coord.z;
             painter.line(x0, y0, z0, x1, y1, z1, zbuffer, white);
         }
     }
@@ -77,17 +90,15 @@ bool Renderer::fill(void) const {
     for (int i = 0; i < model.nfaces(); i++) {
         std::vector<int> face = model.face(i);
         Vectori2         screen_coords[3];
-        Vectord3         world_coords[3];
+        Vectorf3         world_coords[3];
         for (int j = 0; j < 3; j++) {
-            Vectord3 v = model.vert(face[j]);
-            screen_coords[j] =
-                Vectori2((v.coord.x + 1.) * width / 3.,
-                         height - (v.coord.y + 1.) * height / 2.);
-            world_coords[j] = v;
+            Vectorf3 v       = model.vert(face[j]);
+            screen_coords[j] = Vectori2(get_x(v.coord.x), get_y(v.coord.y));
+            world_coords[j]  = v;
         }
-        Vectord3 n = (world_coords[2] - world_coords[0]) ^
+        Vectorf3 n = (world_coords[2] - world_coords[0]) ^
                      (world_coords[1] - world_coords[0]);
-        double intensity = light_dir * n.unit();
+        float intensity = light_dir * n.unit();
         if (intensity > 0) {
             painter.triangle(screen_coords[0], screen_coords[1],
                              screen_coords[2],
@@ -101,20 +112,17 @@ bool Renderer::fill(void) const {
 bool Renderer::fill_zbuffer(void) {
     for (int i = 0; i < model.nfaces(); i++) {
         std::vector<int> face = model.face(i);
-        Vectord3         screen_coords[3];
-        Vectord3         world_coords[3];
+        Vectorf3         screen_coords[3];
+        Vectorf3         world_coords[3];
         for (int j = 0; j < 3; j++) {
-            std::cerr << "1" << std::endl;
-            Vectord3 v = model.vert(face[j]);
-            std::cerr << "2" << std::endl;
-            screen_coords[j] = Vectord3(
-                (v.coord.x + 1.) * width / 3. + 0.5,
-                height - (v.coord.y + 1.) * height / 2. + 0.5, v.coord.z);
+            Vectorf3 v = model.vert(face[j]);
+            screen_coords[j] =
+                Vectorf3(get_x(v.coord.x), get_y(v.coord.y), v.coord.z);
             world_coords[j] = v;
         }
-        Vectord3 n = (world_coords[2] - world_coords[0]) ^
+        Vectorf3 n = (world_coords[2] - world_coords[0]) ^
                      (world_coords[1] - world_coords[0]);
-        double intensity = light_dir * n.unit();
+        float intensity = light_dir * n.unit();
         if (intensity > 0) {
             painter.triangle(screen_coords[0], screen_coords[1],
                              screen_coords[2], zbuffer,
@@ -125,11 +133,16 @@ bool Renderer::fill_zbuffer(void) {
     return true;
 }
 
+bool Renderer::circle(void) const {
+    painter.circle(mid_width, mid_height, 50, white);
+    return true;
+}
+
 bool Renderer::save(const std::string &_filename) const {
     return painter.save(_filename);
 }
 
-bool Renderer::set_light(const Vectord3 &_light) {
+bool Renderer::set_light(const Vectorf3 &_light) {
     light_dir = _light;
     return true;
 }
@@ -141,7 +154,7 @@ bool Renderer::set_size(size_t _w, size_t _h) {
 }
 
 // 读取参数
-Vectord3 Renderer::get_light(void) const {
+Vectorf3 Renderer::get_light(void) const {
     return light_dir;
 }
 Vectori2 Renderer::get_size(void) const {
