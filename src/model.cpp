@@ -53,12 +53,12 @@ Model::~Model() {
     return;
 }
 
-size_t Model::nverts() const {
-    return verts.size();
+int Model::nverts() const {
+    return (int)verts.size();
 }
 
-size_t Model::nfaces() const {
-    return faces.size();
+int Model::nfaces() const {
+    return (int)faces.size();
 }
 
 std::vector<int> Model::face(int _idx) const {

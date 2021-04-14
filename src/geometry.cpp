@@ -1,25 +1,55 @@
 
-// This file is a part of Simple-XX/SimpleRenderer
-// (https://github.com/Simple-XX/SimpleRenderer).
+// This file is a part of SimpleXX/SimpleRenderer
+// (https://github.com/SimpleXX/SimpleRenderer).
 //
-// geometry.cpp for Simple-XX/SimpleRenderer.
+// geometry.cpp for SimpleXX/SimpleRenderer.
 
 #include "iostream"
-#include "vector"
 #include "geometry.h"
+#include "vector"
 
 using namespace std;
 
 // 推导过程见
-bool Geometry::is_barycentric(const Vectors2 &_vertex1,
-                              const Vectors2 &_vertex2,
-                              const Vectors2 &_vertex3,
-                              const Vectors2 &_p) const {
+bool Geometry::is_barycentric(const Vectori2 &_vertex1,
+                              const Vectori2 &_vertex2,
+                              const Vectori2 &_vertex3,
+                              const Vectori2 &_p) const {
     // 边向量
-    Vectors2 edge1 = (_vertex3 - _vertex1);
-    Vectors2 edge2 = (_vertex2 - _vertex1);
+    Vectori2 edge1 = (_vertex3 - _vertex1);
+    Vectori2 edge2 = (_vertex2 - _vertex1);
     // 到点 P 的向量
-    Vectors2 edge3 = (_p - _vertex1);
+    Vectori2 edge3 = (_p - _vertex1);
+    double   v1v1  = edge1 * edge1;
+    double   v1v2  = edge1 * edge2;
+    double   v1v3  = edge1 * edge3;
+    double   v2v2  = edge2 * edge2;
+    double   v2v3  = edge2 * edge3;
+
+    double deno = (v1v1 * v2v2) - (v1v2 * v1v2);
+    double u    = ((v2v2 * v1v3) - (v1v2 * v2v3)) / deno;
+    if (u < 0. || u > 1.) {
+        return false;
+    }
+    double v = ((v1v1 * v2v3) - (v1v2 * v1v3)) / deno;
+    if (v < 0. || v > 1.) {
+        return false;
+    }
+    if (u + v >= 1.) {
+        return false;
+    }
+    return true;
+}
+
+bool Geometry::is_barycentric(const Vectorf2 &_vertex1,
+                              const Vectorf2 &_vertex2,
+                              const Vectorf2 &_vertex3,
+                              const Vectorf2 &_p) const {
+    // 边向量
+    Vectorf2 edge1 = (_vertex3 - _vertex1);
+    Vectorf2 edge2 = (_vertex2 - _vertex1);
+    // 到点 P 的向量
+    Vectorf2 edge3 = (_p - _vertex1);
     float    v1v1  = edge1 * edge1;
     float    v1v2  = edge1 * edge2;
     float    v1v3  = edge1 * edge3;
@@ -32,6 +62,36 @@ bool Geometry::is_barycentric(const Vectors2 &_vertex1,
         return false;
     }
     float v = ((v1v1 * v2v3) - (v1v2 * v1v3)) / deno;
+    if (v < 0. || v > 1.) {
+        return false;
+    }
+    if (u + v >= 1.) {
+        return false;
+    }
+    return true;
+}
+
+bool Geometry::is_barycentric(const Vectori3 &_vertex1,
+                              const Vectori3 &_vertex2,
+                              const Vectori3 &_vertex3,
+                              const Vectori3 &_p) const {
+    // 边向量
+    Vectori3 edge1 = (_vertex3 - _vertex1);
+    Vectori3 edge2 = (_vertex2 - _vertex1);
+    // 到点 P 的向量
+    Vectori3 edge3 = (_p - _vertex1);
+    double   v1v1  = edge1 * edge1;
+    double   v1v2  = edge1 * edge2;
+    double   v1v3  = edge1 * edge3;
+    double   v2v2  = edge2 * edge2;
+    double   v2v3  = edge2 * edge3;
+
+    double deno = (v1v1 * v2v2) - (v1v2 * v1v2);
+    double u    = ((v2v2 * v1v3) - (v1v2 * v2v3)) / deno;
+    if (u < 0. || u > 1.) {
+        return false;
+    }
+    double v = ((v1v1 * v2v3) - (v1v2 * v1v3)) / deno;
     if (v < 0. || v > 1.) {
         return false;
     }
@@ -50,18 +110,18 @@ bool Geometry::is_barycentric(const Vectorf3 &_vertex1,
     Vectorf3 edge2 = (_vertex2 - _vertex1);
     // 到点 P 的向量
     Vectorf3 edge3 = (_p - _vertex1);
-    float    v1v1  = edge1 * edge1;
-    float    v1v2  = edge1 * edge2;
-    float    v1v3  = edge1 * edge3;
-    float    v2v2  = edge2 * edge2;
-    float    v2v3  = edge2 * edge3;
+    double   v1v1  = edge1 * edge1;
+    double   v1v2  = edge1 * edge2;
+    double   v1v3  = edge1 * edge3;
+    double   v2v2  = edge2 * edge2;
+    double   v2v3  = edge2 * edge3;
 
-    float deno = (v1v1 * v2v2) - (v1v2 * v1v2);
-    float u    = ((v2v2 * v1v3) - (v1v2 * v2v3)) / deno;
+    double deno = (v1v1 * v2v2) - (v1v2 * v1v2);
+    double u    = ((v2v2 * v1v3) - (v1v2 * v2v3)) / deno;
     if (u < 0. || u > 1.) {
         return false;
     }
-    float v = ((v1v1 * v2v3) - (v1v2 * v1v3)) / deno;
+    double v = ((v1v1 * v2v3) - (v1v2 * v1v3)) / deno;
     if (v < 0. || v > 1.) {
         return false;
     }
@@ -71,33 +131,49 @@ bool Geometry::is_barycentric(const Vectorf3 &_vertex1,
     return true;
 }
 
-Vectors2 Geometry::get_min(const Vectors2 &_vertex1, const Vectors2 &_vertex2,
-                           const Vectors2 &_vertex3) const {
-    size_t x = min(_vertex1.coord.x, min(_vertex2.coord.x, _vertex3.coord.x));
-    size_t y = min(_vertex1.coord.y, min(_vertex2.coord.y, _vertex3.coord.y));
-    return Vectors2(x, y);
+Vectori2 Geometry::get_min(const Vectori2 &_vertex1, const Vectori2 &_vertex2,
+                           const Vectori2 &_vertex3) const {
+    int x = min(_vertex1.coord.x, min(_vertex2.coord.x, _vertex3.coord.x));
+    int y = min(_vertex1.coord.y, min(_vertex2.coord.y, _vertex3.coord.y));
+    return Vectori2(x, y);
 }
 
-Vectors2 Geometry::get_max(const Vectors2 &_vertex1, const Vectors2 &_vertex2,
-                           const Vectors2 &_vertex3) const {
-    size_t x = max(_vertex1.coord.x, max(_vertex2.coord.x, _vertex3.coord.x));
-    size_t y = max(_vertex1.coord.y, max(_vertex2.coord.y, _vertex3.coord.y));
-    return Vectors2(x, y);
+Vectori2 Geometry::get_max(const Vectori2 &_vertex1, const Vectori2 &_vertex2,
+                           const Vectori2 &_vertex3) const {
+    int x = max(_vertex1.coord.x, max(_vertex2.coord.x, _vertex3.coord.x));
+    int y = max(_vertex1.coord.y, max(_vertex2.coord.y, _vertex3.coord.y));
+    return Vectori2(x, y);
+}
+
+Vectori3 Geometry::get_min(const Vectori3 &_vertex1, const Vectori3 &_vertex2,
+                           const Vectori3 &_vertex3) const {
+    int x = min(_vertex1.coord.x, min(_vertex2.coord.x, _vertex3.coord.x));
+    int y = min(_vertex1.coord.y, min(_vertex2.coord.y, _vertex3.coord.y));
+    int z = min(_vertex1.coord.z, min(_vertex2.coord.z, _vertex3.coord.z));
+    return Vectori3(x, y, z);
 }
 
 Vectorf3 Geometry::get_min(const Vectorf3 &_vertex1, const Vectorf3 &_vertex2,
                            const Vectorf3 &_vertex3) const {
-    size_t x = min(_vertex1.coord.x, min(_vertex2.coord.x, _vertex3.coord.x));
-    size_t y = min(_vertex1.coord.y, min(_vertex2.coord.y, _vertex3.coord.y));
-    size_t z = min(_vertex1.coord.z, min(_vertex2.coord.z, _vertex3.coord.z));
+    double x = min(_vertex1.coord.x, min(_vertex2.coord.x, _vertex3.coord.x));
+    double y = min(_vertex1.coord.y, min(_vertex2.coord.y, _vertex3.coord.y));
+    double z = min(_vertex1.coord.z, min(_vertex2.coord.z, _vertex3.coord.z));
     return Vectorf3(x, y, z);
+}
+
+Vectori3 Geometry::get_max(const Vectori3 &_vertex1, const Vectori3 &_vertex2,
+                           const Vectori3 &_vertex3) const {
+    int x = max(_vertex1.coord.x, max(_vertex2.coord.x, _vertex3.coord.x));
+    int y = max(_vertex1.coord.y, max(_vertex2.coord.y, _vertex3.coord.y));
+    int z = max(_vertex1.coord.z, max(_vertex2.coord.z, _vertex3.coord.z));
+    return Vectori3(x, y, z);
 }
 
 Vectorf3 Geometry::get_max(const Vectorf3 &_vertex1, const Vectorf3 &_vertex2,
                            const Vectorf3 &_vertex3) const {
-    float x = max(_vertex1.coord.x, max(_vertex2.coord.x, _vertex3.coord.x));
-    float y = max(_vertex1.coord.y, max(_vertex2.coord.y, _vertex3.coord.y));
-    float z = max(_vertex1.coord.z, max(_vertex2.coord.z, _vertex3.coord.z));
+    double x = max(_vertex1.coord.x, max(_vertex2.coord.x, _vertex3.coord.x));
+    double y = max(_vertex1.coord.y, max(_vertex2.coord.y, _vertex3.coord.y));
+    double z = max(_vertex1.coord.z, max(_vertex2.coord.z, _vertex3.coord.z));
     return Vectorf3(x, y, z);
 }
 
@@ -120,8 +196,8 @@ float Geometry::get_z(const Vectorf3 &_vertex1, const Vectorf3 &_vertex2,
 
 Geometry::Geometry(TGAImage &_image, const string &_filename)
     : image(_image), filename(_filename) {
-    for (size_t w = 0; w < image.get_width(); w++) {
-        for (size_t h = 0; h < image.get_height(); h++) {
+    for (auto w = 0; w < image.get_width(); w++) {
+        for (auto h = 0; h < image.get_height(); h++) {
             image.set(w, h, color_bg);
         }
     }
@@ -132,26 +208,14 @@ Geometry::~Geometry(void) {
     return;
 }
 
-size_t Geometry::get_width(void) const {
-    return image.get_width();
-}
-
-size_t Geometry::get_height(void) const {
-    return image.get_height();
-}
-
-bool Geometry::save(string _filename) const {
-    return image.write_tga_file(_filename);
-}
-
 // 在给定 _image 上按照 _x0, _y0, _x1, _y1 给出的坐标绘制直线，颜色由 _color
 // 指定
 // [(_x0, _y0), (_x1, _y1)) 左上角为原点
-void Geometry::line(size_t _x0, size_t _y0, size_t _x1, size_t _y1,
+void Geometry::line(int _x0, int _y0, int _x1, int _y1,
                     const TGAColor &_color) const {
     // 斜率大于 1
     bool steep = false;
-    if (abs((int)(_x0 - _x1)) < abs((int)(_y0 - _y1))) {
+    if (abs(_x0 - _x1) < abs(_y0 - _y1)) {
         swap(_x0, _y0);
         swap(_x1, _y1);
         steep = true;
@@ -161,11 +225,11 @@ void Geometry::line(size_t _x0, size_t _y0, size_t _x1, size_t _y1,
         swap(_x0, _x1);
         swap(_y0, _y1);
     }
-    int    de  = 0;
-    int    dy2 = (_y1 - _y0) << 1;
-    int    dx2 = (_x1 - _x0) << 1;
-    size_t y   = _y0;
-    for (size_t x = _x0; x <= _x1; x++) {
+    int de  = 0;
+    int dy2 = (_y1 - _y0) << 1;
+    int dx2 = (_x1 - _x0) << 1;
+    int y   = _y0;
+    for (int x = _x0; x <= _x1; x++) {
         if (steep == true) {
             image.set(y, image.get_height() - x, _color);
         }
@@ -181,19 +245,14 @@ void Geometry::line(size_t _x0, size_t _y0, size_t _x1, size_t _y1,
     return;
 }
 
-void Geometry::line(Vectors2 _v0, Vectors2 _v1, const TGAColor &_color) const {
+void Geometry::line(Vectori2 _v0, Vectori2 _v1, const TGAColor &_color) const {
     line(_v0.coord.x, _v0.coord.y, _v1.coord.x, _v1.coord.y, _color);
     return;
 }
 
-void Geometry::line(Vectors2 *_vertexes, const TGAColor &_color) const {
-    line(_vertexes[0].coord.x, _vertexes[0].coord.y, _vertexes[1].coord.x,
-         _vertexes[1].coord.y, _color);
-    return;
-}
-
-void Geometry::line(float _x0, float _y0, float _z0, float _x1, float _y1,
-                    float _z1, float *_zbuffer, const TGAColor &_color) {
+void Geometry::line(double _x0, double _y0, double _z0, double _x1, double _y1,
+                    double _z1, double *_zbuffer,
+                    const TGAColor &_color) const {
     // 斜率大于 1
     bool steep = false;
     if (abs(_x0 - _x1) < abs(_y0 - _y1)) {
@@ -207,13 +266,13 @@ void Geometry::line(float _x0, float _y0, float _z0, float _x1, float _y1,
         swap(_y0, _y1);
     }
     int    de  = 0;
-    float  dy2 = (_y1 - _y0) * 2;
-    float  dx2 = (_x1 - _x0) * 2;
-    float  y   = _y0;
-    float  z   = _z0;
-    float  dz  = (_z1 - _z0) / (_x1 - _x0);
+    double dy2 = (_y1 - _y0) * 2;
+    double dx2 = (_x1 - _x0) * 2;
+    double y   = _y0;
+    double z   = _z0;
+    double dz  = (_z1 - _z0) / (_x1 - _x0);
     size_t idx = 0;
-    for (float x = _x0; x <= _x1; x++) {
+    for (double x = _x0; x <= _x1; x++) {
         idx = (size_t)(x + y * image.get_height());
         if (steep == true) {
             if (_zbuffer[idx] < z) {
@@ -237,29 +296,21 @@ void Geometry::line(float _x0, float _y0, float _z0, float _x1, float _y1,
     return;
 }
 
-void Geometry::line(Vectorf3 _v0, Vectorf3 _v1, float *_zbuffer,
-                    const TGAColor &_color) {
+void Geometry::line(Vectorf3 _v0, Vectorf3 _v1, double *_zbuffer,
+                    const TGAColor &_color) const {
     line(_v0.coord.x, _v0.coord.y, _v0.coord.z, _v1.coord.x, _v1.coord.y,
          _v1.coord.z, _zbuffer, _color);
     return;
 }
 
-void Geometry::line(Vectorf3 *_vertexes, float *_zbuffer,
-                    const TGAColor &_color) {
-    line(_vertexes[0].coord.x, _vertexes[0].coord.y, _vertexes[0].coord.z,
-         _vertexes[1].coord.x, _vertexes[1].coord.y, _vertexes[1].coord.z,
-         _zbuffer, _color);
-    return;
-}
-
 // 绘制三角形，_vertex1 _vertex2 _vertex3 为三个顶点
-void Geometry::triangle(const Vectors2 &_vertex1, const Vectors2 &_vertex2,
-                        const Vectors2 &_vertex3,
+void Geometry::triangle(const Vectori2 &_vertex1, const Vectori2 &_vertex2,
+                        const Vectori2 &_vertex3,
                         const TGAColor &_color) const {
     // 遍历平行四边形，如果在三角形内则填充
-    Vectors2 min = get_min(_vertex1, _vertex2, _vertex3);
-    Vectors2 max = get_max(_vertex1, _vertex2, _vertex3);
-    Vectors2 p;
+    Vectori2 min = get_min(_vertex1, _vertex2, _vertex3);
+    Vectori2 max = get_max(_vertex1, _vertex2, _vertex3);
+    Vectori2 p;
     for (p.coord.x = min.coord.x; p.coord.x <= max.coord.x; p.coord.x++) {
         for (p.coord.y = min.coord.y; p.coord.y <= max.coord.y; p.coord.y++) {
             if (is_barycentric(_vertex1, _vertex2, _vertex3, p) == true) {
@@ -270,20 +321,60 @@ void Geometry::triangle(const Vectors2 &_vertex1, const Vectors2 &_vertex2,
     return;
 }
 
-void Geometry::triangle(const Vectors2 *_vertexes,
+void Geometry::triangle(const Vectori2 *_vertexes,
                         const TGAColor &_color) const {
     triangle(_vertexes[0], _vertexes[1], _vertexes[2], _color);
     return;
 }
 
+void Geometry::triangle(const Vectori3 &_vertex1, const Vectori3 &_vertex2,
+                        const Vectori3 &_vertex3, double *_zbuffer,
+                        const TGAColor &_color) const {
+    Vectori3 min = get_min(_vertex1, _vertex2, _vertex3);
+    Vectori3 max = get_max(_vertex1, _vertex2, _vertex3);
+    Vectori3 p;
+    for (p.coord.x = min.coord.x; p.coord.x <= max.coord.x; p.coord.x++) {
+        for (p.coord.y = min.coord.y; p.coord.y <= max.coord.y; p.coord.y++) {
+            if (is_barycentric(_vertex1, _vertex2, _vertex3, p) == true) {
+                image.set(p.coord.x, image.get_height() - p.coord.y, _color);
+            }
+        }
+    }
+    _zbuffer = _zbuffer;
+    return;
+}
+
+void Geometry::triangle(const Vectori3 *_vertexes, double *_zbuffer,
+                        const TGAColor &_color) const {
+    triangle(_vertexes[0], _vertexes[1], _vertexes[2], _zbuffer, _color);
+    return;
+}
+
+Vectorf3 barycentric(Vectorf3 A, Vectorf3 B, Vectorf3 C, Vectorf3 P) {
+    Vectorf3 s[2];
+    for (int i = 2; i--;) {
+        s[i][0] = C[i] - A[i];
+        s[i][1] = B[i] - A[i];
+        s[i][2] = A[i] - P[i];
+    }
+    Vectorf3 u = s[0] ^ s[1];
+    if (std::abs(u[2]) > 1e-2) // dont forget that u[2] is integer. If it is
+                               // zero then triangle ABC is degenerate
+        return Vectorf3(1. - (u.coord.x + u.coord.y) / u.coord.z,
+                        u.coord.y / u.coord.z, u.coord.x / u.coord.z);
+    return Vectorf3(-1, 1, 1); // in this case generate negative coordinates, it
+                               // will be thrown away by the rasterizator
+}
+
+// #include "limits"
 void Geometry::triangle(const Vectorf3 &_vertex1, const Vectorf3 &_vertex2,
-                        const Vectorf3 &_vertex3, float *_zbuffer,
+                        const Vectorf3 &_vertex3, double *_zbuffer,
                         const TGAColor &_color) const {
     Vectorf3 min = get_min(_vertex1, _vertex2, _vertex3);
     Vectorf3 max = get_max(_vertex1, _vertex2, _vertex3);
     Vectorf3 p;
     size_t   idx = 0;
-    float    z   = 0;
+    double   z   = 0;
     for (p.coord.x = min.coord.x; p.coord.x <= max.coord.x; p.coord.x++) {
         for (p.coord.y = min.coord.y; p.coord.y <= max.coord.y; p.coord.y++) {
             if (is_barycentric(_vertex1, _vertex2, _vertex3, p) == true) {
@@ -297,19 +388,48 @@ void Geometry::triangle(const Vectorf3 &_vertex1, const Vectorf3 &_vertex2,
             }
         }
     }
+    // Vectord2 bboxmin(std::numeric_limits<double>::max(),
+    //                  std::numeric_limits<double>::max());
+    // Vectord2 bboxmax(-std::numeric_limits<double>::max(),
+    //                  -std::numeric_limits<double>::max());
+    // Vectorf3 pts[3];
+    // pts[0] = _vertex1;
+    // pts[1] = _vertex2;
+    // pts[2] = _vertex3;
+    // Vectord2 clamp(image.get_width() - 1, image.get_height() - 1);
+    // for (int i = 0; i < 3; i++) {
+    //     for (size_t j = 0; j < 2; j++) {
+    //         bboxmin[j] = std::max(0., std::min(bboxmin[j], pts[i][j]));
+    //         bboxmax[j] = std::min(clamp[j], std::max(bboxmax[j], pts[i][j]));
+    //     }
+    // }
+    // Vectorf3 P;
+    // for (P.coord.x = bboxmin.coord.x; P.coord.x <= bboxmax.coord.x;
+    //      P.coord.x++) {
+    //     for (P.coord.y = bboxmin.coord.y; P.coord.y <= bboxmax.coord.y;
+    //          P.coord.y++) {
+    //         Vectorf3 bc_screen = barycentric(pts[0], pts[1], pts[2], P);
+    //         if (bc_screen.coord.x < 0 || bc_screen.coord.y < 0 ||
+    //             bc_screen.coord.z < 0)
+    //             continue;
+    //         P.coord.z = 0;
+    //         for (int i = 0; i < 3; i++)
+    //             P.coord.z += pts[i][2] * bc_screen[i];
+    //         if (_zbuffer[int(P.coord.x + P.coord.y * image.get_height())] <
+    //             P.coord.z) {
+    //             _zbuffer[int(P.coord.x + P.coord.y * image.get_height())] =
+    //                 P.coord.z;
+    //             image.set(P.coord.x,image.get_height() - P.coord.y, _color);
+    //         }
+    //     }
+    // }
     return;
 }
 
-void Geometry::triangle(const Vectorf3 *_vertexes, float *_zbuffer,
-                        const TGAColor &_color) {
-    triangle(_vertexes[0], _vertexes[1], _vertexes[2], _zbuffer, _color);
-    return;
-}
-
-void Geometry::circle(size_t _x0, size_t _y0, float _r, TGAColor _color) const {
+void Geometry::circle(int _x0, int _y0, float _r, TGAColor _color) const {
     assert(_r > 0);
-    size_t x = 0;
-    size_t y = _r;
+    int x = 0;
+    int y = _r;
 
     // 起点(0,R)
     // 下一点中点(1,R-0.5)
@@ -340,20 +460,20 @@ void Geometry::circle(size_t _x0, size_t _y0, float _r, TGAColor _color) const {
     return;
 }
 
-void Geometry::circle(size_t _x0, size_t _y0, float _r, float *_zbuffer,
+void Geometry::circle(int _x0, int _y0, float _r, double *_zbuffer,
                       const TGAColor &_color) const {
     assert(_r > 0);
-    size_t x = 0;
-    size_t y = _r;
+    int x = 0;
+    int y = _r;
 
     // 起点(0,R)
     // 下一点中点(1,R-0.5)
     // d=1*1+(R-0.5)*(R-0.5)-R*R=1.25-R
-    // d 只参与整数运算，所以小数部分可省略
+    // d只参与整数运算，所以小数部分可省略
     int d = 1 - _r;
 
-    // y > x 即第一象限的第1区八分圆
-    while (y > x) {
+    while (y > x) // y>x即第一象限的第1区八分圆
+    {
         image.set(x + _x0, image.get_height() - (y + _y0), _color);
         image.set(y + _x0, image.get_height() - (x + _y0), _color);
         image.set(-x + _x0, image.get_height() - (y + _y0), _color);
@@ -374,4 +494,16 @@ void Geometry::circle(size_t _x0, size_t _y0, float _r, float *_zbuffer,
     }
     _zbuffer = _zbuffer;
     return;
+}
+
+int Geometry::get_width(void) const {
+    return image.get_width();
+}
+
+int Geometry::get_height(void) const {
+    return image.get_height();
+}
+
+bool Geometry::save(string _filename) const {
+    return image.write_tga_file(_filename);
 }

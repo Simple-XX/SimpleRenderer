@@ -1,18 +1,18 @@
 
-// This file is a part of Simple-XX/SimpleRenderer
-// (https://github.com/Simple-XX/SimpleRenderer).
+// This file is a part of SimpleXX/SimpleRenderer
+// (https://github.com/SimpleXX/SimpleRenderer).
 //
-// test.cpp for Simple-XX/SimpleRenderer.
+// test.cpp for SimpleXX/SimpleRenderer.
 
 #include "vector"
 #include "iostream"
 #include "math.h"
 #include "stdarg.h"
 #include "assert.h"
-#include "test.h"
 #include "vector.hpp"
 #include "geometry.h"
 #include "matrix.hpp"
+#include "test.h"
 
 using namespace std;
 
@@ -192,21 +192,21 @@ bool Test::test_matrix(void) const {
     assert(arr[5] == 278);
     assert(arr[7] == 278);
     assert(arr[8] == 446);
-    int           arr2[9] = {2, 3, 3, 3, 4, 2, -2, -2, 3};
-    Matrix<int>   test8(3, 3, arr2);
-    Matrix<float> test9    = test8.inverse();
-    float         arr3[16] = {233};
-    total                  = test9.to_arr(arr3);
+    int            arr2[9] = {2, 3, 3, 3, 4, 2, -2, -2, 3};
+    Matrix<int>    test8(3, 3, arr2);
+    Matrix<double> test9    = test8.inverse();
+    double         arr3[16] = {233};
+    total                   = test9.to_arr(arr3);
     assert(total == 9);
     assert(arr3[0] == -16);
     assert(arr3[3] == 13);
     assert(arr3[5] == -5);
     assert(arr3[7] == 2);
     assert(arr3[8] == 1);
-    int           arr4[16] = {1, 0, 0, 0, 2, 1, 0, 0, 3, 2, 1, 0, 4, 3, 2, 1};
-    Matrix<int>   test10(4, 4, arr4);
-    Matrix<float> test11 = test10.inverse();
-    total                = test11.to_arr(arr3);
+    int            arr4[16] = {1, 0, 0, 0, 2, 1, 0, 0, 3, 2, 1, 0, 4, 3, 2, 1};
+    Matrix<int>    test10(4, 4, arr4);
+    Matrix<double> test11 = test10.inverse();
+    total                 = test11.to_arr(arr3);
     assert(total == 16);
     assert(arr3[0] == 1);
     assert(arr3[3] == 0);
@@ -239,12 +239,12 @@ bool Test::test_triangle(void) const {
     TGAImage image(width, height, TGAImage::RGBA);
     Geometry painter(image);
     painter.line(0, 0, 100, 100, white);
-    size_t   a[] = {0, 0};
-    size_t   b[] = {0, 540};
-    size_t   c[] = {960, 0};
-    Vectors2 A(a);
-    Vectors2 B(b);
-    Vectors2 C(c);
+    int      a[] = {0, 0};
+    int      b[] = {0, 540};
+    int      c[] = {960, 0};
+    Vectori2 A(a);
+    Vectori2 B(b);
+    Vectori2 C(c);
     painter.triangle(A, B, C, white);
     painter.save("test_triangle.tga");
     return true;

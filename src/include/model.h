@@ -1,8 +1,8 @@
 
-// This file is a part of Simple-XX/SimpleRenderer
-// (https://github.com/Simple-XX/SimpleRenderer).
+// This file is a part of SimpleXX/SimpleRenderer
+// (https://github.com/SimpleXX/SimpleRenderer).
 //
-// model.h for Simple-XX/SimpleRenderer.
+// model.h for SimpleXX/SimpleRenderer.
 
 #ifndef __MODEL_H__
 #define __MODEL_H__
@@ -52,7 +52,7 @@ struct Vertex {
 // 颜色
 struct ColorStruct {
     int   index;          //颜色索引
-    float ra，ga，ba;     // 环境光的各分量
+    float ra, ga, ba;     // 环境光的各分量
     float rd, gd, bd, ad; // 漫反射光的各分量
     float rs, gs, bs;     // 镜面反射光的各分量
     float spec;           // 镜面反射光的强度
@@ -61,7 +61,7 @@ struct ColorStruct {
 // 材质
 struct MaterialColor {
     char  name[100];
-    float ra，ga，ba;     // 环境光的各分量
+    float ra, ga, ba;     // 环境光的各分量
     float rd, gd, bd, ad; // 漫反射光的各分量
     float rs, gs, bs;     // 镜面反射光的各分量
     float spec;           // 镜面反射光的强度
@@ -95,8 +95,8 @@ private:
 public:
     Model(const std::string &_filename);
     ~Model(void);
-    size_t           nverts(void) const;
-    size_t           nfaces(void) const;
+    int              nverts(void) const;
+    int              nfaces(void) const;
     Vectorf3         vert(int i) const;
     std::vector<int> face(int _idx) const;
 };

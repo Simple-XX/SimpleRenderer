@@ -1,12 +1,14 @@
 
-// This file is a part of Simple-XX/SimpleRenderer
-// (https://github.com/Simple-XX/SimpleRenderer).
+// This file is a part of SimpleXX/SimpleRenderer
+// (https://github.com/SimpleXX/SimpleRenderer).
 // Based on https://github.com/ssloy/tinyrenderer
-// tga.cpp for Simple-XX/SimpleRenderer.
+// tga.cpp for SimpleXX/SimpleRenderer.
 
 #include "iostream"
 #include "cstring"
 #include "image.h"
+
+using namespace std;
 
 TGAColor::TGAColor(const uint8_t _R, const uint8_t _G, const uint8_t _B,
                    const uint8_t _A)
@@ -33,7 +35,7 @@ uint8_t &TGAColor::operator[](const int _i) {
 TGAColor TGAColor::operator*(const float _intensity) const {
     TGAColor res     = *this;
     float    clamped = std::max((float)0., std::min(_intensity, (float)1.));
-    for (size_t i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
         res.bgra[i] = bgra[i] * clamped;
     }
     return res;
@@ -43,7 +45,7 @@ TGAImage::TGAImage() : data(), width(0), height(0), bytespp(0) {
     return;
 }
 
-TGAImage::TGAImage(const size_t _w, const size_t _h, const int _bpp)
+TGAImage::TGAImage(const int _w, const int _h, const int _bpp)
     : data(_w * _h * _bpp, 0), width(_w), height(_h), bytespp(_bpp) {
     return;
 }
@@ -267,15 +269,15 @@ bool TGAImage::unload_rle_data(std::ofstream &_out) const {
     return true;
 }
 
-TGAColor TGAImage::get(const size_t _x, const size_t _y) const {
-    if (!data.size() || _x >= width || _y >= height) {
+TGAColor TGAImage::get(const int _x, const int _y) const {
+    if (!data.size() || _x < 0 || _y < 0 || _x >= width || _y >= height) {
         return {};
     }
     return TGAColor(data.data() + (_x + _y * width) * bytespp, bytespp);
 }
 
-void TGAImage::set(size_t _x, size_t _y, const TGAColor &_c) {
-    if (!data.size() || _x >= width || _y >= height) {
+void TGAImage::set(int _x, int _y, const TGAColor &_c) {
+    if (!data.size() || _x < 0 || _y < 0 || _x >= width || _y >= height) {
         return;
     }
     memcpy(data.data() + (_x + _y * width) * bytespp, _c.bgra, bytespp);
@@ -285,11 +287,11 @@ int TGAImage::get_bytespp() {
     return bytespp;
 }
 
-size_t TGAImage::get_width() const {
+int TGAImage::get_width() const {
     return width;
 }
 
-size_t TGAImage::get_height() const {
+int TGAImage::get_height() const {
     return height;
 }
 
@@ -297,9 +299,9 @@ void TGAImage::flip_horizontally() {
     if (!data.size()) {
         return;
     }
-    size_t half = width >> 1;
-    for (size_t i = 0; i < half; i++) {
-        for (size_t j = 0; j < height; j++) {
+    int half = width >> 1;
+    for (int i = 0; i < half; i++) {
+        for (int j = 0; j < height; j++) {
             TGAColor c1 = get(i, j);
             TGAColor c2 = get(width - 1 - i, j);
             set(i, j, c2);
@@ -347,14 +349,14 @@ void TGAImage::scale(int _w, int _h) {
     int                       erry       = 0;
     int                       nlinebytes = _w * bytespp;
     int                       olinebytes = width * bytespp;
-    for (size_t j = 0; j < height; j++) {
-        size_t errx = width - _w;
-        int    nx   = -bytespp;
-        int    ox   = -bytespp;
-        for (size_t i = 0; i < width; i++) {
+    for (int j = 0; j < height; j++) {
+        int errx = width - _w;
+        int nx   = -bytespp;
+        int ox   = -bytespp;
+        for (int i = 0; i < width; i++) {
             ox += bytespp;
             errx += _w;
-            while (errx >= width) {
+            while (errx >= (int)width) {
                 errx -= width;
                 nx += bytespp;
                 memcpy(tdata.data() + nscanline + nx,
