@@ -1,0 +1,34 @@
+cmake_minimum_required(VERSION 3.0)
+project(simplerender)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+#include
+set(INCLUDE_DIR include)
+
+aux_source_directory(. SOURCE_FILES)
+file(GLOB HEADER_FILES *.h)
+
+set(SIMPLERENDER_HEADERS 
+	rasterize.h
+	render.h
+	s_math.h
+)
+
+INCLUDE_DIRECTORIES(${INCLUDE_DIR})
+
+#生成可执行文件
+ADD_EXECUTABLE(SIMPLERENDER 
+	${SIMPLERENDER_SOURCES} 
+	${SOURCE_FILES}
+	${HEADER_FILES}
+)
+
+
+INSTALL(TARGETS SIMPLERENDER
+    RUNTIME DESTINATION lib
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)

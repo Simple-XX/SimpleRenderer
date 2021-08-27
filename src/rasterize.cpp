@@ -93,6 +93,8 @@ void s_transform::update()
 	s_matrix m;
 	m.mul_two(world, view);
 	transform.mul_two(m, projection);
+	m.mul_two(view, projection);
+	vp = m;
 }
 //y=x*transform
 void s_transform::apply(s_vector& y, s_vector& x)
@@ -117,6 +119,24 @@ void s_transform::homogenize_reverse(s_vector& y, s_vector& x, float weight)
 	y.z = x.z * weight;
 	y.w = weight;
 }
+
+void transform_homogenize(s_vector& y, s_vector& x, float width, float height)
+{
+	float rhw = 1.0f / x.w;
+	y.x = (x.x * rhw + 1.0f) * width * 0.5f;
+	y.y = (1.0f - x.y * rhw) * height * 0.5f;
+	y.z = x.z * rhw;
+	y.w = rhw;
+}
+//  6). transform_homogenize(ts, y, x)
+void transform_homogenize_reverse(s_vector& y, s_vector& x, float w, float width, float height)
+{
+	y.x = (x.x * 2 / width - 1.0f) * w;
+	y.y = (1.0f - x.y * 2 / height) * w;
+	y.z = x.z * w;
+	y.w = w;
+}
+
 
 int transform_check_cvv(s_vector& v)
 {

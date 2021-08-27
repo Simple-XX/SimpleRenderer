@@ -1,13 +1,14 @@
 //=====================================================================
 // 渲染设备
 //=====================================================================
-#include "s_math.h"
-#include "rasterize.h"
-#include "render.h"
 #include <cstring>
 #include<cstdio>
 #include<iostream>
 #include <cassert>
+#include "s_math.h"
+#include "rasterize.h"
+#include "render.h"
+
 
 //设备初始化，fb为外部帧缓存，非NULL将引用外部帧缓存 
 void device_init(device_t* device, int width, int height, void* fb)
@@ -163,33 +164,169 @@ IUINT32 device_texture_read(const device_t* device, float u, float v)
 	y = CMID(y, 0, device->tex_height - 1);
 	return device->texture[y][x];
 }
+bool computeBarycentric3D(s_vector& tmp, s_vector& p0, s_vector& p1, s_vector& p2, s_vector& pos)
+{
+	s_vector d1, d2, n;
+	d1.minus_two(p1, p0);
+	d2.minus_two(p2, p1);
+	n.crossproduct(d1, d2);
+	float u1, u2, u3, u4;
+	float v1, v2, v3, v4;
+	if ((fabs(n.x) >= fabs(n.y)) && (fabs(n.x) >= fabs(n.z))) {
+		u1 = p0.y - p2.y;
+		u2 = p1.y - p2.y;
+		u3 = pos.y - p0.y;
+		u4 = pos.y - p2.y;
+		v1 = p0.z - p2.z;
+		v2 = p1.z - p2.z;
+		v3 = pos.z - p0.z;
+		v4 = pos.z - p2.z;
+	}
+	else if (fabs(n.y) >= fabs(n.z)) {
+		u1 = p0.z - p2.z;
+		u2 = p1.z - p2.z;
+		u3 = pos.z - p0.z;
+		u4 = pos.z - p2.z;
+		v1 = p0.x - p2.x;
+		v2 = p1.x - p2.x;
+		v3 = pos.x - p0.x;
+		v4 = pos.x - p2.x;
+	}
+	else {
+		u1 = p0.x - p2.x;
+		u2 = p1.x - p2.x;
+		u3 = pos.x - p0.x;
+		u4 = pos.x - p2.x;
+		v1 = p0.y - p2.y;
+		v2 = p1.y - p2.y;
+		v3 = pos.y - p0.y;
+		v4 = pos.y - p2.y;
+	}
+
+	float denom = v1 * u2 - v2 * u1;
+	if (fabsf(denom) < 1e-6) {
+		return 0;
+	}
+	float oneOverDenom = 1.0f / denom;
+	tmp.x = (v4 * u2 - v2 * u4) * oneOverDenom;
+	tmp.y = (v1 * u3 - v3 * u1) * oneOverDenom;
+	tmp.z = 1.0f - tmp.x - tmp.y;
+	return 1;
+}
+// http://www.cnblogs.com/ThreeThousandBigWorld/archive/2012/07/16/2593892.html
+// http://blog.chinaunix.net/uid-26651460-id-3083223.html
+// http://stackoverflow.com/questions/5255806/how-to-calculate-tangent-and-binormal
+void calculate_tangent_and_binormal(s_vector& tangent, s_vector& binormal, s_vector& position1, s_vector& position2, s_vector& position3,
+	float u1, float v1, float u2, float v2, float u3, float v3)
+{
+	//side0 is the vector along one side of the triangle of vertices passed in,
+	//and side1 is the vector along another side. Taking the cross product of these returns the normal.
+	s_vector side0(0.0f, 0.0f, 0.0f, 1.0f);
+	side0.minus_two(position1, position2);
+	s_vector side1(0.0f, 0.0f, 0.0f, 1.0f);
+	side1.minus_two(position3, position1);
+	//Calculate face normal
+	s_vector normal(0.0f, 0.0f, 0.0f, 0.0f);  normal.crossproduct(side1, side0); normal.normalize();
+
+	//Now we use a formula to calculate the tangent.
+	float deltaV0 = v1 - v2;
+	float deltaV1 = v3 - v1;
+	tangent = side0;
+	tangent.float_dot(deltaV1);
+	s_vector temp = side1;
+	temp.float_dot(deltaV0);
+
+	tangent.minus_two(tangent, temp);    tangent.normalize();
+
+	//Calculate binormal
+	float deltaU0 = u1 - u2;
+	float deltaU1 = u3 - u1;
+	binormal = side0;
+	binormal.float_dot(deltaU1);
+	temp = side1;
+	temp.float_dot(deltaU0);
+	binormal.minus_two(binormal, temp);
+	binormal.normalize();
+	//Now, we take the cross product of the tangents to get a vector which
+	//should point in the same direction as our normal calculated above.
+	//If it points in the opposite direction (the dot product between the normals is less than zero),
+	//then we need to reverse the s and t tangents.
+	//This is because the triangle has been mirrored when going from tangent space to object space.
+	//reverse tangents if necessary
+	s_vector tangentCross;
+	tangentCross.crossproduct(tangent, binormal);
+	if (tangentCross.dotproduct(normal) < 0.0f)
+	{
+		tangent.w = -1;
+		//vector_inverse(tangent);
+		//vector_inverse(binormal);
+	}
+
+	//binormal->w = 0.0f;
+}
+void ff_interpolating(for_fs* dest, for_fs* src1, for_fs* src2, for_fs* src3, float a, float b, float c)
+{
+	dest->pos.interpolate(a, b, c, src1->pos, src2->pos, src3->pos, 1.0f);
+	dest->color.interpolate(a, b, c, src1->color, src2->color, src3->color, 1.0f);
+	dest->texcoord.interpolate(a, b, c, src1->texcoord, src2->texcoord, src3->texcoord, 1.0f);
+	dest->normal.interpolate(a, b, c, src1->normal, src2->normal, src3->normal, 1.0f);
+	dest->storage0.interpolate(a, b, c, src1->storage0, src2->storage0, src3->storage0, 1.0f);
+	dest->storage1.interpolate(a, b, c, src1->storage1, src2->storage1, src3->storage1, 1.0f);
+	dest->storage2.interpolate(a, b, c, src1->storage2, src2->storage2, src3->storage2, 1.0f);
+}
+
+
 //=====================================================================
 // 渲染实现
 //=====================================================================
 
 // 绘制扫描线
-void device_draw_scanline(device_t* device, scanline_t* scanline)
+void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& point1, s_vector& point2, s_vector& point3, for_fs* ffs)
 {
 	IUINT32* framebuffer = device->framebuffer[scanline->y];
 	float* zbuffer = device->zbuffer[scanline->y];
 	int x = scanline->x;
 	int w = scanline->w;
 	int width = device->width;
+	int height = device->height;
 	int render_state = device->render_state;
 	for (; w > 0; x++, w--)
 	{
 		if (x >= 0 && x < width)
 		{
 			float rhw = scanline->v.rhw;
-			if (rhw >= zbuffer[x])
+			float ww = 1.0f / rhw;
+			s_vector barycenter(0.0f, 0.0f, 0.0f, 1.0f);
+			s_vector interpos = scanline->v.pos;
+			transform_homogenize_reverse(interpos, interpos, ww, width, height);
+			computeBarycentric3D(barycenter, point1, point2, point3, interpos);
+			float alpha = barycenter.x; float beta = barycenter.y; float gamma = barycenter.z;
+			
+			float Z = 1.0 / (alpha / point1.w + beta /point2.w + gamma /point3.w);
+			float zp = alpha * point1.z / point1.w + beta * point2.z / point2.w + gamma * point3.z / point3.w;
+			zp *= Z;
+			float daozp =1.0/zp;
+			/*if (zp < depth_buf[get_index(i, j)])
 			{
-				float w = 1.0f / rhw;
-				zbuffer[x] = rhw;
+				depth_buf[get_index(i, j)] = zp;
+			}*/
+			if (daozp >= zbuffer[x])
+			{
+				
+				zbuffer[x] = daozp;
+				for_fs ff;
+				
+				
+
+				ff_interpolating(&ff, &ffs[0], &ffs[1], &ffs[2], barycenter.x, barycenter.y, barycenter.z);
+				ff.pos.w = ww;
+				ff.normal.normalize();
 				if (render_state & RENDER_STATE_COLOR)
 				{
-					float r = scanline->v.color.r * w;
-					float g = scanline->v.color.g * w;
-					float b = scanline->v.color.b * w;
+					float a = ff.color.a;
+					float r = ff.color.r;
+					float g = ff.color.g;
+					float b = ff.color.b;
 					int R = (int)(r * 255.0f);
 					int G = (int)(g * 255.0f);
 					int B = (int)(b * 255.0f);
@@ -200,8 +337,8 @@ void device_draw_scanline(device_t* device, scanline_t* scanline)
 				}
 				if (render_state & RENDER_STATE_TEXTURE)
 				{
-					float u = scanline->v.tc.u * w;
-					float v = scanline->v.tc.v * w;
+					float u = ff.texcoord.u ;
+					float v = ff.texcoord.v;
 					IUINT32 cc = device_texture_read(device, u, v);
 					framebuffer[x] = cc;
 				}
@@ -212,7 +349,7 @@ void device_draw_scanline(device_t* device, scanline_t* scanline)
 	}
 }
 //主渲染函数 
-void device_render_trap(device_t* device, trapezoid_t* trap)
+void device_render_trap(device_t* device, trapezoid_t* trap, s_vector& point1, s_vector& point2, s_vector& point3, for_fs* ffs)
 {
 	scanline_t scanline;
 	int j, top, bottom;
@@ -224,7 +361,7 @@ void device_render_trap(device_t* device, trapezoid_t* trap)
 		{
 			trapezoid_edge_interp(trap, (float)j + 0.5f);
 			trapezoid_init_scan_line(trap, &scanline, j);
-			device_draw_scanline(device, &scanline);
+			device_draw_scanline(device, &scanline, point1, point2, point3, ffs);
 		}
 		if (j >= device->height) break;
 	}
@@ -233,7 +370,9 @@ void device_render_trap(device_t* device, trapezoid_t* trap)
 void device_draw_primitive(device_t* device, vertex_t* v1,
 	vertex_t* v2, vertex_t* v3)
 {
-	s_vector p1, p2, p3, c1, c2, c3;
+	vertex_t* vertexs[3] = { v1,v2,v3 };
+	s_vector points[3];
+	/*s_vector p1, p2, p3, c1, c2, c3;
 	int render_state = device->render_state;
 	// 按照 Transform 变化
 	device->transform.apply(c1, v1->pos);
@@ -249,36 +388,96 @@ void device_draw_primitive(device_t* device, vertex_t* v1,
 	device->transform.homogenize(p1, c1);
 	device->transform.homogenize(p2, c2);
 	device->transform.homogenize(p3, c3);
+	*/
 
+	//逆转置
+	s_matrix tmp;
+	tmp = device->transform.world;
+	tmp.inverse(); tmp.transpose();
+
+
+	s_vector c1, c2, c3;
+	for_vs vvs[3]; for_fs ffs[3];
+	for (int i = 0; i < 3; i++)
+	{
+		vertex_t* vertex = vertexs[i];
+		for_vs* av = &vvs[i];
+		apply_to_vector(vertex->pos, vertex->pos, device->transform.world);
+		av->pos = vertex->pos;//世界空间的pos
+		int a = 0, b = 0;
+		if (i == 0) a = 1, b = 2;
+		else if (i == 1) a = 0, b = 2;
+		else if (i == 2) a = 0, b = 1;
+		calculate_tangent_and_binormal(av->tangent, av->binormal, vertex->pos, vertexs[a]->pos, vertexs[b]->pos, vertex->tc.u, vertex->tc.v, vertexs[a]->tc.u, vertexs[a]->tc.v, vertexs[b]->tc.u, vertexs[b]->tc.v);
+
+		apply_to_vector(av->tangent, av->tangent, device->transform.world);
+		av->binormal.crossproduct(av->normal, av->tangent);
+		av->binormal.float_dot(av->tangent.w);
+
+		apply_to_vector(vertex->pos, vertex->pos, device->transform.vp);
+		points[i]= vertex->pos;
+		if (i == 0) c1 = vertex->pos;
+		if (i == 1) c2 = vertex->pos;
+		if (i == 2) c3 = vertex->pos;
+
+		apply_to_vector(vertex->normal, vertex->normal, tmp); // 法向量乘正规矩阵
+		vertex->normal.normalize();
+		av->normal = vertex->normal; // 世界空间的normal
+		av->color = vertex->color;
+		av->texcoord = vertex->tc;
+
+		v_shader(device, av, &ffs[i]); // 顶点着色器
+		transform_homogenize(vertex->pos, vertex->pos, device->width, device->height);
+	
+	}
+	s_vector point1(points[0].x, points[0].y, points[0].z, points[0].w);
+	s_vector point2(points[1].x, points[1].y, points[1].z, points[1].w);
+	s_vector point3(points[2].x, points[2].y, points[2].z, points[2].w);
+	int render_state = device->render_state;
 	if (render_state & (RENDER_STATE_TEXTURE | RENDER_STATE_COLOR))
 	{
-		vertex_t t1 = *v1, t2 = *v2, t3 = *v3;
+
 		trapezoid_t traps[2];
-		int n;
-
-		t1.pos = p1;
-		t2.pos = p2;
-		t3.pos = p3;
-
-		t1.pos.w = c1.w;
-		t2.pos.w = c2.w;
-		t3.pos.w = c3.w;//转换过程中w不变 
-
-		vertex_rhw_init(&t1); //初始化w
-		vertex_rhw_init(&t2); //初始化w 
-		vertex_rhw_init(&t3); //初始化w 
-		// 拆分三角形为0-2个梯形，并且返回可用梯形数量      
-		n = trapezoid_init_triangle(traps, &t1, &t2, &t3);
-
-		if (n >= 1) device_render_trap(device, &traps[0]);
-		if (n >= 2) device_render_trap(device, &traps[1]);
+		v1->pos.w = c1.w;
+		v2->pos.w = c2.w;
+		v3->pos.w = c3.w;
+		vertex_rhw_init(v1); //初始化w
+		vertex_rhw_init(v2); //初始化w 
+		vertex_rhw_init(v3); //初始化w 
+		int n = trapezoid_init_triangle(traps, v1, v2, v3);
+		point1.w = c1.w;
+		point2.w = c2.w;
+		point3.w = c3.w;
+		if (n >= 1) { device_render_trap(device, &traps[0], point1, point2, point3, ffs); }
+		if (n >= 2) {device_render_trap(device, &traps[1], point1, point2, point3, ffs);  }
 	}
 
-	if (render_state & RENDER_STATE_WIREFRAME)//线框绘制 
+	if ((render_state & RENDER_STATE_WIREFRAME) && device->framebuffer != NULL)//线框绘制 
 	{
-		device_draw_line(device, (int)p1.x, (int)p1.y, (int)p2.x, (int)p2.y, device->foreground);
-		device_draw_line(device, (int)p1.x, (int)p1.y, (int)p3.x, (int)p3.y, device->foreground);
-		device_draw_line(device, (int)p3.x, (int)p3.y, (int)p2.x, (int)p2.y, device->foreground);
+		device_draw_line(device, (int)v1->pos.x, (int)v1->pos.y, (int)v2->pos.x, (int)v2->pos.y, device->foreground);
+		device_draw_line(device, (int)v1->pos.x, (int)v1->pos.y, (int)v3->pos.x, (int)v3->pos.y, device->foreground);
+		device_draw_line(device, (int)v3->pos.x, (int)v3->pos.y, (int)v2->pos.x, (int)v2->pos.y, device->foreground);
 	}
+}
+
+void v_shader(device_t* device, for_vs* vv, for_fs* ff)
+{
+	ff->pos = vv->pos;
+	ff->normal = vv->normal;
+	ff->color = vv->color;
+	ff->texcoord = vv->texcoord;
+
+	s_vector tmp1(vv->tangent.x, vv->binormal.x, vv->normal.x, 1.0f);
+	ff->storage0 = tmp1;
+
+	tmp1.reset(vv->tangent.y, vv->binormal.y, vv->normal.y, 1.0f);
+	ff->storage1 = tmp1;
+
+	tmp1.reset(vv->tangent.z, vv->binormal.z, vv->normal.z, 1.0f);
+	ff->storage2 = tmp1;
+}
+void f_shader(device_t* device, for_fs* ff, s_color& color)
+{
+
 }
 
