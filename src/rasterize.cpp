@@ -72,7 +72,7 @@ s_transform::s_transform(int width, int height)
 	float aspect = (float)width / ((float)height);
 	world.set_identity();
 	view.set_identity();
-	set_perspective_matrix(projection, 3.1415926f * 0.5f, aspect, 1.0f, 500.0f);
+	set_perspective_matrix(projection, 3.1415926f * 0.25f, aspect, 1.0f, 500.0f);
 	w = (float)width;
 	h = (float)height;
 	this->update();
@@ -82,7 +82,7 @@ void s_transform::init(int width, int height)
 	float aspect = (float)width / ((float)height);
 	world.set_identity();
 	view.set_identity();
-	set_perspective_matrix(projection, 3.1415926f * 0.5f, aspect, 1.0f, 500.0f);
+	set_perspective_matrix(projection, 3.1415926f * 0.25f, aspect, 1.0f, 500.0f);
 	w = (float)width;
 	h = (float)height;
 	this->update();

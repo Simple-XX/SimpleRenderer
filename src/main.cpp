@@ -14,6 +14,8 @@ using namespace std;
 //=====================================================================
 // Win32 窗口及图形绘制：为 device 提供一个 DibSection 的 FB
 //=====================================================================
+const float PI = 3.141592;
+#define radians(x) x*PI/180.0f
 int screen_w, screen_h, screen_exit = 0;
 int screen_mx = 0, screen_my = 0, screen_mb = 0;
 int screen_keys[512];	// 当前键盘按下状态
@@ -111,10 +113,50 @@ int screen_close(void) {
 	}
 	return 0;
 }
-
+bool firstMouse = true;
+float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+float pitch = 0.0f;
+float lastX = 800.0f / 2.0;
+float lastY = 600.0 / 2.0;
+float fov = 45.0f;
+bool mousechange = false;
+s_vector front;
 static LRESULT screen_events(HWND hWnd, UINT msg,
 	WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
+	case WM_MOUSEMOVE:
+	{   mousechange = true;
+		float xpos = LOWORD(lParam);
+	    float ypos = HIWORD(lParam);
+		if (firstMouse)
+		{
+			lastX = xpos;
+			lastY = ypos;
+			firstMouse = false;
+		}
+		float xoffset = xpos - lastX;
+		float yoffset = lastY - ypos;
+		lastX = xpos;
+		lastY = ypos;
+		float sensitivity = 0.05;
+		xoffset *= sensitivity;
+		yoffset *= sensitivity;
+		yaw += xoffset;
+		pitch += yoffset;
+		if (pitch > 89.0f)
+			pitch = 89.0f;
+		if (pitch < -89.0f)
+			pitch = -89.0f;
+
+
+		
+		front.x = cos(radians(yaw)) * cos(radians(pitch));
+		front.y = sin(radians(pitch));
+		front.z = sin(radians(yaw)) * cos(radians(pitch));	
+		front.w = 1.0f;
+		front.normalize();
+		break;
+	}
 	case WM_CLOSE: screen_exit = 1; break;
 	case WM_KEYDOWN: screen_keys[wParam & 511] = 1; break;
 	case WM_KEYUP: screen_keys[wParam & 511] = 0; break;
@@ -252,7 +294,7 @@ int main()
 	if (screen_init(800, 600, title)) return -1;
 
 	device_init(&device, 800, 600, screen_fb);
-	s_vector eye(5.0f, 0.0f, 0.0f, 1.0f),at(-1.0f, 0.0f, 0.0f, 1.0f), up(0.0f, 0.0f, 1.0f, 1.0f);
+	s_vector eye(2.19f, 0.475f, 11.15f, 1.0f), at(-1.0f, 0.0f, 0.0f, 1.0f), up(0.0f, 0.0f, 1.0f, 1.0f);
 	/* glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
  glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
  glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);*/
@@ -269,6 +311,13 @@ int main()
 		//point_t eye = { x,y,z,1 }, at = { 0,0,0,1 }, up = { 0,0,1,1 };
 		s_vector attemp;
 		attemp.add_two(eye, at);
+		if (mousechange == true)
+		{
+			mousechange = false;
+			at = front;
+		}
+
+	
 		camera_at_zero(&device, eye, attemp, up);
 
 
@@ -289,8 +338,7 @@ int main()
 		the_y.dot_two(the_y, temp);
 		if (screen_keys[VK_LEFT]) { eye.add_two(eye, the_y);/*eye += the_y;/* vector_add(&eye, &eye, &the_y);*/ }
 		if (screen_keys[VK_RIGHT]) { eye.minus_two(eye, the_y);/*eye += the_y; /*vector_sub(&eye, &eye, &the_y);*/ }
-
-
+		
 		if (screen_keys[VK_SPACE])
 		{
 			if (kbhit == 0)
