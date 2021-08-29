@@ -1,5 +1,4 @@
-#SimpleRenderer
-***
+# SimpleRenderer
 ## Structure
 the following are showing different things in the files
 - s_math:
@@ -23,7 +22,7 @@ the following are showing different things in the files
 
 ## Dependencies
 
-###[windows.h](https://en.wikipedia.org/wiki/Windows.h)
+### [windows.h](https://en.wikipedia.org/wiki/Windows.h)
 
 &emsp;&emsp;Right now the project is running on windows,and it's using api from windows to get the result.
 
