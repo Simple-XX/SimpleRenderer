@@ -6,7 +6,18 @@
 #define render_h
 #include "s_math.h"
 #include "rasterize.h"
-
+#include<iostream>
+#include<vector>
+using namespace std;
+typedef struct
+{
+	s_vector lightpos;
+	s_vector lightcolor;
+}point_light;
+typedef struct
+{
+	s_vector viewpos;
+}s_camera;
 typedef struct
 {
 	s_transform transform;   // 坐标变换器
@@ -22,6 +33,9 @@ typedef struct
 	int render_state;        // 渲染状态
 	IUINT32 background;      // 背景颜色
 	IUINT32 foreground;      // 线框颜色
+	point_light pointlight[20];
+	s_camera camera;
+
 }device_t;
 
 #define RENDER_STATE_WIREFRAME 1  //渲染线框 
@@ -34,6 +48,8 @@ void device_init(device_t* device, int width, int height, void* fb);
 void device_destory(device_t* device);
 //设置当前纹理 
 void device_set_texture(device_t* device, void* bits, long pitch, int w, int h);
+//设置点光源
+void device_set_pointlight(device_t* device, s_vector& pos, s_vector& color, int cnt);
 // 清空 framebuffer 和 zbuffer
 void device_clear(device_t* device, int mode);
 
@@ -49,14 +65,14 @@ IUINT32 device_texture_read(const device_t* device, float u, float v);
 //=====================================================================
 
 // 绘制扫描线
-void device_draw_scanline(device_t* device, scanline_t* scanline);
+void device_draw_scanline(device_t* device, scanline_t* scanline,int count);
 
 //主渲染函数 
-void device_render_trap(device_t* device, trapezoid_t* trap);
+void device_render_trap(device_t* device, trapezoid_t* trap,int count);
 
 // 根据 render_state 绘制原始三角形
 void device_draw_primitive(device_t* device, vertex_t* v1,
-	vertex_t* v2, vertex_t* v3);
+	vertex_t* v2, vertex_t* v3,int count);
 
 typedef struct
 {
@@ -81,5 +97,5 @@ typedef struct
 
 void v_shader(device_t* device, for_vs* vv, for_fs* ff);
 
-void f_shader(device_t* device, for_fs* ff, s_color& color);
+void f_shader(device_t* device, for_fs* ff, s_color& color,int count);
 #endif

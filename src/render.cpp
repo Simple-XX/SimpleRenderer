@@ -3,13 +3,14 @@
 //=====================================================================
 #include <cstring>
 #include<cstdio>
+#include<algorithm>
+#include<cmath>
 #include<iostream>
 #include <cassert>
 #include "s_math.h"
 #include "rasterize.h"
 #include "render.h"
-
-
+using namespace std;
 //设备初始化，fb为外部帧缓存，非NULL将引用外部帧缓存 
 void device_init(device_t* device, int width, int height, void* fb)
 {
@@ -68,6 +69,12 @@ void device_set_texture(device_t* device, void* bits, long pitch, int w, int h)
 	device->tex_height = h;
 	device->max_u = (float)(w - 1);
 	device->max_v = (float)(h - 1);
+}
+
+void device_set_pointlight(device_t* device,s_vector& pos,s_vector& color,int cnt)
+{
+	device->pointlight[cnt].lightpos = pos;
+	device->pointlight[cnt].lightcolor = color;
 }
 // 清空 framebuffer 和 zbuffer
 void device_clear(device_t* device, int mode)
@@ -281,7 +288,7 @@ void ff_interpolating(for_fs* dest, for_fs* src1, for_fs* src2, for_fs* src3, fl
 //=====================================================================
 
 // 绘制扫描线
-void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& point1, s_vector& point2, s_vector& point3, for_fs* ffs)
+void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& point1, s_vector& point2, s_vector& point3, for_fs* ffs,int count)
 {
 	IUINT32* framebuffer = device->framebuffer[scanline->y];
 	float* zbuffer = device->zbuffer[scanline->y];
@@ -321,12 +328,14 @@ void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& poin
 				ff_interpolating(&ff, &ffs[0], &ffs[1], &ffs[2], barycenter.x, barycenter.y, barycenter.z);
 				ff.pos.w = ww;
 				ff.normal.normalize();
+				s_color color (0.0f, 0.0f, 0.0f, 1.0f );
+				f_shader(device, &ff, color, count);
 				if (render_state & RENDER_STATE_COLOR)
 				{
-					float a = ff.color.a;
-					float r = ff.color.r;
-					float g = ff.color.g;
-					float b = ff.color.b;
+					float a = color.a;
+					float r = color.r;
+					float g = color.g;
+					float b = color.b;
 					int R = (int)(r * 255.0f);
 					int G = (int)(g * 255.0f);
 					int B = (int)(b * 255.0f);
@@ -349,7 +358,7 @@ void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& poin
 	}
 }
 //主渲染函数 
-void device_render_trap(device_t* device, trapezoid_t* trap, s_vector& point1, s_vector& point2, s_vector& point3, for_fs* ffs)
+void device_render_trap(device_t* device, trapezoid_t* trap, s_vector& point1, s_vector& point2, s_vector& point3, for_fs* ffs,int count)
 {
 	scanline_t scanline;
 	int j, top, bottom;
@@ -361,14 +370,14 @@ void device_render_trap(device_t* device, trapezoid_t* trap, s_vector& point1, s
 		{
 			trapezoid_edge_interp(trap, (float)j + 0.5f);
 			trapezoid_init_scan_line(trap, &scanline, j);
-			device_draw_scanline(device, &scanline, point1, point2, point3, ffs);
+			device_draw_scanline(device, &scanline, point1, point2, point3, ffs,count);
 		}
 		if (j >= device->height) break;
 	}
 }
 // 根据 render_state 绘制原始三角形
 void device_draw_primitive(device_t* device, vertex_t* v1,
-	vertex_t* v2, vertex_t* v3)
+	vertex_t* v2, vertex_t* v3,int count)
 {
 	vertex_t* vertexs[3] = { v1,v2,v3 };
 	s_vector points[3];
@@ -422,6 +431,11 @@ void device_draw_primitive(device_t* device, vertex_t* v1,
 
 		apply_to_vector(vertex->normal, vertex->normal, tmp); // 法向量乘正规矩阵
 		vertex->normal.normalize();
+
+
+
+
+
 		av->normal = vertex->normal; // 世界空间的normal
 		av->color = vertex->color;
 		av->texcoord = vertex->tc;
@@ -448,8 +462,8 @@ void device_draw_primitive(device_t* device, vertex_t* v1,
 		point1.w = c1.w;
 		point2.w = c2.w;
 		point3.w = c3.w;
-		if (n >= 1) { device_render_trap(device, &traps[0], point1, point2, point3, ffs); }
-		if (n >= 2) {device_render_trap(device, &traps[1], point1, point2, point3, ffs);  }
+		if (n >= 1) { device_render_trap(device, &traps[0], point1, point2, point3, ffs,count); }
+		if (n >= 2) {device_render_trap(device, &traps[1], point1, point2, point3, ffs,count);  }
 	}
 
 	if ((render_state & RENDER_STATE_WIREFRAME) && device->framebuffer != NULL)//线框绘制 
@@ -476,8 +490,63 @@ void v_shader(device_t* device, for_vs* vv, for_fs* ff)
 	tmp1.reset(vv->tangent.z, vv->binormal.z, vv->normal.z, 1.0f);
 	ff->storage2 = tmp1;
 }
-void f_shader(device_t* device, for_fs* ff, s_color& color)
+void f_shader(device_t* device, for_fs* ff, s_color& color,int count)
 {
+	if (count == 1)
+	{  
+		s_vector result(0.0f,0.0f,0.0f,1.0f);
+		s_vector lightcolor; s_vector lightpos;
+		lightcolor = device->pointlight[0].lightcolor;
+		lightpos = device->pointlight[0].lightpos;
+		s_vector objectcolor(ff->color.r, ff->color.g, ff->color.b, ff->color.a);
+		//环境光照 ambient
+			float ambientStrength = 0.01;
+			s_vector ambient;
+				ambient=lightcolor;
+			ambient.float_dot(ambientStrength);
 
+		//漫反射光照 diffuse
+			s_vector norm = ff->normal;
+			s_vector fragpos = ff->pos;
+			s_vector lightDir; lightDir.minus_two(lightpos, fragpos); lightDir.normalize();
+			//lightDir.show();
+			float diff = max(norm.dotproduct(lightDir),0.0f);
+			//if (diff > 0.0f) { printf("%lf\n", diff); norm.show(); }
+			s_vector diffuse; diffuse = lightcolor; diffuse.float_dot(diff);
+			
+			//specular 镜面高光
+			float specularstrength = 1.0;
+			//get the view pos
+			s_vector viewpos = device->camera.viewpos;
+			s_vector viewdir; viewdir.minus_two(viewpos, fragpos); viewdir.normalize();
+			s_vector in_lightdir; in_lightdir = lightDir; in_lightdir.inverse();
+			s_vector reflectdir; reflectdir.reflect(in_lightdir, norm);
+			float spec = pow(max(viewdir.dotproduct(reflectdir), 0.0f), 128);
+			s_vector specular = lightcolor;
+			specular.float_dot(spec); specular.float_dot(specularstrength);
+
+			result.add_two(ambient, diffuse); result.add_two(result, specular);
+			result.dot_two(result, objectcolor);
+
+		color.r = result.x;
+		color.g = result.y;
+		color.b = result.z;
+		color.a = result.w;
+		/*
+		
+		color.r = ff->color.r;
+		color.g = ff->color.g;
+		color.b = ff->color.b;
+		color.a = ff->color.a;
+		*/
+		
+
+	}
+	else if (count == 2)
+	{
+		color.r = ff->color.r;
+		color.g = ff->color.g;
+		color.b = ff->color.b;
+		color.a = ff->color.a;
+	}
 }
-

@@ -35,11 +35,6 @@ void s_vector::add(s_vector& b)
 	z += b.z;
 	w = 1.0f;
 }
-s_vector& s_vector::operator=(s_vector& t)
-{
-	x = t.x; y = t.y; z = t.z; w = t.w;
-	return *this;
-}
 
 s_vector& s_vector::operator+=(s_vector& t)
 {

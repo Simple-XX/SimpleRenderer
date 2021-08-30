@@ -24,8 +24,15 @@ public:
 	}
 	void reset(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
 
-	s_vector& operator=(s_vector& t);
-
+	void equal(s_vector& t)
+	{
+		x = t.x; y = t.y; z = t.z; w = t.w;
+	}
+	s_vector& operator=(s_vector& t)
+	{
+		x = t.x; y = t.y; z = t.z;  w = t.w;
+		return *this;
+	}
 	s_vector& operator+=(s_vector& t);
 
 	//a=b+c;
