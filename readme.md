@@ -61,7 +61,8 @@ at the end of the round "while (screen_exit == 0 && screen_keys[VK_ESCAPE] == 0)
     draw_box(&device, alpha);
     //alpha is the angle you want it to rotate at original
 ```
-As I already done the camera for you,you can push the up,down,left,right button to get moved in the scence,and press the space key to change render state. right now there are texture,color and wireframe for you to chose.
+As I already done the camera for you,you can push the up,down,left,right button to get moved in the scence,and press the space key to change render state. right now there are texture,color and wireframe for you to chose. 
+right now you can push the F1,F2 key to rotate the object
 ## How to build
 
 &emsp;&emsp;You can download the src file and easily build this project through cmake tools with the cmakelists inside. but remember to get the images out of the file called images, and put them in the build file you create for cmake.
