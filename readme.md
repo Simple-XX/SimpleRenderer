@@ -24,7 +24,11 @@ the following are showing different things in the files
 
 ### [windows.h](https://en.wikipedia.org/wiki/Windows.h)
 
-&emsp;&emsp;Right now the project is running on windows,and it's using api from windows to get the result.
+&emsp;&emsp;Right now the project is running on windows,and it's using api from windows to get the result.</br></br>
+
+### [stb_image.h](https://github.com/nothings/stb/blob/master/stb_image.h)
+&emsp;&emsp;image loader by Sean Barrett,which I use in this project to get the texture.
+
 
 ## The simple way to get started
 &emsp;&emsp;I have already drawn a mesh for you,you can change it in the main.cpp if you want.
@@ -60,4 +64,4 @@ at the end of the round "while (screen_exit == 0 && screen_keys[VK_ESCAPE] == 0)
 As I already done the camera for you,you can push the up,down,left,right button to get moved in the scence,and press the space key to change render state. right now there are texture,color and wireframe for you to chose.
 ## How to build
 
-&emsp;&emsp;You can download the src file and easily build this project through cmake tools with the cmakelists inside.
+&emsp;&emsp;You can download the src file and easily build this project through cmake tools with the cmakelists inside. but remember to get the images out of the file called images, and put them in the build file you create for cmake.
