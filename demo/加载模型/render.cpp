@@ -21,7 +21,6 @@ void device_init(device_t* device, int width, int height, void* fb)
 	int j;
 	assert(ptr);
 	device->v_m_num = 0;
-	device->is_cull = 1;
 	device->framebuffer = (IUINT32**)ptr;
 	device->zbuffer = (float**)(ptr + sizeof(void*) * height);
 	ptr += sizeof(void*) * height * 2;
@@ -290,7 +289,6 @@ void read_the_texture(s_vector& tmp,const  s_texture* t_texture, float u, float 
 	y = CMID(y, 0, t_texture->tex_height - 1);
 
 	 IUINT32 cc = t_texture->texture[y][x];
-	 int texture_a = (cc>> 24) & 0xff;
 	 int texture_r = (cc >> 16) & 0xff;
 	 int texture_g = (cc >> 8) & 0xff;
 	 int texture_b = cc & 0xff;
@@ -299,7 +297,7 @@ void read_the_texture(s_vector& tmp,const  s_texture* t_texture, float u, float 
 	 tmp.x= (float)texture_r / 255.0f;
 	 tmp.y = (float)texture_g / 255.0f;
 	 tmp.z= (float)texture_b / 255.0f;
-	 tmp.w = (float)texture_a/255.0f;
+	 tmp.w = 1.0f;
 
 }
 bool computeBarycentric3D(s_vector& tmp, s_vector& p0, s_vector& p1, s_vector& p2, s_vector& pos)
@@ -462,24 +460,7 @@ void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& poin
 				s_color color (0.0f, 0.0f, 0.0f, 1.0f );
 				if (count == 2)
 				{
-					bool ban = 0; 
-					s_vector ori_col(-1.0f,-1.0f,-1.0f,1.0f);
-					if (framebuffer[x] != NULL)
-					{
-						IUINT32 cc = framebuffer[x];
-						int texture_a = (cc >> 24) & 0xff;
-						int texture_r = (cc >> 16) & 0xff;
-						int texture_g = (cc >> 8) & 0xff;
-						int texture_b = cc & 0xff;
-						//printf("%d %d %d\n", texture_r, texture_g, texture_b);
-						//printf("%f %f %f\n", ff.color.r, ff.color.g, ff.color.b);
-					    ori_col.x = (float)texture_r / 255.0f;
-						ori_col.y = (float)texture_g / 255.0f;
-						ori_col.z = (float)texture_b / 255.0f;
-						ori_col.w = (float)texture_a / 255.0f;
-					}
-
-					f_shader(device, &ff, color, count,ban,ori_col);
+					f_shader(device, &ff, color, count);
 					float a = color.a;
 					float r = color.r;
 					float g = color.g;
@@ -495,23 +476,7 @@ void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& poin
 				}
 				else if (render_state & RENDER_STATE_COLOR)
 				{
-					bool ban = 0;
-					s_vector ori_col(-1.0f, -1.0f, -1.0f, 1.0f);
-					if (framebuffer[x] != NULL)
-					{
-						IUINT32 cc = framebuffer[x];
-						int texture_a = (cc >> 24) & 0xff;
-						int texture_r = (cc >> 16) & 0xff;
-						int texture_g = (cc >> 8) & 0xff;
-						int texture_b = cc & 0xff;
-						//printf("%d %d %d\n", texture_r, texture_g, texture_b);
-						//printf("%f %f %f\n", ff.color.r, ff.color.g, ff.color.b);
-						ori_col.x = (float)texture_r / 255.0f;
-						ori_col.y = (float)texture_g / 255.0f;
-						ori_col.z = (float)texture_b / 255.0f;
-						ori_col.w = (float)texture_a / 255.0f;
-					}
-					f_shader(device, &ff, color, count,ban,ori_col);
+					f_shader(device, &ff, color, count);
 					float a = color.a;
 					float r = color.r;
 					float g = color.g;
@@ -527,37 +492,19 @@ void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& poin
 				}
 				else if (render_state & RENDER_STATE_TEXTURE)
 				{
-					bool ban = 0;
-					s_vector ori_col(-1.0f, -1.0f, -1.0f, 1.0f);
-					if (framebuffer[x] != NULL)
-					{
-						IUINT32 cc = framebuffer[x];
-						int texture_a = (cc >> 24) & 0xff;
-						int texture_r = (cc >> 16) & 0xff;
-						int texture_g = (cc >> 8) & 0xff;
-						int texture_b = cc & 0xff;
-						//printf("%d %d %d\n", texture_r, texture_g, texture_b);
-						//printf("%f %f %f\n", ff.color.r, ff.color.g, ff.color.b);
-						ori_col.x = (float)texture_r / 255.0f;
-						ori_col.y = (float)texture_g / 255.0f;
-						ori_col.z = (float)texture_b / 255.0f;
-						ori_col.w = (float)texture_a / 255.0f;
-					}
-					f_shader(device, &ff, color, count,ban, ori_col);
-					if (ban == 0)
-					{
-						float a = color.a;
-						float r = color.r;
-						float g = color.g;
-						float b = color.b;
-						int R = (int)(r * 255.0f);
-						int G = (int)(g * 255.0f);
-						int B = (int)(b * 255.0f);
-						R = CMID(R, 0, 255);
-						G = CMID(G, 0, 255);
-						B = CMID(B, 0, 255);
-						framebuffer[x] = (R << 16) | (G << 8) | (B);
-					}
+					
+					f_shader(device, &ff, color, count);
+					float a = color.a;
+					float r = color.r;
+					float g = color.g;
+					float b = color.b;
+					int R = (int)(r * 255.0f);
+					int G = (int)(g * 255.0f);
+					int B = (int)(b * 255.0f);
+					R = CMID(R, 0, 255);
+					G = CMID(G, 0, 255);
+					B = CMID(B, 0, 255);
+					framebuffer[x] = (R << 16) | (G << 8) | (B);
 				}
 
 			}
@@ -654,22 +601,6 @@ void device_draw_primitive(device_t* device, vertex_t* v1,
 		transform_homogenize(vertex->pos, vertex->pos, device->width, device->height);
 	
 	}
-	if (device->is_cull != 0)
-	{
-		s_vector t1_t2;  t1_t2.minus_two(v2->pos, v1->pos);
-		s_vector t2_t3; t2_t3.minus_two(v3->pos, v2->pos);
-
-		float crossdot = t1_t2.x * t2_t3.y - t2_t3.x * t1_t2.y;
-		if (device->is_cull == 1)
-		{ //逆时针只要正面
-			if (crossdot <= 0.0f) return;
-		}
-		else if (device->is_cull == 2)
-		{  //顺时针只要背面
-			if (crossdot > 0.0f) return;
-		}
-	}
-	
 	s_vector point1(points[0].x, points[0].y, points[0].z, points[0].w);
 	s_vector point2(points[1].x, points[1].y, points[1].z, points[1].w);
 	s_vector point3(points[2].x, points[2].y, points[2].z, points[2].w);
@@ -716,7 +647,7 @@ void v_shader(device_t* device, for_vs* vv, for_fs* ff)
 	tmp1.reset(vv->tangent.z, vv->binormal.z, vv->normal.z, 1.0f);
 	ff->storage2 = tmp1;
 }
-void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_ban, s_vector& ori_co)
+void f_shader(device_t* device, for_fs* ff, s_color& color,int count)
 {
 	if (count == 2)
 	{  
@@ -732,7 +663,7 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 
 	}
 	else 
-	{   
+	{
 		s_vector init_diffuse(0.64, 0.64, 0.64, 1.0f);
 		s_vector init_specular(0.5, 0.5, 0.5, 1.0f);
 		float u = ff->texcoord.u; float v = ff->texcoord.v;
@@ -752,19 +683,6 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 		if (device->material[count].have_diffuse == 1)
 			read_the_texture(material_ambient, &device->material[count].diffuse_texture, u, v);
 		else material_ambient = init_diffuse;
-		if (material_ambient.w < 0.1f) 
-		{
-			is_ban = 1; return;
-		}
-		else
-		if(ori_co.x!=-1.0f)
-		{
-			float a1 = material_ambient.w; float a2 = 1.0f - a1;
-			s_vector tmp1; tmp1 = material_ambient; tmp1.float_dot(a1);
-			s_vector tmp2; tmp2 = ori_co; tmp2.float_dot(a2);
-			material_ambient.add_two(tmp1, tmp2);
-		}
-		
 		s_vector ambient;                ambient.dot_two(light_ambient, material_ambient);
 		//ambient.show();
 

@@ -31,7 +31,6 @@ static HBITMAP screen_hb = NULL;		// DIB
 static HBITMAP screen_ob = NULL;		// 老的 BITMAP
 unsigned char* screen_fb = NULL;		// frame buffer
 long screen_pitch = 0;
-float pos_uniform = 0.0f;
 
 int screen_init(int w, int h, const TCHAR* title);	// 屏幕初始化
 int screen_close(void);								// 关闭屏幕
@@ -128,15 +127,9 @@ float lastY = 600.0 / 2.0;
 float fov = 45.0f;
 bool mousechange = false;
 s_vector front;
-float theta_ = 0.0f;
 static LRESULT screen_events(HWND hWnd, UINT msg,
 	WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
-	case WM_LBUTTONDOWN:
-	{
-		//printf("\n%lf\n", theta_);
-	//	break;
-	}
 	case WM_MOUSEMOVE:
 	{   mousechange = true;
 		float xpos = LOWORD(lParam);
@@ -288,33 +281,6 @@ vertex_t mesh2[36] = {
 	{{0.5f,  0.5f, -0.5f, 1.0f},  {1.0f,  1.0f},{ 1.0f, 1.0f, 1.0f, 1.0f }, 1,{ 0.0f,1.0f,  0.0f,0.0f},2},
 	{{-0.5f,  0.5f, -0.5f, 1.0f},  {0.0f,  1.0f},{1.0f, 1.0f, 1.0f, 1.0f },1,{ 0.0f, 1.0f,  0.0f,0.0f},2}
 };
-
-vertex_t mesh_grass[6] =
-{
-	{{-0.5f, -0.5f,  0.5f, 1.0f},{ 0.0f,  1.0f},{1.0f, 0.5f, 0.31f, 1.0f },1, { 0.0f,  0.0f, 1.0f,0.0f},3},
-	{{0.5f, -0.5f,  0.5f, 1.0f},{ 0.0f,  0.0f}, { 1.0f, 0.5f, 0.31f, 1.0f },1, {0.0f,  0.0f,  1.0f,0.0f},3},
-	{{0.5f,  0.5f,  0.5f, 1.0f},{ 1.0f,  0.0f}, { 1.0f, 0.5f, 0.31f, 1.0f }, 1, {0.0f,  0.0f,  1.0f,0.0f},3},
-	{{0.5f,  0.5f,  0.5f, 1.0f},{ 1.0f,  0.0f}, { 1.0f, 0.5f, 0.31f, 1.0f }, 1, {0.0f,  0.0f,  1.0f,0.0f},3},
-	{{-0.5f,  0.5f,  0.5f, 1.0f},{ 1.0f,  1.0f},{ 1.0f, 0.5f, 0.31f, 1.0f },1, { 0.0f,  0.0f,  1.0f,0.0f},3},
-	{{-0.5f, -0.5f,  0.5f, 1.0f},{ 0.0f,  1.0f},{ 1.0f, 0.5f, 0.31f, 1.0f }, 1, { 0.0f,  0.0f,  1.0f,0.0f},3}
-
-
-
-};
-
-vertex_t mesh_window[6] =
-{
-	{{-0.5f, -0.5f,  0.5f, 1.0f},{ 0.0f,  1.0f},{1.0f, 0.5f, 0.31f, 1.0f },1, { 0.0f,  0.0f, 1.0f,0.0f},4},
-	{{0.5f, -0.5f,  0.5f, 1.0f},{ 0.0f,  0.0f}, { 1.0f, 0.5f, 0.31f, 1.0f },1, {0.0f,  0.0f,  1.0f,0.0f},4},
-	{{0.5f,  0.5f,  0.5f, 1.0f},{ 1.0f,  0.0f}, { 1.0f, 0.5f, 0.31f, 1.0f }, 1, {0.0f,  0.0f,  1.0f,0.0f},4},
-	{{0.5f,  0.5f,  0.5f, 1.0f},{ 1.0f,  0.0f}, { 1.0f, 0.5f, 0.31f, 1.0f }, 1, {0.0f,  0.0f,  1.0f,0.0f},4},
-	{{-0.5f,  0.5f,  0.5f, 1.0f},{ 1.0f,  1.0f},{ 1.0f, 0.5f, 0.31f, 1.0f },1, { 0.0f,  0.0f,  1.0f,0.0f},4},
-	{{-0.5f, -0.5f,  0.5f, 1.0f},{ 0.0f,  1.0f},{ 1.0f, 0.5f, 0.31f, 1.0f }, 1, { 0.0f,  0.0f,  1.0f,0.0f},4}
-
-
-
-};
-
 void draw_plane(device_t* device,int num,vertex_t *mesh,int count)
 {
 	vertex_t p1, p2, p3;
@@ -342,10 +308,6 @@ void draw_box(device_t* device, float theta)
 	int cnt = 0;
 	cnt++;
 	s_matrix m;
-	s_vector axis(-1.0f, -0.5f, 1.0f, 1.0f);
-	s_vector pos(2.0f, 1.0f, 0.0f, 1.0f);
-	s_vector scale(1.0f, 1.0f, 1.0f, 1.0f);
-	//m.set_rotate_translate_scale(axis, theta, pos, scale);
 	m.set_rotate(-1, -0.5, 1, theta);
 	device->transform.world = m;
 	device->transform.update();
@@ -361,9 +323,9 @@ void draw_box(device_t* device, float theta)
 
 	//to draw the light box
 	cnt++;
-	axis.reset(-1.0f, -0.5f, 1.0f, 1.0f);
-	pos.reset(0.0f, 2.0f, 2.0f, 1.0f);
-	scale.reset(0.2f, 0.2f, 0.2f, 1.0f);
+	s_vector axis(-1.0f, -0.5f, 1.0f, 1.0f);
+	s_vector pos(0.0f, 2.0f, 2.0f, 1.0f);
+	s_vector scale(0.2f, 0.2f, 0.2f, 1.0f);
 	m.set_rotate_translate_scale(axis,1.0f,pos,scale);
 	s_vector rightpos(0.5f, 0.5f, 0.5f, 1.0f);
 	s_vector pos2;
@@ -379,38 +341,12 @@ void draw_box(device_t* device, float theta)
 	device->transform.update();
 	draw_plane(device, 36,mesh2,cnt);
 
-	// 画草
-	cnt++;
-	axis.reset(1.0f, 0.0f, 0.0f, 1.0f);
-	pos.reset(-1.0f, 1.0f + pos_uniform, -1.0f , 1.0f);
-	scale.reset(1.0f, 1.0f, 1.0f, 1.0f);
-	m.set_rotate_translate_scale(axis, -0.30f, pos, scale);
-
-	//theta_ = theta;
-	device->transform.world = m;
-	device->transform.update();
-	device->material[cnt].shininess = 16.0f;
-	draw_plane(device, 6, mesh_grass, cnt);
 	//画obj
-	/*
 	cnt++;
 	m.set_rotate_translate_scale(axis, theta, pos, scale);
 	device->transform.world = m;
 	device->transform.update();
 	draw_plane(device, tot_vertex.size(), tot_vertex, cnt);
-	*/
-
-	//画窗子
-	cnt++;
-	axis.reset(1.0f, 0.0f, 0.0f, 1.0f);
-	pos.reset(-1.0f, 1.0f, 0.0f, 1.0f);
-	scale.reset(1.0f, 1.0f, 1.0f, 1.0f);
-	m.set_rotate_translate_scale(axis, -0.30f, pos, scale);
-	//theta_ = theta;
-	device->transform.world = m;
-	device->transform.update();
-	device->material[cnt].shininess = 16.0f;
-	draw_plane(device, 6, mesh_window, cnt);
 }
 
 void camera_at_zero(device_t* device, s_vector eye, s_vector at, s_vector up)
@@ -465,12 +401,11 @@ void init_texture_by_photo(device_t* device, char const* path)
 			int R = rr;
 			int G = gg;
 			int B = bb;
-			int A = aa;
 			R = CMID(R, 0, 255);
 			G = CMID(G, 0, 255);
 			B = CMID(B, 0, 255);
-			A = CMID(A, 0, 255);
-			texture[y][x] = (A << 24) | (R << 16) | (G << 8) | (B);
+			
+			texture[y][x]= (R << 16) | (G << 8) | (B);
 			//cout<<(int)r<<" "<<(int)g<<" "<<(int)b<<" "<<(int)a<<endl;
 		}
 	}
@@ -513,12 +448,11 @@ void init_texture_by_diffuse(device_t* device, char const* path,int count)
 			int R = rr;
 			int G = gg;
 			int B = bb;
-			int A = aa;
 			R = CMID(R, 0, 255);
 			G = CMID(G, 0, 255);
 			B = CMID(B, 0, 255);
-			A = CMID(A, 0, 255);
-			texture[y][x] = (A << 24) | (R << 16) | (G << 8) | (B);
+
+			texture[y][x] = (R << 16) | (G << 8) | (B);
 			//cout<<(int)r<<" "<<(int)g<<" "<<(int)b<<" "<<(int)a<<endl;
 		}
 	}
@@ -557,12 +491,11 @@ void init_texture_by_specular(device_t* device, char const* path, int count)
 			int R = rr;
 			int G = gg;
 			int B = bb;
-			int A = aa;
 			R = CMID(R, 0, 255);
 			G = CMID(G, 0, 255);
 			B = CMID(B, 0, 255);
-			A = CMID(A, 0, 255);
-			texture[y][x] = (A << 24) | (R << 16) | (G << 8) | (B);
+
+			texture[y][x] = (R << 16) | (G << 8) | (B);
 			//cout<<(int)r<<" "<<(int)g<<" "<<(int)b<<" "<<(int)a<<endl;
 		}
 	}
@@ -800,21 +733,11 @@ int main()
 	device.material[1].have_specular = 1;
 	init_texture_by_specular(&device, "photo/container2_specular.png", 1);
 
-	//2是我设置的 灯的小方块，不需要对它加任何纹理，所以直接跳到3。
-
-	device.material[3].have_diffuse = 1;
-	init_texture_by_diffuse(&device, "photo/grass.png", 3);
-	device.material[3].have_specular = 0;
-
-	device.material[4].have_diffuse = 1;
-	init_texture_by_diffuse(&device, "photo/blending_transparent_window.png", 4);
-	device.material[4].have_specular = 0;
-
 	//init_texture_by_diffuse(&device, "model/arm_dif.png", 3);
-		// if you wanna use the obj,please change the number of 3,as it means that it's the 3rd object.
+
 	//加载obj的mesh
 
-	//load_obj(tot_vertex, &device, "model/nanosuit.obj", "model", 3,1);
+	load_obj(tot_vertex, &device, "model/nanosuit.obj", "model", 3,1);
 	//init_texture_by_photo(&device, "container2.png");
 	device.render_state = RENDER_STATE_TEXTURE;
 
@@ -856,8 +779,6 @@ int main()
 		if (screen_keys[VK_F1]) { alpha += 0.05f; }
 		if (screen_keys[VK_F2]) { alpha -= 0.05f; }
 
-		if (screen_keys[VK_F3]) { pos_uniform+= 0.05f; }
-		if (screen_keys[VK_F4]) { pos_uniform -= 0.05f; }
 		if (screen_keys[VK_SPACE])
 		{
 			if (kbhit == 0)

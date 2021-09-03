@@ -50,7 +50,7 @@ void transform_homogenize_reverse(s_vector& y, s_vector& x, float w, float width
 
 int transform_check_cvv(s_vector& v);
 
-typedef struct { s_vector pos; s_vector2f tc; s_color color; float rhw; s_vector normal; } vertex_t;
+typedef struct { s_vector pos; s_vector2f tc; s_color color; float rhw; s_vector normal; int material_idex; } vertex_t;
 void vertex_rhw_init(vertex_t* v);
 
 void vertex_interp(vertex_t* y, vertex_t* x1, vertex_t* x2, float t);

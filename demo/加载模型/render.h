@@ -13,11 +13,39 @@ typedef struct
 {
 	s_vector lightpos;
 	s_vector lightcolor;
+	
+	s_vector ambient;
+	s_vector diffuse;
+	s_vector specular;
 }point_light;
 typedef struct
 {
 	s_vector viewpos;
 }s_camera;
+typedef struct
+{
+	IUINT32** texture;
+	int tex_width;           // 纹理宽度
+	int tex_height;          // 纹理高度
+	float max_u;             // 纹理最大宽度：tex_width - 1
+	float max_v;             // 纹理最大高度：tex_height - 1
+}s_texture;
+
+typedef struct
+{
+	float shininess;
+	s_texture diffuse_texture;
+	s_texture specular_texture;
+	bool have_diffuse;
+	bool have_specular;
+}s_material;
+typedef struct
+{
+	float shininess;
+	s_vector ambient;
+	s_vector diffuse;
+	s_vector specular;
+}v_material;
 typedef struct
 {
 	s_transform transform;   // 坐标变换器
@@ -34,7 +62,12 @@ typedef struct
 	IUINT32 background;      // 背景颜色
 	IUINT32 foreground;      // 线框颜色
 	point_light pointlight[20];
+	s_material material[100];
+	v_material vmaterial[100];
+	int v_m_num;
 	s_camera camera;
+	IUINT32** texture_di;
+	IUINT32** texture_spe;
 
 }device_t;
 
@@ -48,8 +81,19 @@ void device_init(device_t* device, int width, int height, void* fb);
 void device_destory(device_t* device);
 //设置当前纹理 
 void device_set_texture(device_t* device, void* bits, long pitch, int w, int h);
+
+void device_set_texture_by_photo(device_t* device, IUINT32** texture, long pitch, int w, int h);
+//设置材质的漫反射贴图
+void device_set_texture_by_diffuse(device_t* device, IUINT32** texture, long pitch, int w, int h, int count);
+//设置镜面高光贴图
+void device_set_texture_by_specular(device_t* device, IUINT32** texture, long pitch, int w, int h, int count);
+
 //设置点光源
-void device_set_pointlight(device_t* device, s_vector& pos, s_vector& color, int cnt);
+void device_set_pointlight(device_t* device, s_vector& pos, s_vector& color,s_vector& am,s_vector& di,s_vector& spe,int cnt);
+
+//设置材质
+
+//void device_set_material(device_t* device, s_vector& am, s_vector& di,s_vector& spe, float shi,int cnt);
 // 清空 framebuffer 和 zbuffer
 void device_clear(device_t* device, int mode);
 
@@ -59,6 +103,9 @@ void device_draw_line(device_t* device, int x1, int y1, int x2, int y2, IUINT32 
 
 // 根据坐标读取纹理
 IUINT32 device_texture_read(const device_t* device, float u, float v);
+
+void read_the_texture(s_vector& tmp, const  s_texture* t_texture, float u, float v);
+
 
 //=====================================================================
 // 渲染实现
@@ -98,4 +145,5 @@ typedef struct
 void v_shader(device_t* device, for_vs* vv, for_fs* ff);
 
 void f_shader(device_t* device, for_fs* ff, s_color& color,int count);
+
 #endif
