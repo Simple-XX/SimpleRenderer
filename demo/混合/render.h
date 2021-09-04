@@ -146,20 +146,4 @@ void v_shader(device_t* device, for_vs* vv, for_fs* ff);
 
 void f_shader(device_t* device, for_fs* ff, s_color& color,int count,bool& is_ban,s_vector& ori_co);
 
-void draw_plane(device_t* device, int num, vertex_t* mesh, int count);
-
-void draw_plane(device_t* device, int num, vector<vertex_t>& mesh, int count);//жиди
-
-void camera_at_zero(device_t* device, s_vector eye, s_vector at, s_vector up);
-
-void init_texture(device_t* device);
-
-void init_texture_by_photo(device_t* device, char const* path);
-
-void init_texture_by_diffuse(device_t* device, char const* path, int count);
-
-void init_texture_by_specular(device_t* device, char const* path, int count);
-
-bool load_obj(std::vector<vertex_t>& tot_vertex, device_t* device, const char* obj_path, const char* pre_mtl_path, int start, bool filp_y);
-
 #endif
