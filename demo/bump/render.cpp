@@ -28,7 +28,7 @@ void device_init(device_t* device, int width, int height, void* fb)
 	device->framebuffer = (IUINT32**)ptr;
 	device->zbuffer = (float**)(ptr + sizeof(void*) * height);
 	ptr += sizeof(void*) * height * 2;
-	device->texture_di= (IUINT32**)ptr;
+	device->texture_di = (IUINT32**)ptr;
 	device->texture = (IUINT32**)ptr;
 	ptr += sizeof(void*) * 1024;
 	framebuf = (char*)ptr;
@@ -40,8 +40,8 @@ void device_init(device_t* device, int width, int height, void* fb)
 		device->framebuffer[j] = (IUINT32*)(framebuf + width * 4 * j);
 		device->zbuffer[j] = (float*)(zbuf + width * 4 * j);
 	}
-	device->texture_di[0]= (IUINT32*)ptr;
-	device->texture_di[1]= (IUINT32*)(ptr + 16);
+	device->texture_di[0] = (IUINT32*)ptr;
+	device->texture_di[1] = (IUINT32*)(ptr + 16);
 	device->texture[0] = (IUINT32*)ptr;
 	device->texture[1] = (IUINT32*)(ptr + 16);
 	memset(device->texture_di[0], 0, 64);
@@ -103,8 +103,8 @@ void device_set_texture_by_photo(device_t* device, IUINT32** texture, long pitch
 	device->max_u = (float)(w - 1);
 	device->max_v = (float)(h - 1);
 }
-void device_set_texture_by_diffuse(device_t* device, IUINT32** texture, long pitch, int w, int h,int count)
-{     
+void device_set_texture_by_diffuse(device_t* device, IUINT32** texture, long pitch, int w, int h, int count)
+{
 
 
 
@@ -118,10 +118,10 @@ void device_set_texture_by_diffuse(device_t* device, IUINT32** texture, long pit
 	device->material[count].diffuse_texture.texture = new IUINT32 * [n];
 
 	for (int i = 0; i < n; i++)
-		device->material[count].diffuse_texture.texture[i]= new IUINT32[m];
-	
+		device->material[count].diffuse_texture.texture[i] = new IUINT32[m];
 
-	
+
+
 	assert(w <= 1024 && h <= 1024);
 	for (int i = 0; i < h; i++)
 	{
@@ -294,7 +294,7 @@ IUINT32 device_texture_read(const device_t* device, float u, float v)
 	return device->texture[y][x];
 }
 
-IUINT32 device_texture_read_from_material(const s_texture* t_texture,float u,float v)
+IUINT32 device_texture_read_from_material(const s_texture* t_texture, float u, float v)
 {
 	int x, y;
 	u = u * t_texture->max_u;
@@ -308,7 +308,7 @@ IUINT32 device_texture_read_from_material(const s_texture* t_texture,float u,flo
 
 }
 
-void read_the_texture(s_vector& tmp,const  s_texture* t_texture, float u, float v)
+void read_the_texture(s_vector& tmp, const  s_texture* t_texture, float u, float v)
 {
 	int x, y;
 	u = u * t_texture->max_u;
@@ -318,17 +318,17 @@ void read_the_texture(s_vector& tmp,const  s_texture* t_texture, float u, float 
 	x = CMID(x, 0, t_texture->tex_width - 1);
 	y = CMID(y, 0, t_texture->tex_height - 1);
 
-	 IUINT32 cc = t_texture->texture[y][x];
-	 int texture_a = (cc>> 24) & 0xff;
-	 int texture_r = (cc >> 16) & 0xff;
-	 int texture_g = (cc >> 8) & 0xff;
-	 int texture_b = cc & 0xff;
-	 //printf("%d %d %d\n", texture_r, texture_g, texture_b);
-	 //printf("%f %f %f\n", ff.color.r, ff.color.g, ff.color.b);
-	 tmp.x= (float)texture_r / 255.0f;
-	 tmp.y = (float)texture_g / 255.0f;
-	 tmp.z= (float)texture_b / 255.0f;
-	 tmp.w = (float)texture_a/255.0f;
+	IUINT32 cc = t_texture->texture[y][x];
+	int texture_a = (cc >> 24) & 0xff;
+	int texture_r = (cc >> 16) & 0xff;
+	int texture_g = (cc >> 8) & 0xff;
+	int texture_b = cc & 0xff;
+	//printf("%d %d %d\n", texture_r, texture_g, texture_b);
+	//printf("%f %f %f\n", ff.color.r, ff.color.g, ff.color.b);
+	tmp.x = (float)texture_r / 255.0f;
+	tmp.y = (float)texture_g / 255.0f;
+	tmp.z = (float)texture_b / 255.0f;
+	tmp.w = (float)texture_a / 255.0f;
 
 }
 
@@ -449,7 +449,7 @@ void ff_interpolating(for_fs* dest, for_fs* src1, for_fs* src2, for_fs* src3, fl
 //=====================================================================
 
 // 绘制扫描线
-void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& point1, s_vector& point2, s_vector& point3, for_fs* ffs,int count)
+void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& point1, s_vector& point2, s_vector& point3, for_fs* ffs, int count)
 {
 	IUINT32* framebuffer = device->framebuffer[scanline->y];
 	float* zbuffer = device->zbuffer[scanline->y];
@@ -469,31 +469,31 @@ void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& poin
 			transform_homogenize_reverse(interpos, interpos, ww, width, height);
 			computeBarycentric3D(barycenter, point1, point2, point3, interpos);
 			float alpha = barycenter.x; float beta = barycenter.y; float gamma = barycenter.z;
-			
-			float Z = 1.0 / (alpha / point1.w + beta /point2.w + gamma /point3.w);
+
+			float Z = 1.0 / (alpha / point1.w + beta / point2.w + gamma / point3.w);
 			float zp = alpha * point1.z / point1.w + beta * point2.z / point2.w + gamma * point3.z / point3.w;
 			zp *= Z;
-			float daozp =1.0/zp;
+			float daozp = 1.0 / zp;
 			/*if (zp < depth_buf[get_index(i, j)])
 			{
 				depth_buf[get_index(i, j)] = zp;
 			}*/
 			if (daozp >= zbuffer[x])
 			{
-				
+
 				zbuffer[x] = daozp;
 				for_fs ff;
-				
-				
+
+
 
 				ff_interpolating(&ff, &ffs[0], &ffs[1], &ffs[2], barycenter.x, barycenter.y, barycenter.z);
 				ff.pos.w = ww;
 				ff.normal.normalize();
-				s_color color (0.0f, 0.0f, 0.0f, 1.0f );
+				s_color color(0.0f, 0.0f, 0.0f, 1.0f);
 				if (count == 2)
 				{
-					bool ban = 0; 
-					s_vector ori_col(-1.0f,-1.0f,-1.0f,1.0f);
+					bool ban = 0;
+					s_vector ori_col(-1.0f, -1.0f, -1.0f, 1.0f);
 					if (framebuffer[x] != NULL)
 					{
 						IUINT32 cc = framebuffer[x];
@@ -503,13 +503,13 @@ void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& poin
 						int texture_b = cc & 0xff;
 						//printf("%d %d %d\n", texture_r, texture_g, texture_b);
 						//printf("%f %f %f\n", ff.color.r, ff.color.g, ff.color.b);
-					    ori_col.x = (float)texture_r / 255.0f;
+						ori_col.x = (float)texture_r / 255.0f;
 						ori_col.y = (float)texture_g / 255.0f;
 						ori_col.z = (float)texture_b / 255.0f;
 						ori_col.w = (float)texture_a / 255.0f;
 					}
 
-					f_shader(device, &ff, color, count,ban,ori_col);
+					f_shader(device, &ff, color, count, ban, ori_col);
 					float a = color.a;
 					float r = color.r;
 					float g = color.g;
@@ -541,7 +541,7 @@ void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& poin
 						ori_col.z = (float)texture_b / 255.0f;
 						ori_col.w = (float)texture_a / 255.0f;
 					}
-					f_shader(device, &ff, color, count,ban,ori_col);
+					f_shader(device, &ff, color, count, ban, ori_col);
 					float a = color.a;
 					float r = color.r;
 					float g = color.g;
@@ -573,7 +573,7 @@ void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& poin
 						ori_col.z = (float)texture_b / 255.0f;
 						ori_col.w = (float)texture_a / 255.0f;
 					}
-					f_shader(device, &ff, color, count,ban, ori_col);
+					f_shader(device, &ff, color, count, ban, ori_col);
 					if (ban == 0)
 					{
 						float a = color.a;
@@ -591,14 +591,14 @@ void device_draw_scanline(device_t* device, scanline_t* scanline, s_vector& poin
 				}
 
 			}
-			
+
 		}
 		vertex_add(&scanline->v, &scanline->step);
 		if (x >= width) break;
 	}
 }
 //主渲染函数 
-void device_render_trap(device_t* device, trapezoid_t* trap, s_vector& point1, s_vector& point2, s_vector& point3, for_fs* ffs,int count)
+void device_render_trap(device_t* device, trapezoid_t* trap, s_vector& point1, s_vector& point2, s_vector& point3, for_fs* ffs, int count)
 {
 	scanline_t scanline;
 	int j, top, bottom;
@@ -610,14 +610,14 @@ void device_render_trap(device_t* device, trapezoid_t* trap, s_vector& point1, s
 		{
 			trapezoid_edge_interp(trap, (float)j + 0.5f);
 			trapezoid_init_scan_line(trap, &scanline, j);
-			device_draw_scanline(device, &scanline, point1, point2, point3, ffs,count);
+			device_draw_scanline(device, &scanline, point1, point2, point3, ffs, count);
 		}
 		if (j >= device->height) break;
 	}
 }
 // 根据 render_state 绘制原始三角形
 void device_draw_primitive(device_t* device, vertex_t* v1,
-	vertex_t* v2, vertex_t* v3,int count)
+	vertex_t* v2, vertex_t* v3, int count)
 {
 	vertex_t* vertexs[3] = { v1,v2,v3 };
 	s_vector points[3];
@@ -629,7 +629,7 @@ void device_draw_primitive(device_t* device, vertex_t* v1,
 	device->transform.apply(c3, v3->pos);
 	// 裁剪，注意此处可以完善为具体判断几个点在 cvv内以及同cvv相交平面的坐标比例
 // 进行进一步精细裁剪，将一个分解为几个完全处在 cvv内的三角形
-//等于0表示完全在cvv里面(我的理解 
+//等于0表示完全在cvv里面(我的理解
 	if (transform_check_cvv(c1) != 0) return;
 	if (transform_check_cvv(c2) != 0) return;
 	if (transform_check_cvv(c3) != 0) return;
@@ -664,7 +664,7 @@ void device_draw_primitive(device_t* device, vertex_t* v1,
 		av->binormal.float_dot(av->tangent.w);
 
 		apply_to_vector(vertex->pos, vertex->pos, device->transform.vp);
-		points[i]= vertex->pos;
+		points[i] = vertex->pos;
 		if (i == 0) c1 = vertex->pos;
 		if (i == 1) c2 = vertex->pos;
 		if (i == 2) c3 = vertex->pos;
@@ -682,7 +682,7 @@ void device_draw_primitive(device_t* device, vertex_t* v1,
 
 		v_shader(device, av, &ffs[i]); // 顶点着色器
 		transform_homogenize(vertex->pos, vertex->pos, device->width, device->height);
-	
+
 	}
 	if (device->is_cull != 0)
 	{
@@ -699,7 +699,7 @@ void device_draw_primitive(device_t* device, vertex_t* v1,
 			if (crossdot > 0.0f) return;
 		}
 	}
-	
+
 	s_vector point1(points[0].x, points[0].y, points[0].z, points[0].w);
 	s_vector point2(points[1].x, points[1].y, points[1].z, points[1].w);
 	s_vector point3(points[2].x, points[2].y, points[2].z, points[2].w);
@@ -718,8 +718,8 @@ void device_draw_primitive(device_t* device, vertex_t* v1,
 		point1.w = c1.w;
 		point2.w = c2.w;
 		point3.w = c3.w;
-		if (n >= 1) { device_render_trap(device, &traps[0], point1, point2, point3, ffs,count); }
-		if (n >= 2) {device_render_trap(device, &traps[1], point1, point2, point3, ffs,count);  }
+		if (n >= 1) { device_render_trap(device, &traps[0], point1, point2, point3, ffs, count); }
+		if (n >= 2) { device_render_trap(device, &traps[1], point1, point2, point3, ffs, count); }
 	}
 
 	if ((render_state & RENDER_STATE_WIREFRAME) && device->framebuffer != NULL)//线框绘制 
@@ -746,23 +746,24 @@ void v_shader(device_t* device, for_vs* vv, for_fs* ff)
 	tmp1.reset(vv->tangent.z, vv->binormal.z, vv->normal.z, 1.0f);
 	ff->storage2 = tmp1;
 }
+
 void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_ban, s_vector& ori_co)
 {
 	if (count == 2)
-	{  
-		
-		
-		
+	{
+
+
+
 		color.r = ff->color.r;
 		color.g = ff->color.g;
 		color.b = ff->color.b;
 		color.a = ff->color.a;
-		
-		
+
+
 
 	}
-	else 
-	{   
+	else
+	{
 		s_vector init_diffuse(0.64, 0.64, 0.64, 1.0f);
 		s_vector init_specular(0.5, 0.5, 0.5, 1.0f);
 		float u = ff->texcoord.u; float v = ff->texcoord.v;
@@ -772,34 +773,39 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 		s_vector light_diffuse; light_diffuse = device->pointlight[0].diffuse;
 		s_vector light_specular; light_specular = device->pointlight[0].specular;
 		lightpos = device->pointlight[0].lightpos;
+		//bump
+		/*if (device->material[count].have_normal == 1)
+			lightpos.reset(ff->storage0.dotproduct(lightpos), ff->storage1.dotproduct(lightpos), ff->storage2.dotproduct(lightpos), 1.0f);
+		*/
+
 		s_vector objectcolor(ff->color.r, ff->color.g, ff->color.b, ff->color.a);
 		//环境光照 ambient
-		
+
 		//float r, g, b, a; a = 1.0f;
 		//device_texture_read_from_material(device, u, v, r, g, b, a);
 		//printf("%lf %lf %lf %lf\n", r, g, b, a);
-		s_vector material_ambient; 
+		s_vector material_ambient;
 		if (device->material[count].have_diffuse == 1)
 			read_the_texture(material_ambient, &device->material[count].diffuse_texture, u, v);
 		else material_ambient = init_diffuse;
-		if (material_ambient.w < 0.1f) 
+		if (material_ambient.w < 0.1f)
 		{
 			is_ban = 1; return;
 		}
 		else
-		if(ori_co.x!=-1.0f)
-		{
-			float a1 = material_ambient.w; float a2 = 1.0f - a1;
-			s_vector tmp1; tmp1 = material_ambient; tmp1.float_dot(a1);
-			s_vector tmp2; tmp2 = ori_co; tmp2.float_dot(a2);
-			material_ambient.add_two(tmp1, tmp2);
-		}
-		
+			if (ori_co.x != -1.0f)
+			{
+				float a1 = material_ambient.w; float a2 = 1.0f - a1;
+				s_vector tmp1; tmp1 = material_ambient; tmp1.float_dot(a1);
+				s_vector tmp2; tmp2 = ori_co; tmp2.float_dot(a2);
+				material_ambient.add_two(tmp1, tmp2);
+			}
+
 		s_vector ambient;                ambient.dot_two(light_ambient, material_ambient);
 		//ambient.show();
 
 		//漫反射光照 diffuse
-		s_vector norm ;       // = ff->normal
+		s_vector norm;       // = ff->normal
 		if (device->material[count].have_normal == 1)
 		{
 			read_the_texture(norm, &device->material[count].normal_texture, u, v);
@@ -807,36 +813,48 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 			s_vector tmp_1(1.0f, 1.0f, 1.0f, 1.0f);
 			norm.minus_two(norm, tmp_1);
 			norm.normalize();
+			norm.reset(ff->storage0.dotproduct(norm), ff->storage1.dotproduct(norm), ff->storage2.dotproduct(norm), 1.0f);
+			norm.normalize();
 		}
 		else
 		{
 			norm = ff->normal;
 		}
-		
+
 		s_vector fragpos = ff->pos;
+		//bump
+		/*if (device->material[count].have_normal == 1)
+			fragpos.reset(ff->storage0.dotproduct(fragpos), ff->storage1.dotproduct(fragpos), ff->storage2.dotproduct(fragpos), 1.0f);
+			*/
+
 		s_vector lightDir; lightDir.minus_two(lightpos, fragpos); lightDir.normalize();
 		//lightDir.show();
 		float diff = max(norm.dotproduct(lightDir), 0.0f);
 		//if (diff > 0.0f) { printf("%lf\n", diff); norm.show(); }
 		s_vector material_diffuse; material_diffuse = material_ambient;
 		s_vector diffuse; diffuse = light_diffuse; diffuse.float_dot(diff); diffuse.dot_two(diffuse, material_diffuse);
-		
+
 		//specular 镜面高光
 		float material_shininess; material_shininess = device->material[count].shininess;
 		//get the view pos
 		s_vector viewpos = device->camera.viewpos;
+		//bump
+		/*if (device->material[count].have_normal == 1)
+			viewpos.reset(ff->storage0.dotproduct(viewpos), ff->storage1.dotproduct(viewpos), ff->storage2.dotproduct(viewpos), 1.0f);
+			*/
+
 		s_vector viewdir; viewdir.minus_two(viewpos, fragpos); viewdir.normalize();
 		s_vector in_lightdir; in_lightdir = lightDir; in_lightdir.inverse();
 		s_vector reflectdir; reflectdir.reflect(in_lightdir, norm);
 		float spec = pow(max(viewdir.dotproduct(reflectdir), 0.0f), material_shininess);
 		s_vector specular = light_specular;
-		specular.float_dot(spec); 
+		specular.float_dot(spec);
 
-		s_vector material_specular; 
+		s_vector material_specular;
 		if (device->material[count].have_specular == 1)
 			read_the_texture(material_specular, &device->material[count].specular_texture, u, v);
 		else material_specular = init_specular;
-		specular.dot_two(specular,material_specular);
+		specular.dot_two(specular, material_specular);
 		//specular.show();
 		result.add_two(ambient, diffuse); result.add_two(result, specular);
 		//result.dot_two(result, objectcolor);
@@ -851,13 +869,13 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 		zz = pow(zz, 1.0f / gamma);
 		result.reset(xx, yy, zz, result.w);
 		*/
-		
+
 		color.r = result.x;
 		color.g = result.y;
 		color.b = result.z;
 		color.a = result.w;
-		
-		
+
+
 		/*
 		color.r = ff->color.r;
 		color.g = ff->color.g;
@@ -865,7 +883,7 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 		color.a = ff->color.a;
 		*/
 
-		
+
 	}
 }
 

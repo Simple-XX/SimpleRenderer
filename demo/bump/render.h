@@ -142,6 +142,8 @@ typedef struct
 	s_vector2f texcoord;//纹理坐标 
 	s_color color; //颜色 
 	s_vector normal;//法向量 
+	s_vector tangent;
+	s_vector binormal;
 	s_vector storage0;// 插值寄存器
 	s_vector storage1;
 	s_vector storage2;

@@ -335,7 +335,7 @@ void draw_box(device_t* device, float theta)
 	//device_set_material(device, m_ambient, m_diffuse, m_specular, m_shininess, cnt);
 
 
-	device->material[cnt].shininess = 64.0f;
+	device->material[cnt].shininess = 32.0f;
 	draw_plane(device,36,mesh,cnt);
 
 	//to draw the light box

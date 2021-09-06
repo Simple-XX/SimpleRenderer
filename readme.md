@@ -5,7 +5,7 @@ right now it includes</br>
 2.Phong Lighting Model</br>
 3.use the stb_image.h to read the images.</br>
 4.depth test.</br>
-5.support Lighting maps such as Diffuse maps and Specular maps.</br>
+5.support Lighting maps such as Diffuse maps,Specular maps and normal maps.</br>
 6.get the obj file by tiny_obj_loader.h.</br>
 7.Face culling.</br>
 8.Blending.</br>
