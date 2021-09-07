@@ -10,6 +10,8 @@ right now it includes</br>
 7.Face culling.</br>
 8.Blending.</br>
 9.vertex shader and fragment shader.</br>
+10.bump</br>
+11.basic PBR</br>
 ## Structure
 the following are showing different things in the files
 - s_math:
