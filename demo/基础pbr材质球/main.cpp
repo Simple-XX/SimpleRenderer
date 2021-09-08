@@ -127,11 +127,13 @@ float fov = 45.0f;
 bool mousechange = false;
 s_vector front;
 float theta_ = 0.0f;
+float me = 6.5f;
+float rou = 2.0f;
 static LRESULT screen_events(HWND hWnd, UINT msg,
 	WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 	case WM_LBUTTONDOWN:
-	{
+	{  //printf("%lf %lf\n", me, rou);
 		//printf("\n%lf\n", theta_);
 	//	break;
 	}
@@ -317,6 +319,7 @@ vertex_t mesh_window[6] =
 std::vector<vertex_t> tot_vertex;
 std::vector<vertex_t> tot_data;
 std::vector<int> indices;
+
 void draw_box(device_t* device, float theta)
 {
 	int cnt = 0;
@@ -324,7 +327,7 @@ void draw_box(device_t* device, float theta)
 	cnt++;
 	s_matrix m;
 	s_vector axis(-1.0f, -0.5f, 1.0f, 1.0f);
-	s_vector pos(2.0f, 1.0f+pos_uniform, 0.0f, 1.0f);
+	s_vector pos(2.0f, 1.0f, 0.0f, 1.0f);
 	s_vector scale(0.6f, 0.6f, 0.6f, 1.0f);
 	//m.set_rotate_translate_scale(axis, theta, pos, scale);
 	m.set_rotate_translate_scale(axis, 1.0f, pos, scale);
@@ -335,8 +338,8 @@ void draw_box(device_t* device, float theta)
 
 	device->PBR.albedo.x = 0.5f; device->PBR.albedo.y = 0.0f; device->PBR.albedo.z = 0.0f; device->PBR.albedo.w = 1.0f;
 	device->PBR.ao = 1.0f;
-	device->PBR.metallic = 1.0f / 7.0f;
-	device->PBR.roughness = 1.0f / 7.0f;
+	device->PBR.metallic = me / 7.0f;
+	device->PBR.roughness = rou / 7.0f;
 
 	draw_plane_STRIP(device, tot_data, indices, cnt);
 	//draw_plane(device,tot_data.size(), tot_data,cnt);
@@ -386,7 +389,7 @@ void get_the_ball(std::vector<vertex_t>& tot_data,std::vector<int>& indices)
 			m.normal.x = xPos; m.normal.y = yPos; m.normal.z = zPos;
 			m.material_idex = 1;
 			m.rhw = 1;
-			m.color.r = 0.6f; m.color.g = 0.0f; m.color.b = 0.0f; m.color.a = 1.0f;
+			m.color.r = 0.5f; m.color.g = 0.0f; m.color.b = 0.0f; m.color.a = 1.0f;
 			//positions.push_back(glm::vec3(xPos, yPos, zPos));
 			//uv.push_back(glm::vec2(xSegment, ySegment));
 		//	normals.push_back(glm::vec3(xPos, yPos, zPos));
@@ -497,11 +500,11 @@ int main()
 		the_y.dot_two(the_y, temp);
 		if (screen_keys[VK_LEFT]) { eye.add_two(eye, the_y);/*eye += the_y;/* vector_add(&eye, &eye, &the_y);*/ }
 		if (screen_keys[VK_RIGHT]) { eye.minus_two(eye, the_y);/*eye += the_y; /*vector_sub(&eye, &eye, &the_y);*/ }
-		if (screen_keys[VK_F1]) { alpha += 0.05f; }
-		if (screen_keys[VK_F2]) { alpha -= 0.05f; }
+		if (screen_keys[VK_F1]) { alpha += 0.05f; me+=0.5f; if (me > 7.0f) me = 7.0f; }
+		if (screen_keys[VK_F2]) { alpha -= 0.05f; me-=0.5f; if (me < 0.0f) me = 0.0f; }
 
-		if (screen_keys[VK_F3]) { pos_uniform+= 0.05f; }
-		if (screen_keys[VK_F4]) { pos_uniform -= 0.05f; }
+		if (screen_keys[VK_F3]) { pos_uniform += 0.05f; rou+=0.5f; if (rou > 7.0f) rou = 7.0f; }
+		if (screen_keys[VK_F4]) { pos_uniform -= 0.05f; rou-=0.5f; if (rou < 0.0f) rou = 0.0f; }
 		if (screen_keys[VK_SPACE])
 		{
 			if (kbhit == 0)
