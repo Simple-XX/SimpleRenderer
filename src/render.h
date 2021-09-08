@@ -48,6 +48,21 @@ typedef struct
 	s_vector diffuse;
 	s_vector specular;
 }v_material;
+
+typedef struct
+{
+	s_vector albedo;
+    float metallic;
+	float roughness;
+	float ao;
+}s_PBR;
+typedef struct
+{
+	s_texture albedo_texture;
+	s_texture metallic_texture;
+	s_texture roughness_texture;
+	s_texture ao_texture;
+}t_PBR;
 typedef struct
 {
 	s_transform transform;   // 坐标变换器
@@ -71,6 +86,8 @@ typedef struct
 	IUINT32** texture_di;
 	IUINT32** texture_spe;
 	int is_cull;
+	s_PBR PBR;
+	t_PBR tPBR[10];//texture PBR
 }device_t;
 
 #define RENDER_STATE_WIREFRAME 1  //渲染线框 
@@ -91,6 +108,14 @@ void device_set_texture_by_diffuse(device_t* device, IUINT32** texture, long pit
 void device_set_texture_by_specular(device_t* device, IUINT32** texture, long pitch, int w, int h, int count);
 
 void device_set_texture_by_normal(device_t* device, IUINT32** texture, long pitch, int w, int h, int count);
+
+void device_set_texture_by_albedo(device_t* device, IUINT32** texture, long pitch, int w, int h, int count);
+
+void device_set_texture_by_metallic(device_t* device, IUINT32** texture, long pitch, int w, int h, int count);
+
+void device_set_texture_by_roughness(device_t* device, IUINT32** texture, long pitch, int w, int h, int count);
+
+void device_set_texture_by_ao(device_t* device, IUINT32** texture, long pitch, int w, int h, int count);
 
 //设置点光源
 void device_set_pointlight(device_t* device, s_vector& pos, s_vector& color,s_vector& am,s_vector& di,s_vector& spe,int cnt);
@@ -142,6 +167,8 @@ typedef struct
 	s_vector2f texcoord;//纹理坐标 
 	s_color color; //颜色 
 	s_vector normal;//法向量 
+	s_vector tangent;
+	s_vector binormal;
 	s_vector storage0;// 插值寄存器
 	s_vector storage1;
 	s_vector storage2;
@@ -155,6 +182,8 @@ void draw_plane(device_t* device, int num, vertex_t* mesh, int count);
 
 void draw_plane(device_t* device, int num, vector<vertex_t>& mesh, int count);//重载
 
+void draw_plane_STRIP(device_t* device, vector<vertex_t>& mesh, vector<int>& indices, int count);
+
 void camera_at_zero(device_t* device, s_vector eye, s_vector at, s_vector up);
 
 void init_texture(device_t* device);
@@ -166,6 +195,14 @@ void init_texture_by_diffuse(device_t* device, char const* path, int count);
 void init_texture_by_specular(device_t* device, char const* path, int count);
 
 void init_texture_by_normal(device_t* device, char const* path, int count);
+
+void init_texture_by_albedo(device_t* device, char const* path, int count);
+
+void init_texture_by_metallic(device_t* device, char const* path, int count);
+
+void init_texture_by_roughness(device_t* device, char const* path, int count);
+
+void init_texture_by_ao(device_t* device, char const* path, int count);
 
 bool load_obj(std::vector<vertex_t>& tot_vertex, device_t* device, const char* obj_path, const char* pre_mtl_path, int start, bool filp_y);
 

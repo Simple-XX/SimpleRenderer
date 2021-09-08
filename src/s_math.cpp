@@ -5,6 +5,10 @@ int CMID(int x, int min, int max)
 {
 	return (x < min) ? min : ((x > max) ? max : x);
 }
+float CMID(float x, float min, float max)
+{
+	return (x < min) ? min : ((x > max) ? max : x);
+}
 //计算插值：t 为 [0, 1] 之间的数值 
 float interp(float x1, float x2, float t)
 {
@@ -97,6 +101,12 @@ void s_vector::interp_two(s_vector& a, s_vector& b, float t)
 	y = interp(a.y, b.y, t);
 	z = interp(a.z, b.z, t);
 	w = 1.0f;
+}
+void s_vector::divide_two(s_vector& a, s_vector& b)
+{
+	x = a.x / (b.x+ 0.0001f);
+	y= a.y / (b.y + 0.0001f);
+	z= a.z / (b.z + 0.0001f);
 }
 
 void s_vector::normalize()

@@ -16,11 +16,10 @@ set(SIMPLERENDER_HEADERS
 	render.h
 	s_math.h
         stb_image.h
-        tiny_obj_loader.h
 )
 
 INCLUDE_DIRECTORIES(${INCLUDE_DIR})
-
+INCLUDE_DIRECTORIES(${INCLUDE_DIR2})
 #生成可执行文件
 ADD_EXECUTABLE(SIMPLERENDER 
 	${SIMPLERENDER_SOURCES} 

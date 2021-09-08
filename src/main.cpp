@@ -127,11 +127,13 @@ float fov = 45.0f;
 bool mousechange = false;
 s_vector front;
 float theta_ = 0.0f;
+float me = 6.5f;
+float rou = 2.0f;
 static LRESULT screen_events(HWND hWnd, UINT msg,
 	WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 	case WM_LBUTTONDOWN:
-	{
+	{  //printf("%lf %lf\n", me, rou);
 		//printf("\n%lf\n", theta_);
 	//	break;
 	}
@@ -315,6 +317,9 @@ vertex_t mesh_window[6] =
 
 
 std::vector<vertex_t> tot_vertex;
+std::vector<vertex_t> tot_data;
+std::vector<int> indices;
+
 void draw_box(device_t* device, float theta)
 {
 	int cnt = 0;
@@ -323,20 +328,21 @@ void draw_box(device_t* device, float theta)
 	s_matrix m;
 	s_vector axis(-1.0f, -0.5f, 1.0f, 1.0f);
 	s_vector pos(2.0f, 1.0f, 0.0f, 1.0f);
-	s_vector scale(1.0f, 1.0f, 1.0f, 1.0f);
+	s_vector scale(0.6f, 0.6f, 0.6f, 1.0f);
 	//m.set_rotate_translate_scale(axis, theta, pos, scale);
-	m.set_rotate(-1, -0.5, 1, theta);
+	m.set_rotate_translate_scale(axis, theta, pos, scale);
 	device->transform.world = m;
 	device->transform.update();
-	//六个面 this is the first box 
-	
-	//设置材质
-	
-	//device_set_material(device, m_ambient, m_diffuse, m_specular, m_shininess, cnt);
 
+	device->material[cnt].shininess = 32.0f;
 
-	device->material[cnt].shininess = 64.0f;
-	draw_plane(device,36,mesh,cnt);
+	device->PBR.albedo.x = 0.5f; device->PBR.albedo.y = 0.0f; device->PBR.albedo.z = 0.0f; device->PBR.albedo.w = 1.0f;
+	device->PBR.ao = 1.0f;
+	device->PBR.metallic = me / 7.0f;
+	device->PBR.roughness = rou / 7.0f;
+
+	draw_plane_STRIP(device, tot_data, indices, cnt);
+	//draw_plane(device,tot_data.size(), tot_data,cnt);
 
 	//to draw the light box
 	cnt++;
@@ -347,9 +353,9 @@ void draw_box(device_t* device, float theta)
 	s_vector rightpos(0.5f, 0.5f, 0.5f, 1.0f);
 	s_vector pos2;
 	apply_to_vector(pos2, rightpos, m);
-	s_vector light_color(1.0f, 1.0f, 1.0f, 1.0f);
+	s_vector light_color(300.0f, 300.0f, 300.0f, 1.0f);
 
-	s_vector light_ambient(0.2f, 0.2f, 0.2f,1.0f);
+	s_vector light_ambient(0.5f, 0.5f, 0.5f,1.0f);
 	s_vector light_diffuse(0.5f, 0.5f, 0.5f, 1.0f);
 	s_vector light_specular(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -363,9 +369,61 @@ void draw_box(device_t* device, float theta)
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-int main()
+void get_the_ball(std::vector<vertex_t>& tot_data,std::vector<int>& indices)
 {
+	const unsigned int X_SEGMENTS = 64;
+	const unsigned int Y_SEGMENTS = 64;
+	const float PI = 3.14159265359;
+	for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
+	{
+		for (unsigned int y = 0; y <= Y_SEGMENTS; ++y)
+		{
+			float xSegment = (float)x / (float)X_SEGMENTS;
+			float ySegment = (float)y / (float)Y_SEGMENTS;
+			float xPos = std::cos(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+			float yPos = std::cos(ySegment * PI);
+			float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+			vertex_t m;
+			m.pos.x = xPos; m.pos.y = yPos;  m.pos.z = zPos; m.pos.w = 1.0f;
+			m.tc.u = xSegment; m.tc.v = ySegment;
+			m.normal.x = xPos; m.normal.y = yPos; m.normal.z = zPos;
+			m.material_idex = 1;
+			m.rhw = 1;
+			m.color.r = 0.5f; m.color.g = 0.0f; m.color.b = 0.0f; m.color.a = 1.0f;
+			//positions.push_back(glm::vec3(xPos, yPos, zPos));
+			//uv.push_back(glm::vec2(xSegment, ySegment));
+		//	normals.push_back(glm::vec3(xPos, yPos, zPos));
+			tot_data.push_back(m);
+			
+		}
+	}
+	bool oddRow = false;
+	for (unsigned int y = 0; y < Y_SEGMENTS; ++y)
+	{
+		if (!oddRow) // even rows: y == 0, y == 2; and so on
+		{
+			for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
+			{
+				indices.push_back(y * (X_SEGMENTS + 1) + x);
+				indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+			}
+		}
+		else
+		{
+			for (int x = X_SEGMENTS; x >= 0; --x)
+			{
+				indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+				indices.push_back(y * (X_SEGMENTS + 1) + x);
+			}
+		}
+		oddRow = !oddRow;
+	}
+		
+}
 
+int main()
+{ 
+	get_the_ball(tot_data,indices);
 	device_t device;
 	int states[] = { RENDER_STATE_TEXTURE,RENDER_STATE_COLOR,RENDER_STATE_WIREFRAME };
 	int indicator = 0;
@@ -388,13 +446,18 @@ int main()
 	camera_at_zero(&device, eye, at, up);
 
 	//表示1号物体所用的材质信息。
-	device.material[1].have_diffuse = 1;
-	init_texture_by_diffuse(&device, "photo/brickwall.jpg",1);
+	device.material[1].have_diffuse = 0;
+	//init_texture_by_diffuse(&device, "photo/brickwall.jpg",1);
 	device.material[1].have_specular = 0;
 	//init_texture_by_specular(&device, "photo/container2_specular.png", 1);
 	device.material[1].have_normal = 1;
 
-	init_texture_by_normal(&device, "photo/brickwall_normal.jpg", 1);
+	init_texture_by_normal(&device, "photo/rustediron2_normal.png", 1);
+	init_texture_by_albedo(&device, "photo/rustediron2_basecolor.png", 1);
+	init_texture_by_metallic(&device, "photo/rustediron2_metallic.png", 1);
+	init_texture_by_roughness(&device, "photo/rustediron2_roughness.png", 1);
+
+	//init_texture_by_normal(&device, "photo/brickwall_normal.jpg", 1);
 	
 
 	
@@ -442,11 +505,11 @@ int main()
 		the_y.dot_two(the_y, temp);
 		if (screen_keys[VK_LEFT]) { eye.add_two(eye, the_y);/*eye += the_y;/* vector_add(&eye, &eye, &the_y);*/ }
 		if (screen_keys[VK_RIGHT]) { eye.minus_two(eye, the_y);/*eye += the_y; /*vector_sub(&eye, &eye, &the_y);*/ }
-		if (screen_keys[VK_F1]) { alpha += 0.05f; }
-		if (screen_keys[VK_F2]) { alpha -= 0.05f; }
+		if (screen_keys[VK_F1]) { alpha += 0.05f; me+=0.5f; if (me > 7.0f) me = 7.0f; }
+		if (screen_keys[VK_F2]) { alpha -= 0.05f; me-=0.5f; if (me < 0.0f) me = 0.0f; }
 
-		if (screen_keys[VK_F3]) { pos_uniform+= 0.05f; }
-		if (screen_keys[VK_F4]) { pos_uniform -= 0.05f; }
+		if (screen_keys[VK_F3]) { pos_uniform += 0.05f; rou+=0.5f; if (rou > 7.0f) rou = 7.0f; }
+		if (screen_keys[VK_F4]) { pos_uniform -= 0.05f; rou-=0.5f; if (rou < 0.0f) rou = 0.0f; }
 		if (screen_keys[VK_SPACE])
 		{
 			if (kbhit == 0)

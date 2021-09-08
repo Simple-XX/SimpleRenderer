@@ -6,6 +6,7 @@
 typedef unsigned int IUINT32;
 //越界处理 
 int CMID(int x, int min, int max);
+float CMID(float x, float min, float max);
 //计算插值：t 为 [0, 1] 之间的数值 
 float interp(float x1, float x2, float t);
 float interp_(float& x1, float& x2, float t);
@@ -62,6 +63,8 @@ public:
 	void normalize();
 
 	void float_divide(float k);
+
+	void divide_two(s_vector& a, s_vector& b);
 	//插值 
 	void interpolate(float alpha, float beta, float gamma, s_vector& vert1, s_vector& vert2, s_vector& vert3, float weight);
 	//a=-a;
