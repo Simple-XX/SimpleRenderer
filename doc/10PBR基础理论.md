@@ -86,12 +86,94 @@ F0 表示平面的基础反射率，它是利用所谓折射指数(Indices of Re
 
 * **AO**：环境光遮蔽(Ambient Occlusion)贴图或者说AO贴图为表面和周围潜在的几何图形指定了一个额外的阴影因子。比如如果我们有一个砖块表面，反照率纹理上的砖块裂缝部分应该没有任何阴影信息。然而AO贴图则会把那些光线较难逃逸出来的暗色边缘指定出来。在光照的结尾阶段引入环境遮蔽可以明显的提升你场景的视觉效果。网格/表面的环境遮蔽贴图要么通过手动生成，要么由3D建模软件自动生成。<br/>
 
-美术师们可以在纹素级别设置或调整这些基于物理的输入值，还可以以现实世界材料的表面物理性质来建立他们的材质数据。这是PBR渲染管线最大的优势之一，因为不论环境或者光照的设置如何改变这些表面的性质是不会改变的，这使得美术师们可以更便捷的获取物理可信的结果。在PBR渲染管线中编写的表面可以非常方便的在不同的PBR渲染引擎间共享使用，不论处于何种环境中它们看上去都会是正确的，因此看上去也会更自然。
+美术师们可以在纹素级别设置或调整这些基于物理的输入值，还可以以现实世界材料的表面物理性质来建立他们的材质数据。这是PBR渲染管线最大的优势之一，因为不论环境或者光照的设置如何改变这些表面的性质是不会改变的，这使得美术师们可以更便捷的获取物理可信的结果。在PBR渲染管线中编写的表面可以非常方便的在不同的PBR渲染引擎间共享使用，不论处于何种环境中它们看上去都会是正确的，因此看上去也会更自然。<br/><br/>
+
+在这个渲染器中，添加PBR材质的方式如下:<br/>
+```bash
+   device.material[1].have_diffuse = 0;
+	//init_texture_by_diffuse(&device, "photo/brickwall.jpg",1);
+	device.material[1].have_specular = 0;
+	//init_texture_by_specular(&device, "photo/container2_specular.png", 1);
+	device.material[1].have_normal = 1;
+
+	init_texture_by_normal(&device, "photo/rustediron2_normal.png", 1);
+	init_texture_by_albedo(&device, "photo/rustediron2_basecolor.png", 1);
+	init_texture_by_metallic(&device, "photo/rustediron2_metallic.png", 1);
+	init_texture_by_roughness(&device, "photo/rustediron2_roughness.png", 1);
+```
+计算DFG的函数如下<br/>
+```bash
+   //正态分布函数D
+float DistributionGGX(s_vector& N, s_vector& H, float roughness)
+{
+	float a = roughness * roughness;
+	float a2 = a * a;
+	float NdotH = max(N.dotproduct(H), 0.0f);
+	float NdotH2 = NdotH * NdotH;
+
+	float nom = a2;
+	float denom= (NdotH2 * (a2 - 1.0) + 1.0);
+	denom = PI * denom * denom;
+
+	return nom / denom;
+}
+//几何函数G
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+	float r = (roughness + 1.0);
+	float k = (r * r) / 8.0;
+
+	float nom = NdotV;
+	float denom = NdotV * (1.0 - k) + k;
+
+	return nom / denom;
+}
+// ----------------------------------------------------------------------------
+float GeometrySmith(s_vector& N, s_vector& V, s_vector& L, float roughness)
+{
+	float NdotV = max(N.dotproduct(V), 0.0f);
+	float NdotL = max(N.dotproduct(L), 0.0f);
+	float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+	float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+
+	return ggx1 * ggx2;
+}
+
+void fresnelSchlick(s_vector& result,float cosTheta,s_vector& F0)
+{
+	s_vector the_1(1.0f, 1.0f, 1.0f, 1.0f);
+	s_vector tmp1; tmp1 = F0; tmp1.inverse(); tmp1.add(the_1);
+	float clamp = CMID(1.0 - cosTheta, 0.0f, 1.0f);
+	float tmp2 = pow(clamp, 5.0f);
+	tmp1.float_dot(tmp2);
+	
+	result.add_two(tmp1, F0);
+}
+
+```
 
 
+&emsp;&emsp;我们究竟将怎样表示场景上的辐照度(Irradiance), 辐射率(Radiance) L? 我们知道辐射率L（在计算机图形领域中）表示在给定立体角ω的情况下光源的辐射通量(Radiant flux)ϕ或光源在角度ω下发送出来的光能。 在我们的情况下，不妨假设立体角ω无限小，这样辐射度就表示光源在一条光线或单个方向向量上的辐射通量。<br/>
 
+&emsp;&emsp;基于以上的知识，我们如何将其转化为以前的教程中积累的一些光照知识呢？ 那么想象一下，我们有一个点光源（一个光源在所有方向具有相同的亮度），它的辐射通量为用RBG表示为（23.47,21.31,20.79）。该光源的辐射强度(Radiant Intensity)等于其在所有出射光线的辐射通量。 然而，当我们为一个表面上的特定的点p着色时，在其半球领域Ω的所有可能的入射方向上，只有一个入射方向向量ωi直接来自于该点光源。 假设我们在场景中只有一个光源，位于空间中的某一个点，因而对于p点的其他可能的入射光线方向上的辐射率为0：<br/><br/>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;![图片](https://learnopengl-cn.github.io/img/07/02/lighting_radiance_direct.png)<br/><br/>
+&emsp;&emsp;如果从一开始，我们就假设点光源不受光线衰减（光照强度会随着距离变暗）的影响，那么无论我们把光源放在哪，入射光线的辐射率总是一样的（除去入射角cosθ对辐射率的影响之外）。 正正是因为无论我们从哪个角度观察它，点光源总具有相同的辐射强度，我们可以有效地将其辐射强度建模为其辐射通量: 一个常量向量（23.47,21.31,20.79）。<br/>
 
+&emsp;&emsp;然而，辐射率也需要将位置p作为输入，正如所有现实的点光源都会受光线衰减影响一样，点光源的辐射强度应该根据点p所在的位置和光源的位置以及他们之间的距离而做一些缩放。 因此，根据原始的辐射方程，我们会根据表面法向量n和入射角度wi来缩放光源的辐射强度。<br/>
 
+&emsp;&emsp;在实现上来说：对于直接点光源的情况，辐射率函数L先获取光源的颜色值， 然后光源和某点p的距离衰减，接着按照n⋅wi缩放，但是仅仅有一条入射角为wi的光线打在点p上， 这个wi同时也等于在p点光源的方向向量。<br/>
 
+代码表示如下:<br/>
+```bash
+   //do the light
+		s_vector lightcolor; s_vector lightpos;
+		lightcolor = device->pointlight[0].lightcolor;
+		lightpos = device->pointlight[0].lightpos;
 
+		s_vector L; L.minus_two(lightpos, WorldPos); L.normalize();
+		s_vector H; H.add_two(V, L); H.normalize();
+
+		float distance = L.length();
+		float attenuation = 1.0f / (distance * distance);
+		s_vector radiance; radiance = lightcolor; radiance.float_dot(attenuation);
+```
 

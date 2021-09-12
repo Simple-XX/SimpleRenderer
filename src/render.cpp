@@ -922,9 +922,11 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 		float u = ff->texcoord.u; float v = ff->texcoord.v;
 		//albedo
 		s_vector albedo; read_the_texture(albedo, &device->tPBR[count].albedo_texture, u, v);
+		//gamma ½ÃÕý
 		float a_xx = albedo.x; float a_yy = albedo.y; float a_zz = albedo.z;
 		a_xx = pow(a_xx, 2.2f); a_yy = pow(a_yy, 2.2f); a_zz = pow(a_zz, 2.2f);
 		albedo.reset(a_xx, a_yy, a_zz, albedo.w);
+		
 	   //metallic
 		float metallic; s_vector v_metallic; read_the_texture(v_metallic, &device->tPBR[count].metallic_texture, u, v);
 		metallic = v_metallic.x;
@@ -938,7 +940,7 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 		s_vector N; N = ff->normal;
 
 		//get the norm
-		/*if (device->material[count].have_normal == 1)
+		if (device->material[count].have_normal == 1)
 		{
 			
 			s_vector norm;
@@ -951,7 +953,7 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 			norm.normalize();
 			N = norm;
 		}
-		*/
+		
 		
 
 		s_vector camPos; camPos = device->camera.viewpos; s_vector WorldPos; WorldPos = ff->pos;
@@ -1019,7 +1021,7 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 		yy = pow(yy, 1.0f / gamma);
 		zz = pow(zz, 1.0f / gamma);
 		the_color.reset(xx, yy, zz, the_color.w);
-
+		
 		color.r = the_color.x;
 		color.g = the_color.y;
 		color.b = the_color.z;

@@ -353,7 +353,7 @@ void draw_box(device_t* device, float theta)
 	s_vector rightpos(0.5f, 0.5f, 0.5f, 1.0f);
 	s_vector pos2;
 	apply_to_vector(pos2, rightpos, m);
-	s_vector light_color(300.0f, 300.0f, 300.0f, 1.0f);
+	s_vector light_color(0.588f, 0.588f, 0.588f, 0.588f);
 
 	s_vector light_ambient(0.5f, 0.5f, 0.5f,1.0f);
 	s_vector light_diffuse(0.5f, 0.5f, 0.5f, 1.0f);
