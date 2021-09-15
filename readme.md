@@ -54,7 +54,7 @@ You can download the src file and easily build this project through cmake tools 
 
 The render itself doesn't need to depend on any kinds of platforms. As it's developed by C/C++.  You can use it as how you use the OpenGL, however,it also needs something to output the result. In the src file, I showed how to use the `window.h` to get the result, and change the camera. You can read the `main.cpp` and see how to work with this renderer, and then drop the main.cpp, to  use it through other tools to get the output. And here am I writing to explain something for you:
 
-### 1. Get the device.
+### 1. Get the device
 
 The steps may go like:
 
@@ -105,7 +105,7 @@ load_obj(tot_vertex, &device, "model/nanosuit.obj", "model", 3,1);
 // the 5th one is to show if you wanna silp the y-axis or not.
 ```
 
-### 3. Get the texture.
+### 3. Get the texture
 
 If you already get the obj,then you don't have to set the texture for it.
 - if you are using the mesh you created yourself.
@@ -118,7 +118,7 @@ device.material[1].have_specular = 1;
 init_texture_by_specular(&device, "photo/container2_specular.png", 1);
 ```
 
-4. Draw them!!
+### 4. Draw them!!
 
 Draw the mesh you created by youself.
 
@@ -150,7 +150,7 @@ device->transform.update();
 draw_plane(device, tot_vertex.size(), tot_vertex, cnt);
 ```
 
-How to get the result? Check the framebuffer
+Check the framebuffer to get the result.
 
 ```cpp
 typedef unsigned int IUINT32;
