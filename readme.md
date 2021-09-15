@@ -107,8 +107,9 @@ load_obj(tot_vertex, &device, "model/nanosuit.obj", "model", 3,1);
 
 ### 3. Get the texture
 
-If you already get the obj,then you don't have to set the texture for it.
-- if you are using the mesh you created yourself.
+If you already get the obj, then you don't have to set the texture for it.
+
+If you are using the mesh you created yourself.
 
 ```cpp
 device.material[1].have_diffuse = 1; // if it has the diffuse texture.
