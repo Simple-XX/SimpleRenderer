@@ -87,7 +87,11 @@ typedef struct
 	IUINT32** texture_spe;
 	int is_cull;
 	s_PBR PBR;
-	t_PBR tPBR[10];//texture PBR
+	t_PBR tPBR[30];//texture PBR
+	int now_state;
+	float m1;
+	float m2;
+
 }device_t;
 
 #define RENDER_STATE_WIREFRAME 1  //渲染线框 
@@ -120,6 +124,8 @@ void device_set_texture_by_ao(device_t* device, IUINT32** texture, long pitch, i
 //设置点光源
 void device_set_pointlight(device_t* device, s_vector& pos, s_vector& color,s_vector& am,s_vector& di,s_vector& spe,int cnt);
 
+void device_set_pointlight(device_t* device, s_vector& pos, s_vector& color, int cnt);
+
 //设置材质
 
 //void device_set_material(device_t* device, s_vector& am, s_vector& di,s_vector& spe, float shi,int cnt);
@@ -135,6 +141,7 @@ IUINT32 device_texture_read(const device_t* device, float u, float v);
 
 void read_the_texture(s_vector& tmp, const  s_texture* t_texture, float u, float v);
 
+void read_the_texture_dir(s_vector& tmp, const  s_texture* t_texture, int x, int y);
 
 
 //=====================================================================

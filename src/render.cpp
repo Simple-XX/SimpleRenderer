@@ -436,6 +436,22 @@ void read_the_texture(s_vector& tmp, const  s_texture* t_texture, float u, float
 	tmp.w = (float)texture_a / 255.0f;
 
 }
+void read_the_texture_dir(s_vector& tmp, const  s_texture* t_texture, int x, int y)
+{
+	
+
+	IUINT32 cc = t_texture->texture[x][y];
+	int texture_a = (cc >> 24) & 0xff;
+	int texture_r = (cc >> 16) & 0xff;
+	int texture_g = (cc >> 8) & 0xff;
+	int texture_b = cc & 0xff;
+	//printf("%d %d %d\n", texture_r, texture_g, texture_b);
+	//printf("%f %f %f\n", ff.color.r, ff.color.g, ff.color.b);
+	tmp.x = (float)texture_r / 255.0f;
+	tmp.y = (float)texture_g / 255.0f;
+	tmp.z = (float)texture_b / 255.0f;
+	tmp.w = (float)texture_a / 255.0f;
+}
 
 bool computeBarycentric3D(s_vector& tmp, s_vector& p0, s_vector& p1, s_vector& p2, s_vector& pos)
 {
@@ -903,7 +919,195 @@ void fresnelSchlick(s_vector& result,float cosTheta,s_vector& F0)
 
 void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_ban, s_vector& ori_co)
 {
-	
+	int now_num = device->now_state;
+	if (now_num == 7)
+	{
+		if (count == 2)
+		{
+
+
+
+			color.r = ff->color.r;
+			color.g = ff->color.g;
+			color.b = ff->color.b;
+			color.a = ff->color.a;
+
+
+
+		}
+		else
+		{
+			float u = ff->texcoord.u; float v = ff->texcoord.v;
+			//albedo
+			s_vector albedo; read_the_texture(albedo, &device->tPBR[count].albedo_texture, u, v);
+			//gamma 矫正
+			float a_xx = albedo.x; float a_yy = albedo.y; float a_zz = albedo.z;
+			a_xx = pow(a_xx, 2.2f); a_yy = pow(a_yy, 2.2f); a_zz = pow(a_zz, 2.2f);
+			albedo.reset(a_xx, a_yy, a_zz, albedo.w);
+
+			//metallic
+			float metallic; s_vector v_metallic; read_the_texture(v_metallic, &device->tPBR[count].metallic_texture, u, v);
+			metallic = v_metallic.x;
+
+			//roughness
+			float roughness; s_vector v_roughness; read_the_texture(v_roughness, &device->tPBR[count].roughness_texture, u, v);
+			roughness = v_roughness.x;
+			//ao
+			float ao = device->PBR.ao;
+			//normal
+			s_vector N; N = ff->normal;
+
+			//get the norm
+			if (device->material[count].have_normal == 1)
+			{
+
+				s_vector norm;
+				read_the_texture(norm, &device->material[count].normal_texture, u, v);
+				norm.float_dot(2.0f);
+				s_vector tmp_1(1.0f, 1.0f, 1.0f, 1.0f);
+				norm.minus_two(norm, tmp_1);
+				norm.normalize();
+				norm.reset(ff->storage0.dotproduct(norm), ff->storage1.dotproduct(norm), ff->storage2.dotproduct(norm), 1.0f);
+				norm.normalize();
+				N = norm;
+			}
+
+
+
+			s_vector camPos; camPos = device->camera.viewpos; s_vector WorldPos; WorldPos = ff->pos;
+			s_vector V; V.minus_two(camPos, WorldPos); V.normalize();
+
+			s_vector F0(0.04f, 0.04f, 0.04f, 1.0f);
+
+			F0.interp_two(F0, albedo, metallic);
+
+			s_vector Lo(0.0f, 0.0f, 0.0f, 1.0f);
+
+			//do the light
+			s_vector lightcolor; s_vector lightpos;
+			lightcolor = device->pointlight[0].lightcolor;
+			lightpos = device->pointlight[0].lightpos;
+
+			s_vector L; L.minus_two(lightpos, WorldPos); L.normalize();
+			s_vector H; H.add_two(V, L); H.normalize();
+
+			float distance = L.length();
+			float attenuation = 1.0f / (distance * distance);
+			s_vector radiance; radiance = lightcolor; radiance.float_dot(attenuation);
+
+			//cook-Torrance BRDF
+			float NDF = DistributionGGX(N, H, roughness);
+			float G = GeometrySmith(N, V, L, roughness);
+			s_vector F;    float tmp1; tmp1 = H.dotproduct(V); tmp1 = max(tmp1, 0.0f); /*tmp1 = CMID(tmp1, 0.0f, 1.0f); */ fresnelSchlick(F, tmp1, F0);
+
+			s_vector numerator;  numerator = F;
+			float tmp2 = NDF * G;   numerator.float_dot(tmp2);
+			float denominator = 4.0f * max(N.dotproduct(V), 0.0f) * max(N.dotproduct(L), 0.0f) + 0.0001f;
+			s_vector specular = numerator;
+			specular.float_dot(1.0f / denominator);
+
+			s_vector kS; kS = F;
+
+			s_vector the_1(1.0f, 1.0f, 1.0f, 1.0f);
+			s_vector tmp9; tmp9 = kS; tmp9.inverse(); tmp9.add(the_1);
+			s_vector kD; kD = tmp9;
+
+
+			kD.float_dot(1.0f - metallic);
+
+			float NdotL = max(N.dotproduct(L), 0.0f);
+
+			s_vector get1; get1.dot_two(kD, albedo); get1.float_dot(1.0f / PI);  get1.add(specular);
+			s_vector get2; get2 = radiance; get2.float_dot(NdotL);
+			get1.dot_two(get1, get2);
+			Lo.add(get1);
+
+
+			//ambient lighting
+			s_vector tmp8(0.03f, 0.03f, 0.03f, 1.0f);
+			s_vector ambient; ambient.dot_two(tmp8, albedo);  ambient.float_dot(ao);
+
+			s_vector the_color; the_color.add_two(ambient, Lo);
+
+			s_vector tmp7; tmp7.add_two(the_color, the_1);
+			the_color.divide_two(the_color, tmp7);
+
+			float gamma = 2.2;
+
+			float xx = the_color.x; float yy = the_color.y; float zz = the_color.z;
+			xx = pow(xx, 1.0f / gamma);
+			yy = pow(yy, 1.0f / gamma);
+			zz = pow(zz, 1.0f / gamma);
+			the_color.reset(xx, yy, zz, the_color.w);
+
+			color.r = the_color.x;
+			color.g = the_color.y;
+			color.b = the_color.z;
+			color.a = 1.0f;
+		}
+	}
+	else if (now_num == 1)
+	{
+	if (count == 1)
+	{
+		s_vector result(0.0f, 0.0f, 0.0f, 1.0f);
+		s_vector lightcolor; s_vector lightpos;
+		lightcolor = device->pointlight[0].lightcolor;
+		lightpos = device->pointlight[0].lightpos;
+		s_vector objectcolor(ff->color.r, ff->color.g, ff->color.b, ff->color.a);
+		//环境光照 ambient
+		float ambientStrength = device->m1;
+		s_vector ambient;
+		ambient = lightcolor;
+		ambient.float_dot(ambientStrength);
+
+		//漫反射光照 diffuse
+		s_vector norm = ff->normal;
+		s_vector fragpos = ff->pos;
+		s_vector lightDir; lightDir.minus_two(lightpos, fragpos); lightDir.normalize();
+		//lightDir.show();
+		float diff = max(norm.dotproduct(lightDir), 0.0f);
+		//if (diff > 0.0f) { printf("%lf\n", diff); norm.show(); }
+		s_vector diffuse; diffuse = lightcolor; diffuse.float_dot(diff);
+
+		//specular 镜面高光
+		float specularstrength = device->m2;
+		//get the view pos
+		s_vector viewpos = device->camera.viewpos;
+		s_vector viewdir; viewdir.minus_two(viewpos, fragpos); viewdir.normalize();
+		s_vector in_lightdir; in_lightdir = lightDir; in_lightdir.inverse();
+		s_vector reflectdir; reflectdir.reflect(in_lightdir, norm);
+		float spec = pow(max(viewdir.dotproduct(reflectdir), 0.0f), 128);
+		s_vector specular = lightcolor;
+		specular.float_dot(spec); specular.float_dot(specularstrength);
+
+		result.add_two(ambient, diffuse); result.add_two(result, specular);
+		result.dot_two(result, objectcolor);
+
+		color.r = result.x;
+		color.g = result.y;
+		color.b = result.z;
+		color.a = result.w;
+		/*
+
+		color.r = ff->color.r;
+		color.g = ff->color.g;
+		color.b = ff->color.b;
+		color.a = ff->color.a;
+		*/
+
+
+	}
+	else if (count == 2)
+	{
+		color.r = ff->color.r;
+		color.g = ff->color.g;
+		color.b = ff->color.b;
+		color.a = ff->color.a;
+	}
+    }
+	else if (now_num == 2)
+	{
 	if (count == 2)
 	{
 
@@ -919,31 +1123,322 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 	}
 	else
 	{
+		s_vector init_diffuse(0.64, 0.64, 0.64, 1.0f);
+		s_vector init_specular(0.5, 0.5, 0.5, 1.0f);
 		float u = ff->texcoord.u; float v = ff->texcoord.v;
-		//albedo
-		s_vector albedo; read_the_texture(albedo, &device->tPBR[count].albedo_texture, u, v);
-		//gamma 矫正
-		float a_xx = albedo.x; float a_yy = albedo.y; float a_zz = albedo.z;
-		a_xx = pow(a_xx, 2.2f); a_yy = pow(a_yy, 2.2f); a_zz = pow(a_zz, 2.2f);
-		albedo.reset(a_xx, a_yy, a_zz, albedo.w);
-		
-	   //metallic
-		float metallic; s_vector v_metallic; read_the_texture(v_metallic, &device->tPBR[count].metallic_texture, u, v);
-		metallic = v_metallic.x;
+		s_vector result(0.0f, 0.0f, 0.0f, 1.0f);
+		s_vector lightpos;
+		s_vector light_ambient; light_ambient = device->pointlight[0].ambient;
+		s_vector light_diffuse; light_diffuse = device->pointlight[0].diffuse;
+		s_vector light_specular; light_specular = device->pointlight[0].specular;
+		lightpos = device->pointlight[0].lightpos;
+		s_vector objectcolor(ff->color.r, ff->color.g, ff->color.b, ff->color.a);
+		//环境光照 ambient
 
-		//roughness
-		float roughness; s_vector v_roughness; read_the_texture(v_roughness, &device->tPBR[count].roughness_texture, u, v);
-		roughness = v_roughness.x;
-		//ao
-		float ao = device->PBR.ao;
-		//normal
-		s_vector N; N = ff->normal;
+		//float r, g, b, a; a = 1.0f;
+		//device_texture_read_from_material(device, u, v, r, g, b, a);
+		//printf("%lf %lf %lf %lf\n", r, g, b, a);
+		s_vector material_ambient;
+		if (device->material[count].have_diffuse == 1)
+			read_the_texture(material_ambient, &device->material[count].diffuse_texture, u, v);
+		else material_ambient = init_diffuse;
+		s_vector ambient;                ambient.dot_two(light_ambient, material_ambient);
+		//ambient.show();
 
-		//get the norm
+		//漫反射光照 diffuse
+		s_vector norm = ff->normal;
+		s_vector fragpos = ff->pos;
+		s_vector lightDir; lightDir.minus_two(lightpos, fragpos); lightDir.normalize();
+		//lightDir.show();
+		float diff = max(norm.dotproduct(lightDir), 0.0f);
+		//if (diff > 0.0f) { printf("%lf\n", diff); norm.show(); }
+		s_vector material_diffuse; material_diffuse = material_ambient;
+		s_vector diffuse; diffuse = light_diffuse; diffuse.float_dot(diff); diffuse.dot_two(diffuse, material_diffuse);
+
+		//specular 镜面高光
+		float material_shininess; material_shininess = device->material[count].shininess;
+		//get the view pos
+		s_vector viewpos = device->camera.viewpos;
+		s_vector viewdir; viewdir.minus_two(viewpos, fragpos); viewdir.normalize();
+		s_vector in_lightdir; in_lightdir = lightDir; in_lightdir.inverse();
+		s_vector reflectdir; reflectdir.reflect(in_lightdir, norm);
+		float spec = pow(max(viewdir.dotproduct(reflectdir), 0.0f), material_shininess);
+		s_vector specular = light_specular;
+		specular.float_dot(spec);
+
+		s_vector material_specular;
+		if (device->material[count].have_specular == 1)
+			read_the_texture(material_specular, &device->material[count].specular_texture, u, v);
+		else material_specular = init_specular;
+		specular.dot_two(specular, material_specular);
+		//specular.show();
+		result.add_two(ambient, diffuse); result.add_two(result, specular);
+		//result.dot_two(result, objectcolor);
+		//result.show();
+
+		color.r = result.x;
+		color.g = result.y;
+		color.b = result.z;
+		color.a = result.w;
+
+
+		/*
+		color.r = ff->color.r;
+		color.g = ff->color.g;
+		color.b = ff->color.b;
+		color.a = ff->color.a;
+		*/
+
+
+	}
+    }
+	else if (now_num == 3)
+	{
+	if (count == 2)
+	{
+
+
+
+		color.r = ff->color.r;
+		color.g = ff->color.g;
+		color.b = ff->color.b;
+		color.a = ff->color.a;
+
+
+
+	}
+	else
+	{
+		s_vector init_diffuse(0.64, 0.64, 0.64, 1.0f);
+		s_vector init_specular(0.5, 0.5, 0.5, 1.0f);
+		float u = ff->texcoord.u; float v = ff->texcoord.v;
+		s_vector result(0.0f, 0.0f, 0.0f, 1.0f);
+		s_vector lightpos;
+		s_vector light_ambient; light_ambient = device->pointlight[0].ambient;
+		s_vector light_diffuse; light_diffuse = device->pointlight[0].diffuse;
+		s_vector light_specular; light_specular = device->pointlight[0].specular;
+		lightpos = device->pointlight[0].lightpos;
+		s_vector objectcolor(ff->color.r, ff->color.g, ff->color.b, ff->color.a);
+		//环境光照 ambient
+
+		//float r, g, b, a; a = 1.0f;
+		//device_texture_read_from_material(device, u, v, r, g, b, a);
+		//printf("%lf %lf %lf %lf\n", r, g, b, a);
+		s_vector material_ambient;
+		if (device->material[count].have_diffuse == 1)
+			read_the_texture(material_ambient, &device->material[count].diffuse_texture, u, v);
+		else material_ambient = init_diffuse;
+		s_vector ambient;                ambient.dot_two(light_ambient, material_ambient);
+		//ambient.show();
+
+		//漫反射光照 diffuse
+		s_vector norm = ff->normal;
+		s_vector fragpos = ff->pos;
+		s_vector lightDir; lightDir.minus_two(lightpos, fragpos); lightDir.normalize();
+		//lightDir.show();
+		float diff = max(norm.dotproduct(lightDir), 0.0f);
+		//if (diff > 0.0f) { printf("%lf\n", diff); norm.show(); }
+		s_vector material_diffuse; material_diffuse = material_ambient;
+		s_vector diffuse; diffuse = light_diffuse; diffuse.float_dot(diff); diffuse.dot_two(diffuse, material_diffuse);
+
+		//specular 镜面高光
+		float material_shininess; material_shininess = device->material[count].shininess;
+		//get the view pos
+		s_vector viewpos = device->camera.viewpos;
+		s_vector viewdir; viewdir.minus_two(viewpos, fragpos); viewdir.normalize();
+		s_vector in_lightdir; in_lightdir = lightDir; in_lightdir.inverse();
+		s_vector reflectdir; reflectdir.reflect(in_lightdir, norm);
+		float spec = pow(max(viewdir.dotproduct(reflectdir), 0.0f), material_shininess);
+		s_vector specular = light_specular;
+		specular.float_dot(spec);
+
+		s_vector material_specular;
+		if (device->material[count].have_specular == 1)
+			read_the_texture(material_specular, &device->material[count].specular_texture, u, v);
+		else material_specular = init_specular;
+		specular.dot_two(specular, material_specular);
+		//specular.show();
+		result.add_two(ambient, diffuse); result.add_two(result, specular);
+		//result.dot_two(result, objectcolor);
+		//result.show();
+
+		color.r = result.x;
+		color.g = result.y;
+		color.b = result.z;
+		color.a = result.w;
+
+
+		/*
+		color.r = ff->color.r;
+		color.g = ff->color.g;
+		color.b = ff->color.b;
+		color.a = ff->color.a;
+		*/
+
+
+	}
+
+    }
+	else if (now_num == 4)
+	{
+	if (count == 2)
+	{
+
+
+
+		color.r = ff->color.r;
+		color.g = ff->color.g;
+		color.b = ff->color.b;
+		color.a = ff->color.a;
+
+
+
+	}
+	else
+	{
+		s_vector init_diffuse(0.64, 0.64, 0.64, 1.0f);
+		s_vector init_specular(0.5, 0.5, 0.5, 1.0f);
+		float u = ff->texcoord.u; float v = ff->texcoord.v;
+		s_vector result(0.0f, 0.0f, 0.0f, 1.0f);
+		s_vector lightpos;
+		s_vector light_ambient; light_ambient = device->pointlight[0].ambient;
+		s_vector light_diffuse; light_diffuse = device->pointlight[0].diffuse;
+		s_vector light_specular; light_specular = device->pointlight[0].specular;
+		lightpos = device->pointlight[0].lightpos;
+		s_vector objectcolor(ff->color.r, ff->color.g, ff->color.b, ff->color.a);
+		//环境光照 ambient
+
+		//float r, g, b, a; a = 1.0f;
+		//device_texture_read_from_material(device, u, v, r, g, b, a);
+		//printf("%lf %lf %lf %lf\n", r, g, b, a);
+		s_vector material_ambient;
+		if (device->material[count].have_diffuse == 1)
+			read_the_texture(material_ambient, &device->material[count].diffuse_texture, u, v);
+		else material_ambient = init_diffuse;
+		if (material_ambient.w < 0.1f)
+		{
+			is_ban = 1; return;
+		}
+		else
+			if (ori_co.x != -1.0f)
+			{
+				float a1 = material_ambient.w; float a2 = 1.0f - a1;
+				s_vector tmp1; tmp1 = material_ambient; tmp1.float_dot(a1);
+				s_vector tmp2; tmp2 = ori_co; tmp2.float_dot(a2);
+				material_ambient.add_two(tmp1, tmp2);
+			}
+
+		s_vector ambient;                ambient.dot_two(light_ambient, material_ambient);
+		//ambient.show();
+
+		//漫反射光照 diffuse
+		s_vector norm = ff->normal;
+		s_vector fragpos = ff->pos;
+		s_vector lightDir; lightDir.minus_two(lightpos, fragpos); lightDir.normalize();
+		//lightDir.show();
+		float diff = max(norm.dotproduct(lightDir), 0.0f);
+		//if (diff > 0.0f) { printf("%lf\n", diff); norm.show(); }
+		s_vector material_diffuse; material_diffuse = material_ambient;
+		s_vector diffuse; diffuse = light_diffuse; diffuse.float_dot(diff); diffuse.dot_two(diffuse, material_diffuse);
+
+		//specular 镜面高光
+		float material_shininess; material_shininess = device->material[count].shininess;
+		//get the view pos
+		s_vector viewpos = device->camera.viewpos;
+		s_vector viewdir; viewdir.minus_two(viewpos, fragpos); viewdir.normalize();
+		s_vector in_lightdir; in_lightdir = lightDir; in_lightdir.inverse();
+		s_vector reflectdir; reflectdir.reflect(in_lightdir, norm);
+		float spec = pow(max(viewdir.dotproduct(reflectdir), 0.0f), material_shininess);
+		s_vector specular = light_specular;
+		specular.float_dot(spec);
+
+		s_vector material_specular;
+		if (device->material[count].have_specular == 1)
+			read_the_texture(material_specular, &device->material[count].specular_texture, u, v);
+		else material_specular = init_specular;
+		specular.dot_two(specular, material_specular);
+		//specular.show();
+		result.add_two(ambient, diffuse); result.add_two(result, specular);
+		//result.dot_two(result, objectcolor);
+		//result.show();
+
+		color.r = result.x;
+		color.g = result.y;
+		color.b = result.z;
+		color.a = result.w;
+
+
+		/*
+		color.r = ff->color.r;
+		color.g = ff->color.g;
+		color.b = ff->color.b;
+		color.a = ff->color.a;
+		*/
+
+
+	}
+    }
+	else if (now_num == 5)
+	{
+	if (count == 2)
+	{
+
+
+
+		color.r = ff->color.r;
+		color.g = ff->color.g;
+		color.b = ff->color.b;
+		color.a = ff->color.a;
+
+
+
+	}
+	else
+	{
+		s_vector init_diffuse(0.64, 0.64, 0.64, 1.0f);
+		s_vector init_specular(0.5, 0.5, 0.5, 1.0f);
+		float u = ff->texcoord.u; float v = ff->texcoord.v;
+		s_vector result(0.0f, 0.0f, 0.0f, 1.0f);
+		s_vector lightpos;
+		s_vector light_ambient; light_ambient = device->pointlight[0].ambient;
+		s_vector light_diffuse; light_diffuse = device->pointlight[0].diffuse;
+		s_vector light_specular; light_specular = device->pointlight[0].specular;
+		lightpos = device->pointlight[0].lightpos;
+		//bump
+		/*if (device->material[count].have_normal == 1)
+			lightpos.reset(ff->storage0.dotproduct(lightpos), ff->storage1.dotproduct(lightpos), ff->storage2.dotproduct(lightpos), 1.0f);
+		*/
+
+		s_vector objectcolor(ff->color.r, ff->color.g, ff->color.b, ff->color.a);
+		//环境光照 ambient
+
+		//float r, g, b, a; a = 1.0f;
+		//device_texture_read_from_material(device, u, v, r, g, b, a);
+		//printf("%lf %lf %lf %lf\n", r, g, b, a);
+		s_vector material_ambient;
+		if (device->material[count].have_diffuse == 1)
+			read_the_texture(material_ambient, &device->material[count].diffuse_texture, u, v);
+		else material_ambient = init_diffuse;
+		if (material_ambient.w < 0.1f)
+		{
+			is_ban = 1; return;
+		}
+		else
+			if (ori_co.x != -1.0f)
+			{
+				float a1 = material_ambient.w; float a2 = 1.0f - a1;
+				s_vector tmp1; tmp1 = material_ambient; tmp1.float_dot(a1);
+				s_vector tmp2; tmp2 = ori_co; tmp2.float_dot(a2);
+				material_ambient.add_two(tmp1, tmp2);
+			}
+
+		s_vector ambient;                ambient.dot_two(light_ambient, material_ambient);
+		//ambient.show();
+
+		//漫反射光照 diffuse
+		s_vector norm;       // = ff->normal
 		if (device->material[count].have_normal == 1)
 		{
-			
-			s_vector norm;
 			read_the_texture(norm, &device->material[count].normal_texture, u, v);
 			norm.float_dot(2.0f);
 			s_vector tmp_1(1.0f, 1.0f, 1.0f, 1.0f);
@@ -951,11 +1446,100 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 			norm.normalize();
 			norm.reset(ff->storage0.dotproduct(norm), ff->storage1.dotproduct(norm), ff->storage2.dotproduct(norm), 1.0f);
 			norm.normalize();
-			N = norm;
 		}
-		
-		
+		else
+		{
+			norm = ff->normal;
+		}
 
+		s_vector fragpos = ff->pos;
+		//bump
+		/*if (device->material[count].have_normal == 1)
+			fragpos.reset(ff->storage0.dotproduct(fragpos), ff->storage1.dotproduct(fragpos), ff->storage2.dotproduct(fragpos), 1.0f);
+			*/
+
+		s_vector lightDir; lightDir.minus_two(lightpos, fragpos); lightDir.normalize();
+		//lightDir.show();
+		float diff = max(norm.dotproduct(lightDir), 0.0f);
+		//if (diff > 0.0f) { printf("%lf\n", diff); norm.show(); }
+		s_vector material_diffuse; material_diffuse = material_ambient;
+		s_vector diffuse; diffuse = light_diffuse; diffuse.float_dot(diff); diffuse.dot_two(diffuse, material_diffuse);
+
+		//specular 镜面高光
+		float material_shininess; material_shininess = device->material[count].shininess;
+		//get the view pos
+		s_vector viewpos = device->camera.viewpos;
+		//bump
+		/*if (device->material[count].have_normal == 1)
+			viewpos.reset(ff->storage0.dotproduct(viewpos), ff->storage1.dotproduct(viewpos), ff->storage2.dotproduct(viewpos), 1.0f);
+			*/
+
+		s_vector viewdir; viewdir.minus_two(viewpos, fragpos); viewdir.normalize();
+		s_vector in_lightdir; in_lightdir = lightDir; in_lightdir.inverse();
+		s_vector reflectdir; reflectdir.reflect(in_lightdir, norm);
+		float spec = pow(max(viewdir.dotproduct(reflectdir), 0.0f), material_shininess);
+		s_vector specular = light_specular;
+		specular.float_dot(spec);
+
+		s_vector material_specular;
+		if (device->material[count].have_specular == 1)
+			read_the_texture(material_specular, &device->material[count].specular_texture, u, v);
+		else material_specular = init_specular;
+		specular.dot_two(specular, material_specular);
+		//specular.show();
+		result.add_two(ambient, diffuse); result.add_two(result, specular);
+		//result.dot_two(result, objectcolor);
+		//result.show();
+
+		//gamma 矫正
+		/*float gamma = 2.2;
+
+		float xx = result.x; float yy = result.y; float zz = result.z;
+		xx = pow(xx, 1.0f / gamma);
+		yy = pow(yy, 1.0f / gamma);
+		zz = pow(zz, 1.0f / gamma);
+		result.reset(xx, yy, zz, result.w);
+		*/
+
+		color.r = result.x;
+		color.g = result.y;
+		color.b = result.z;
+		color.a = result.w;
+
+
+		/*
+		color.r = ff->color.r;
+		color.g = ff->color.g;
+		color.b = ff->color.b;
+		color.a = ff->color.a;
+		*/
+
+
+	}
+    }
+	else if (now_num == 6)
+	{
+	if (count == 2)
+	{
+
+
+
+		color.r = ff->color.r;
+		color.g = ff->color.g;
+		color.b = ff->color.b;
+		color.a = ff->color.a;
+
+
+
+	}
+	else
+	{
+		s_vector albedo; albedo = device->PBR.albedo;
+		float metallic = device->PBR.metallic;
+		s_vector v_metallic(metallic, metallic, metallic, 1.0f);
+		float roughness = device->PBR.roughness;
+		float ao = device->PBR.ao;
+		s_vector N; N = ff->normal;
 		s_vector camPos; camPos = device->camera.viewpos; s_vector WorldPos; WorldPos = ff->pos;
 		s_vector V; V.minus_two(camPos, WorldPos); V.normalize();
 
@@ -980,7 +1564,7 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 		//cook-Torrance BRDF
 		float NDF = DistributionGGX(N, H, roughness);
 		float G = GeometrySmith(N, V, L, roughness);
-		s_vector F;    float tmp1; tmp1 = H.dotproduct(V); tmp1 = max(tmp1, 0.0f); /*tmp1 = CMID(tmp1, 0.0f, 1.0f); */ fresnelSchlick(F, tmp1, F0);
+		s_vector F;    float tmp1; tmp1 = H.dotproduct(V); tmp1 = CMID(tmp1, 0.0f, 1.0f);  fresnelSchlick(F, tmp1, F0);
 
 		s_vector numerator;  numerator = F;
 		float tmp2 = NDF * G;   numerator.float_dot(tmp2);
@@ -991,9 +1575,9 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 		s_vector kS; kS = F;
 
 		s_vector the_1(1.0f, 1.0f, 1.0f, 1.0f);
-		s_vector tmp9; tmp9 =kS ; tmp9.inverse(); tmp9.add(the_1);
+		s_vector tmp9; tmp9 = kS; tmp9.inverse(); tmp9.add(the_1);
 		s_vector kD; kD = tmp9;
-      
+
 
 		kD.float_dot(1.0f - metallic);
 
@@ -1006,9 +1590,9 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 
 
 		//ambient lighting
-		s_vector tmp8(0.03f, 0.03f, 0.03f, 1.0f); 
+		s_vector tmp8(0.03f, 0.03f, 0.03f, 1.0f);
 		s_vector ambient; ambient.dot_two(tmp8, albedo);  ambient.float_dot(ao);
-		
+
 		s_vector the_color; the_color.add_two(ambient, Lo);
 
 		s_vector tmp7; tmp7.add_two(the_color, the_1);
@@ -1021,12 +1605,13 @@ void f_shader(device_t* device, for_fs* ff, s_color& color, int count, bool& is_
 		yy = pow(yy, 1.0f / gamma);
 		zz = pow(zz, 1.0f / gamma);
 		the_color.reset(xx, yy, zz, the_color.w);
-		
+
 		color.r = the_color.x;
 		color.g = the_color.y;
 		color.b = the_color.z;
 		color.a = 1.0f;
 	}
+    }
 }
 
 
@@ -1620,6 +2205,12 @@ bool load_obj(std::vector<vertex_t>& tot_vertex, device_t* device, const char* o
 				mesh_data.pos.x = attrib.vertices[(vertex_index[v]) * 3 + 2];
 				mesh_data.pos.w = 1.0f;
 
+				s_matrix mm;
+
+				s_vector axis;
+				axis.reset(0.0f, 1.0f, 0.0f, 1.0f);
+				mm.set_rotate(axis, -1.65);
+				apply_to_vector(mesh_data.pos, mesh_data.pos, mm);
 				// vt
 				mesh_data.tc.u = (float)attrib.texcoords[texcoord_index[v] * 2 + 0];
 				mesh_data.tc.v = (float)attrib.texcoords[texcoord_index[v] * 2 + 1];
@@ -1657,4 +2248,11 @@ bool load_obj(std::vector<vertex_t>& tot_vertex, device_t* device, const char* o
 	return true;
 
 
+}
+
+
+void device_set_pointlight(device_t* device, s_vector& pos, s_vector& color, int cnt)
+{
+	device->pointlight[cnt].lightpos = pos;
+	device->pointlight[cnt].lightcolor = color;
 }
