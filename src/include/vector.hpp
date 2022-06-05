@@ -528,10 +528,9 @@ public:
     }
 
     /**
-     * @brief * 重载，向量数乘
-     * @param  _U              相乘的数的类型
-     * @param  _f              相乘的数
-     * @return Vector2<_T>     结果
+     * @brief * 重载，向量点积
+     * @param  _v              要乘的向量
+     * @return _T              结果
      */
     _T operator*(Vector2<_T> _v) const {
         DCHECK(!_v.HasNaNs());
