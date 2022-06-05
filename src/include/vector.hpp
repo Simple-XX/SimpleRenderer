@@ -528,6 +528,17 @@ public:
     }
 
     /**
+     * @brief * 重载，向量数乘
+     * @param  _U              相乘的数的类型
+     * @param  _f              相乘的数
+     * @return Vector2<_T>     结果
+     */
+    _T operator*(Vector2<_T> _v) const {
+        DCHECK(!_v.HasNaNs());
+        return x * _v.x + y * _v.y;
+    }
+
+    /**
      * @brief *= 重载，向量数乘
      * @param  _U              相乘的数的类型
      * @param  _f              相乘的数
