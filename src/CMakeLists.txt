@@ -33,7 +33,6 @@ include_directories(
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} SimpleRender_src)
 
-
 # 生成可执行文件
 ADD_EXECUTABLE(SimpleRender
     ${SimpleRender_src})
