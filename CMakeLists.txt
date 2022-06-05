@@ -23,7 +23,26 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# Set kernel name
+# Set renderer name
 set(RendererName renderer)
 
+# pkgconfig
+find_package(PkgConfig REQUIRED)
+
+# gtk
+pkg_check_modules(Gtkmm4 REQUIRED gtkmm-4.0)
+add_definitions(${Gtkmm4_CFLAGS_OTHER})
+link_directories(${Gtkmm4_LIBRARY_DIRS})
+
+# gflag
+pkg_check_modules(gflag REQUIRED gflags)
+add_definitions(${gflag_CFLAGS_OTHER})
+link_directories(${gflag_LIBRARY_DIRS})
+
+# glog
+pkg_check_modules(glog REQUIRED libglog)
+add_definitions(${glog_CFLAGS_OTHER})
+link_directories(${glog_LIBRARY_DIRS})
+
 add_subdirectory(${SimpleRender_SOURCE_DIR}/src)
+# add_subdirectory(${SimpleRender_SOURCE_DIR}/test)

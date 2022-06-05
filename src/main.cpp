@@ -10,7 +10,7 @@
  * @par change log:
  * <table>
  * <tr><th>Date<th>Author<th>Description
- * <tr><td>2022-06-06<td>Zone<td>创建文件
+ * <tr><td>2022-06-06<td>Zone.N<td>迁移到 doxygen
  * </table>
  */
 
@@ -79,6 +79,10 @@ private:
     Screen   m_Area_Lines;
     bool on_window_key_pressed(guint _keyval, guint, Gdk::ModifierType _mod) {
         cout << Gtk::Accelerator::name(_keyval, _mod) << endl;
+        if (_keyval == GDK_KEY_Escape) {
+            hide();
+            return true;
+        }
         return false;
     }
 
