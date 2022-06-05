@@ -1,0 +1,7 @@
+/Users/nzh/Documents/GitHub/SimpleRenderer/demo/加载模型/CMakeFiles/install/local.dir
+/Users/nzh/Documents/GitHub/SimpleRenderer/demo/加载模型/CMakeFiles/rebuild_cache.dir
+/Users/nzh/Documents/GitHub/SimpleRenderer/demo/加载模型/CMakeFiles/edit_cache.dir
+/Users/nzh/Documents/GitHub/SimpleRenderer/demo/加载模型/CMakeFiles/install/strip.dir
+/Users/nzh/Documents/GitHub/SimpleRenderer/demo/加载模型/CMakeFiles/install.dir
+/Users/nzh/Documents/GitHub/SimpleRenderer/demo/加载模型/CMakeFiles/list_install_components.dir
+/Users/nzh/Documents/GitHub/SimpleRenderer/demo/加载模型/CMakeFiles/SIMPLERENDER.dir
