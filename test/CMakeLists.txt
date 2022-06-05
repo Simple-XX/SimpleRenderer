@@ -33,7 +33,8 @@ add_executable(test
     ${test_src})
 
 target_link_libraries(test
-    gtest_main)
+    gtest_main
+    ${glog_LIBRARIES})
 
 include(GoogleTest)
 gtest_discover_tests(test)

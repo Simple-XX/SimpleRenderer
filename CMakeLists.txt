@@ -45,4 +45,4 @@ add_definitions(${glog_CFLAGS_OTHER})
 link_directories(${glog_LIBRARY_DIRS})
 
 add_subdirectory(${SimpleRender_SOURCE_DIR}/src)
-# add_subdirectory(${SimpleRender_SOURCE_DIR}/test)
+add_subdirectory(${SimpleRender_SOURCE_DIR}/test)

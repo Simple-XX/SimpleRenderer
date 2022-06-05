@@ -43,7 +43,7 @@ public:
     bool operator<(const Vector<T, N> &_v) const;
     bool operator<=(const Vector<T, N> &_v) const;
     // 向量取反
-    Vector<T, N> operator-(void) const;
+    Vector<T, N> operator-() const;
     // 范数
     float norm(void) const;
     // 单位向量
@@ -168,8 +168,7 @@ bool Vector<T, N>::operator>(const Vector<T, N> &_v) const {
 template <class T, size_t N>
 bool Vector<T, N>::operator>=(const Vector<T, N> &_v) const {
     bool res = true;
-    if (coord.x < _v.coord.x || coord.y < _v.coord.y || coord.z < _v.coord.z)
-    {
+    if (coord.x < _v.coord.x || coord.y < _v.coord.y || coord.z < _v.coord.z) {
         res = false;
     }
     return res;
@@ -188,15 +187,14 @@ bool Vector<T, N>::operator<(const Vector<T, N> &_v) const {
 template <class T, size_t N>
 bool Vector<T, N>::operator<=(const Vector<T, N> &_v) const {
     bool res = true;
-    if (coord.x > _v.coord.x || coord.y > _v.coord.y || coord.z > _v.coord.z)
-    {
+    if (coord.x > _v.coord.x || coord.y > _v.coord.y || coord.z > _v.coord.z) {
         res = false;
     }
     return res;
 }
 
 template <class T, size_t N>
-Vector<T, N> Vector<T, N>::operator-(void) const {
+Vector<T, N> Vector<T, N>::operator-() const {
     T tmp[N];
     tmp[0] = -coord.x;
     tmp[1] = -coord.y;
@@ -492,7 +490,7 @@ public:
      * @brief - 重载，向量反向
      * @return Vector2<_T>     结果
      */
-    Vector2<_T> operator-(void) const {
+    Vector2<_T> operator-() const {
         return Vector2<_T>(-x, -y);
     }
 
@@ -616,6 +614,46 @@ public:
      */
     _T Length(void) const {
         return std::sqrt(LengthSquared());
+    }
+
+    /**
+     * @brief 点积
+     * @param  _v1             向量1
+     * @param  _v2             向量2
+     * @return _T              结果
+     */
+    _T Dot(const Vector2<_T> &_v1, const Vector2<_T> &_v2) {
+        DCHECK(!_v1.HasNaNs() && !_v2.HasNaNs());
+        return _v1.x * _v2.x + _v1.y * _v2.y;
+    }
+
+    /**
+     * @brief 点积的绝对值
+     * @param  _v1             向量1
+     * @param  _v2             向量2
+     * @return _T              结果
+     */
+    _T AbsDot(const Vector2<_T> &_v1, const Vector2<_T> &_v2) {
+        DCHECK(!_v1.HasNaNs() && !_v2.HasNaNs());
+        return std::abs(Dot(_v1, _v2));
+    }
+
+    /**
+     * @brief 归一化
+     * @param  _v              向量1
+     * @return Vector2<_T>     结果
+     */
+    Vector2<_T> Normalize(const Vector2<_T> &_v) {
+        return _v / _v.Length();
+    }
+
+    /**
+     * @brief 对所有分量取绝对值
+     * @param  _v              向量1
+     * @return Vector2<_T>     结果
+     */
+    Vector2<_T> Abs(const Vector2<_T> &_v) {
+        return Vector2<_T>(std::abs(_v.x), std::abs(_v.y));
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Vector2<_T> &v) {
@@ -746,7 +784,7 @@ public:
      * @brief - 重载，向量反向
      * @return Vector3<_T>     结果
      */
-    Vector3<_T> operator-(void) const {
+    Vector3<_T> operator-() const {
         return Vector3<_T>(-x, -y, -z);
     }
 
