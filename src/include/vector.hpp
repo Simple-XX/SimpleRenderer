@@ -396,62 +396,39 @@ public:
     /**
      * @brief 构造函数
      */
-    Vector2(void) {
-        x = 0;
-        y = 0;
-        return;
-    }
+    Vector2(void);
 
     /**
      * @brief 构造函数
      * @param  _x              x 值
      * @param  _y              y 值
      */
-    Vector2(_T _x, _T _y) : x(_x), y(_y) {
-        DCHECK(!HasNaNs());
-        return;
-    }
+    Vector2(_T _x, _T _y);
 
     /**
      * @brief 构造函数
      * @param  _p              二维点
      */
-    Vector2(const Point2<_T> &_p) : x(_p.x), y(_p.y) {
-        DCHECK(!HasNaNs());
-        return;
-    }
+    Vector2(const Point2<_T> &_p);
 
     /**
      * @brief 构造函数
      * @param  _p              三维点
      */
-    Vector2(const Point3<_T> &_p) : x(_p.x), y(_p.y) {
-        DCHECK(!HasNaNs());
-        return;
-    }
+    Vector2(const Point3<_T> &_p);
 
     /**
      * @brief 构造函数
      * @param  _v              另一个 Vector2<_T>
      */
-    Vector2(const Vector2<_T> &_v) {
-        DCHECK(!_v.HasNaNs());
-        x = _v.x;
-        y = _v.y;
-        return;
-    }
+    Vector2(const Vector2<_T> &_v);
 
     /**
      * @brief = 重载
      * @param  _v               另一个 Vector2<_T>
      * @return Vector2<_T>&     结果
      */
-    Vector2<_T> &operator=(const Vector2<_T> &_v) {
-        DCHECK(!_v.HasNaNs());
-        x = _v.x;
-        y = _v.y;
-        return *this;
-    }
+    Vector2<_T> &operator=(const Vector2<_T> &_v);
 
     /**
      * @brief == 重载
@@ -459,9 +436,7 @@ public:
      * @return true            相等
      * @return false           不相等
      */
-    bool operator==(const Vector2<_T> &_v) const {
-        return x == _v.x && y == _v.y;
-    }
+    bool operator==(const Vector2<_T> &_v) const;
 
     /**
      * @brief != 重载
@@ -469,61 +444,41 @@ public:
      * @return true            不相等
      * @return false           相等
      */
-    bool operator!=(const Vector2<_T> &_v) const {
-        return x != _v.x || y != _v.y;
-    }
+    bool operator!=(const Vector2<_T> &_v) const;
 
     /**
      * @brief + 重载
      * @param  _v              另一个 Vector2<_T>
      * @return Vector2<_T>     结果
      */
-    Vector2<_T> operator+(const Vector2<_T> &_v) const {
-        DCHECK(!_v.HasNaNs());
-        return Vector2(x + _v.x, y + _v.y);
-    }
+    Vector2<_T> operator+(const Vector2<_T> &_v) const;
 
     /**
      * @brief += 重载
      * @param  _v              另一个 Vector2<_T>
      * @return Vector2<_T>     结果
      */
-    Vector2<_T> &operator+=(const Vector2<_T> &_v) {
-        DCHECK(!_v.HasNaNs());
-        x += _v.x;
-        y += _v.y;
-        return *this;
-    }
+    Vector2<_T> &operator+=(const Vector2<_T> &_v);
 
     /**
      * @brief - 重载，向量反向
      * @return Vector2<_T>     结果
      */
-    Vector2<_T> operator-() const {
-        return Vector2<_T>(-x, -y);
-    }
+    Vector2<_T> operator-() const;
 
     /**
      * @brief - 重载
      * @param  _v              另一个 Vector2<_T>
      * @return Vector2<_T>     结果
      */
-    Vector2<_T> operator-(const Vector2<_T> &_v) const {
-        DCHECK(!_v.HasNaNs());
-        return Vector2(x - _v.x, y - _v.y);
-    }
+    Vector2<_T> operator-(const Vector2<_T> &_v) const;
 
     /**
      * @brief -= 重载
      * @param  _v              另一个 Vector2<_T>
      * @return Vector2<_T>     结果
      */
-    Vector2<_T> &operator-=(const Vector2<_T> &_v) {
-        DCHECK(!_v.HasNaNs());
-        x -= _v.x;
-        y -= _v.y;
-        return *this;
-    }
+    Vector2<_T> &operator-=(const Vector2<_T> &_v);
 
     /**
      * @brief * 重载，向量数乘
@@ -532,19 +487,14 @@ public:
      * @return Vector2<_T>     结果
      */
     template <class _U>
-    Vector2<_T> operator*(_U _f) const {
-        return Vector2<_T>(_f * x, _f * y);
-    }
+    Vector2<_T> operator*(_U _f) const;
 
     /**
      * @brief * 重载，向量点积
      * @param  _v              要乘的向量
      * @return _T              结果
      */
-    _T operator*(Vector2<_T> _v) const {
-        DCHECK(!_v.HasNaNs());
-        return x * _v.x + y * _v.y;
-    }
+    _T operator*(Vector2<_T> _v) const;
 
     /**
      * @brief *= 重载，向量数乘
@@ -553,12 +503,7 @@ public:
      * @return Vector2<_T>     结果
      */
     template <class _U>
-    Vector2<_T> &operator*=(_U _f) {
-        DCHECK(!isNaN(_f));
-        x *= _f;
-        y *= _f;
-        return *this;
-    }
+    Vector2<_T> &operator*=(_U _f);
 
     /**
      * @brief / 重载，向量数除
@@ -567,11 +512,7 @@ public:
      * @return Vector2<_T>     结果
      */
     template <class _U>
-    Vector2<_T> operator/(_U _f) const {
-        CHECK_NE(_f, 0);
-        _T inv = (_T)1 / _f;
-        return Vector2<_T>(x * inv, y * inv);
-    }
+    Vector2<_T> operator/(_U _f) const;
 
     /**
      * @brief /= 重载，向量数除
@@ -580,69 +521,45 @@ public:
      * @return Vector2<_T>     结果
      */
     template <class _U>
-    Vector2<_T> &operator/=(_U _f) {
-        CHECK_NE(_f, 0);
-        _T inv = (_T)1 / _f;
-        x *= inv;
-        y *= inv;
-        return *this;
-    }
+    Vector2<_T> &operator/=(_U _f);
 
     /**
      * @brief [] 重载
      * @return _T              结果
      */
-    _T operator[](int _idx) const {
-        DCHECK(_idx >= 0 && _idx <= 1);
-        if (_idx == 0)
-            return x;
-        return y;
-    }
+    _T operator[](int _idx) const;
 
     /**
      * @brief [] 重载
      * @return _T&             结果
      */
-    _T &operator[](int _idx) {
-        DCHECK(_idx >= 0 && _idx <= 1);
-        if (_idx == 0)
-            return x;
-        return y;
-    }
+    _T &operator[](int _idx);
 
     /**
      * @brief 是否有非数值
      * @return true             有
      * @return false            无
      */
-    bool HasNaNs(void) const {
-        return isNaN(x) || isNaN(y);
-    }
+    bool HasNaNs(void) const;
 
     /**
      * @brief 距离^2
      * @return _T              距离的平方
      */
-    _T LengthSquared(void) const {
-        return x * x + y * y;
-    }
+    _T LengthSquared(void) const;
 
     /**
      * @brief 距离
      * @return _T              距离
      */
-    _T Length(void) const {
-        return std::sqrt(LengthSquared());
-    }
+    _T Length(void) const;
 
     /**
      * @brief 对所有分量取绝对值
      * @param  _v              向量
      * @return Vector2<_T>     结果
      */
-    Vector2<_T> Abs(const Vector2<_T> &_v) {
-        return Vector2<_T>(std::abs(_v.x), std::abs(_v.y));
-    }
+    Vector2<_T> Abs(const Vector2<_T> &_v);
 
     /**
      * @brief 点积
@@ -650,10 +567,7 @@ public:
      * @param  _v2             向量2
      * @return _T              结果
      */
-    _T Dot(const Vector2<_T> &_v1, const Vector2<_T> &_v2) {
-        DCHECK(!_v1.HasNaNs() && !_v2.HasNaNs());
-        return _v1.x * _v2.x + _v1.y * _v2.y;
-    }
+    _T Dot(const Vector2<_T> &_v1, const Vector2<_T> &_v2);
 
     /**
      * @brief 点积的绝对值
@@ -661,25 +575,199 @@ public:
      * @param  _v2             向量2
      * @return _T              结果
      */
-    _T AbsDot(const Vector2<_T> &_v1, const Vector2<_T> &_v2) {
-        DCHECK(!_v1.HasNaNs() && !_v2.HasNaNs());
-        return std::abs(Dot(_v1, _v2));
-    }
+    _T AbsDot(const Vector2<_T> &_v1, const Vector2<_T> &_v2);
 
     /**
      * @brief 归一化
      * @param  _v              向量
      * @return Vector2<_T>     结果
      */
-    Vector2<_T> Normalize(const Vector2<_T> &_v) {
-        return _v / _v.Length();
-    }
+    Vector2<_T> Normalize(const Vector2<_T> &_v);
 
-    friend std::ostream &operator<<(std::ostream &os, const Vector2<_T> &v) {
-        os << "[ " << v.x << ", " << v.y << " ]";
-        return os;
-    }
+    friend std::ostream &operator<<(std::ostream &_os, const Vector2<_T> &_v);
 };
+
+template <class _T>
+Vector2<_T>::Vector2(void) {
+    x = 0;
+    y = 0;
+    return;
+}
+
+template <class _T>
+Vector2<_T>::Vector2(_T _x, _T _y) : x(_x), y(_y) {
+    DCHECK(!HasNaNs());
+    return;
+}
+
+template <class _T>
+Vector2<_T>::Vector2(const Point2<_T> &_p) : x(_p.x), y(_p.y) {
+    DCHECK(!HasNaNs());
+    return;
+}
+
+template <class _T>
+Vector2<_T>::Vector2(const Point3<_T> &_p) : x(_p.x), y(_p.y) {
+    DCHECK(!HasNaNs());
+    return;
+}
+
+template <class _T>
+Vector2<_T>::Vector2(const Vector2<_T> &_v) {
+    DCHECK(!_v.HasNaNs());
+    x = _v.x;
+    y = _v.y;
+    return;
+}
+
+template <class _T>
+Vector2<_T> &Vector2<_T>::operator=(const Vector2<_T> &_v) {
+    DCHECK(!_v.HasNaNs());
+    x = _v.x;
+    y = _v.y;
+    return *this;
+}
+
+template <class _T>
+bool Vector2<_T>::operator==(const Vector2<_T> &_v) const {
+    return x == _v.x && y == _v.y;
+}
+
+template <class _T>
+bool Vector2<_T>::operator!=(const Vector2<_T> &_v) const {
+    return x != _v.x || y != _v.y;
+}
+
+template <class _T>
+Vector2<_T> Vector2<_T>::operator+(const Vector2<_T> &_v) const {
+    DCHECK(!_v.HasNaNs());
+    return Vector2(x + _v.x, y + _v.y);
+}
+
+template <class _T>
+Vector2<_T> &Vector2<_T>::operator+=(const Vector2<_T> &_v) {
+    DCHECK(!_v.HasNaNs());
+    x += _v.x;
+    y += _v.y;
+    return *this;
+}
+
+template <class _T>
+Vector2<_T> Vector2<_T>::operator-() const {
+    return Vector2<_T>(-x, -y);
+}
+
+template <class _T>
+Vector2<_T> Vector2<_T>::operator-(const Vector2<_T> &_v) const {
+    DCHECK(!_v.HasNaNs());
+    return Vector2(x - _v.x, y - _v.y);
+}
+
+template <class _T>
+Vector2<_T> &Vector2<_T>::operator-=(const Vector2<_T> &_v) {
+    DCHECK(!_v.HasNaNs());
+    x -= _v.x;
+    y -= _v.y;
+    return *this;
+}
+
+template <class _T>
+template <class _U>
+Vector2<_T> Vector2<_T>::operator*(_U _f) const {
+    return Vector2<_T>(_f * x, _f * y);
+}
+
+template <class _T>
+_T Vector2<_T>::operator*(Vector2<_T> _v) const {
+    DCHECK(!_v.HasNaNs());
+    return x * _v.x + y * _v.y;
+}
+
+template <class _T>
+template <class _U>
+Vector2<_T> &Vector2<_T>::operator*=(_U _f) {
+    DCHECK(!isNaN(_f));
+    x *= _f;
+    y *= _f;
+    return *this;
+}
+
+template <class _T>
+template <class _U>
+Vector2<_T> Vector2<_T>::operator/(_U _f) const {
+    CHECK_NE(_f, 0);
+    _T inv = (_T)1 / _f;
+    return Vector2<_T>(x * inv, y * inv);
+}
+
+template <class _T>
+template <class _U>
+Vector2<_T> &Vector2<_T>::operator/=(_U _f) {
+    CHECK_NE(_f, 0);
+    _T inv = (_T)1 / _f;
+    x *= inv;
+    y *= inv;
+    return *this;
+}
+
+template <class _T>
+_T Vector2<_T>::operator[](int _idx) const {
+    DCHECK(_idx >= 0 && _idx <= 1);
+    if (_idx == 0)
+        return x;
+    return y;
+}
+
+template <class _T>
+_T &Vector2<_T>::operator[](int _idx) {
+    DCHECK(_idx >= 0 && _idx <= 1);
+    if (_idx == 0)
+        return x;
+    return y;
+}
+
+template <class _T>
+bool Vector2<_T>::HasNaNs(void) const {
+    return isNaN(x) || isNaN(y);
+}
+
+template <class _T>
+_T Vector2<_T>::LengthSquared(void) const {
+    return x * x + y * y;
+}
+
+template <class _T>
+_T Vector2<_T>::Length(void) const {
+    return std::sqrt(LengthSquared());
+}
+
+template <class _T>
+Vector2<_T> Vector2<_T>::Abs(const Vector2<_T> &_v) {
+    return Vector2<_T>(std::abs(_v.x), std::abs(_v.y));
+}
+
+template <class _T>
+_T Vector2<_T>::Dot(const Vector2<_T> &_v1, const Vector2<_T> &_v2) {
+    DCHECK(!_v1.HasNaNs() && !_v2.HasNaNs());
+    return _v1.x * _v2.x + _v1.y * _v2.y;
+}
+
+template <class _T>
+_T Vector2<_T>::AbsDot(const Vector2<_T> &_v1, const Vector2<_T> &_v2) {
+    DCHECK(!_v1.HasNaNs() && !_v2.HasNaNs());
+    return std::abs(Dot(_v1, _v2));
+}
+
+template <class _T>
+Vector2<_T> Vector2<_T>::Normalize(const Vector2<_T> &_v) {
+    return _v / _v.Length();
+}
+
+template <class _T>
+std::ostream &operator<<(std::ostream &_os, const Vector2<_T> &_v) {
+    _os << "[ " << _v.x << ", " << _v.y << " ]";
+    return _os;
+}
 
 /**
  * @brief 3 维向量
@@ -839,6 +927,16 @@ public:
     template <class _U>
     Vector3<_T> operator*(_U _s) const {
         return Vector3<_T>(_s * x, _s * y, _s * z);
+    }
+
+    /**
+     * @brief * 重载，向量点积
+     * @param  _v              要乘的向量
+     * @return _T              结果
+     */
+    _T operator*(Vector3<_T> _v) const {
+        DCHECK(!_v.HasNaNs());
+        return x * _v.x + y * _v.y + z * _v.z;
     }
 
     /**
