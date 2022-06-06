@@ -380,6 +380,7 @@ inline bool isNaN(const _T _x) {
  */
 template <>
 inline bool isNaN(const int _x) {
+    (void)_x;
     return false;
 }
 
