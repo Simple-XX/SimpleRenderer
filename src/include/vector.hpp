@@ -1,8 +1,18 @@
 
-// This file is a part of Simple-XX/SimpleRenderer
-// (https://github.com/Simple-XX/SimpleRenderer).
-//
-// vector.hpp for Simple-XX/SimpleRenderer.
+/**
+ * @file main.cpp
+ * @brief 入口
+ * @author Zone.N (Zone.Niuzh@hotmail.com)
+ * @version 1.0
+ * @date 2022-06-07
+ * @copyright MIT LICENSE
+ * https://github.com/Simple-XX/SimpleRenderer
+ * @par change log:
+ * <table>
+ * <tr><th>Date<th>Author<th>Description
+ * <tr><td>2022-06-07<td>Zone.N<td>迁移到 doxygen
+ * </table>
+ */
 
 #ifndef __VECTOR_HPP__
 #define __VECTOR_HPP__
@@ -335,7 +345,6 @@ std::ostream &operator<<(std::ostream &_os, const Vector<T, N> &_v) {
 typedef Vector<size_t, 2> Vectors2;
 typedef Vector<float, 2>  Vectorf2;
 typedef Vector<float, 3>  Vectorf3;
-typedef Vector<float, 4>  Vectorf4;
 
 #include "cmath"
 #include "glog/logging.h"
@@ -627,6 +636,15 @@ public:
     }
 
     /**
+     * @brief 对所有分量取绝对值
+     * @param  _v              向量
+     * @return Vector2<_T>     结果
+     */
+    Vector2<_T> Abs(const Vector2<_T> &_v) {
+        return Vector2<_T>(std::abs(_v.x), std::abs(_v.y));
+    }
+
+    /**
      * @brief 点积
      * @param  _v1             向量1
      * @param  _v2             向量2
@@ -650,20 +668,11 @@ public:
 
     /**
      * @brief 归一化
-     * @param  _v              向量1
+     * @param  _v              向量
      * @return Vector2<_T>     结果
      */
     Vector2<_T> Normalize(const Vector2<_T> &_v) {
         return _v / _v.Length();
-    }
-
-    /**
-     * @brief 对所有分量取绝对值
-     * @param  _v              向量1
-     * @return Vector2<_T>     结果
-     */
-    Vector2<_T> Abs(const Vector2<_T> &_v) {
-        return Vector2<_T>(std::abs(_v.x), std::abs(_v.y));
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Vector2<_T> &v) {
@@ -927,6 +936,171 @@ public:
      */
     bool HasNaNs(void) const {
         return isNaN(x) || isNaN(y) || isNaN(z);
+    }
+
+    /**
+     * @brief 对所有分量取绝对值
+     * @param  _v              向量
+     * @return Vector2<_T>     结果
+     */
+    Vector3<_T> Abs(const Vector3<_T> &_v) {
+        return Vector3<_T>(std::abs(_v.x), std::abs(_v.y), std::abs(_v.z));
+    }
+
+    /**
+     * @brief 点积
+     * @param  _v1             向量1
+     * @param  _v2             向量2
+     * @return _T              结果
+     */
+    inline _T Dot(const Vector3<_T> &_v1, const Vector3<_T> &_v2) {
+        DCHECK(!_v1.HasNaNs() && !_v2.HasNaNs());
+        return _v1.x * _v2.x + _v1.y * _v2.y + _v1.z * _v2.z;
+    }
+
+    /**
+     * @brief 点积的绝对值
+     * @param  _v1             向量1
+     * @param  _v2             向量2
+     * @return _T              结果
+     */
+    inline _T AbsDot(const Vector3<_T> &_v1, const Vector3<_T> &_v2) {
+        DCHECK(!_v1.HasNaNs() && !_v2.HasNaNs());
+        return std::abs(Dot(_v1, _v2));
+    }
+
+    /**
+     * @brief 叉积
+     * @param  _v1             向量1
+     * @param  _v2             向量2
+     * @return Vector2<_T>     结果
+     */
+    inline Vector3<_T> Cross(const Vector3<_T> &_v1, const Vector3<_T> &_v2) {
+        DCHECK(!_v1.HasNaNs() && !_v2.HasNaNs());
+        _T v1x = _v1.x, v1y = _v1.y, v1z = _v1.z;
+        _T v2x = _v2.x, v2y = _v2.y, v2z = _v2.z;
+        return Vector3<_T>((v1y * v2z) - (v1z * v2y), (v1z * v2x) - (v1x * v2z),
+                           (v1x * v2y) - (v1y * v2x));
+    }
+
+    /**
+     * @brief 叉积
+     * @param  _v1             向量
+     * @param  _v2             法向量
+     * @return Vector2<_T>     结果
+     */
+    inline Vector3<_T> Cross(const Vector3<_T> &_v1, const Normal3<_T> &_v2) {
+        DCHECK(!_v1.HasNaNs() && !_v2.HasNaNs());
+        _T v1x = _v1.x, v1y = _v1.y, v1z = _v1.z;
+        _T v2x = _v2.x, v2y = _v2.y, v2z = _v2.z;
+        return Vector3<_T>((v1y * v2z) - (v1z * v2y), (v1z * v2x) - (v1x * v2z),
+                           (v1x * v2y) - (v1y * v2x));
+    }
+
+    /**
+     * @brief 叉积
+     * @param  _v1             法向量
+     * @param  _v2             向量
+     * @return Vector2<_T>     结果
+     */
+    inline Vector3<_T> Cross(const Normal3<_T> &_v1, const Vector3<_T> &_v2) {
+        DCHECK(!_v1.HasNaNs() && !_v2.HasNaNs());
+        _T v1x = _v1.x, v1y = _v1.y, v1z = _v1.z;
+        _T v2x = _v2.x, v2y = _v2.y, v2z = _v2.z;
+        return Vector3<_T>((v1y * v2z) - (v1z * v2y), (v1z * v2x) - (v1x * v2z),
+                           (v1x * v2y) - (v1y * v2x));
+    }
+
+    /**
+     * @brief 归一化
+     * @param  _v              向量
+     * @return Vector2<_T>     结果
+     */
+    inline Vector3<_T> Normalize(const Vector3<_T> &_v) {
+        return _v / _v.Length();
+    }
+
+    /**
+     * @brief 最小分量
+     * @param  _v              向量
+     * @return _T              结果
+     */
+    _T MinComponent(const Vector3<_T> &_v) {
+        return std::min(_v.x, std::min(_v.y, _v.z));
+    }
+
+    /**
+     * @brief 最大分量
+     * @param  _v              向量
+     * @return _T              结果
+     */
+    _T MaxComponent(const Vector3<_T> &_v) {
+        return std::max(_v.x, std::max(_v.y, _v.z));
+    }
+
+    /**
+     * @brief 最大分量下标
+     * @param  _v              向量
+     * @return int             结果
+     */
+    int MaxDimension(const Vector3<_T> &_v) {
+        return (_v.x > _v.y) ? ((_v.x > _v.z) ? 0 : 2)
+                             : ((_v.y > _v.z) ? 1 : 2);
+    }
+
+    /**
+     * @brief 构造最小向量
+     * @param  _v1             向量1
+     * @param  _v2             向量2
+     * @return Vector2<_T>     结果
+     */
+    Vector3<_T> Min(const Vector3<_T> &_p1, const Vector3<_T> &_p2) {
+        return Vector3<_T>(std::min(_p1.x, _p2.x), std::min(_p1.y, _p2.y),
+                           std::min(_p1.z, _p2.z));
+    }
+
+    /**
+     * @brief 构造最大向量
+     * @param  _v1             向量1
+     * @param  _v2             向量2
+     * @return Vector2<_T>     结果
+     */
+    Vector3<_T> Max(const Vector3<_T> &_p1, const Vector3<_T> &_p2) {
+        return Vector3<_T>(std::max(_p1.x, _p2.x), std::max(_p1.y, _p2.y),
+                           std::max(_p1.z, _p2.z));
+    }
+
+    /**
+     * @brief 重新排列向量
+     * @param  _v              向量
+     * @param  _x              新的 x 在 _v 中的下标
+     * @param  _y              新的 y 在 _v 中的下标
+     * @param  _z              新的 z 在 _v 中的下标
+     * @return Vector2<_T>     结果
+     */
+    Vector3<_T> Permute(const Vector3<_T> &_v, int _x, int _y, int _z) {
+        return Vector3<_T>(_v[_x], _v[_y], _v[_z]);
+    }
+
+    /**
+     * @brief 基于 _v1 构建出另外两个正交向量 _v2，_v3
+     * @param  _v1             向量1
+     * @param  _v2             向量2，用于获取返回值
+     * @param  _v3             向量3，用于获取返回值
+     * @todo ? 不确定
+     */
+    inline void CoordinateSystem(const Vector3<_T> &_v1, Vector3<_T> *_v2,
+                                 Vector3<_T> *_v3) {
+        if (std::abs(_v1.x) > std::abs(_v1.y)) {
+            *_v2 = Vector3<_T>(-_v1.z, 0, _v1.x) /
+                   std::sqrt(_v1.x * _v1.x + _v1.z * _v1.z);
+        }
+        else {
+            *_v2 = Vector3<_T>(0, _v1.z, -_v1.y) /
+                   std::sqrt(_v1.y * _v1.y + _v1.z * _v1.z);
+        }
+        *_v3 = Cross(_v1, *_v2);
+        return;
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Vector3<_T> &_v) {
