@@ -24,66 +24,6 @@ Test::~Test(void) {
     return;
 }
 
-bool Test::test_vector(void) const {
-    Vector<int, 2> test(vector<int>{2, 3});
-    Vector<int, 2> test2(vector<int>{-1, 3});
-    Vector<int, 2> test3 = test - test2;
-    assert(test.coord.x == 2);
-    assert(test.coord.y == 3);
-    assert(test2.coord.x == -1);
-    assert(test2.coord.y == 3);
-    assert(test3.coord.x == 3);
-    assert(test3.coord.y == 0);
-    assert((test3 * 3).coord.x == 9);
-    assert((test3 * 3).coord.y == 0);
-    assert((Vector<int, 2>(vector<int>{0, 1}) *
-            Vector<int, 2>(vector<int>{1, 0})) == 0);
-    assert(test.norm() == sqrt(13));
-    assert((-test).coord.x == -2);
-    assert((-test).coord.y == -3);
-    assert(test == true);
-    Vector<int, 2> test4;
-    assert(test4 == false);
-    Vector<int, 3> test5(vector<int>{2, 3, 4});
-    Vector<int, 3> test6(vector<int>{-1, 3, -2});
-    Vector<int, 3> test7 = test5 - test6;
-    assert(test5.coord.x == 2);
-    assert(test5.coord.y == 3);
-    assert(test5.coord.z == 4);
-    assert(test6.coord.x == -1);
-    assert(test6.coord.y == 3);
-    assert(test6.coord.z == -2);
-    assert(test7.coord.x == 3);
-    assert(test7.coord.y == 0);
-    assert(test7.coord.z == 6);
-    assert((test7 * 3).coord.x == 9);
-    assert((test7 * 3).coord.y == 0);
-    assert((test7 * 3).coord.z == 18);
-    assert((Vector<int, 3>(vector<int>{0, 1, 0}) *
-            Vector<int, 3>(vector<int>{1, 0, 0})) == 0);
-    assert(test5.norm() == sqrt(29));
-    assert((-test5).coord.x == -2);
-    assert((-test5).coord.y == -3);
-    assert((-test5).coord.z == -4);
-    assert(test5 == true);
-    Vector<int, 3> test8;
-    assert(test8 == false);
-    Vector<int, 3> test9 = test5 ^ test6;
-    assert(test9.coord.x == -18);
-    assert(test9.coord.y == 0);
-    assert(test9.coord.z == 9);
-    int            tmp233[3] = {1, 2, 3};
-    Vector<int, 3> test10(tmp233);
-    assert(test10.coord.x == 1);
-    assert(test10.coord.y == 2);
-    assert(test10.coord.z == 3);
-    Vector<int, 3> test11(test10);
-    assert(test11.coord.x == 1);
-    assert(test11.coord.y == 2);
-    assert(test11.coord.z == 3);
-    return true;
-}
-
 bool Test::test_matrix(void) const {
     Matrix<int> test1;
     int         arr[16] = {233};

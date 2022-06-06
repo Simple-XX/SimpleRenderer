@@ -119,7 +119,6 @@ int main(int _argc, char **_argv) {
     Renderer render = Renderer(painter, model);
     render.render();
     render.save();
-    // test.test_vector();
     // test.test_matrix();
     auto app = Gtk::Application::create();
     // Shows the window and returns when it is closed.
