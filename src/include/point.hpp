@@ -744,20 +744,24 @@ Point3<_T> &Point3<_T>::operator/=(_U _f) {
 template <class _T>
 _T Point3<_T>::operator[](int _idx) const {
     DCHECK(_idx >= 0 && _idx <= 2);
-    if (_idx == 0)
+    if (_idx == 0) {
         return x;
-    if (_idx == 1)
+    }
+    if (_idx == 1) {
         return y;
+    }
     return z;
 }
 
 template <class _T>
 _T &Point3<_T>::operator[](int _idx) {
     DCHECK(_idx >= 0 && _idx <= 2);
-    if (_idx == 0)
+    if (_idx == 0) {
         return x;
-    if (_idx == 1)
+    }
+    if (_idx == 1) {
         return y;
+    }
     return z;
 }
 
