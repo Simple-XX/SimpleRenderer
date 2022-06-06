@@ -1087,7 +1087,6 @@ public:
      * @param  _v1             向量1
      * @param  _v2             向量2，用于获取返回值
      * @param  _v3             向量3，用于获取返回值
-     * @todo ? 不确定
      */
     inline void CoordinateSystem(const Vector3<_T> &_v1, Vector3<_T> *_v2,
                                  Vector3<_T> *_v3) {
