@@ -1,7 +1,7 @@
 
 /**
- * @file main.cpp
- * @brief 入口
+ * @file vector.hpp
+ * @brief 向量模版
  * @author Zone.N (Zone.Niuzh@hotmail.com)
  * @version 1.0
  * @date 2022-06-07
@@ -16,6 +16,20 @@
 
 #ifndef __VECTOR_HPP__
 #define __VECTOR_HPP__
+
+#include "cmath"
+#include "glog/logging.h"
+
+template <class _T>
+class Vector2;
+template <class _T>
+class Vector3;
+template <class _T>
+class Point3;
+template <class _T>
+class Point2;
+template <class _T>
+class Normal3;
 
 #include "assert.h"
 #include "iostream"
@@ -346,23 +360,9 @@ typedef Vector<size_t, 2> Vectors2;
 typedef Vector<float, 2>  Vectorf2;
 typedef Vector<float, 3>  Vectorf3;
 
-#include "cmath"
-#include "glog/logging.h"
-
-template <class _T>
-class Vector2;
-template <class _T>
-class Vector3;
-template <class _T>
-class Point3;
-template <class _T>
-class Point2;
-template <class _T>
-class Normal3;
-
 /**
  * @brief 是否为非数值
- * @param  _T                类型
+ * @tparam _T                类型
  * @param  _x                值
  * @return true              是
  * @return false             否
@@ -385,7 +385,7 @@ inline bool isNaN(const int _x) {
 
 /**
  * @brief 2 维向量
- * @param  _T                类型
+ * @tparam _T                类型
  */
 template <class _T>
 class Vector2 {
@@ -409,13 +409,13 @@ public:
      * @brief 构造函数
      * @param  _p              二维点
      */
-    Vector2(const Point2<_T> &_p);
+    explicit Vector2(const Point2<_T> &_p);
 
     /**
      * @brief 构造函数
      * @param  _p              三维点
      */
-    Vector2(const Point3<_T> &_p);
+    explicit Vector2(const Point3<_T> &_p);
 
     /**
      * @brief 构造函数
@@ -482,7 +482,7 @@ public:
 
     /**
      * @brief * 重载，向量数乘
-     * @param  _U              相乘的数的类型
+     * @tparam _U              相乘的数的类型
      * @param  _f              相乘的数
      * @return Vector2<_T>     结果
      */
@@ -498,7 +498,7 @@ public:
 
     /**
      * @brief *= 重载，向量数乘
-     * @param  _U              相乘的数的类型
+     * @tparam _U              相乘的数的类型
      * @param  _f              相乘的数
      * @return Vector2<_T>     结果
      */
@@ -507,7 +507,7 @@ public:
 
     /**
      * @brief / 重载，向量数除
-     * @param  _U              相除的数的类型
+     * @tparam _U              相除的数的类型
      * @param  _f              相除的数
      * @return Vector2<_T>     结果
      */
@@ -516,7 +516,7 @@ public:
 
     /**
      * @brief /= 重载，向量数除
-     * @param  _U              相除的数的类型
+     * @tparam _U              相除的数的类型
      * @param  _f              相除的数
      * @return Vector2<_T>     结果
      */
@@ -525,12 +525,14 @@ public:
 
     /**
      * @brief [] 重载
+     * @param  _idx            下标
      * @return _T              结果
      */
     _T operator[](int _idx) const;
 
     /**
      * @brief [] 重载
+     * @param  _idx            下标
      * @return _T&             结果
      */
     _T &operator[](int _idx);
@@ -771,7 +773,7 @@ std::ostream &operator<<(std::ostream &_os, const Vector2<_T> &_v) {
 
 /**
  * @brief 3 维向量
- * @param  _T                类型
+ * @tparam _T                类型
  */
 template <class _T>
 class Vector3 {
@@ -797,7 +799,7 @@ public:
      * @brief 构造函数
      * @param  _p              三维点
      */
-    Vector3(const Point3<_T> &_p);
+    explicit Vector3(const Point3<_T> &_p);
 
     /**
      * @brief 构造函数
@@ -809,7 +811,7 @@ public:
      * @brief 构造函数
      * @param  _n               三维法向量
      */
-    Vector3(const Normal3<_T> &_n);
+    explicit Vector3(const Normal3<_T> &_n);
 
     /**
      * @brief = 重载
@@ -863,14 +865,14 @@ public:
 
     /**
      * @brief -= 重载，向量减
-     * @param  _v              另一个 Vector3<_T>
+     * @param  _v               另一个 Vector3<_T>
      * @return Vector3<_T>      结果
      */
     Vector3<_T> &operator-=(const Vector3<_T> &_v);
 
     /**
      * @brief * 重载，向量数乘
-     * @param  _U              数的类型
+     * @tparam _U              数的类型
      * @param  _s              数
      * @return Vector3<_T>     结果
      */
@@ -886,7 +888,7 @@ public:
 
     /**
      * @brief *= 重载，向量数乘
-     * @param  _U              数的类型
+     * @tparam _U              数的类型
      * @param  _s              数
      * @return Vector3<_T>&    结果
      */
@@ -895,7 +897,7 @@ public:
 
     /**
      * @brief / 重载，向量数除
-     * @param  _U              数的类型
+     * @tparam _U              数的类型
      * @param  _f              数
      * @return Vector3<_T>     结果
      */
@@ -904,7 +906,7 @@ public:
 
     /**
      * @brief /= 重载，向量数除
-     * @param  _U              数的类型
+     * @tparam _U              数的类型
      * @param  _f              数
      * @return Vector3<_T>&    结果
      */

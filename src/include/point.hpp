@@ -1,0 +1,562 @@
+
+/**
+ * @file point.hpp
+ * @brief 点模版
+ * @author Zone.N (Zone.Niuzh@hotmail.com)
+ * @version 1.0
+ * @date 2022-06-07
+ * @copyright MIT LICENSE
+ * https://github.com/Simple-XX/SimpleRenderer
+ * @par change log:
+ * <table>
+ * <tr><th>Date<th>Author<th>Description
+ * <tr><td>2022-06-07<td>Zone.N<td>创建文件
+ * </table>
+ */
+
+#ifndef __POINT_HPP__
+#define __POINT_HPP__
+
+#include "iostream"
+#include "cmath"
+#include "glog/logging.h"
+
+template <class _T>
+class Vector2;
+template <class _T>
+class Vector3;
+template <class _T>
+class Point3;
+template <class _T>
+class Point2;
+template <class _T>
+class Normal3;
+
+/**
+ * @brief 点模版
+ * @tparam _T
+ */
+template <class _T>
+class Point2 {
+public:
+    _T x;
+    _T y;
+
+    /**
+     * @brief 构造函数
+     */
+    Point2(void);
+
+    /**
+     * @brief 构造函数
+     * @param  _x              x 值
+     * @param  _y              y 值
+     */
+    Point2(_T _x, _T _y);
+
+    /**
+     * @brief 构造函数
+     * @param  _p               二维点
+     */
+    Point2(const Point2<_T> &_p);
+
+    /**
+     * @brief 构造函数
+     * @tparam _U               二维点类型
+     * @param  _p               二维点
+     */
+    template <class _U>
+    explicit Point2(const Point2<_U> &_p);
+
+    /**
+     * @brief 构造函数
+     * @tparam _U               二维向量类型
+     * @param  _p               二维向量
+     */
+    template <class _U>
+    explicit Point2(const Vector2<_U> &_p);
+
+    /**
+     * @brief 构造函数
+     * @param  _p               三维点
+     */
+    explicit Point2(const Point3<_T> &_p);
+
+    /**
+     * @brief = 重载
+     * @param  _p               另一个 Point2<_T>
+     * @return Point2<_T>&      结果
+     */
+    Point2<_T> &operator=(const Point2<_T> &_p);
+
+    /**
+     * @brief == 重载
+     * @param  _p               另一个 Point2<_T>
+     * @return true             相等
+     * @return false            不相等
+     */
+    bool operator==(const Point2<_T> &_p) const;
+
+    /**
+     * @brief != 重载
+     * @param  _p               另一个 Point2<_T>
+     * @return true             不相等
+     * @return false            相等
+     */
+    bool operator!=(const Point2<_T> &_p) const;
+
+    /**
+     * @brief + 重载
+     * @param  _p               另一个 Point2<_T>
+     * @return Point2<_T>       结果
+     */
+    Point2<_T> operator+(const Point2<_T> &_p) const;
+
+    /**
+     * @brief += 重载
+     * @param  _p               另一个 Point2<_T>
+     * @return Point2<_T>&      结果
+     */
+    Point2<_T> &operator+=(const Point2<_T> &_p);
+
+    /**
+     * @brief + 重载
+     * @param  _v               另一个 Vector2<_T>
+     * @return Point2<_T>       结果
+     */
+    Point2<_T> operator+(const Vector2<_T> &_v) const;
+
+    /**
+     * @brief += 重载
+     * @param  _v               另一个 Vector2<_T>
+     * @return Point2<_T>&      结果
+     */
+    Point2<_T> &operator+=(const Vector2<_T> &_v);
+
+    /**
+     * @brief - 重载，向量反向
+     * @return Point2<_T>      结果
+     */
+    Point2<_T> operator-() const;
+
+    /**
+     * @brief - 重载，向量减
+     * @param  _p               要减的 Point2<_T>
+     * @return Vector2<_T>      结果
+     */
+    Vector2<_T> operator-(const Point2<_T> &_p) const;
+
+    /**
+     * @brief - 重载，向量减
+     * @param  _v               另一个 Vector3<_T>
+     * @return Point2<_T>       结果
+     */
+    Point2<_T> operator-(const Vector2<_T> &_v) const;
+
+    /**
+     * @brief -= 重载，向量减
+     * @param  _v               Vector2<_T>
+     * @return Point2<_T>       结果
+     */
+    Point2<_T> &operator-=(const Vector2<_T> &_v);
+
+    /**
+     * @brief * 重载，向量数乘
+     * @tparam _U              数的类型
+     * @param  _f              数
+     * @return Point2<_T>      结果
+     */
+    template <class _U>
+    Point2<_T> operator*(_U _f) const;
+
+    /**
+     * @brief *= 重载，向量数乘
+     * @tparam _U              数的类型
+     * @param  _f              数
+     * @return Point2<_T>&     结果
+     */
+    template <class _U>
+    Point2<_T> &operator*=(_U _f);
+
+    /**
+     * @brief / 重载，向量数除
+     * @tparam _U              相除的数的类型
+     * @param  _f              相除的数
+     * @return Point2<_T>      结果
+     */
+    template <class _U>
+    Point2<_T> operator/(_U _f) const;
+
+    /**
+     * @brief /= 重载，向量数除
+     * @tparam _U              数的类型
+     * @param  _f              数
+     * @return Point2<_T>&     结果
+     */
+    template <class _U>
+    Point2<_T> &operator/=(_U _f);
+
+    /**
+     * @brief () 重载，类型转换
+     * @tparam _U               要转换的 Vector2 类型
+     * @return Vector2<_U>      结果
+     */
+    template <class _U>
+    explicit operator Vector2<_U>() const;
+
+    /**
+     * @brief [] 重载
+     * @param  _idx            下标
+     * @return _T              结果
+     */
+    _T operator[](int _idx) const;
+
+    /**
+     * @brief [] 重载
+     * @param  _idx            下标
+     * @return _T&             结果
+     */
+    _T &operator[](int _idx);
+
+    /**
+     * @brief 是否有非数值
+     * @return true             有
+     * @return false            无
+     */
+    bool HasNaNs(void) const;
+
+    friend std::ostream &operator<<(std::ostream &_os, const Point2<_T> &_v);
+};
+
+template <class _T>
+Point2<_T>::Point2(void) {
+    x = 0;
+    y = 0;
+    return;
+}
+
+template <class _T>
+Point2<_T>::Point2(_T _x, _T _y) : x(_x), y(_y) {
+    DCHECK(!HasNaNs());
+    return;
+}
+
+template <class _T>
+Point2<_T>::Point2(const Point2<_T> &_p) {
+    DCHECK(!_p.HasNaNs());
+    x = _p.x;
+    y = _p.y;
+    return;
+}
+
+template <class _T>
+template <class _U>
+Point2<_T>::Point2(const Point2<_U> &_p) {
+    x = (_T)_p.x;
+    y = (_T)_p.y;
+    DCHECK(!HasNaNs());
+    return;
+}
+
+template <class _T>
+template <class _U>
+Point2<_T>::Point2(const Vector2<_U> &_p) {
+    x = (_T)_p.x;
+    y = (_T)_p.y;
+    DCHECK(!HasNaNs());
+    return;
+}
+
+template <class _T>
+Point2<_T>::Point2(const Point3<_T> &_p) : x(_p.x), y(_p.y) {
+    DCHECK(!HasNaNs());
+    return;
+}
+
+template <class _T>
+Point2<_T> &Point2<_T>::operator=(const Point2<_T> &_p) {
+    DCHECK(!_p.HasNaNs());
+    x = _p.x;
+    y = _p.y;
+    return *this;
+}
+
+template <class _T>
+bool Point2<_T>::operator==(const Point2<_T> &_p) const {
+    return x == _p.x && y == _p.y;
+}
+
+template <class _T>
+bool Point2<_T>::operator!=(const Point2<_T> &_p) const {
+    return x != _p.x || y != _p.y;
+}
+
+template <class _T>
+Point2<_T> Point2<_T>::operator+(const Point2<_T> &_p) const {
+    DCHECK(!_p.HasNaNs());
+    return Point2<_T>(x + _p.x, y + _p.y);
+}
+
+template <class _T>
+Point2<_T> &Point2<_T>::operator+=(const Point2<_T> &_p) {
+    DCHECK(!_p.HasNaNs());
+    x += _p.x;
+    y += _p.y;
+    return *this;
+}
+
+template <class _T>
+Point2<_T> Point2<_T>::operator+(const Vector2<_T> &_v) const {
+    DCHECK(!_v.HasNaNs());
+    return Point2<_T>(x + _v.x, y + _v.y);
+}
+
+template <class _T>
+Point2<_T> &Point2<_T>::operator+=(const Vector2<_T> &_v) {
+    DCHECK(!_v.HasNaNs());
+    x += _v.x;
+    y += _v.y;
+    return *this;
+}
+
+template <class _T>
+Point2<_T> Point2<_T>::operator-() const {
+    return Point2<_T>(-x, -y);
+}
+
+template <class _T>
+Vector2<_T> Point2<_T>::operator-(const Point2<_T> &_p) const {
+    DCHECK(!_p.HasNaNs());
+    return Vector2<_T>(x - _p.x, y - _p.y);
+}
+
+template <class _T>
+Point2<_T> Point2<_T>::operator-(const Vector2<_T> &_v) const {
+    DCHECK(!_v.HasNaNs());
+    return Point2<_T>(x - _v.x, y - _v.y);
+}
+
+template <class _T>
+Point2<_T> &Point2<_T>::operator-=(const Vector2<_T> &_v) {
+    DCHECK(!_v.HasNaNs());
+    x -= _v.x;
+    y -= _v.y;
+    return *this;
+}
+
+template <class _T>
+template <class _U>
+Point2<_T> Point2<_T>::operator*(_U _f) const {
+    return Point2<_T>(_f * x, _f * y);
+}
+
+template <class _T>
+template <class _U>
+Point2<_T> &Point2<_T>::operator*=(_U _f) {
+    x *= _f;
+    y *= _f;
+    return *this;
+}
+
+template <class _T>
+template <class _U>
+Point2<_T> Point2<_T>::operator/(_U _f) const {
+    CHECK_NE(_f, 0);
+    _T inv = (_T)1 / _f;
+    return Point2<_T>(inv * x, inv * y);
+}
+
+template <class _T>
+template <class _U>
+Point2<_T> &Point2<_T>::operator/=(_U _f) {
+    CHECK_NE(_f, 0);
+    _T inv = (_T)1 / _f;
+    x *= inv;
+    y *= inv;
+    return *this;
+}
+
+template <class _T>
+template <class _U>
+Point2<_T>::operator Vector2<_U>() const {
+    return Vector2<_U>(x, y);
+}
+
+template <class _T>
+_T Point2<_T>::operator[](int _idx) const {
+    DCHECK(_idx >= 0 && _idx <= 1);
+    if (_idx == 0) {
+        return x;
+    }
+    return y;
+}
+
+template <class _T>
+_T &Point2<_T>::operator[](int _idx) {
+    DCHECK(_idx >= 0 && _idx <= 1);
+    if (_idx == 0) {
+        return x;
+    }
+    return y;
+}
+
+template <class _T>
+bool Point2<_T>::HasNaNs(void) const {
+    return isNaN(x) || isNaN(y);
+}
+
+template <class _T>
+std::ostream &operator<<(std::ostream &_os, const Point2<_T> &_v) {
+    _os << "[ " << _v.x << ", " << _v.y << " ]";
+    return _os;
+}
+
+// template <class _T>
+// class Point3 {
+// public:
+//     // Point3 Public Methods
+//     Point3() {
+//         x = y = z = 0;
+//     }
+//     Point3(_T x, _T y, _T z) : x(x), y(y), z(z) {
+//         DCHECK(!HasNaNs());
+//     }
+//     template <class _U>
+//     explicit Point3(const Point3<_U> &_p)
+//         : x((_T)_p.x), y((_T)_p.y), z((_T)_p.z) {
+//         DCHECK(!HasNaNs());
+//     }
+//     template <class _U>
+//     explicit operator Vector3<_U>() const {
+//         return Vector3<_U>(x, y, z);
+//     }
+//     Point3(const Point3<_T> &_p) {
+//         DCHECK(!_p.HasNaNs());
+//         x = _p.x;
+//         y = _p.y;
+//         z = _p.z;
+//     }
+
+//     Point3<_T> &operator=(const Point3<_T> &_p) {
+//         DCHECK(!_p.HasNaNs());
+//         x = _p.x;
+//         y = _p.y;
+//         z = _p.z;
+//         return *this;
+//     }
+
+//     Point3<_T> operator+(const Vector3<_T> &_v) const {
+//         DCHECK(!_v.HasNaNs());
+//         return Point3<_T>(x + _v.x, y + _v.y, z + _v.z);
+//     }
+//     Point3<_T> &operator+=(const Vector3<_T> &_v) {
+//         DCHECK(!_v.HasNaNs());
+//         x += _v.x;
+//         y += _v.y;
+//         z += _v.z;
+//         return *this;
+//     }
+//     Vector3<_T> operator-(const Point3<_T> &_p) const {
+//         DCHECK(!_p.HasNaNs());
+//         return Vector3<_T>(x - _p.x, y - _p.y, z - _p.z);
+//     }
+//     Point3<_T> operator-(const Vector3<_T> &_v) const {
+//         DCHECK(!_v.HasNaNs());
+//         return Point3<_T>(x - _v.x, y - _v.y, z - _v.z);
+//     }
+//     Point3<_T> &operator-=(const Vector3<_T> &_v) {
+//         DCHECK(!_v.HasNaNs());
+//         x -= _v.x;
+//         y -= _v.y;
+//         z -= _v.z;
+//         return *this;
+//     }
+//     Point3<_T> &operator+=(const Point3<_T> &_p) {
+//         DCHECK(!_p.HasNaNs());
+//         x += _p.x;
+//         y += _p.y;
+//         z += _p.z;
+//         return *this;
+//     }
+//     Point3<_T> operator+(const Point3<_T> &_p) const {
+//         DCHECK(!_p.HasNaNs());
+//         return Point3<_T>(x + _p.x, y + _p.y, z + _p.z);
+//     }
+//     template <class _U>
+//     Point3<_T> operator*(_U _f) const {
+//         return Point3<_T>(_f * x, _f * y, _f * z);
+//     }
+//     template <class _U>
+//     Point3<_T> &operator*=(_U _f) {
+//         x *= _f;
+//         y *= _f;
+//         z *= _f;
+//         return *this;
+//     }
+//     template <class _U>
+//     Point3<_T> operator/(_U _f) const {
+//         CHECK_NE(_f, 0);
+//         Float inv = (Float)1 / _f;
+//         return Point3<_T>(inv * x, inv * y, inv * z);
+//     }
+//     template <class _U>
+//     Point3<_T> &operator/=(_U _f) {
+//         CHECK_NE(_f, 0);
+//         Float inv = (Float)1 / _f;
+//         x *= inv;
+//         y *= inv;
+//         z *= inv;
+//         return *this;
+//     }
+//     _T operator[](int _idx) const {
+//         DCHECK(i >= 0 && i <= 2);
+//         if (i == 0)
+//             return x;
+//         if (i == 1)
+//             return y;
+//         return z;
+//     }
+
+//     _T &operator[](int _idx) {
+//         DCHECK(i >= 0 && i <= 2);
+//         if (i == 0)
+//             return x;
+//         if (i == 1)
+//             return y;
+//         return z;
+//     }
+//     bool operator==(const Point3<_T> &_p) const {
+//         return x == _p.x && y == _p.y && z == _p.z;
+//     }
+//     bool operator!=(const Point3<_T> &_p) const {
+//         return x != _p.x || y != _p.y || z != _p.z;
+//     }
+//     bool HasNaNs() const {
+//         return isNaN(x) || isNaN(y) || isNaN(z);
+//     }
+//     Point3<_T> operator-() const {
+//         return Point3<_T>(-x, -y, -z);
+//     }
+
+//     // Point3 Public Data
+//     _T x, y, z;
+// };
+
+// template <class _T>
+// inline std::ostream &operator<<(std::ostream &_os, const Point3<_T> &_v) {
+//     _os << "[ " << _v.x << ", " << _v.y << ", " << _v.z << " ]";
+//     return _os;
+// }
+
+// template <>
+// inline std::ostream &operator<<(std::ostream &_os, const Point3<Float> &_v) {
+//     _os << StringPrintf("[ %_f, %_f, %_f ]", _v.x, _v.y, _v.z);
+//     return _os;
+// }
+
+// typedef Point2<Float> Point2f;
+// typedef Point2<int>   Point2i;
+// typedef Point3<Float> Point3f;
+// typedef Point3<int>   Point3i;
+
+#endif /* __POINT_HPP__ */

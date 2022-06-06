@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 #include "cmath"
 #include "vector.hpp"
+#include "point.hpp"
 
 TEST(Vector2f, test1) {
     Vector2f test(2, 3);
