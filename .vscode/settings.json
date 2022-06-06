@@ -122,7 +122,8 @@
         "variant": "cpp",
         "cuchar": "cpp",
         "source_location": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "strstream": "cpp"
     },
     "cmake.configureOnOpen": true,
     // --------Doxygen--------
