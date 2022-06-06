@@ -7,6 +7,7 @@
  * @date 2022-06-07
  * @copyright MIT LICENSE
  * https://github.com/Simple-XX/SimpleRenderer
+ * Based on https://github.com/mmp/pbrt-v3
  * @par change log:
  * <table>
  * <tr><th>Date<th>Author<th>Description
