@@ -109,6 +109,7 @@ void framebuffer_t::pixel(int _x, int _y, const color_t &_color) {
 framebuffer_t::color_t framebuffer_t::RGBA(const uint8_t _r, const uint8_t _g,
                                            const uint8_t _b, const uint8_t _a) {
     color_t color;
-    color = _r << 24 | _g << 16 | _b << 8 | _a;
+    /// @see https://en.wikipedia.org/wiki/RGBA_color_model
+    color = _a << 24 | _b << 16 | _g << 8 | _r;
     return color;
 }
