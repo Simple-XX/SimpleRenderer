@@ -40,10 +40,10 @@ private:
                 const Vectorf3 &_vertex3, size_t _x, size_t _y) const;
 
 protected:
-    TGAImage &  image;
+    TGAImage   &image;
     std::string filename = "output.tga";
     // 背景色默认黑色
-    const TGAColor color_bg = black;
+    const TGAColor color_bg = TGAColor(0, 0, 0, 255);
 
 public:
     Geometry(TGAImage &_image, const std::string &_filename = "output.tga");

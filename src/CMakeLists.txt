@@ -22,9 +22,7 @@ message(STATUS "CMAKE_CXX_FLAGS is ${CMAKE_CXX_FLAGS}")
 # Set include dir
 include_directories(
     ./include
-    ${Gtkmm4_INCLUDE_DIRS}
-    ${glog_INCLUDE_DIRS}
-    ${gflag_INCLUDE_DIRS})
+    ${gtkmm4_INCLUDE_DIRS})
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} SimpleRender_src)
 
@@ -33,5 +31,4 @@ add_executable(SimpleRender
     ${SimpleRender_src})
 
 target_link_libraries(SimpleRender 
-    ${Gtkmm4_LIBRARIES} 
-    ${glog_LIBRARIES})
+    ${gtkmm4_LIBRARIES})

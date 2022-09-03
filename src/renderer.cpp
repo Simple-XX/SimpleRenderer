@@ -85,14 +85,14 @@ bool Renderer::line(void) const {
             size_t   y0 = get_y(v0.coord.y);
             size_t   x1 = get_x(v1.coord.x);
             size_t   y1 = get_y(v1.coord.y);
-            painter.line(x0, y0, x1, y1, white);
+            painter.line(x0, y0, x1, y1, TGAColor(255, 255, 255, 255));
         }
     }
     return true;
 }
 
 bool Renderer::circle(void) const {
-    painter.circle(mid_width, mid_height, 50, white);
+    painter.circle(mid_width, mid_height, 50, TGAColor(255, 255, 255, 255));
     return true;
 }
 
@@ -108,7 +108,8 @@ bool Renderer::line_zbuffer(void) {
             size_t   y1 = get_y(v1.coord.y);
             float    z0 = v0.coord.z;
             float    z1 = v1.coord.z;
-            painter.line(x0, y0, z0, x1, y1, z1, zbuffer, white);
+            painter.line(x0, y0, z0, x1, y1, z1, zbuffer,
+                         TGAColor(255, 255, 255, 255));
         }
     }
     return true;

@@ -20,7 +20,6 @@
 
 #include "iostream"
 #include "cmath"
-#include "glog/logging.h"
 
 template <class _T>
 class Vector2;
@@ -238,13 +237,13 @@ Point2<_T>::Point2(void) {
 
 template <class _T>
 Point2<_T>::Point2(_T _x, _T _y) : x(_x), y(_y) {
-    DCHECK(!HasNaNs());
+    assert(!HasNaNs());
     return;
 }
 
 template <class _T>
 Point2<_T>::Point2(const Point2<_T> &_p) {
-    DCHECK(!_p.HasNaNs());
+    assert(!_p.HasNaNs());
     x = _p.x;
     y = _p.y;
     return;
@@ -255,7 +254,7 @@ template <class _U>
 Point2<_T>::Point2(const Point2<_U> &_p) {
     x = (_T)_p.x;
     y = (_T)_p.y;
-    DCHECK(!HasNaNs());
+    assert(!HasNaNs());
     return;
 }
 
@@ -264,13 +263,13 @@ template <class _U>
 Point2<_T>::Point2(const Vector2<_U> &_p) {
     x = (_T)_p.x;
     y = (_T)_p.y;
-    DCHECK(!HasNaNs());
+    assert(!HasNaNs());
     return;
 }
 
 template <class _T>
 Point2<_T>::Point2(const Point3<_T> &_p) : x(_p.x), y(_p.y) {
-    DCHECK(!HasNaNs());
+    assert(!HasNaNs());
     return;
 }
 
@@ -282,7 +281,7 @@ Point2<_T>::operator Vector2<_U>() const {
 
 template <class _T>
 Point2<_T> &Point2<_T>::operator=(const Point2<_T> &_p) {
-    DCHECK(!_p.HasNaNs());
+    assert(!_p.HasNaNs());
     x = _p.x;
     y = _p.y;
     return *this;
@@ -300,13 +299,13 @@ bool Point2<_T>::operator!=(const Point2<_T> &_p) const {
 
 template <class _T>
 Point2<_T> Point2<_T>::operator+(const Point2<_T> &_p) const {
-    DCHECK(!_p.HasNaNs());
+    assert(!_p.HasNaNs());
     return Point2<_T>(x + _p.x, y + _p.y);
 }
 
 template <class _T>
 Point2<_T> &Point2<_T>::operator+=(const Point2<_T> &_p) {
-    DCHECK(!_p.HasNaNs());
+    assert(!_p.HasNaNs());
     x += _p.x;
     y += _p.y;
     return *this;
@@ -314,13 +313,13 @@ Point2<_T> &Point2<_T>::operator+=(const Point2<_T> &_p) {
 
 template <class _T>
 Point2<_T> Point2<_T>::operator+(const Vector2<_T> &_v) const {
-    DCHECK(!_v.HasNaNs());
+    assert(!_v.HasNaNs());
     return Point2<_T>(x + _v.x, y + _v.y);
 }
 
 template <class _T>
 Point2<_T> &Point2<_T>::operator+=(const Vector2<_T> &_v) {
-    DCHECK(!_v.HasNaNs());
+    assert(!_v.HasNaNs());
     x += _v.x;
     y += _v.y;
     return *this;
@@ -333,19 +332,19 @@ Point2<_T> Point2<_T>::operator-() const {
 
 template <class _T>
 Vector2<_T> Point2<_T>::operator-(const Point2<_T> &_p) const {
-    DCHECK(!_p.HasNaNs());
+    assert(!_p.HasNaNs());
     return Vector2<_T>(x - _p.x, y - _p.y);
 }
 
 template <class _T>
 Point2<_T> Point2<_T>::operator-(const Vector2<_T> &_v) const {
-    DCHECK(!_v.HasNaNs());
+    assert(!_v.HasNaNs());
     return Point2<_T>(x - _v.x, y - _v.y);
 }
 
 template <class _T>
 Point2<_T> &Point2<_T>::operator-=(const Vector2<_T> &_v) {
-    DCHECK(!_v.HasNaNs());
+    assert(!_v.HasNaNs());
     x -= _v.x;
     y -= _v.y;
     return *this;
@@ -368,7 +367,7 @@ Point2<_T> &Point2<_T>::operator*=(_U _f) {
 template <class _T>
 template <class _U>
 Point2<_T> Point2<_T>::operator/(_U _f) const {
-    CHECK_NE(_f, 0);
+    assert(_f != 0);
     _T inv = (_T)1 / _f;
     return Point2<_T>(inv * x, inv * y);
 }
@@ -376,7 +375,7 @@ Point2<_T> Point2<_T>::operator/(_U _f) const {
 template <class _T>
 template <class _U>
 Point2<_T> &Point2<_T>::operator/=(_U _f) {
-    CHECK_NE(_f, 0);
+    assert(_f != 0);
     _T inv = (_T)1 / _f;
     x *= inv;
     y *= inv;
@@ -385,7 +384,7 @@ Point2<_T> &Point2<_T>::operator/=(_U _f) {
 
 template <class _T>
 _T Point2<_T>::operator[](int _idx) const {
-    DCHECK(_idx >= 0 && _idx <= 1);
+    assert(_idx >= 0 && _idx <= 1);
     if (_idx == 0) {
         return x;
     }
@@ -394,7 +393,7 @@ _T Point2<_T>::operator[](int _idx) const {
 
 template <class _T>
 _T &Point2<_T>::operator[](int _idx) {
-    DCHECK(_idx >= 0 && _idx <= 1);
+    assert(_idx >= 0 && _idx <= 1);
     if (_idx == 0) {
         return x;
     }
@@ -606,7 +605,7 @@ Point3<_T>::Point3(void) {
 
 template <class _T>
 Point3<_T>::Point3(_T _x, _T _y, _T _z) : x(_x), y(_y), z(_z) {
-    DCHECK(!HasNaNs());
+    assert(!HasNaNs());
     return;
 }
 
@@ -614,13 +613,13 @@ template <class _T>
 template <class _U>
 Point3<_T>::Point3(const Point3<_U> &_p)
     : x((_T)_p.x), y((_T)_p.y), z((_T)_p.z) {
-    DCHECK(!HasNaNs());
+    assert(!HasNaNs());
     return;
 }
 
 template <class _T>
 Point3<_T>::Point3(const Point3<_T> &_p) {
-    DCHECK(!_p.HasNaNs());
+    assert(!_p.HasNaNs());
     x = _p.x;
     y = _p.y;
     z = _p.z;
@@ -635,7 +634,7 @@ Point3<_T>::operator Vector3<_U>() const {
 
 template <class _T>
 Point3<_T> &Point3<_T>::operator=(const Point3<_T> &_p) {
-    DCHECK(!_p.HasNaNs());
+    assert(!_p.HasNaNs());
     x = _p.x;
     y = _p.y;
     z = _p.z;
@@ -654,13 +653,13 @@ bool Point3<_T>::operator!=(const Point3<_T> &_p) const {
 
 template <class _T>
 Point3<_T> Point3<_T>::operator+(const Point3<_T> &_p) const {
-    DCHECK(!_p.HasNaNs());
+    assert(!_p.HasNaNs());
     return Point3<_T>(x + _p.x, y + _p.y, z + _p.z);
 }
 
 template <class _T>
 Point3<_T> &Point3<_T>::operator+=(const Point3<_T> &_p) {
-    DCHECK(!_p.HasNaNs());
+    assert(!_p.HasNaNs());
     x += _p.x;
     y += _p.y;
     z += _p.z;
@@ -669,13 +668,13 @@ Point3<_T> &Point3<_T>::operator+=(const Point3<_T> &_p) {
 
 template <class _T>
 Point3<_T> Point3<_T>::operator+(const Vector3<_T> &_v) const {
-    DCHECK(!_v.HasNaNs());
+    assert(!_v.HasNaNs());
     return Point3<_T>(x + _v.x, y + _v.y, z + _v.z);
 }
 
 template <class _T>
 Point3<_T> &Point3<_T>::operator+=(const Vector3<_T> &_v) {
-    DCHECK(!_v.HasNaNs());
+    assert(!_v.HasNaNs());
     x += _v.x;
     y += _v.y;
     z += _v.z;
@@ -689,19 +688,19 @@ Point3<_T> Point3<_T>::operator-() const {
 
 template <class _T>
 Vector3<_T> Point3<_T>::operator-(const Point3<_T> &_p) const {
-    DCHECK(!_p.HasNaNs());
+    assert(!_p.HasNaNs());
     return Vector3<_T>(x - _p.x, y - _p.y, z - _p.z);
 }
 
 template <class _T>
 Point3<_T> Point3<_T>::operator-(const Vector3<_T> &_v) const {
-    DCHECK(!_v.HasNaNs());
+    assert(!_v.HasNaNs());
     return Point3<_T>(x - _v.x, y - _v.y, z - _v.z);
 }
 
 template <class _T>
 Point3<_T> &Point3<_T>::operator-=(const Vector3<_T> &_v) {
-    DCHECK(!_v.HasNaNs());
+    assert(!_v.HasNaNs());
     x -= _v.x;
     y -= _v.y;
     z -= _v.z;
@@ -726,7 +725,7 @@ Point3<_T> &Point3<_T>::operator*=(_U _f) {
 template <class _T>
 template <class _U>
 Point3<_T> Point3<_T>::operator/(_U _f) const {
-    CHECK_NE(_f, 0);
+    assert(_f != 0);
     _T inv = (_T)1 / _f;
     return Point3<_T>(inv * x, inv * y, inv * z);
 }
@@ -734,7 +733,7 @@ Point3<_T> Point3<_T>::operator/(_U _f) const {
 template <class _T>
 template <class _U>
 Point3<_T> &Point3<_T>::operator/=(_U _f) {
-    CHECK_NE(_f, 0);
+    assert(_f != 0);
     _T inv = (_T)1 / _f;
     x *= inv;
     y *= inv;
@@ -744,7 +743,7 @@ Point3<_T> &Point3<_T>::operator/=(_U _f) {
 
 template <class _T>
 _T Point3<_T>::operator[](int _idx) const {
-    DCHECK(_idx >= 0 && _idx <= 2);
+    assert(_idx >= 0 && _idx <= 2);
     if (_idx == 0) {
         return x;
     }
@@ -756,7 +755,7 @@ _T Point3<_T>::operator[](int _idx) const {
 
 template <class _T>
 _T &Point3<_T>::operator[](int _idx) {
-    DCHECK(_idx >= 0 && _idx <= 2);
+    assert(_idx >= 0 && _idx <= 2);
     if (_idx == 0) {
         return x;
     }

@@ -13,3 +13,8 @@ A software renderer
 参考：https://github.com/ssloy/tinyrenderer
 
 正在开发中...
+
+
+```shell
+brew install gtkmm4
+```

@@ -148,7 +148,7 @@
     // 文件注释：版权信息模板
     "doxdocgen.file.copyrightTag": [
         "@copyright MIT LICENSE",
-        "https://github.com/Simple-XX/SimpleKernel"
+        "https://github.com/Simple-XX/SimpleRenderer"
     ],
     // 文件注释：自定义模块，这里我添加一个修改日志
     "doxdocgen.file.customTag": [

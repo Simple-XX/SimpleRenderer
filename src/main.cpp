@@ -18,17 +18,13 @@
 #include "geometry.h"
 #include "image.h"
 #include "iostream"
+#include "framebuffer.h"
 #include "model.h"
 #include "renderer.h"
-#include "test.h"
 #include "vector.hpp"
 #include "gtkmm.h"
 
 using namespace std;
-
-Test                          test;
-static constexpr const size_t WIDTH  = 800;
-static constexpr const size_t HEIGHT = 600;
 
 class Screen : public Gtk::DrawingArea {
 private:
@@ -114,12 +110,11 @@ int main(int _argc, char **_argv) {
         filename = "../../src/obj/test.obj";
     }
     Model    model(filename);
-    TGAImage image(width, height, TGAImage::RGBA);
-    Geometry painter(image);
-    Renderer render = Renderer(painter, model);
-    render.render();
-    render.save();
-    // test.test_matrix();
+    // TGAImage image(width, height, TGAImage::RGBA);
+    // Geometry painter(image);
+    // Renderer render = Renderer(painter, model);
+    // render.render();
+    // render.save();
     auto app = Gtk::Application::create();
     // Shows the window and returns when it is closed.
     return app->make_window_and_run<ExampleWindow>(_argc, _argv);
