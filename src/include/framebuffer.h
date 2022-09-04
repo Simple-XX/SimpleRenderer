@@ -29,7 +29,7 @@ private:
     /// 窗口高度
     uint32_t height;
 
-    /// 颜色类型，格式为 ARGB32
+    /// 颜色类型，格式为 RGBA32
     typedef uint32_t color_t;
     /// 颜色缓存
     color_t *color_buffer;

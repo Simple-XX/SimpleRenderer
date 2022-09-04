@@ -29,7 +29,7 @@ void init(GLFWwindow *window) {
 void display(GLFWwindow *window, double currentTime) {
     glClearColor(1.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
-    glDrawPixels(0, 0, 0, 0, 0);
+    glDrawPixels(WIDTH, HEIGHT, GL_RGBA, GL_UNSIGNED_INT, 0);
 }
 
 int main(int _argc, char **_argv) {
