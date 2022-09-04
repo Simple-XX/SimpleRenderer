@@ -23,30 +23,33 @@
  * @brief 缓冲
  */
 class framebuffer_t {
-private:
-    /// 窗口宽度
-    uint32_t width;
-    /// 窗口高度
-    uint32_t height;
-
-    /// 颜色类型，格式为 RGBA32
-    typedef uint32_t color_t;
-    /// 颜色缓存
-    color_t *color_buffer;
-    /// 每像素字节数
-    static constexpr const uint8_t BPP = sizeof(color_t);
-
-    /// 深度类型
-    typedef float depth_buffer_t;
-    /// 深度缓存
-    depth_buffer_t *depth_buffer;
-
 public:
     /// 默认宽度
     static constexpr const uint32_t WIDTH = 1920;
     /// 默认高度
     static constexpr const uint32_t HEIGHT = 1080;
 
+    /// 颜色类型，格式为 RGBA32
+    typedef uint32_t color_t;
+
+    /// 深度类型
+    typedef float depth_buffer_t;
+
+private:
+    /// 窗口宽度
+    uint32_t width;
+    /// 窗口高度
+    uint32_t height;
+
+    /// 颜色缓存
+    color_t *color_buffer;
+    /// 每像素字节数
+    static constexpr const uint8_t BPP = sizeof(color_t);
+
+    /// 深度缓存
+    depth_buffer_t *depth_buffer;
+
+public:
     /**
      * @brief 构造函数
      */
@@ -99,15 +102,21 @@ public:
     void pixel(int _x, int _y, const color_t &_color);
 
     /**
+     * @brief 获取像素缓存
+     * @return const color_t*   只读的像素缓存
+     */
+    const color_t *get_color_buffer(void) const;
+
+    /**
      * @brief 生成 rgba
      * @param  _r               红
      * @param  _g               绿
      * @param  _b               蓝
      * @param  _a               alpha
-     * @return color_t          argb 颜色
+     * @return color_t          rgba 颜色
      */
-    static color_t ARGB(const uint8_t _r, const uint8_t _g, const uint8_t _b,
-                        const uint8_t _a);
+    static color_t RGBA(const uint8_t _r, const uint8_t _g, const uint8_t _b,
+                        const uint8_t _a = UINT8_MAX);
 };
 
 #endif /* _FRAMEBUFFER_H_ */

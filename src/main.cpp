@@ -19,18 +19,9 @@
 #include "framebuffer.h"
 #include "model.h"
 #include "renderer.h"
-#include "GLFW/glfw3.h"
+#include "display.h"
 
 using namespace std;
-
-void init(GLFWwindow *window) {
-}
-
-void display(GLFWwindow *window, double currentTime) {
-    glClearColor(1.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glDrawPixels(WIDTH, HEIGHT, GL_RGBA, GL_UNSIGNED_INT, 0);
-}
 
 int main(int _argc, char **_argv) {
     // obj 路径
@@ -53,41 +44,14 @@ int main(int _argc, char **_argv) {
     }
 
     // 读取模型与材质
-    model_t model(obj_path, mtl_path);
-
-    if (!glfwInit()) {
-        exit(EXIT_FAILURE);
+    model_t       model(obj_path, mtl_path);
+    framebuffer_t framebuffer(WIDTH, HEIGHT);
+    for (auto i = 0; i < 1920; i++) {
+        for (auto j = 0; j < 1080; j++) {
+            framebuffer.pixel(i, j, framebuffer_t::RGBA(255, 0, 0, 255));
+        }
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-
-    // mac增加的代码
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-    GLFWwindow *window =
-        glfwCreateWindow(WIDTH, HEIGHT, "SimpleRenderer", NULL, NULL);
-    glfwMakeContextCurrent(window);
-
-    if (glfwInit() != GLFW_TRUE) {
-        exit(EXIT_FAILURE);
-    }
-
-    glfwSwapInterval(1);
-
-    init(window);
-
-    while (!glfwWindowShouldClose(window)) {
-        display(window, glfwGetTime());
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-
-    glfwDestroyWindow(window);
-    glfwTerminate();
-
-    exit(EXIT_SUCCESS);
+    show_window(framebuffer);
     return 0;
 }
