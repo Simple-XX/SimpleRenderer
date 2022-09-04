@@ -29,7 +29,7 @@ private:
     /// 窗口高度
     uint32_t height;
 
-    /// 颜色类型，格式为 RGBA8888
+    /// 颜色类型，格式为 ARGB32
     typedef uint32_t color_t;
     /// 颜色缓存
     color_t *color_buffer;
@@ -104,9 +104,9 @@ public:
      * @param  _g               绿
      * @param  _b               蓝
      * @param  _a               alpha
-     * @return color_t          rgba 颜色
+     * @return color_t          argb 颜色
      */
-    static color_t RGBA(const uint8_t _r, const uint8_t _g, const uint8_t _b,
+    static color_t ARGB(const uint8_t _r, const uint8_t _g, const uint8_t _b,
                         const uint8_t _a);
 };
 

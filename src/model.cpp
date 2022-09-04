@@ -1,70 +1,197 @@
 
-// This file is a part of SimpleXX/SimpleRenderer
-// (https://github.com/SimpleXX/SimpleRenderer).
-// Based on https://github.com/ssloy/tinyrenderer
-// model.cpp for SimpleXX/SimpleRenderer.
+/**
+ * @file model.cpp
+ * @brief 模型抽象
+ * @author Zone.N (Zone.Niuzh@hotmail.com)
+ * @version 1.0
+ * @date 2022-06-06
+ * @copyright MIT LICENSE
+ * https://github.com/Simple-XX/SimpleRenderer
+ * @par change log:
+ * <table>
+ * <tr><th>Date<th>Author<th>Description
+ * <tr><td>2022-09-04<td>Zone.N<td>迁移到 doxygen
+ * </table>
+ */
 
 #include "iostream"
-#include "fstream"
-#include "sstream"
 #include "model.h"
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "3rd/tiny_obj_loader.h"
 
 using namespace std;
 
-Model::Model(const string &_filename) : verts(), faces() {
-    std::ifstream in;
-    in.open(_filename, std::ifstream::in);
-    if (in.fail()) {
+// 顶点回调函数
+static void vertex_cb(void *_user_data, float _x, float _y, float _z, float) {
+    mesh_t *mesh = reinterpret_cast<mesh_t *>(_user_data);
+    // printf("v[%ld] = %f, %f, %f (_w %f)\n", mesh->vertices.size(), _x, _y,
+    // _z,
+    //        _w);
+    // 保存顶点信息
+    // Discard _w
+    vertex_t tmp(_x, _y, _z);
+    mesh->vertices.push_back(tmp);
+    return;
+}
+
+// 法线回调函数
+static void normal_cb(void *_user_data, float _x, float _y, float _z) {
+    mesh_t *mesh = reinterpret_cast<mesh_t *>(_user_data);
+    // printf("vn[%ld] = %f, %f, %f\n", mesh->normals.size() / 3, _x, _y, _z);
+    // 保存法线信息
+    normal_t tmp(_x, _y, _z);
+    mesh->normals.push_back(tmp);
+    return;
+}
+
+// 贴图回调函数
+static void texcoord_cb(void *_user_data, float _x, float _y, float _z) {
+    mesh_t *mesh = reinterpret_cast<mesh_t *>(_user_data);
+    // printf("vt[%ld] = %f, %f, %f\n", mesh->texcoords.size() / 3, _x, _y, _z);
+    // 保存贴图信息
+    texcoord_t tmp(_x, _y, _z);
+    mesh->texcoords.push_back(tmp);
+    return;
+}
+
+// 索引回调函数
+static void index_cb(void *_user_data, tinyobj::index_t *_indices,
+                     int _num_indices) {
+    mesh_t *mesh = reinterpret_cast<mesh_t *>(_user_data);
+    // 保存顶点索引/法线索引/贴图索引
+    // 无效值用 -1 填充
+    for (int i = 0; i < _num_indices; i++) {
+        tinyobj::index_t idx = _indices[i];
+        // printf("idx[%ld] = %d, %d, %d\n", mesh->indices.size(),
+        //        idx.vertex_index - 1, idx.normal_index - 1,
+        //        idx.texcoord_index - 1);
+        // -1 是因为 obj 文件的索引从 1 开始，-1 以让其从 0 开始
+        index_t tmp(idx.vertex_index - 1, idx.normal_index - 1,
+                    idx.texcoord_index - 1);
+        mesh->indices.push_back(tmp);
+    }
+    return;
+}
+
+// 材质回调函数
+static void usemtl_cb(void *_user_data, const char *_name, int _material_idx) {
+    mesh_t *mesh = reinterpret_cast<mesh_t *>(_user_data);
+    // 保存材质信息
+    if ((_material_idx > -1) &&
+        ((unsigned)_material_idx < mesh->materials.size())) {
+        printf("usemtl. material id = %d(name = %s)\n", _material_idx,
+               mesh->materials[_material_idx].name.c_str());
+    }
+    else {
+        printf("usemtl. name = %s\n", _name);
+    }
+    return;
+}
+
+// 材质回调函数
+static void mtllib_cb(void *_user_data, const tinyobj::material_t *_materials,
+                      int num_materials) {
+    mesh_t *mesh = reinterpret_cast<mesh_t *>(_user_data);
+    printf("mtllib. # of materials = %d\n", num_materials);
+    // 保存材质信息
+    for (int i = 0; i < num_materials; i++) {
+        mesh->materials.push_back(_materials[i]);
+    }
+    return;
+}
+
+static void group_cb(void *, const char **_names, int _num_names) {
+    printf("group : name = \n");
+    for (int i = 0; i < _num_names; i++) {
+        printf("  %s\n", _names[i]);
+    }
+    return;
+}
+
+static void object_cb(void *, const char *_name) {
+    printf("object : name = %s\n", _name);
+    return;
+}
+
+model_t::model_t(const string &_obj_path, const string &_mtl_path) {
+    tinyobj::callback_t cb;
+    cb.vertex_cb   = vertex_cb;
+    cb.normal_cb   = normal_cb;
+    cb.texcoord_cb = texcoord_cb;
+    cb.index_cb    = index_cb;
+    cb.usemtl_cb   = usemtl_cb;
+    cb.mtllib_cb   = mtllib_cb;
+    cb.group_cb    = group_cb;
+    cb.object_cb   = object_cb;
+
+    std::string   warn;
+    std::string   err;
+    std::ifstream ifs(_obj_path.c_str());
+
+    if (ifs.fail()) {
+        std::cerr << "file not found." << std::endl;
         return;
     }
-    std::string line;
-    while (!in.eof()) {
-        std::getline(in, line);
-        std::istringstream iss(line.c_str());
-        char               trash;
-        if (!line.compare(0, 2, "v ")) {
-            iss >> trash;
-            std::vector<float> tmp;
-            for (int i = 0; i < 3; i++) {
-                float s;
-                iss >> s;
-                tmp.push_back(s);
-            }
-            Vectorf3 v(tmp);
-            verts.push_back(v);
-        }
-        else if (!line.compare(0, 2, "f ")) {
-            std::vector<int> f;
-            int              itrash, idx;
-            iss >> trash;
-            while (iss >> idx >> trash >> itrash >> trash >> itrash) {
-                // in wavefront obj all indices start at 1, not zero
-                idx--;
-                f.push_back(idx);
-            }
-            faces.push_back(f);
-        }
+
+    tinyobj::MaterialFileReader mtlReader(_mtl_path);
+
+    bool ret =
+        tinyobj::LoadObjWithCallback(ifs, cb, &mesh, &mtlReader, &warn, &err);
+
+    if (!warn.empty()) {
+        std::cout << "WARN: " << warn << std::endl;
     }
-    std::cerr << "# v# " << verts.size() << " f# " << faces.size() << std::endl;
+
+    if (!err.empty()) {
+        std::cerr << err << std::endl;
+    }
+
+    if (!ret) {
+        std::cerr << "Failed to parse .obj" << std::endl;
+        return;
+    }
+
+    printf("# of vertices         = %ld\n", mesh.vertices.size() / 3);
+    printf("# of normals          = %ld\n", mesh.normals.size() / 3);
+    printf("# of texcoords        = %ld\n", mesh.texcoords.size() / 2);
+    printf("# of indices          = %ld\n", mesh.indices.size());
+    printf("# of materials = %ld\n", mesh.materials.size());
+
+    for (size_t i = 0; i < mesh.indices.size(); i += 3) {
+        vertex_t tmp_p0 = mesh.vertices.at(mesh.indices.at(i).v);
+        vertex_t tmp_p1 = mesh.vertices.at(mesh.indices.at(i + 1).v);
+        vertex_t tmp_p2 = mesh.vertices.at(mesh.indices.at(i + 2).v);
+        faces.push_back(face_t(tmp_p0, tmp_p1, tmp_p2));
+    }
+
     return;
 }
 
-Model::~Model() {
+model_t::~model_t() {
     return;
 }
 
-size_t Model::nverts() const {
-    return verts.size();
+const std::vector<vertex_t> &model_t::get_vertex(void) const {
+    return mesh.vertices;
 }
 
-size_t Model::nfaces() const {
-    return faces.size();
+const std::vector<normal_t> &model_t::get_normal(void) const {
+    return mesh.normals;
 }
 
-std::vector<int> Model::face(int _idx) const {
-    return faces.at(_idx);
+const std::vector<texcoord_t> &model_t::get_texcoord(void) const {
+    return mesh.texcoords;
 }
 
-Vectorf3 Model::vert(int _i) const {
-    return verts.at(_i);
+const std::vector<index_t> &model_t::get_index(void) const {
+    return mesh.indices;
+}
+
+const std::vector<tinyobj::material_t> &model_t::get_material(void) const {
+    return mesh.materials;
+}
+
+const std::vector<face_t> &model_t::get_face(void) const {
+    return faces;
 }
