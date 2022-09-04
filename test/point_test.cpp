@@ -15,7 +15,6 @@
  */
 
 #include "gtest/gtest.h"
-#include "cmath"
 #include "vector.hpp"
 #include "point.hpp"
 

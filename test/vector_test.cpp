@@ -13,8 +13,8 @@
  * <tr><td>2022-06-07<td>Zone.N<td>创建文件
  * </table>
  */
+
 #include "gtest/gtest.h"
-#include "cmath"
 #include "vector.hpp"
 #include "point.hpp"
 

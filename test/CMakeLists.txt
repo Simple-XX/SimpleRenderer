@@ -20,10 +20,8 @@ FetchContent_MakeAvailable(googletest)
 
 # Set include dir
 include_directories(
-    ${SimpleRender_SOURCE_DIR}/src/include
-    ${Gtkmm4_INCLUDE_DIRS}
-    ${glog_INCLUDE_DIRS}
-    ${gflag_INCLUDE_DIRS})
+        ${SimpleRender_SOURCE_DIR}/src/include
+        ${Gtkmm4_INCLUDE_DIRS})
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} test_src)
 
