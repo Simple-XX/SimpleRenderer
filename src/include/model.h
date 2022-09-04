@@ -31,12 +31,7 @@ struct vertex_t {
     /**
      * @brief 构造函数
      */
-    vertex_t(void) {
-        x = 0;
-        y = 0;
-        z = 0;
-        return;
-    }
+    vertex_t(void);
 
     /**
      * @brief 构造函数
@@ -44,12 +39,7 @@ struct vertex_t {
      * @param  _y               y 坐标
      * @param  _z               z 坐标
      */
-    vertex_t(const float _x, const float _y, const float _z) {
-        x = _x;
-        y = _y;
-        z = _z;
-        return;
-    }
+    vertex_t(const float _x, const float _y, const float _z);
 };
 
 /**
@@ -65,12 +55,7 @@ struct normal_t {
      * @param  _y               y 坐标
      * @param  _z               z 坐标
      */
-    normal_t(const float _x, const float _y, const float _z) {
-        x = _x;
-        y = _y;
-        z = _z;
-        return;
-    }
+    normal_t(const float _x, const float _y, const float _z);
 };
 
 /**
@@ -86,12 +71,7 @@ struct texcoord_t {
      * @param  _y               y 坐标
      * @param  _z               z 坐标
      */
-    texcoord_t(const float _x, const float _y, const float _z) {
-        x = _x;
-        y = _y;
-        z = _z;
-        return;
-    }
+    texcoord_t(const float _x, const float _y, const float _z);
 };
 
 /**
@@ -107,12 +87,7 @@ struct index_t {
      * @param  _vn              法线索引
      * @param  _vt              贴图索引
      */
-    index_t(const int _v, const int _vn, const int _vt) {
-        v  = _v;
-        vn = _vn;
-        vt = _vt;
-        return;
-    }
+    index_t(const int _v, const int _vn, const int _vt);
 };
 
 /**

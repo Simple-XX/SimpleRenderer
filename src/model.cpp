@@ -22,6 +22,41 @@
 
 using namespace std;
 
+vertex_t::vertex_t(void) {
+    x = 0;
+    y = 0;
+    z = 0;
+    return;
+}
+
+vertex_t::vertex_t(const float _x, const float _y, const float _z) {
+    x = _x;
+    y = _y;
+    z = _z;
+    return;
+}
+
+normal_t::normal_t(const float _x, const float _y, const float _z) {
+    x = _x;
+    y = _y;
+    z = _z;
+    return;
+}
+
+texcoord_t::texcoord_t(const float _x, const float _y, const float _z) {
+    x = _x;
+    y = _y;
+    z = _z;
+    return;
+}
+
+index_t::index_t(const int _v, const int _vn, const int _vt) {
+    v  = _v;
+    vn = _vn;
+    vt = _vt;
+    return;
+}
+
 /**
  * @brief 顶点回调函数
  * @param  _user_data       保存顶点信息
