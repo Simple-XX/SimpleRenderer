@@ -21,17 +21,29 @@
 #include "string"
 #include "3rd/tiny_obj_loader.h"
 
-// 顶点
+/**
+ * @brief 顶点
+ */
 struct vertex_t {
     float x;
     float y;
     float z;
+    /**
+     * @brief 构造函数
+     */
     vertex_t(void) {
         x = 0;
         y = 0;
         z = 0;
         return;
     }
+
+    /**
+     * @brief 构造函数
+     * @param  _x               x 坐标
+     * @param  _y               y 坐标
+     * @param  _z               z 坐标
+     */
     vertex_t(const float _x, const float _y, const float _z) {
         x = _x;
         y = _y;
@@ -40,11 +52,19 @@ struct vertex_t {
     }
 };
 
-// 法向量
+/**
+ * @brief 法向量
+ */
 struct normal_t {
     float x;
     float y;
     float z;
+    /**
+     * @brief 构造函数
+     * @param  _x               x 坐标
+     * @param  _y               y 坐标
+     * @param  _z               z 坐标
+     */
     normal_t(const float _x, const float _y, const float _z) {
         x = _x;
         y = _y;
@@ -53,11 +73,19 @@ struct normal_t {
     }
 };
 
-// 贴图
+/**
+ * @brief 贴图
+ */
 struct texcoord_t {
     float x;
     float y;
     float z;
+    /**
+     * @brief 构造函数
+     * @param  _x               x 坐标
+     * @param  _y               y 坐标
+     * @param  _z               z 坐标
+     */
     texcoord_t(const float _x, const float _y, const float _z) {
         x = _x;
         y = _y;
@@ -66,11 +94,19 @@ struct texcoord_t {
     }
 };
 
-// 索引
+/**
+ * @brief 索引
+ */
 struct index_t {
     int v;
     int vn;
     int vt;
+    /**
+     * @brief 构造函数
+     * @param  _v               顶点索引
+     * @param  _vn              法线索引
+     * @param  _vt              贴图索引
+     */
     index_t(const int _v, const int _vn, const int _vt) {
         v  = _v;
         vn = _vn;
@@ -79,20 +115,35 @@ struct index_t {
     }
 };
 
-// obj/mtl 文件的原始数据
+/**
+ * @brief obj/mtl 文件的原始数据
+ */
 struct mesh_t {
-    std::vector<vertex_t>            vertices;
-    std::vector<normal_t>            normals;
-    std::vector<texcoord_t>          texcoords;
-    std::vector<index_t>             indices;
+    /// 顶点
+    std::vector<vertex_t> vertices;
+    /// 法线
+    std::vector<normal_t> normals;
+    /// 贴图
+    std::vector<texcoord_t> texcoords;
+    /// 索引
+    std::vector<index_t> indices;
+    /// 材质
     std::vector<tinyobj::material_t> materials;
 };
 
-// 面
+/**
+ * @brief 面
+ */
 struct face_t {
     vertex_t p0;
     vertex_t p1;
     vertex_t p2;
+    /**
+     * @brief 构造函数
+     * @param  _p0              顶点 0
+     * @param  _p1              顶点 1
+     * @param  _p2              顶点 2
+     */
     face_t(const vertex_t &_p0, const vertex_t &_p1, const vertex_t &_p2) {
         p0 = _p0;
         p1 = _p1;
@@ -101,22 +152,64 @@ struct face_t {
     }
 };
 
+/**
+ * @brief 模型
+ */
 class model_t {
 private:
-    // 原始数据
+    /// 原始数据
     mesh_t mesh;
-    // 所有三角形面
+    /// 所有三角形面
     std::vector<face_t> faces;
 
 public:
+    /**
+     * @brief 构造函数
+     * @param  _obj_path        obj 文件路径
+     * @param  _mtl_path        mtl 文件路径
+     */
     model_t(const std::string &_obj_path, const std::string &_mtl_path = "");
+
+    /**
+     * @brief 析构函数
+     */
     ~model_t(void);
-    const std::vector<vertex_t>            &get_vertex(void) const;
-    const std::vector<normal_t>            &get_normal(void) const;
-    const std::vector<texcoord_t>          &get_texcoord(void) const;
-    const std::vector<index_t>             &get_index(void) const;
+
+    /**
+     * @brief 获取所有顶点
+     * @return const std::vector<vertex_t>& 所有顶点
+     */
+    const std::vector<vertex_t> &get_vertex(void) const;
+
+    /**
+     * @brief 获取所有法线
+     * @return const std::vector<normal_t>& 所有法线
+     */
+    const std::vector<normal_t> &get_normal(void) const;
+
+    /**
+     * @brief 获取所有贴图
+     * @return const std::vector<texcoord_t>&   所有贴图
+     */
+    const std::vector<texcoord_t> &get_texcoord(void) const;
+
+    /**
+     * @brief 获取所有索引
+     * @return const std::vector<index_t>&  所有索引
+     */
+    const std::vector<index_t> &get_index(void) const;
+
+    /**
+     * @brief 获取所有材质
+     * @return const std::vector<tinyobj::material_t>&  所有材质
+     */
     const std::vector<tinyobj::material_t> &get_material(void) const;
-    const std::vector<face_t>              &get_face(void) const;
+
+    /**
+     * @brief 获取所有面
+     * @return const std::vector<face_t>&   所有面
+     */
+    const std::vector<face_t> &get_face(void) const;
 };
 
 #endif /* _MODEL_H_ */

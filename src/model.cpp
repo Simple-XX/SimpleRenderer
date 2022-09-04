@@ -22,7 +22,14 @@
 
 using namespace std;
 
-// 顶点回调函数
+/**
+ * @brief 顶点回调函数
+ * @param  _user_data       保存顶点信息
+ * @param  _x               x 坐标
+ * @param  _y               y 坐标
+ * @param  _z               z 坐标
+ * @param  _w               未使用
+ */
 static void vertex_cb(void *_user_data, float _x, float _y, float _z, float) {
     mesh_t *mesh = reinterpret_cast<mesh_t *>(_user_data);
     // printf("v[%ld] = %f, %f, %f (_w %f)\n", mesh->vertices.size(), _x, _y,
@@ -35,7 +42,13 @@ static void vertex_cb(void *_user_data, float _x, float _y, float _z, float) {
     return;
 }
 
-// 法线回调函数
+/**
+ * @brief 法线回调函数
+ * @param  _user_data       保存法线信息
+ * @param  _x               x 坐标
+ * @param  _y               y 坐标
+ * @param  _z               z 坐标
+ */
 static void normal_cb(void *_user_data, float _x, float _y, float _z) {
     mesh_t *mesh = reinterpret_cast<mesh_t *>(_user_data);
     // printf("vn[%ld] = %f, %f, %f\n", mesh->normals.size() / 3, _x, _y, _z);
@@ -45,7 +58,13 @@ static void normal_cb(void *_user_data, float _x, float _y, float _z) {
     return;
 }
 
-// 贴图回调函数
+/**
+ * @brief 贴图回调函数
+ * @param  _user_data       保存贴图信息
+ * @param  _x               x 坐标
+ * @param  _y               y 坐标
+ * @param  _z               z 坐标
+ */
 static void texcoord_cb(void *_user_data, float _x, float _y, float _z) {
     mesh_t *mesh = reinterpret_cast<mesh_t *>(_user_data);
     // printf("vt[%ld] = %f, %f, %f\n", mesh->texcoords.size() / 3, _x, _y, _z);
@@ -55,7 +74,12 @@ static void texcoord_cb(void *_user_data, float _x, float _y, float _z) {
     return;
 }
 
-// 索引回调函数
+/**
+ * @brief 索引回调函数
+ * @param  _user_data       保存索引信息
+ * @param  _indices         索引数组
+ * @param  _num_indices     数组长度
+ */
 static void index_cb(void *_user_data, tinyobj::index_t *_indices,
                      int _num_indices) {
     mesh_t *mesh = reinterpret_cast<mesh_t *>(_user_data);
@@ -74,7 +98,12 @@ static void index_cb(void *_user_data, tinyobj::index_t *_indices,
     return;
 }
 
-// 材质回调函数
+/**
+ * @brief 材质回调函数
+ * @param  _user_data       保存材质数据
+ * @param  _name            材质名
+ * @param  _material_idx    材质索引
+ */
 static void usemtl_cb(void *_user_data, const char *_name, int _material_idx) {
     mesh_t *mesh = reinterpret_cast<mesh_t *>(_user_data);
     // 保存材质信息
@@ -89,7 +118,12 @@ static void usemtl_cb(void *_user_data, const char *_name, int _material_idx) {
     return;
 }
 
-// 材质回调函数
+/**
+ * @brief 材质回调函数
+ * @param  _user_data       保存材质数据
+ * @param  _materials       材质数组
+ * @param  num_materials    材质数量
+ */
 static void mtllib_cb(void *_user_data, const tinyobj::material_t *_materials,
                       int num_materials) {
     mesh_t *mesh = reinterpret_cast<mesh_t *>(_user_data);
@@ -101,6 +135,11 @@ static void mtllib_cb(void *_user_data, const tinyobj::material_t *_materials,
     return;
 }
 
+/**
+ * @brief 组回调函数
+ * @param  _names           组名数据
+ * @param  _num_names       组名数量
+ */
 static void group_cb(void *, const char **_names, int _num_names) {
     printf("group : name = \n");
     for (int i = 0; i < _num_names; i++) {
@@ -109,6 +148,10 @@ static void group_cb(void *, const char **_names, int _num_names) {
     return;
 }
 
+/**
+ * @brief obj 回调函数
+ * @param  _name            obj 名
+ */
 static void object_cb(void *, const char *_name) {
     printf("object : name = %s\n", _name);
     return;
@@ -130,12 +173,13 @@ model_t::model_t(const string &_obj_path, const string &_mtl_path) {
     std::ifstream ifs(_obj_path.c_str());
 
     if (ifs.fail()) {
-        std::cerr << "file not found." << std::endl;
+        std::cerr << "file not found: " << _obj_path << "." << std::endl;
         return;
     }
 
     tinyobj::MaterialFileReader mtlReader(_mtl_path);
 
+    // 加载
     bool ret =
         tinyobj::LoadObjWithCallback(ifs, cb, &mesh, &mtlReader, &warn, &err);
 
@@ -158,6 +202,7 @@ model_t::model_t(const string &_obj_path, const string &_mtl_path) {
     printf("# of indices          = %ld\n", mesh.indices.size());
     printf("# of materials = %ld\n", mesh.materials.size());
 
+    // 添加到 face
     for (size_t i = 0; i < mesh.indices.size(); i += 3) {
         vertex_t tmp_p0 = mesh.vertices.at(mesh.indices.at(i).v);
         vertex_t tmp_p1 = mesh.vertices.at(mesh.indices.at(i + 1).v);
@@ -168,7 +213,7 @@ model_t::model_t(const string &_obj_path, const string &_mtl_path) {
     return;
 }
 
-model_t::~model_t() {
+model_t::~model_t(void) {
     return;
 }
 
