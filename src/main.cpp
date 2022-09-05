@@ -14,20 +14,23 @@
  * </table>
  */
 
-#include "common.h"
-#include "iostream"
-#include "framebuffer.h"
 #include "model.h"
 #include "renderer.h"
 #include "display.h"
 
-using namespace std;
+static constexpr const uint32_t                  WIDTH  = 1920;
+static constexpr const uint32_t                  HEIGHT = 1080;
+[[maybe_unused]] static constexpr const uint32_t RED    = 0xFFFF0000;
+[[maybe_unused]] static constexpr const uint32_t GREEN  = 0xFF00FF00;
+[[maybe_unused]] static constexpr const uint32_t BLUE   = 0xFF0000FF;
+[[maybe_unused]] static constexpr const uint32_t WHITE  = 0xFFFFFFFF;
+[[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
 
 int main(int _argc, char **_argv) {
     // obj 路径
-    string obj_path;
+    std::string obj_path;
     // 材质路径
-    string mtl_path;
+    std::string mtl_path;
     // 如果没有指定那么使用默认值
     if (_argc == 1) {
         obj_path = "../../src/obj/cube.obj";
@@ -44,14 +47,19 @@ int main(int _argc, char **_argv) {
     }
 
     // 读取模型与材质
-    model_t       model(obj_path, mtl_path);
+    model_t model(obj_path, mtl_path);
+
     framebuffer_t framebuffer(WIDTH, HEIGHT);
-    for (auto i = 0; i < 1920; i++) {
-        for (auto j = 0; j < 1080; j++) {
-            framebuffer.pixel(i, j, framebuffer_t::RGBA(255, 0, 0, 255));
+    display_t     display(framebuffer);
+    for (uint32_t i = 0; i < WIDTH; i++) {
+        for (uint32_t j = 0; j < HEIGHT; j++) {
+            if (i == j) {
+                framebuffer.pixel(i, j, WHITE);
+            }
         }
     }
 
-    show_window(framebuffer);
+    display.loop();
+
     return 0;
 }

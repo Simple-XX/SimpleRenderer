@@ -18,24 +18,23 @@
 #define _FRAMEBUFFER_H_
 
 #include "cstdint"
+#include "mutex"
 
 /**
  * @brief 缓冲
  */
 class framebuffer_t {
-public:
-    /// 默认宽度
-    static constexpr const uint32_t WIDTH = 1920;
-    /// 默认高度
-    static constexpr const uint32_t HEIGHT = 1080;
+private:
+    std::mutex color_buffer_mutex;
+    std::mutex depth_buffer_mutex;
 
-    /// 颜色类型，格式为 RGBA32
+public:
+    /// 颜色类型，格式为 ARGB32
     typedef uint32_t color_t;
 
     /// 深度类型
-    typedef float depth_buffer_t;
+    typedef float depth_t;
 
-private:
     /// 窗口宽度
     uint32_t width;
     /// 窗口高度
@@ -45,11 +44,12 @@ private:
     color_t *color_buffer;
     /// 每像素字节数
     static constexpr const uint8_t BPP = sizeof(color_t);
+    /// 每像素深度大小
+    static constexpr const uint8_t BPP_DEPTH = sizeof(depth_t);
 
     /// 深度缓存
-    depth_buffer_t *depth_buffer;
+    depth_t *depth_buffer;
 
-public:
     /**
      * @brief 构造函数
      */
@@ -61,7 +61,7 @@ public:
      * @param  _height          高度
      * @param  _color_type      颜色类型
      */
-    framebuffer_t(uint32_t _width = WIDTH, uint32_t _height = HEIGHT);
+    framebuffer_t(uint32_t _width, uint32_t _height);
 
     /**
      * @brief 拷贝构造
@@ -89,17 +89,20 @@ public:
     /**
      * @brief 清空成指定颜色
      * @param  _color           指定颜色
+     * @param  _depth           指定深度
      */
-    void clear(const color_t &_color);
+    void clear(const color_t &_color, const depth_t &_depth = 0);
 
     /**
      * @brief 设置像素
-     * @param  _x               横向坐标
-     * @param  _y               纵向坐标
+     * @param  _i               横向坐标
+     * @param  _j               纵向坐标
      * @param  _color           颜色
+     * @param  _depth           深度
      * @note (0, 0) 在屏幕左上角
      */
-    void pixel(int _x, int _y, const color_t &_color);
+    void pixel(const uint32_t _i, const uint32_t _j, const color_t &_color,
+               const depth_t &_depth = 0);
 
     /**
      * @brief 获取像素缓存
@@ -108,15 +111,15 @@ public:
     const color_t *get_color_buffer(void) const;
 
     /**
-     * @brief 生成 rgba
+     * @brief 生成 argb
+     * @param  _a               alpha
      * @param  _r               红
      * @param  _g               绿
      * @param  _b               蓝
-     * @param  _a               alpha
-     * @return color_t          rgba 颜色
+     * @return color_t          argb 颜色
      */
-    static color_t RGBA(const uint8_t _r, const uint8_t _g, const uint8_t _b,
-                        const uint8_t _a = UINT8_MAX);
+    static color_t ARGB(const uint8_t _a, const uint8_t _r, const uint8_t _g,
+                        const uint8_t _b);
 };
 
 #endif /* _FRAMEBUFFER_H_ */

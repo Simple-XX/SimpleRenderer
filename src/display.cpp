@@ -4,96 +4,123 @@
  * @brief 显示
  * @author Zone.N (Zone.Niuzh@hotmail.com)
  * @version 1.0
- * @date 2022-09-04
+ * @date 2022-09-05
  * @copyright MIT LICENSE
  * https://github.com/Simple-XX/SimpleRenderer
  * @par change log:
  * <table>
  * <tr><th>Date<th>Author<th>Description
- * <tr><td>2022-09-04<td>Zone.N<td>创建文件
+ * <tr><td>2022-09-05<td>Zone.N<td>创建文件
  * </table>
  */
 
-#include <iostream>
-#ifdef __APPLE__
-#define GL_SILENCE_DEPRECATION
-#endif
-#include <GLFW/glfw3.h>
+#include "iostream"
 #include "display.h"
-#include "common.h"
 
-/**
- * @brief 显示循环
- * @param  _window          未使用
- * @param  _current_time    未使用
- * @param  _pixels          要写入的像素
- */
-static void display(GLFWwindow *, double, const uint32_t *_pixels) {
-    glDrawPixels(WIDTH, HEIGHT, GL_RGBA, GL_UNSIGNED_INT, _pixels);
+uint8_t display_t::ARGB2A(uint32_t _color) {
+    return (_color >> 24) & 0xFF;
 }
 
-/**
- * @brief 设置视窗大小回调函数
- * @param  _window          未使用
- * @param  _width           新的宽度
- * @param  _height          新的高度
- */
-static void framebuffer_size_callback(GLFWwindow *, int _width, int _height) {
-    glViewport(0, 0, _width, _height);
+uint8_t display_t::ARGB2R(uint32_t _color) {
+    return (_color >> 16) & 0xFF;
 }
 
-/**
- * @brief 处理输入回调函数
- * @param  _window          窗口
- */
-static void processInput(GLFWwindow *_window) {
-    if (glfwGetKey(_window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(_window, true);
-    }
+uint8_t display_t::ARGB2G(uint32_t _color) {
+    return (_color >> 8) & 0xFF;
 }
 
-void show_window(const framebuffer_t &_framebuffer) {
-    if (glfwInit() != GLFW_TRUE) {
-        std::cerr << "glfwInit failed." << std::endl;
+uint8_t display_t::ARGB2B(uint32_t _color) {
+    return (_color >> 0) & 0xFF;
+}
+
+void display_t::pixel(SDL_Surface *_surface, const uint32_t _x,
+                      const uint32_t _y, const uint8_t _a, const uint8_t _r,
+                      const uint8_t _g, const uint8_t _b) {
+    // 加锁
+    SDL_LockSurface(_surface);
+    // 判断颜色深度
+    int bpp = _surface->format->BytesPerPixel;
+    if (bpp != 4) {
+        std::cerr << "Only support "
+                  << SDL_GetPixelFormatName(
+                         SDL_GetWindowPixelFormat(sdl_window))
+                  << std::endl;
         return;
     }
-    // 设置主版本号
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    // 设置次版本号
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-    // 创建窗口
-    auto window = glfwCreateWindow(_framebuffer.WIDTH, _framebuffer.HEIGHT,
-                                   "SimpleRenderer", nullptr, nullptr);
-    if (window == nullptr) {
-        std::cerr << "fail to create window" << std::endl;
-        glfwTerminate();
-        return;
+    // 计算像素位置
+    uint8_t *p = (uint8_t *)_surface->pixels + _y * _surface->pitch + _x * bpp;
+    *(uint32_t *)p = SDL_MapRGBA(_surface->format, _r, _g, _b, _a);
+    SDL_UnlockSurface(_surface);
+    return;
+}
+
+display_t::display_t(framebuffer_t &_framebuffer) : framebuffer(_framebuffer) {
+    width  = framebuffer.width;
+    height = framebuffer.height;
+    // 初始化 sdl
+    SDL_Init(SDL_INIT_VIDEO);
+    // 创建窗口，居中，可见
+    sdl_window = SDL_CreateWindow("SimpleRenderer", SDL_WINDOWPOS_CENTERED,
+                                  SDL_WINDOWPOS_CENTERED, width, height,
+                                  SDL_WINDOW_SHOWN);
+    return;
+}
+
+display_t::~display_t(void) {
+    // 回收资源
+    SDL_DestroyWindow(sdl_window);
+    SDL_Quit();
+}
+
+void display_t::input_handler(void) {
+    // 捕获事件
+    while (SDL_PollEvent(&sdl_event)) {
+        switch (sdl_event.type) {
+                // 键盘事件
+            case SDL_KEYDOWN: {
+                // 输出按键名
+                printf("key %s down！\n",
+                       SDL_GetKeyName(sdl_event.key.keysym.sym));
+                // 如果是 esc 键则将 is_shoule_quit 置位
+                if (sdl_event.key.keysym.sym == SDLK_ESCAPE) {
+                    is_shoule_quit = true;
+                }
+                break;
+            }
+            case SDL_QUIT: {
+                is_shoule_quit = true;
+                break;
+            }
+        }
     }
+    return;
+}
 
-    // 创建上下文
-    glfwMakeContextCurrent(window);
+void display_t::fill(void) {
+    // 获取 framebuffer 颜色缓存
+    auto     color_buffer = framebuffer.get_color_buffer();
+    uint32_t color        = 0x00000000;
+    auto     surface      = SDL_GetWindowSurface(sdl_window);
+    // 填充整个屏幕
+    for (uint32_t i = 0; i < width; i++) {
+        for (uint32_t j = 0; j < height; j++) {
+            color = color_buffer[j * width + i];
+            pixel(surface, i, j, ARGB2A(color), ARGB2R(color), ARGB2G(color),
+                  ARGB2B(color));
+        }
+    }
+    return;
+}
 
-    // 设置视窗
-    glViewport(0, 0, _framebuffer.WIDTH, _framebuffer.HEIGHT);
-    // 设置视窗大小回调函数
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-    // 进入主循环
-    while (glfwWindowShouldClose(window) == false) {
+void display_t::loop(void) {
+    // 主循环
+    while (is_shoule_quit == false) {
         // 处理输入
-        processInput(window);
-        // 刷新显示缓存
-        display(window, glfwGetTime(), _framebuffer.get_color_buffer());
-        // 交换缓冲区
-        glfwSwapBuffers(window);
-        // 处理事件
-        glfwPollEvents();
+        input_handler();
+        // 填充窗口
+        fill();
+        // 刷新窗口
+        SDL_UpdateWindowSurface(sdl_window);
     }
-
-    glfwTerminate();
     return;
 }

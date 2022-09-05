@@ -7,7 +7,7 @@
 # Set minimum cmake version
 cmake_minimum_required(VERSION 3.10)
 
-project(SimpleRender LANGUAGES CXX)
+project(SimpleRender LANGUAGES C CXX)
 
 if(${SimpleRenderer_SOURCE_DIR} STREQUAL ${SimpleRenderer_BINARY_DIR})
     message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.")

@@ -19,24 +19,22 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 
 message(STATUS "CMAKE_CXX_FLAGS is ${CMAKE_CXX_FLAGS}")
 
-# opengl
-find_package(OpenGL REQUIRED)
+find_package(SDL2 REQUIRED)
 
-# glfw
-find_package(glfw3 REQUIRED)
-message(INFO ${glfw_INCLUDE_DIRS})
 # Set include dir
 include_directories(
         ./include
-        ${OPENGL_INCLUDE_DIR}
-        ${glfw_INCLUDE_DIRS})
+        ${SDL2_INCLUDE_DIRS})
 
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} SimpleRender_src)
+set(SimpleRender_src
+        main.cpp
+        model.cpp
+        framebuffer.cpp
+        display.cpp)
 
 # 生成可执行文件
 add_executable(SimpleRender
     ${SimpleRender_src})
 
 target_link_libraries(SimpleRender
-        ${OPENGL_LIBRARIES}
-        ${glfw_LIBRARIES})
+        ${SDL2_LIBRARIES})

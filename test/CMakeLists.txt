@@ -20,10 +20,11 @@ FetchContent_MakeAvailable(googletest)
 
 # Set include dir
 include_directories(
-        ${SimpleRender_SOURCE_DIR}/src/include
-        ${Gtkmm4_INCLUDE_DIRS})
+        ${SimpleRender_SOURCE_DIR}/src/include)
 
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} test_src)
+set(test_src
+        point_test.cpp
+        vector_test.cpp)
 
 enable_testing()
 

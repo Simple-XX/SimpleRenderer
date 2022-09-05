@@ -30,7 +30,7 @@ framebuffer_t::framebuffer_t(uint32_t _width, uint32_t _height) {
     width        = _width;
     height       = _height;
     color_buffer = new color_t[width * height];
-    depth_buffer = new depth_buffer_t[width * height];
+    depth_buffer = new depth_t[width * height];
     return;
 }
 
@@ -41,14 +41,14 @@ framebuffer_t::framebuffer_t(const framebuffer_t &_framebuffer) {
         color_buffer = new color_t[width * height];
     }
     if (depth_buffer == nullptr) {
-        depth_buffer = new depth_buffer_t[width * height];
+        depth_buffer = new depth_t[width * height];
     }
     if (_framebuffer.color_buffer != nullptr) {
         memcpy(color_buffer, _framebuffer.color_buffer, width * height * BPP);
     }
     if (_framebuffer.depth_buffer != nullptr) {
         memcpy(depth_buffer, _framebuffer.depth_buffer,
-               width * height * sizeof(depth_buffer_t));
+               width * height * BPP_DEPTH);
     }
     return;
 }
@@ -71,38 +71,42 @@ framebuffer_t &framebuffer_t::operator=(const framebuffer_t &_framebuffer) {
         color_buffer = new color_t[width * height];
     }
     if (depth_buffer == nullptr) {
-        depth_buffer = new depth_buffer_t[width * height];
+        depth_buffer = new depth_t[width * height];
     }
     if (_framebuffer.color_buffer != nullptr) {
         memcpy(color_buffer, _framebuffer.color_buffer, width * height * BPP);
     }
     if (_framebuffer.depth_buffer != nullptr) {
         memcpy(depth_buffer, _framebuffer.depth_buffer,
-               width * height * sizeof(depth_buffer_t));
+               width * height * BPP_DEPTH);
     }
     return *this;
 }
 
 void framebuffer_t::clear(void) {
-    for (uint32_t i = 0; i < height; i++) {
-        for (uint32_t j = 0; j < width; j++) {
-            color_buffer[i * width + j] = 0;
+    for (uint32_t i = 0; i < width; i++) {
+        for (uint32_t j = 0; j < height; j++) {
+            pixel(i, j, 0x00000000, 0);
         }
     }
     return;
 }
 
-void framebuffer_t::clear(const color_t &_color) {
-    for (uint32_t i = 0; i < height; i++) {
-        for (uint32_t j = 0; j < width; j++) {
-            color_buffer[i * width + j] = _color;
+void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
+    for (uint32_t i = 0; i < width; i++) {
+        for (uint32_t j = 0; j < height; j++) {
+            pixel(i, j, _color, _depth);
         }
     }
     return;
 }
 
-void framebuffer_t::pixel(int _x, int _y, const color_t &_color) {
-    color_buffer[_y * width + _x] = _color;
+void framebuffer_t::pixel(const uint32_t _i, const uint32_t _j,
+                          const color_t &_color, const depth_t &_depth) {
+    std::lock_guard<std::mutex> color_buffer_lock(color_buffer_mutex);
+    std::lock_guard<std::mutex> depth_buffer_lock(depth_buffer_mutex);
+    color_buffer[_j * width + _i] = _color;
+    depth_buffer[_j * width + _i] = _depth;
     return;
 }
 
@@ -110,10 +114,10 @@ const framebuffer_t::color_t *framebuffer_t::get_color_buffer(void) const {
     return color_buffer;
 }
 
-framebuffer_t::color_t framebuffer_t::RGBA(const uint8_t _r, const uint8_t _g,
-                                           const uint8_t _b, const uint8_t _a) {
-    color_t color;
-    /// @see https://en.wikipedia.org/wiki/RGBA_color_model
-    color = _r << 24 | _g << 16 | _b << 8 | _a;
+framebuffer_t::color_t framebuffer_t::ARGB(const uint8_t _a, const uint8_t _r,
+                                           const uint8_t _g, const uint8_t _b) {
+    color_t color = 0x00000000;
+    color =
+        (_a & 0xFF) << 24 | (_r & 0xFF) << 16 | (_g & 0xFF) << 8 | (_b & 0xFF);
     return color;
 }
