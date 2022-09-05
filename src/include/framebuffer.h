@@ -24,10 +24,6 @@
  * @brief 缓冲
  */
 class framebuffer_t {
-private:
-    std::mutex color_buffer_mutex;
-    std::mutex depth_buffer_mutex;
-
 public:
     /// 颜色类型，格式为 ARGB32
     typedef uint32_t color_t;
@@ -35,25 +31,33 @@ public:
     /// 深度类型
     typedef float depth_t;
 
-    /// 窗口宽度
-    uint32_t width;
-    /// 窗口高度
-    uint32_t height;
-
-    /// 颜色缓存
-    color_t *color_buffer;
     /// 每像素字节数
     static constexpr const uint8_t BPP = sizeof(color_t);
     /// 每像素深度大小
     static constexpr const uint8_t BPP_DEPTH = sizeof(depth_t);
 
+private:
+    /// 窗口宽度
+    uint32_t width;
+    /// 窗口高度
+    uint32_t height;
+
+    /// 颜色缓存锁
+    std::mutex color_buffer_mutex;
+
+    /// 颜色缓存
+    color_t *color_buffer;
+
+    /// 深度缓存锁
+    std::mutex depth_buffer_mutex;
     /// 深度缓存
     depth_t *depth_buffer;
 
+public:
     /**
-     * @brief 构造函数
+     * @brief 不使用空构造
      */
-    framebuffer_t(void);
+    framebuffer_t(void) = delete;
 
     /**
      * @brief 构造函数
@@ -77,9 +81,21 @@ public:
     /**
      * @brief 赋值
      * @param  _framebuffer     另一个 framebuffer_t
-     * @return framebuffer_t&     结果
+     * @return framebuffer_t&   结果
      */
     framebuffer_t &operator=(const framebuffer_t &_framebuffer);
+
+    /**
+     * @brief 获取缓冲区宽度
+     * @return uint32_t         缓冲区宽度
+     */
+    uint32_t get_width(void) const;
+
+    /**
+     * @brief 获取缓冲区高度
+     * @return uint32_t         缓冲区高度
+     */
+    uint32_t get_height(void) const;
 
     /**
      * @brief 清空

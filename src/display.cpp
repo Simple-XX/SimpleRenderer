@@ -55,8 +55,8 @@ void display_t::pixel(SDL_Surface *_surface, const uint32_t _x,
 }
 
 display_t::display_t(framebuffer_t &_framebuffer) : framebuffer(_framebuffer) {
-    width  = framebuffer.width;
-    height = framebuffer.height;
+    width  = framebuffer.get_width();
+    height = framebuffer.get_height();
     // 初始化 sdl
     SDL_Init(SDL_INIT_VIDEO);
     // 创建窗口，居中，可见

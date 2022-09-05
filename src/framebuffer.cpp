@@ -18,14 +18,6 @@
 #include "cassert"
 #include "framebuffer.h"
 
-framebuffer_t::framebuffer_t(void) {
-    width        = 0;
-    height       = 0;
-    color_buffer = nullptr;
-    depth_buffer = nullptr;
-    return;
-}
-
 framebuffer_t::framebuffer_t(uint32_t _width, uint32_t _height) {
     width        = _width;
     height       = _height;
@@ -65,8 +57,8 @@ framebuffer_t::~framebuffer_t(void) {
 
 framebuffer_t &framebuffer_t::operator=(const framebuffer_t &_framebuffer) {
     assert(&_framebuffer == this);
-    assert(width == _framebuffer.width);
-    assert(height == _framebuffer.height);
+    assert(width == _framebuffer.get_width());
+    assert(height == _framebuffer.get_height());
     if (color_buffer == nullptr) {
         color_buffer = new color_t[width * height];
     }
@@ -81,6 +73,14 @@ framebuffer_t &framebuffer_t::operator=(const framebuffer_t &_framebuffer) {
                width * height * BPP_DEPTH);
     }
     return *this;
+}
+
+uint32_t framebuffer_t::get_width(void) const {
+    return width;
+}
+
+uint32_t framebuffer_t::get_height(void) const {
+    return height;
 }
 
 void framebuffer_t::clear(void) {
