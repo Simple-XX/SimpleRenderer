@@ -24,7 +24,8 @@ include_directories(
 
 set(test_src
         point_test.cpp
-        vector_test.cpp)
+        vector_test.cpp
+        draw2d_test.cpp)
 
 enable_testing()
 

@@ -30,7 +30,7 @@ set(SimpleRender_src
         main.cpp
         model.cpp
         framebuffer.cpp
-        display.cpp)
+        display.cpp draw2d.cpp include/draw2d.h)
 
 # 生成可执行文件
 add_executable(SimpleRender

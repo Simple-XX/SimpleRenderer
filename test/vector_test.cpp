@@ -18,10 +18,10 @@
 #include "vector.hpp"
 #include "point.hpp"
 
-TEST(Vector2f, test1) {
-    Vector2f test(2, 3);
-    Vector2f test2(-1, 3);
-    Vector2f test3 = test - test2;
+TEST(vector2f_t, test1) {
+    vector2f_t test(2, 3);
+    vector2f_t test2(-1, 3);
+    vector2f_t test3 = test - test2;
     EXPECT_EQ(test.x, 2);
     EXPECT_EQ(test.y, 3);
     EXPECT_EQ(test2.x, -1);
@@ -30,17 +30,17 @@ TEST(Vector2f, test1) {
     EXPECT_EQ(test3.y, 0);
     EXPECT_EQ((test3 * 3).x, 9);
     EXPECT_EQ((test3 * 3).y, 0);
-    EXPECT_EQ((Vector2f(0, 1) * Vector2f(1, 0)), 0);
+    EXPECT_EQ((vector2f_t(0, 1) * vector2f_t(1, 0)), 0);
     EXPECT_EQ(test.LengthSquared(), 13);
     EXPECT_EQ((-test).x, -2);
     EXPECT_EQ((-test).y, -3);
     return;
 }
 
-TEST(Vector3f, test1) {
-    Vector3f test5(2, 3, 4);
-    Vector3f test6(-1, 3, -2);
-    Vector3f test7 = test5 - test6;
+TEST(vector3f_t, test1) {
+    vector3f_t test5(2, 3, 4);
+    vector3f_t test6(-1, 3, -2);
+    vector3f_t test7 = test5 - test6;
     EXPECT_EQ(test5.x, 2);
     EXPECT_EQ(test5.y, 3);
     EXPECT_EQ(test5.z, 4);
@@ -53,22 +53,22 @@ TEST(Vector3f, test1) {
     EXPECT_EQ((test7 * 3).x, 9);
     EXPECT_EQ((test7 * 3).y, 0);
     EXPECT_EQ((test7 * 3).z, 18);
-    EXPECT_EQ((Vector3f(0, 1, 0) * Vector3f(1, 0, 0)), 0);
+    EXPECT_EQ((vector3f_t(0, 1, 0) * vector3f_t(1, 0, 0)), 0);
     EXPECT_EQ(test5.LengthSquared(), 29);
     EXPECT_EQ((-test5).x, -2);
     EXPECT_EQ((-test5).y, -3);
     EXPECT_EQ((-test5).z, -4);
-    Vector3f test8;
-    Vector3f test9(1, 1, 1);
+    vector3f_t test8;
+    vector3f_t test9(1, 1, 1);
     test9 = test9.Cross(test5, test6);
     EXPECT_EQ(test9.x, -18);
     EXPECT_EQ(test9.y, 0);
     EXPECT_EQ(test9.z, 9);
-    Vector3f test10(1, 2, 3);
+    vector3f_t test10(1, 2, 3);
     EXPECT_EQ(test10.x, 1);
     EXPECT_EQ(test10.y, 2);
     EXPECT_EQ(test10.z, 3);
-    Vector3f test11(test10);
+    vector3f_t test11(test10);
     EXPECT_EQ(test11.x, 1);
     EXPECT_EQ(test11.y, 2);
     EXPECT_EQ(test11.z, 3);

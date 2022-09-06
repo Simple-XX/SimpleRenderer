@@ -22,9 +22,9 @@
 #include "cmath"
 
 template <class _T>
-class Vector2;
+class vector2_t;
 template <class _T>
-class Vector3;
+class vector3_t;
 template <class _T>
 class Point3;
 template <class _T>
@@ -74,7 +74,7 @@ public:
      * @param  _p               二维向量
      */
     template <class _U>
-    explicit Point2(const Vector2<_U> &_p);
+    explicit Point2(const vector2_t<_U> &_p);
 
     /**
      * @brief 构造函数
@@ -84,11 +84,11 @@ public:
 
     /**
      * @brief () 重载，类型转换
-     * @tparam _U               要转换的 Vector2 类型
-     * @return Vector2<_U>      结果
+     * @tparam _U               要转换的 vector2_t 类型
+     * @return vector2_t<_U>      结果
      */
     template <class _U>
-    explicit operator Vector2<_U>() const;
+    explicit operator vector2_t<_U>() const;
 
     /**
      * @brief = 重载
@@ -129,17 +129,17 @@ public:
 
     /**
      * @brief + 重载
-     * @param  _v               另一个 Vector2<_T>
+     * @param  _v               另一个 vector2_t<_T>
      * @return Point2<_T>       结果
      */
-    Point2<_T> operator+(const Vector2<_T> &_v) const;
+    Point2<_T> operator+(const vector2_t<_T> &_v) const;
 
     /**
      * @brief += 重载
-     * @param  _v               另一个 Vector2<_T>
+     * @param  _v               另一个 vector2_t<_T>
      * @return Point2<_T>&      结果
      */
-    Point2<_T> &operator+=(const Vector2<_T> &_v);
+    Point2<_T> &operator+=(const vector2_t<_T> &_v);
 
     /**
      * @brief - 重载，向量反向
@@ -150,23 +150,23 @@ public:
     /**
      * @brief - 重载，向量减
      * @param  _p               要减的 Point2<_T>
-     * @return Vector2<_T>      结果
+     * @return vector2_t<_T>      结果
      */
-    Vector2<_T> operator-(const Point2<_T> &_p) const;
+    vector2_t<_T> operator-(const Point2<_T> &_p) const;
 
     /**
      * @brief - 重载，向量减
-     * @param  _v               另一个 Vector3<_T>
+     * @param  _v               另一个 vector3_t<_T>
      * @return Point2<_T>       结果
      */
-    Point2<_T> operator-(const Vector2<_T> &_v) const;
+    Point2<_T> operator-(const vector2_t<_T> &_v) const;
 
     /**
      * @brief -= 重载，向量减
-     * @param  _v               Vector2<_T>
+     * @param  _v               vector2_t<_T>
      * @return Point2<_T>       结果
      */
-    Point2<_T> &operator-=(const Vector2<_T> &_v);
+    Point2<_T> &operator-=(const vector2_t<_T> &_v);
 
     /**
      * @brief * 重载，向量数乘
@@ -260,7 +260,7 @@ Point2<_T>::Point2(const Point2<_U> &_p) {
 
 template <class _T>
 template <class _U>
-Point2<_T>::Point2(const Vector2<_U> &_p) {
+Point2<_T>::Point2(const vector2_t<_U> &_p) {
     x = (_T)_p.x;
     y = (_T)_p.y;
     assert(!HasNaNs());
@@ -275,8 +275,8 @@ Point2<_T>::Point2(const Point3<_T> &_p) : x(_p.x), y(_p.y) {
 
 template <class _T>
 template <class _U>
-Point2<_T>::operator Vector2<_U>() const {
-    return Vector2<_U>(x, y);
+Point2<_T>::operator vector2_t<_U>() const {
+    return vector2_t<_U>(x, y);
 }
 
 template <class _T>
@@ -312,13 +312,13 @@ Point2<_T> &Point2<_T>::operator+=(const Point2<_T> &_p) {
 }
 
 template <class _T>
-Point2<_T> Point2<_T>::operator+(const Vector2<_T> &_v) const {
+Point2<_T> Point2<_T>::operator+(const vector2_t<_T> &_v) const {
     assert(!_v.HasNaNs());
     return Point2<_T>(x + _v.x, y + _v.y);
 }
 
 template <class _T>
-Point2<_T> &Point2<_T>::operator+=(const Vector2<_T> &_v) {
+Point2<_T> &Point2<_T>::operator+=(const vector2_t<_T> &_v) {
     assert(!_v.HasNaNs());
     x += _v.x;
     y += _v.y;
@@ -331,19 +331,19 @@ Point2<_T> Point2<_T>::operator-() const {
 }
 
 template <class _T>
-Vector2<_T> Point2<_T>::operator-(const Point2<_T> &_p) const {
+vector2_t<_T> Point2<_T>::operator-(const Point2<_T> &_p) const {
     assert(!_p.HasNaNs());
-    return Vector2<_T>(x - _p.x, y - _p.y);
+    return vector2_t<_T>(x - _p.x, y - _p.y);
 }
 
 template <class _T>
-Point2<_T> Point2<_T>::operator-(const Vector2<_T> &_v) const {
+Point2<_T> Point2<_T>::operator-(const vector2_t<_T> &_v) const {
     assert(!_v.HasNaNs());
     return Point2<_T>(x - _v.x, y - _v.y);
 }
 
 template <class _T>
-Point2<_T> &Point2<_T>::operator-=(const Vector2<_T> &_v) {
+Point2<_T> &Point2<_T>::operator-=(const vector2_t<_T> &_v) {
     assert(!_v.HasNaNs());
     x -= _v.x;
     y -= _v.y;
@@ -452,10 +452,10 @@ public:
     /**
      * @brief () 重载，类型转换
      * @tparam _U
-     * @return Vector3<_U>
+     * @return vector3_t<_U>
      */
     template <class _U>
-    explicit operator Vector3<_U>() const;
+    explicit operator vector3_t<_U>() const;
 
     /**
      * @brief = 重载
@@ -496,17 +496,17 @@ public:
 
     /**
      * @brief + 重载
-     * @param  _v               另一个 Vector3<_T>
+     * @param  _v               另一个 vector3_t<_T>
      * @return Point3<_T>       结果
      */
-    Point3<_T> operator+(const Vector3<_T> &_v) const;
+    Point3<_T> operator+(const vector3_t<_T> &_v) const;
 
     /**
      * @brief += 重载
-     * @param  _v               另一个 Vector3<_T>
+     * @param  _v               另一个 vector3_t<_T>
      * @return Point3<_T>&      结果
      */
-    Point3<_T> &operator+=(const Vector3<_T> &_v);
+    Point3<_T> &operator+=(const vector3_t<_T> &_v);
 
     /**
      * @brief - 重载，取负
@@ -517,23 +517,23 @@ public:
     /**
      * @brief - 重载
      * @param  _p               另一个 Point3<_T>
-     * @return Vector3<_T>      结果
+     * @return vector3_t<_T>      结果
      */
-    Vector3<_T> operator-(const Point3<_T> &_p) const;
+    vector3_t<_T> operator-(const Point3<_T> &_p) const;
 
     /**
      * @brief - 重载
-     * @param  _v               另一个 Vector3<_T>
+     * @param  _v               另一个 vector3_t<_T>
      * @return Point3<_T>       结果
      */
-    Point3<_T> operator-(const Vector3<_T> &_v) const;
+    Point3<_T> operator-(const vector3_t<_T> &_v) const;
 
     /**
      * @brief -= 重载
-     * @param  _v               另一个 Vector3<_T>
+     * @param  _v               另一个 vector3_t<_T>
      * @return Point3<_T>&      结果
      */
-    Point3<_T> &operator-=(const Vector3<_T> &_v);
+    Point3<_T> &operator-=(const vector3_t<_T> &_v);
 
     /**
      * @brief * 重载，数乘
@@ -628,8 +628,8 @@ Point3<_T>::Point3(const Point3<_T> &_p) {
 
 template <class _T>
 template <class _U>
-Point3<_T>::operator Vector3<_U>() const {
-    return Vector3<_U>(x, y, z);
+Point3<_T>::operator vector3_t<_U>() const {
+    return vector3_t<_U>(x, y, z);
 }
 
 template <class _T>
@@ -667,13 +667,13 @@ Point3<_T> &Point3<_T>::operator+=(const Point3<_T> &_p) {
 }
 
 template <class _T>
-Point3<_T> Point3<_T>::operator+(const Vector3<_T> &_v) const {
+Point3<_T> Point3<_T>::operator+(const vector3_t<_T> &_v) const {
     assert(!_v.HasNaNs());
     return Point3<_T>(x + _v.x, y + _v.y, z + _v.z);
 }
 
 template <class _T>
-Point3<_T> &Point3<_T>::operator+=(const Vector3<_T> &_v) {
+Point3<_T> &Point3<_T>::operator+=(const vector3_t<_T> &_v) {
     assert(!_v.HasNaNs());
     x += _v.x;
     y += _v.y;
@@ -687,19 +687,19 @@ Point3<_T> Point3<_T>::operator-() const {
 }
 
 template <class _T>
-Vector3<_T> Point3<_T>::operator-(const Point3<_T> &_p) const {
+vector3_t<_T> Point3<_T>::operator-(const Point3<_T> &_p) const {
     assert(!_p.HasNaNs());
-    return Vector3<_T>(x - _p.x, y - _p.y, z - _p.z);
+    return vector3_t<_T>(x - _p.x, y - _p.y, z - _p.z);
 }
 
 template <class _T>
-Point3<_T> Point3<_T>::operator-(const Vector3<_T> &_v) const {
+Point3<_T> Point3<_T>::operator-(const vector3_t<_T> &_v) const {
     assert(!_v.HasNaNs());
     return Point3<_T>(x - _v.x, y - _v.y, z - _v.z);
 }
 
 template <class _T>
-Point3<_T> &Point3<_T>::operator-=(const Vector3<_T> &_v) {
+Point3<_T> &Point3<_T>::operator-=(const vector3_t<_T> &_v) {
     assert(!_v.HasNaNs());
     x -= _v.x;
     y -= _v.y;
