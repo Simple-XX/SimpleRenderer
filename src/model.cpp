@@ -20,43 +20,6 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "3rd/tiny_obj_loader.h"
 
-using namespace std;
-
-vertex_t::vertex_t(void) {
-    x = 0;
-    y = 0;
-    z = 0;
-    return;
-}
-
-vertex_t::vertex_t(const float _x, const float _y, const float _z) {
-    x = _x;
-    y = _y;
-    z = _z;
-    return;
-}
-
-normal_t::normal_t(const float _x, const float _y, const float _z) {
-    x = _x;
-    y = _y;
-    z = _z;
-    return;
-}
-
-texcoord_t::texcoord_t(const float _x, const float _y, const float _z) {
-    x = _x;
-    y = _y;
-    z = _z;
-    return;
-}
-
-index_t::index_t(const int _v, const int _vn, const int _vt) {
-    v  = _v;
-    vn = _vn;
-    vt = _vt;
-    return;
-}
-
 /**
  * @brief 顶点回调函数
  * @param  _user_data       保存顶点信息
@@ -192,7 +155,7 @@ static void object_cb(void *, const char *_name) {
     return;
 }
 
-model_t::model_t(const string &_obj_path, const string &_mtl_path) {
+model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
     tinyobj::callback_t cb;
     cb.vertex_cb   = vertex_cb;
     cb.normal_cb   = normal_cb;
@@ -239,9 +202,9 @@ model_t::model_t(const string &_obj_path, const string &_mtl_path) {
 
     // 添加到 face
     for (size_t i = 0; i < mesh.indices.size(); i += 3) {
-        vertex_t tmp_p0 = mesh.vertices.at(mesh.indices.at(i).v);
-        vertex_t tmp_p1 = mesh.vertices.at(mesh.indices.at(i + 1).v);
-        vertex_t tmp_p2 = mesh.vertices.at(mesh.indices.at(i + 2).v);
+        vertex_t tmp_p0 = mesh.vertices.at(mesh.indices.at(i).x);
+        vertex_t tmp_p1 = mesh.vertices.at(mesh.indices.at(i + 1).x);
+        vertex_t tmp_p2 = mesh.vertices.at(mesh.indices.at(i + 2).x);
         faces.push_back(face_t(tmp_p0, tmp_p1, tmp_p2));
     }
 

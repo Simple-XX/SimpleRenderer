@@ -14,10 +14,9 @@
  * </table>
  */
 
-#include <thread>
+#include "thread"
 #include "model.h"
 #include "display.h"
-#include "vector.hpp"
 #include "draw2d.h"
 
 static constexpr const uint32_t                  WIDTH  = 1920;
@@ -92,11 +91,11 @@ int main(int _argc, char **_argv) {
     draw2d_t draw2d(framebuffer);
 
     // 循环模型里的所有三角形
-    for (int i = 0; i < model.get_face().size(); i++) {
+    for (size_t i = 0; i < model.get_face().size(); i++) {
         auto face = model.get_face()[i];
 
         // 循环三角形三个顶点，每两个顶点连一条线
-        for (int j = 0; j < 3; j++) {
+        for (auto j = 0; j < 3; j++) {
             auto v0 = face.p0;
             auto v1 = face.p1;
             auto v2 = face.p2;

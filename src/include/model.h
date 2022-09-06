@@ -20,75 +20,16 @@
 #include "vector"
 #include "string"
 #include "3rd/tiny_obj_loader.h"
+#include "vector.hpp"
 
-/**
- * @brief 顶点
- */
-struct vertex_t {
-    float x;
-    float y;
-    float z;
-    /**
-     * @brief 构造函数
-     */
-    vertex_t(void);
-
-    /**
-     * @brief 构造函数
-     * @param  _x               x 坐标
-     * @param  _y               y 坐标
-     * @param  _z               z 坐标
-     */
-    vertex_t(const float _x, const float _y, const float _z);
-};
-
-/**
- * @brief 法向量
- */
-struct normal_t {
-    float x;
-    float y;
-    float z;
-    /**
-     * @brief 构造函数
-     * @param  _x               x 坐标
-     * @param  _y               y 坐标
-     * @param  _z               z 坐标
-     */
-    normal_t(const float _x, const float _y, const float _z);
-};
-
-/**
- * @brief 贴图
- */
-struct texcoord_t {
-    float x;
-    float y;
-    float z;
-    /**
-     * @brief 构造函数
-     * @param  _x               x 坐标
-     * @param  _y               y 坐标
-     * @param  _z               z 坐标
-     */
-    texcoord_t(const float _x, const float _y, const float _z);
-};
-
-/**
- * @brief 索引
- */
-struct index_t {
-    int v;
-    int vn;
-    int vt;
-    /**
-     * @brief 构造函数
-     * @param  _v               顶点索引
-     * @param  _vn              法线索引
-     * @param  _vt              贴图索引
-     */
-    index_t(const int _v, const int _vn, const int _vt);
-};
+/// 顶点
+typedef vector3f_t vertex_t;
+/// 法向量
+typedef vector3f_t normal_t;
+/// 贴图
+typedef vector3f_t texcoord_t;
+/// 索引 顶点 v，法线 vn，贴图 vt
+typedef vector3i_t index_t;
 
 /**
  * @brief obj/mtl 文件的原始数据

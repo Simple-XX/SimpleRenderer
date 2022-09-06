@@ -1,7 +1,7 @@
 
 /**
  * @file draw2d_test.cpp
- * @brief draw2d 测试
+ * @brief draw2d_t 测试
  * @author Zone.N (Zone.Niuzh@hotmail.com)
  * @version 1.0
  * @date 2022-09-06
@@ -17,7 +17,6 @@
 #include "gtest/gtest.h"
 #include "vector.hpp"
 #include "draw2d.h"
-#include "framebuffer.h"
 #include "display.h"
 
 static constexpr const uint32_t                  WIDTH  = 1920;
@@ -28,7 +27,7 @@ static constexpr const uint32_t                  HEIGHT = 1080;
 [[maybe_unused]] static constexpr const uint32_t WHITE  = 0xFFFFFFFF;
 [[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
 
-TEST(vector2f_t, test1) {
+TEST(draw2d_t, test1) {
     framebuffer_t framebuffer(WIDTH, HEIGHT);
     draw2d_t      draw2d(framebuffer);
     draw2d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);

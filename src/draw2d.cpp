@@ -1,6 +1,4 @@
 
-#include "draw2d.h"
-
 /**
  * @file draw2d.cpp
  * @brief 二维绘制
@@ -17,6 +15,7 @@
  */
 
 #include "cmath"
+#include "draw2d.h"
 
 draw2d_t::draw2d_t(framebuffer_t &_framebuffer) : framebuffer(_framebuffer) {
     width  = framebuffer.get_width();

@@ -16,7 +16,6 @@
 
 #include "gtest/gtest.h"
 #include "vector.hpp"
-#include "point.hpp"
 
 TEST(vector2f_t, test1) {
     vector2f_t test(2, 3);
@@ -31,7 +30,7 @@ TEST(vector2f_t, test1) {
     EXPECT_EQ((test3 * 3).x, 9);
     EXPECT_EQ((test3 * 3).y, 0);
     EXPECT_EQ((vector2f_t(0, 1) * vector2f_t(1, 0)), 0);
-    EXPECT_EQ(test.LengthSquared(), 13);
+    EXPECT_EQ(test.length_squared(), 13);
     EXPECT_EQ((-test).x, -2);
     EXPECT_EQ((-test).y, -3);
     return;
@@ -54,13 +53,13 @@ TEST(vector3f_t, test1) {
     EXPECT_EQ((test7 * 3).y, 0);
     EXPECT_EQ((test7 * 3).z, 18);
     EXPECT_EQ((vector3f_t(0, 1, 0) * vector3f_t(1, 0, 0)), 0);
-    EXPECT_EQ(test5.LengthSquared(), 29);
+    EXPECT_EQ(test5.length_squared(), 29);
     EXPECT_EQ((-test5).x, -2);
     EXPECT_EQ((-test5).y, -3);
     EXPECT_EQ((-test5).z, -4);
     vector3f_t test8;
     vector3f_t test9(1, 1, 1);
-    test9 = test9.Cross(test5, test6);
+    test9 = test5 ^ test6;
     EXPECT_EQ(test9.x, -18);
     EXPECT_EQ(test9.y, 0);
     EXPECT_EQ(test9.z, 9);
