@@ -35,11 +35,11 @@ void draw(framebuffer_t *_framebuffer) {
     draw2d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
     draw2d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, WHITE);
 
-    //    vector2i_t v0(80, 80);
-    //    vector2i_t v1(800, 800);
-    //    vector2i_t v2(50, 900);
-    //    draw2d.line(v2.x, v2.y, v0.x, v0.y, GREEN);
-    //    draw2d.line(v0.x, v0.y, v2.x, v2.y, GREEN);
+    vector2i_t v0(80, 80);
+    vector2i_t v1(800, 800);
+    vector2i_t v2(50, 900);
+    draw2d.line(v2.x, v2.y, v0.x, v0.y, GREEN);
+    draw2d.line(v0.x, v0.y, v2.x, v2.y, GREEN);
 
     draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 100, HEIGHT / 2 + 60, GREEN);
     draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 50, HEIGHT / 2 + 100, GREEN);
@@ -47,16 +47,19 @@ void draw(framebuffer_t *_framebuffer) {
     draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 80, HEIGHT / 2 - 100, GREEN);
     draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 100, HEIGHT / 2 - 50, GREEN);
 
-    draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 40, HEIGHT / 2 + 100, GREEN);
-    draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 100, HEIGHT / 2 + 100,
-                GREEN);
+    draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 50, HEIGHT / 2 + 100, GREEN);
+    draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 100, HEIGHT / 2 + 90, GREEN);
 
     draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 90, HEIGHT / 2 - 100, GREEN);
     draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 100, HEIGHT / 2 - 50, GREEN);
 
     draw2d.line(10, 20, 100, 200, RED);
 
-    //        draw2d.triangle(v0, v1, v2, RED);
+    vector2i_t v3(830, 984);
+    vector2i_t v4(400, 874);
+    vector2i_t v5(505, 456);
+    draw2d.triangle(v5, v3, v4, GREEN);
+    draw2d.triangle(v0, v1, v2, RED);
 
     return;
 }
@@ -85,6 +88,35 @@ int main(int _argc, char **_argv) {
     model_t model(obj_path, mtl_path);
 
     framebuffer_t framebuffer(WIDTH, HEIGHT);
+
+    draw2d_t draw2d(framebuffer);
+
+    // 循环模型里的所有三角形
+    for (int i = 0; i < model.get_face().size(); i++) {
+        auto face = model.get_face()[i];
+
+        // 循环三角形三个顶点，每两个顶点连一条线
+        for (int j = 0; j < 3; j++) {
+            auto v0 = face.p0;
+            auto v1 = face.p1;
+            auto v2 = face.p2;
+
+            // 因为模型空间取值范围是 [-1,
+            // 1]^3，我们要把模型坐标平移到屏幕坐标中 下面 (point + 1)
+            // * width(height) / 2 的操作学名为视口变换（Viewport
+            // Transformation）
+            int x0 = (v0.x + 1.) * WIDTH / 16.;
+            int y0 = (v0.y + 1.) * HEIGHT / 9.;
+            int x1 = (v1.x + 1.) * WIDTH / 16.;
+            int y1 = (v1.y + 1.) * HEIGHT / 9.;
+            int x2 = (v2.x + 1.) * WIDTH / 16.;
+            int y2 = (v2.y + 1.) * HEIGHT / 9.;
+            // 画线
+            draw2d.line(x0, y0, x1, y1, WHITE);
+            draw2d.line(x1, y1, x2, y2, WHITE);
+            draw2d.line(x2, y2, x0, y0, WHITE);
+        }
+    }
 
     std::thread draw_thread = std::thread(draw, &framebuffer);
     draw_thread.join();
