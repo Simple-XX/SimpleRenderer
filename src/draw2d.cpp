@@ -17,6 +17,41 @@
 #include "cmath"
 #include "draw2d.h"
 
+template <class _T>
+bool draw2d_t::is_inside(const vector2_t<_T> &_p0, const vector2_t<_T> &_p1,
+                         const vector2_t<_T> &_p2, const vector2_t<_T> &_p) {
+    // 边向量
+    auto edge_p2p0 = (_p2 - _p0);
+    auto edge_p1p0 = (_p1 - _p0);
+    // 到点 _p 的向量
+    auto edge_pp0 = (_p - _p0);
+
+    float p0p0 = edge_p2p0 * edge_p2p0;
+    float p0p1 = edge_p2p0 * edge_p1p0;
+    float p0p2 = edge_p2p0 * edge_pp0;
+    float p1p1 = edge_p1p0 * edge_p1p0;
+    float p1p2 = edge_p1p0 * edge_pp0;
+
+    auto deno = 1. / ((p0p0 * p1p1) - (p0p1 * p0p1));
+
+    auto u = ((p1p1 * p0p2) - (p0p1 * p1p2)) * deno;
+    if (u < 0. || u > 1.) {
+        return false;
+    }
+
+    auto v = ((p0p0 * p1p2) - (p0p1 * p0p2)) * deno;
+    if (v < 0. || v > 1.) {
+        return false;
+    }
+
+    // 重心坐标的分量和为 1
+    if (u + v >= 1.) {
+        return false;
+    }
+
+    return true;
+}
+
 draw2d_t::draw2d_t(framebuffer_t &_framebuffer) : framebuffer(_framebuffer) {
     width  = framebuffer.get_width();
     height = framebuffer.get_height();
@@ -80,8 +115,15 @@ void draw2d_t::line(const uint32_t _x0, const uint32_t _y0, const uint32_t _x1,
 void draw2d_t::triangle(const vector2i_t &_v0, const vector2i_t &_v1,
                         const vector2i_t             &_v2,
                         const framebuffer_t::color_t &_color) {
-    line(_v0.x, _v0.y, _v1.x, _v1.y, _color);
-    line(_v1.x, _v1.y, _v2.x, _v2.y, _color);
-    line(_v2.x, _v2.y, _v0.x, _v0.y, _color);
+    vector2i_t min = _v0.min(_v1).min(_v2);
+    vector2i_t max = _v0.max(_v1).max(_v2);
+    for (auto x = min.x; x <= max.x; x++) {
+        for (auto y = min.y; y <= max.y; y++) {
+            if (is_inside(_v0, _v1, _v2, vector2i_t(x, y)) == true) {
+                framebuffer.pixel(x, y, _color);
+            }
+        }
+    }
+    return;
     return;
 }

@@ -165,6 +165,11 @@ public:
     _T &operator[](const uint32_t _idx);
 
     /**
+     * @brief 转换为 float 类型
+     */
+    operator vector2_t<float>(void) const;
+
+    /**
      * @brief 是否有非数值
      * @return true             有
      * @return false            无
@@ -339,6 +344,11 @@ _T &vector2_t<_T>::operator[](const uint32_t _idx) {
         return x;
     }
     return y;
+}
+
+template <class _T>
+vector2_t<_T>::operator vector2_t<float>(void) const {
+    return vector2_t<float>((float)x, (float)y);
 }
 
 template <class _T>
@@ -538,6 +548,11 @@ public:
     _T &operator[](const uint32_t _idx);
 
     /**
+     * @brief 转换为 float 类型
+     */
+    operator vector3_t<float>(void) const;
+
+    /**
      * @brief 距离^2
      * @return const _T         结果
      */
@@ -735,6 +750,11 @@ _T &vector3_t<_T>::operator[](const uint32_t _idx) {
         return y;
     }
     return z;
+}
+
+template <class _T>
+vector3_t<_T>::operator vector3_t<float>(void) const {
+    return vector3_t<float>((float)x, (float)y, (float)z);
 }
 
 template <class _T>
