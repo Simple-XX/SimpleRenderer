@@ -1,517 +1,569 @@
 
-// This file is a part of Simple-XX/SimpleRenderer
-// (https://github.com/Simple-XX/SimpleRenderer).
-//
-// matrix.hpp for Simple-XX/SimpleRenderer.
+/**
+ * @file matrix.hpp
+ * @brief 矩阵计算
+ * @author Zone.N (Zone.Niuzh@hotmail.com)
+ * @version 1.0
+ * @date 2022-09-07
+ * @copyright MIT LICENSE
+ * https://github.com/Simple-XX/SimpleRenderer
+ * @par change log:
+ * <table>
+ * <tr><th>Date<th>Author<th>Description
+ * <tr><td>2022-09-07<td>Zone.N<td>迁移到 doxygen
+ * </table>
+ */
 
-#ifndef __MATRIX_HPP__
-#define __MATRIX_HPP__
+#ifndef _MATRIX_HPP_
+#define _MATRIX_HPP_
 
-#include "vector"
+#include "iostream"
 #include "iomanip"
+#include "vector.hpp"
 
-template <class T>
-class Matrix {
+template <class _T>
+class matrix_t {
 private:
-    std::vector<std::vector<T>> mat;
-    size_t                      rows;
-    size_t                      cols;
-    // 矩阵求行列式
-    T det(void) const;
+    static constexpr const uint32_t ORDER = 4;
+    _T                              mat[ORDER][ORDER];
+    // 矩阵求行列式值
+    _T determ(void) const;
     // 矩阵求余子式
-    T minor(const size_t _r, const size_t _c) const;
+    _T minor(const uint32_t _r, const uint32_t _c) const;
     // 矩阵求代数余子式
-    T cofactor(const size_t _r, const size_t _c) const;
+    _T cofactor(const uint32_t _r, const uint32_t _c) const;
 
 public:
-    Matrix(size_t _rows = 4, size_t _cols = 4);
-    Matrix(size_t _rows, size_t _cols, const T *const _mat);
-    Matrix(const std::vector<std::vector<T>> &_mat);
-    Matrix(const Matrix<T> &_matrix);
-    ~Matrix(void);
+    // 单位矩阵
+    matrix_t(void);
+
+    matrix_t(const matrix_t<_T> &_mat);
+
+    matrix_t(const _T *const _arr);
+
+    matrix_t(const _T _arr[ORDER][ORDER]);
+
+    matrix_t(const vector2_t<_T> &_v);
+    matrix_t(const vector3_t<_T> &_v);
+
     // 赋值
-    Matrix<T> &operator=(const Matrix<T> &_matrix);
+    matrix_t<_T> &operator=(const matrix_t<_T> &_mat);
     // 矩阵间加法
-    Matrix<T> operator+(const Matrix<T> &_matrix) const;
+    const matrix_t<_T> operator+(const matrix_t<_T> &_mat) const;
     // 矩阵间自加
-    Matrix<T> &operator+=(const Matrix<T> &_matrix);
+    matrix_t<_T> &operator+=(const matrix_t<_T> &_mat);
     // 矩阵之间的减法运算
-    Matrix<T> operator-(const Matrix<T> &_matrix) const;
+    const matrix_t<_T> operator-(const matrix_t<_T> &_mat) const;
     // 矩阵之间自减运算
-    Matrix<T> &operator-=(const Matrix<T> &_matrix);
+    matrix_t<_T> &operator-=(const matrix_t<_T> &_mat);
     // 矩阵与整数乘法
-    Matrix<T> operator*(const T _v);
+    const matrix_t<_T> operator*(const _T &_v) const;
     // 矩阵间乘法
-    Matrix<T> operator*(const Matrix<T> &_matrix) const;
+    const matrix_t<_T> operator*(const matrix_t<_T> &_mat) const;
     // 矩阵与整数自乘
-    Matrix<T> &operator*=(const T _v);
+    matrix_t<_T> &operator*=(const _T &_v);
     // 矩阵间自乘
-    Matrix<T> &operator*=(const Matrix<T> &_matrix);
+    matrix_t<_T> &operator*=(const matrix_t<_T> &_mat);
+
+    const vector2_t<_T> operator*(const vector2_t<_T> &_v) const;
+
+    const vector3_t<_T> operator*(const vector3_t<_T> &_v) const;
+
     // 矩阵相等
-    bool operator==(const Matrix<T> &_matrix) const;
+    bool operator==(const matrix_t<_T> &_mat) const;
+    bool operator!=(const matrix_t<_T> &_mat) const;
     // 访问矩阵行/列
-    std::vector<T> &operator[](const size_t _idx);
-    // 获取行数
-    size_t get_rows(void) const;
-    // 获取列数
-    size_t get_cols(void) const;
+    _T *const       operator[](const uint32_t _idx);
+    const _T *const operator[](const uint32_t _idx) const;
+    // 获取阶数
+    uint32_t get_order(void) const;
     // 矩阵转置
-    Matrix<T> transpose(void) const;
+    const matrix_t<_T> transpose(void) const;
     // 矩阵求逆
-    Matrix<float> inverse(void) const;
-    // 转换为数组
-    size_t to_arr(T *_arr) const;
-    // 转换为向量
-    std::vector<std::vector<T>> to_vector(void) const;
+    const matrix_t<float> inverse(void) const;
     // PLU 分解，返回分解好的矩阵，参数用于获取主元表
-    Matrix<float> PLU(std::vector<size_t> &_p);
+    matrix_t<float> PLU(std::vector<uint32_t> &_p);
     // 矩阵求余子式矩阵
-    Matrix<T> minor(void) const;
+    matrix_t<_T> minor(void) const;
     // 矩阵求代数余子式矩阵
-    Matrix<T> cofactor(void) const;
+    matrix_t<_T> cofactor(void) const;
     // 矩阵求伴随矩阵
-    Matrix<T> adjugate(void) const;
-};
+    matrix_t<_T> adjugate(void) const;
 
-template <class T>
-Matrix<float> Matrix<T>::PLU(std::vector<size_t> &_p) {
-    std::vector<std::vector<float>> tmp(rows, std::vector<float>(cols, 0));
-    // 转换为 float 类型
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            tmp.at(i).at(j) = (float)mat.at(i).at(j);
-        }
-    }
+    // 旋转矩阵
+    /*
+     * angle: the angle of rotation, in radians
+     * vx, vy, vz: the x, y, and z coordinates of a vector, respectively
+     *
+     * nx*nx*(1-c)+c     ny*nx*(1-c)-s*nz  nz*nx*(1-c)+s*ny  0
+     * nx*ny*(1-c)+s*nz  ny*ny*(1-c)+c     nz*ny*(1-c)-s*nx  0
+     * nx*nz*(1-c)-s*ny  ny*nz*(1-c)+s*nx  nz*nz*(1-c)+c     0
+     * 0                 0                 0                 1
+     *
+     * nx, ny, nz: the normalized coordinates of the vector, respectively
+     * s, c: sin(angle), cos(angle)
+     *
+     * see http://docs.gl/gl2/glRotate
+     */
+    matrix_t<_T> &rotate(const float _x, const float _y, const float _z,
+                         const float _angle);
+    // 缩放矩阵
+    matrix_t<_T> &set_scale(float &_x, float &_y, float &_z);
 
-    // 对于非方阵，选取较小的
-    size_t n = std::min(rows, cols);
-    // 初始化置换矩阵 _p
-    _p = std::vector<size_t>(n, 0);
-    for (size_t i = 0; i < n; i++) {
-        _p.at(i) = i;
-    }
+    bool HasNaNs(void) const;
 
-    // 如果主元所在列的绝对值最大值不是当前行，进行行交换
-    for (size_t i = 0; i < n; i++) {
-        T imax = 0;
-        for (size_t j = i; j < n; j++) {
-            if (imax < std::abs(tmp.at(j).at(i))) {
-                imax = std::abs(tmp.at(j).at(i));
-                // 交换行
-                if (i != j) {
-                    std::swap(tmp.at(i), tmp.at(j));
-                    // 记录 _p
-                    _p.at(i) = j;
-                    _p.at(j) = i;
+    friend std::ostream &operator<<(std::ostream       &_os,
+                                    const matrix_t<_T> &_mat) {
+        _os << "[";
+        for (uint32_t i = 0; i < matrix_t<_T>::ORDER; i++) {
+            if (i != 0) {
+                _os << "\n";
+                _os << " ";
+            }
+            for (uint32_t j = 0; j < matrix_t<_T>::ORDER; j++) {
+                _os << std::setw(7) << std::setprecision(4) << _mat[i][j];
+                if (j != matrix_t<_T>::ORDER - 1) {
+                    _os << " ";
                 }
             }
         }
+        _os << std::setw(4) << "]";
+        return _os;
     }
-    // 选主元完成
-    // L
-    // for (size_t i = n - 1; i >= 0; i--) {
-    //     // 变为单位下三角矩阵
-    //     // ii 归一化
-    //     if (tmp.at(i).at(i) != 1) {
-    //         T ii = tmp.at(i).at(i);
-    //         for (size_t j = n - 1; j >= 0; j--) {
-    //             assert(j < 0);
-    //             tmp.at(i).at(j) /= ii;
-    //         }
-    //     }
-    //     return Matrix<double>(tmp);
-    // }
+};
 
-    // U
-    for (size_t i = 0; i < n; i++) {
-        // 变为上三角矩阵
-        // 首先确定主元
-        float ii = tmp.at(i).at(i);
-        // 下面一行-主元行*(行列/主元)
-        for (size_t j = i + 1; j < n; j++) {
-            for (size_t k = 0; k < n; k++) {
-                float scale = tmp.at(j).at(k) / ii;
-                tmp.at(j).at(k) -= tmp.at(i).at(k) * scale;
-            }
-        }
+template <class _T>
+_T matrix_t<_T>::determ(void) const {
+    return mat[0][0] * mat[1][1] * mat[2][2] * mat[3][3] +
+           mat[0][0] * mat[2][1] * mat[3][2] * mat[1][3] +
+           mat[0][0] * mat[3][1] * mat[1][2] * mat[2][3] +
 
-        // return Matrix<double>(tmp);
-    }
+           mat[1][0] * mat[0][1] * mat[3][2] * mat[2][3] +
+           mat[1][0] * mat[3][1] * mat[2][2] * mat[0][3] +
+           mat[1][0] * mat[2][1] * mat[0][2] * mat[3][3] +
 
-    return Matrix<float>(tmp);
+           mat[2][0] * mat[3][1] * mat[0][2] * mat[1][3] +
+           mat[2][0] * mat[0][1] * mat[1][2] * mat[3][3] +
+           mat[2][0] * mat[1][1] * mat[3][2] * mat[0][3] +
+
+           mat[3][0] * mat[2][1] * mat[1][2] * mat[0][3] +
+           mat[3][0] * mat[1][1] * mat[0][2] * mat[2][3] +
+           mat[3][0] * mat[0][1] * mat[2][2] * mat[1][3] -
+
+           mat[0][0] * mat[1][1] * mat[3][2] * mat[2][3] -
+           mat[0][0] * mat[2][1] * mat[1][2] * mat[3][3] -
+           mat[0][0] * mat[3][1] * mat[2][2] * mat[1][3] -
+
+           mat[1][0] * mat[0][1] * mat[2][2] * mat[3][3] -
+           mat[1][0] * mat[3][1] * mat[0][2] * mat[2][3] -
+           mat[1][0] * mat[2][1] * mat[3][2] * mat[0][3] -
+
+           mat[2][0] * mat[3][1] * mat[1][2] * mat[0][3] -
+           mat[2][0] * mat[0][1] * mat[3][2] * mat[1][3] -
+           mat[2][0] * mat[1][1] * mat[0][2] * mat[3][3] -
+
+           mat[3][0] * mat[2][1] * mat[0][2] * mat[1][3] -
+           mat[3][0] * mat[1][1] * mat[2][2] * mat[0][3] -
+           mat[3][0] * mat[0][1] * mat[1][2] * mat[2][3];
 }
 
-template <class T>
-T Matrix<T>::det(void) const {
-    assert(rows == cols);
-    assert(rows != 0);
-    T res = 0;
-    if (rows == 1) {
-        res = mat.at(0).at(0);
-    }
-    else if (rows == 2) {
-        res = mat.at(0).at(0) * mat.at(1).at(1) -
-              mat.at(0).at(1) * mat.at(1).at(0);
-    }
-    else if (rows == 3) {
-        res = mat.at(0).at(0) * mat.at(1).at(1) * mat.at(2).at(2) +
-              mat.at(1).at(0) * mat.at(2).at(1) * mat.at(0).at(2) +
-              mat.at(2).at(0) * mat.at(0).at(1) * mat.at(1).at(2) -
-              mat.at(1).at(0) * mat.at(0).at(1) * mat.at(2).at(2) -
-              mat.at(2).at(0) * mat.at(1).at(1) * mat.at(0).at(2) -
-              mat.at(0).at(0) * mat.at(2).at(1) * mat.at(1).at(2);
-    }
-    else if (rows == 4) {
-        res = mat.at(0).at(0) * mat.at(1).at(1) * mat.at(2).at(2) *
-                  mat.at(3).at(3) +
-              mat.at(0).at(0) * mat.at(2).at(1) * mat.at(3).at(2) *
-                  mat.at(1).at(3) +
-              mat.at(0).at(0) * mat.at(3).at(1) * mat.at(1).at(2) *
-                  mat.at(2).at(3) +
-
-              mat.at(1).at(0) * mat.at(0).at(1) * mat.at(3).at(2) *
-                  mat.at(2).at(3) +
-              mat.at(1).at(0) * mat.at(3).at(1) * mat.at(2).at(2) *
-                  mat.at(0).at(3) +
-              mat.at(1).at(0) * mat.at(2).at(1) * mat.at(0).at(2) *
-                  mat.at(3).at(3) +
-
-              mat.at(2).at(0) * mat.at(3).at(1) * mat.at(0).at(2) *
-                  mat.at(1).at(3) +
-              mat.at(2).at(0) * mat.at(0).at(1) * mat.at(1).at(2) *
-                  mat.at(3).at(3) +
-              mat.at(2).at(0) * mat.at(1).at(1) * mat.at(3).at(2) *
-                  mat.at(0).at(3) +
-
-              mat.at(3).at(0) * mat.at(2).at(1) * mat.at(1).at(2) *
-                  mat.at(0).at(3) +
-              mat.at(3).at(0) * mat.at(1).at(1) * mat.at(0).at(2) *
-                  mat.at(2).at(3) +
-              mat.at(3).at(0) * mat.at(0).at(1) * mat.at(2).at(2) *
-                  mat.at(1).at(3) -
-
-              mat.at(0).at(0) * mat.at(1).at(1) * mat.at(3).at(2) *
-                  mat.at(2).at(3) -
-              mat.at(0).at(0) * mat.at(2).at(1) * mat.at(1).at(2) *
-                  mat.at(3).at(3) -
-              mat.at(0).at(0) * mat.at(3).at(1) * mat.at(2).at(2) *
-                  mat.at(1).at(3) -
-
-              mat.at(1).at(0) * mat.at(0).at(1) * mat.at(2).at(2) *
-                  mat.at(3).at(3) -
-              mat.at(1).at(0) * mat.at(3).at(1) * mat.at(0).at(2) *
-                  mat.at(2).at(3) -
-              mat.at(1).at(0) * mat.at(2).at(1) * mat.at(3).at(2) *
-                  mat.at(0).at(3) -
-
-              mat.at(2).at(0) * mat.at(3).at(1) * mat.at(1).at(2) *
-                  mat.at(0).at(3) -
-              mat.at(2).at(0) * mat.at(0).at(1) * mat.at(3).at(2) *
-                  mat.at(1).at(3) -
-              mat.at(2).at(0) * mat.at(1).at(1) * mat.at(0).at(2) *
-                  mat.at(3).at(3) -
-
-              mat.at(3).at(0) * mat.at(2).at(1) * mat.at(0).at(2) *
-                  mat.at(1).at(3) -
-              mat.at(3).at(0) * mat.at(1).at(1) * mat.at(2).at(2) *
-                  mat.at(0).at(3) -
-              mat.at(3).at(0) * mat.at(0).at(1) * mat.at(1).at(2) *
-                  mat.at(2).at(3);
-    }
-    return res;
-}
-
-template <class T>
-T Matrix<T>::minor(const size_t _r, const size_t _c) const {
-    std::vector<std::vector<T>> tmp(rows - 1, std::vector<T>(cols - 1, 0));
-    for (size_t i = 0; i < rows - 1; i++) {
-        for (size_t j = 0; j < cols - 1; j++) {
-            size_t idx_r = i;
-            size_t idx_c = j;
-            if (i >= _r) {
-                idx_r += 1;
-            }
-            if (j >= _c) {
-                idx_c += 1;
-            }
-            tmp.at(i).at(j) = mat.at(idx_r).at(idx_c);
-        }
-    }
-    // 计算行列式 tmp 的值
-    T res = Matrix<T>(tmp).det();
-    return res;
-}
-
-template <class T>
-Matrix<T> Matrix<T>::minor(void) const {
-    std::vector<std::vector<T>> tmp(rows, std::vector<T>(cols, 0));
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            tmp.at(i).at(j) = minor(i, j);
-        }
-    }
-    return Matrix<T>(tmp);
-}
-
-template <class T>
-T Matrix<T>::cofactor(const size_t _r, const size_t _c) const {
-    assert(std::is_signed<T>::value);
-    return minor(_r, _c) * ((_r + _c) % 2 ? -1 : 1);
-}
-
-template <class T>
-Matrix<T> Matrix<T>::cofactor(void) const {
-    std::vector<std::vector<T>> tmp(rows, std::vector<T>(cols, 0));
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            tmp.at(i).at(j) = cofactor(i, j);
-        }
-    }
-    return Matrix<T>(tmp);
-}
-
-template <class T>
-Matrix<T> Matrix<T>::adjugate(void) const {
-    return cofactor().transpose();
-}
-
-template <class T>
-Matrix<T>::Matrix(size_t _rows, size_t _cols)
-    : mat(std::vector<std::vector<T>>(_rows, std::vector<T>(_cols, 0))),
-      rows(_rows), cols(_cols) {
-    for (size_t i = 0; i < rows; i++) {
-        mat.at(i).at(i) = 1;
+template <class _T>
+matrix_t<_T>::matrix_t(void) {
+    memset(mat, 0, ORDER * ORDER * sizeof(_T));
+    for (uint32_t i = 0; i < ORDER; i++) {
+        mat[i][i] = 1;
     }
     return;
 }
 
-template <class T>
-Matrix<T>::Matrix(size_t _rows, size_t _cols, const T *const _mat)
-    : mat(std::vector<std::vector<T>>(_rows, std::vector<T>(_cols, 0))),
-      rows(_rows), cols(_cols) {
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            mat.at(i).at(j) = _mat[i * cols + j];
-        }
+template <class _T>
+matrix_t<_T>::matrix_t(const matrix_t<_T> &_mat) {
+    assert(!_mat.HasNaNs());
+    memcpy(mat, _mat.mat, ORDER * ORDER * sizeof(_T));
+    return;
+}
+
+template <class _T>
+matrix_t<_T>::matrix_t(const _T *const _arr) {
+    assert(_arr != nullptr);
+    memcpy(mat, _arr, ORDER * ORDER * sizeof(_T));
+    return;
+}
+
+template <class _T>
+matrix_t<_T>::matrix_t(const _T _arr[ORDER][ORDER]) {
+    memcpy(mat, _arr, ORDER * ORDER * sizeof(_T));
+    return;
+}
+
+template <class _T>
+matrix_t<_T>::matrix_t(const vector2_t<_T> &_v) {
+    memset(mat, 0, ORDER * ORDER * sizeof(_T));
+    mat[0][0] = _v.x;
+    mat[1][1] = _v.y;
+    return;
+}
+
+template <class _T>
+matrix_t<_T>::matrix_t(const vector3_t<_T> &_v) {
+    memset(mat, 0, ORDER * ORDER * sizeof(_T));
+    mat[0][0] = _v.x;
+    mat[1][1] = _v.y;
+    mat[2][2] = _v.z;
+    return;
+}
+
+template <class _T>
+matrix_t<_T> &matrix_t<_T>::operator=(const matrix_t<_T> &_mat) {
+    assert(!_mat.HasNaNs());
+    if (this != &_mat) {
+        memcpy(mat, _mat.mat, ORDER * ORDER * sizeof(_T));
     }
-    return;
-}
-
-template <class T>
-Matrix<T>::Matrix(const std::vector<std::vector<T>> &_mat)
-    : mat(_mat), rows(_mat.size()), cols(_mat.at(0).size()) {
-    return;
-}
-
-template <class T>
-Matrix<T>::Matrix(const Matrix<T> &_matrix)
-    : mat(_matrix.mat), rows(_matrix.rows), cols(_matrix.cols) {
-    return;
-}
-
-template <class T>
-Matrix<T>::~Matrix(void) {
-    return;
-}
-
-template <class T>
-Matrix<T> &Matrix<T>::operator=(const Matrix<T> &_matrix) {
-    mat = _matrix.to_vector();
     return *this;
 }
 
-template <class T>
-Matrix<T> Matrix<T>::operator+(const Matrix<T> &_matrix) const {
-    std::vector<std::vector<T>> tmp(rows, std::vector<T>(cols, 0));
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            tmp.at(i).at(j) = mat.at(i).at(j) + _matrix.to_vector().at(i).at(j);
+template <class _T>
+const matrix_t<_T> matrix_t<_T>::operator+(const matrix_t<_T> &_mat) const {
+    assert(!_mat.HasNaNs());
+    _T tmp[ORDER][ORDER] = {{0}};
+    for (uint32_t i = 0; i < ORDER; i++) {
+        for (uint32_t j = 0; j < ORDER; j++) {
+            tmp[i][j] = mat[i][j] + _mat[i][j];
         }
     }
-    return Matrix<T>(tmp);
+    return matrix_t<_T>(tmp);
 }
 
-template <class T>
-Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &_matrix) {
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            mat.at(i).at(j) += _matrix.to_vector().at(i).at(j);
+template <class _T>
+matrix_t<_T> &matrix_t<_T>::operator+=(const matrix_t<_T> &_mat) {
+    assert(!_mat.HasNaNs());
+    for (uint32_t i = 0; i < ORDER; i++) {
+        for (uint32_t j = 0; j < ORDER; j++) {
+            mat[i][j] += _mat[i][j];
         }
     }
     return *this;
 }
 
-template <class T>
-Matrix<T> Matrix<T>::operator-(const Matrix<T> &_matrix) const {
-    std::vector<std::vector<T>> tmp(rows, std::vector<T>(cols, 0));
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            tmp.at(i).at(j) = mat.at(i).at(j) - _matrix.to_vector().at(i).at(j);
+template <class _T>
+const matrix_t<_T> matrix_t<_T>::operator-(const matrix_t<_T> &_mat) const {
+    assert(!_mat.HasNaNs());
+    _T tmp[ORDER][ORDER] = {{0}};
+    for (uint32_t i = 0; i < ORDER; i++) {
+        for (uint32_t j = 0; j < ORDER; j++) {
+            tmp[i][j] = mat[i][j] - _mat[i][j];
         }
     }
-    return Matrix<T>(tmp);
+    return matrix_t<_T>(tmp);
 }
 
-template <class T>
-Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &_matrix) {
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            mat.at(i).at(j) -= _matrix.to_vector().at(i).at(j);
-        }
-    }
-    return *this;
-}
-
-template <class T>
-Matrix<T> Matrix<T>::operator*(const T _v) {
-    std::vector<std::vector<T>> tmp(rows, std::vector<T>(cols, 0));
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            tmp.at(i).at(j) = mat.at(i).at(j) * _v;
-        }
-    }
-    return Matrix<T>(tmp);
-}
-
-template <class T>
-Matrix<T> &Matrix<T>::operator*=(const T _v) {
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            mat.at(i).at(j) *= _v;
+template <class _T>
+matrix_t<_T> &matrix_t<_T>::operator-=(const matrix_t<_T> &_mat) {
+    assert(!_mat.HasNaNs());
+    for (uint32_t i = 0; i < ORDER; i++) {
+        for (uint32_t j = 0; j < ORDER; j++) {
+            mat[i][j] -= _mat[i][j];
         }
     }
     return *this;
 }
 
-template <class T>
-Matrix<T> Matrix<T>::operator*(const Matrix<T> &_matrix) const {
-    assert(cols == _matrix.rows);
-    std::vector<std::vector<T>> tmp(rows, std::vector<T>(_matrix.cols, 0));
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < _matrix.cols; j++) {
-            for (size_t k = 0; k < cols; k++) {
-                tmp.at(i).at(j) += mat.at(i).at(k) * _matrix.mat.at(k).at(j);
-            }
+template <class _T>
+const matrix_t<_T> matrix_t<_T>::operator*(const _T &_v) const {
+    _T tmp[ORDER][ORDER] = {{0}};
+    for (uint32_t i = 0; i < ORDER; i++) {
+        for (uint32_t j = 0; j < ORDER; j++) {
+            tmp[i][j] = mat[i][j] * _v;
         }
     }
-    return Matrix<T>(tmp);
+    return matrix_t<_T>(tmp);
 }
 
-template <class T>
-Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &_matrix) {
-    assert(cols == _matrix.rows);
-    std::vector<std::vector<T>> tmp(rows, std::vector<T>(_matrix.cols, 0));
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < _matrix.cols; j++) {
-            for (size_t k = 0; k < cols; k++) {
-                tmp.at(i).at(j) += mat.at(i).at(k) * _matrix.mat.at(k).at(j);
+template <class _T>
+const matrix_t<_T> matrix_t<_T>::operator*(const matrix_t<_T> &_mat) const {
+    assert(!_mat.HasNaNs());
+    _T tmp[ORDER][ORDER] = {{0}};
+    for (uint32_t i = 0; i < ORDER; i++) {
+        for (uint32_t j = 0; j < ORDER; j++) {
+            for (uint32_t k = 0; k < ORDER; k++) {
+                tmp[i][j] += mat[i][k] * _mat[k][j];
             }
         }
     }
-    mat  = tmp;
-    cols = _matrix.cols;
+    return matrix_t<_T>(tmp);
+}
+
+template <class _T>
+matrix_t<_T> &matrix_t<_T>::operator*=(const _T &_v) {
+    for (uint32_t i = 0; i < ORDER; i++) {
+        for (uint32_t j = 0; j < ORDER; j++) {
+            mat[i][j] *= _v;
+        }
+    }
     return *this;
 }
 
-template <class T>
-bool Matrix<T>::operator==(const Matrix<T> &_matrix) const {
-    bool res = true;
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            if (_matrix.get_rows() != rows || _matrix.get_cols() != cols) {
-                res = false;
-                break;
-            }
-            if (mat.at(i).at(j) != _matrix.to_vector().at(i).at(j)) {
-                res = false;
-                break;
+template <class _T>
+matrix_t<_T> &matrix_t<_T>::operator*=(const matrix_t<_T> &_mat) {
+    assert(!_mat.HasNaNs());
+    _T tmp[ORDER][ORDER] = {{0}};
+    for (uint32_t i = 0; i < ORDER; i++) {
+        for (uint32_t j = 0; j < _mat.ORDER; j++) {
+            for (uint32_t k = 0; k < ORDER; k++) {
+                tmp[i][j] += mat[i][k] * _mat[k][j];
             }
         }
     }
-    return res;
+    mat = tmp;
+    return *this;
 }
 
-template <class T>
-std::vector<T> &Matrix<T>::operator[](const size_t _idx) {
-    assert(_idx >= 0 && _idx < rows);
-    return mat.at(_idx);
+template <class _T>
+const vector2_t<_T> matrix_t<_T>::operator*(const vector2_t<_T> &_v) const {
+    return;
 }
 
-template <class T>
-size_t Matrix<T>::get_rows(void) const {
-    return rows;
+template <class _T>
+const vector3_t<_T> matrix_t<_T>::operator*(const vector3_t<_T> &_v) const {
+    return;
 }
 
-template <class T>
-size_t Matrix<T>::get_cols(void) const {
-    return cols;
-}
-
-template <class T>
-Matrix<T> Matrix<T>::transpose(void) const {
-    std::vector<std::vector<T>> tmp(cols, std::vector<T>(rows, 0));
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            tmp.at(j).at(i) = to_vector().at(i).at(j);
+template <class _T>
+bool matrix_t<_T>::operator==(const matrix_t<_T> &_mat) const {
+    assert(!_mat.HasNaNs());
+    for (uint32_t i = 0; i < ORDER; i++) {
+        for (uint32_t j = 0; j < ORDER; j++) {
+            if (mat[i][j] != _mat[i][j]) {
+                return false;
+            }
         }
     }
-    return Matrix<T>(tmp);
+    return true;
 }
 
-// TODO: 换成 LU 分解法
-template <class T>
-Matrix<float> Matrix<T>::inverse(void) const {
-    assert(rows == cols);
-    std::vector<std::vector<float>> tmp(rows, std::vector<float>(cols, 0));
-    T                               d = det();
+template <class _T>
+bool matrix_t<_T>::operator!=(const matrix_t<_T> &_mat) const {
+    assert(!_mat.HasNaNs());
+    for (uint32_t i = 0; i < ORDER; i++) {
+        for (uint32_t j = 0; j < ORDER; j++) {
+            if (mat[i][j] != _mat[i][j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+template <class _T>
+_T *const matrix_t<_T>::operator[](const uint32_t _idx) {
+    assert(_idx >= 0 && _idx < ORDER);
+    return mat[_idx];
+}
+
+template <class _T>
+const _T *const matrix_t<_T>::operator[](const uint32_t _idx) const {
+    assert(_idx >= 0 && _idx < ORDER);
+    return mat[_idx];
+}
+
+template <class _T>
+uint32_t matrix_t<_T>::get_order(void) const {
+    return ORDER;
+}
+
+template <class _T>
+const matrix_t<_T> matrix_t<_T>::transpose(void) const {
+    _T tmp[ORDER][ORDER] = {{0}};
+    for (uint32_t i = 0; i < ORDER; i++) {
+        for (uint32_t j = 0; j < ORDER; j++) {
+            tmp[j][i] = mat[i][j];
+        }
+    }
+    return matrix_t<_T>(tmp);
+}
+
+template <class _T>
+const matrix_t<float> matrix_t<_T>::inverse(void) const {
+    _T tmp[ORDER][ORDER] = {{0}};
+    _T d                 = determ();
     if (d == 0) {
-        return Matrix<float>(tmp);
+        return matrix_t<float>(tmp);
     }
-    Matrix<T> adj = adjugate();
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            tmp.at(i).at(j) = adj.mat.at(i).at(j) * (1. / d);
+    matrix_t<_T> adj = adjugate();
+    for (uint32_t i = 0; i < ORDER; i++) {
+        for (uint32_t j = 0; j < ORDER; j++) {
+            tmp[i][j] = adj.mat[i][j] * (1. / d);
         }
     }
-    return Matrix<float>(tmp);
+    return matrix_t<float>(tmp);
 }
 
-template <class T>
-size_t Matrix<T>::to_arr(T *_arr) const {
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            _arr[i * cols + j] = to_vector().at(i).at(j);
+// template <class _T>
+// matrix_t<float> matrix_t<_T>::PLU(std::vector<uint32_t> &_p) {
+//     std::vector<std::vector<float>> tmp(ORDER, std::vector<float>(ORDER, 0));
+//     // 转换为 float 类型
+//     for (uint32_t i = 0; i < ORDER; i++) {
+//         for (uint32_t j = 0; j < ORDER; j++) {
+//             tmp[i][j] = (float)mat[i][j];
+//         }
+//     }
+//
+//     // 对于非方阵，选取较小的
+//     uint32_t n = std::min(ORDER, ORDER);
+//     // 初始化置换矩阵 _p
+//     _p = std::vector<uint32_t>(n, 0);
+//     for (uint32_t i = 0; i < n; i++) {
+//         _p.at(i) = i;
+//     }
+//
+//     // 如果主元所在列的绝对值最大值不是当前行，进行行交换
+//     for (uint32_t i = 0; i < n; i++) {
+//         _T imax = 0;
+//         for (uint32_t j = i; j < n; j++) {
+//             if (imax < std::abs(tmp.at(j).at(i))) {
+//                 imax = std::abs(tmp.at(j).at(i));
+//                 // 交换行
+//                 if (i != j) {
+//                     std::swap(tmp.at(i), tmp.at(j));
+//                     // 记录 _p
+//                     _p.at(i) = j;
+//                     _p.at(j) = i;
+//                 }
+//             }
+//         }
+//     }
+//     // 选主元完成
+//     // L
+//     // for (uint32_t i = n - 1; i >= 0; i--) {
+//     //     // 变为单位下三角矩阵
+//     //     // ii 归一化
+//     //     if (tmp.at(i).at(i) != 1) {
+//     //         _T ii = tmp.at(i).at(i);
+//     //         for (uint32_t j = n - 1; j >= 0; j--) {
+//     //             assert(j < 0);
+//     //             tmp[i][j]] /= ii;
+//     //         }
+//     //     }
+//     //     return matrix_t<double>(tmp);
+//     // }
+//
+//     // U
+//     for (uint32_t i = 0; i < n; i++) {
+//         // 变为上三角矩阵
+//         // 首先确定主元
+//         float ii = tmp.at(i).at(i);
+//         // 下面一行-主元行*(行列/主元)
+//         for (uint32_t j = i + 1; j < n; j++) {
+//             for (uint32_t k = 0; k < n; k++) {
+//                 float scale = tmp.at(j).at(k) / ii;
+//                 tmp.at(j).at(k) -= tmp.at(i).at(k) * scale;
+//             }
+//         }
+//
+//         // return matrix_t<double>(tmp);
+//     }
+//
+//     return matrix_t<float>(tmp);
+// }
+
+// template <class _T>
+//_T matrix_t<_T>::minor(const uint32_t _r, const uint32_t _c) const {
+//     std::vector<std::vector<_T>> tmp(ORDER - 1, std::vector<_T>(ORDER - 1,
+//     0)); for (uint32_t i = 0; i < ORDER - 1; i++) {
+//         for (uint32_t j = 0; j < ORDER - 1; j++) {
+//             uint32_t idx_r = i;
+//             uint32_t idx_c = j;
+//             if (i >= _r) {
+//                 idx_r += 1;
+//             }
+//             if (j >= _c) {
+//                 idx_c += 1;
+//             }
+//             tmp[i][j] = mat.at(idx_r).at(idx_c);
+//         }
+//     }
+//     // 计算行列式 tmp 的值
+//     _T res = matrix_t<_T>(tmp).determ();
+//     return res;
+// }
+//
+// template <class _T>
+// matrix_t<_T> matrix_t<_T>::minor(void) const {
+//     std::vector<std::vector<_T>> tmp(ORDER, std::vector<_T>(ORDER, 0));
+//     for (uint32_t i = 0; i < ORDER; i++) {
+//         for (uint32_t j = 0; j < ORDER; j++) {
+//             tmp[i][j] = minor(i, j);
+//         }
+//     }
+//     return matrix_t<_T>(tmp);
+// }
+//
+// template <class _T>
+//_T matrix_t<_T>::cofactor(const uint32_t _r, const uint32_t _c) const {
+//    assert(std::is_signed<_T>::value);
+//    return minor(_r, _c) * ((_r + _c) % 2 ? -1 : 1);
+//}
+//
+// template <class _T>
+// matrix_t<_T> matrix_t<_T>::cofactor(void) const {
+//    std::vector<std::vector<_T>> tmp(ORDER, std::vector<_T>(ORDER, 0));
+//    for (uint32_t i = 0; i < ORDER; i++) {
+//        for (uint32_t j = 0; j < ORDER; j++) {
+//            tmp[i][j] = cofactor(i, j);
+//        }
+//    }
+//    return matrix_t<_T>(tmp);
+//}
+
+// template <class _T>
+// matrix_t<_T> matrix_t<_T>::adjugate(void) const {
+//     return cofactor().transpose();
+// }
+
+template <class _T>
+matrix_t<_T> &matrix_t<_T>::rotate(const float _x, const float _y,
+                                   const float _z, const float _angle) {
+    auto n = vector3_t(_x, _y, _z).normalize();
+    auto c = std::cos(_angle);
+    auto s = std::sin(_angle);
+
+    mat[0][0] = n.x * n.x * (1 - c) + c;
+    mat[0][1] = n.y * n.x * (1 - c) - s * n.z;
+    mat[0][2] = n.z * n.x * (1 - c) + s * n.y;
+
+    mat[1][0] = n.x * n.y * (1 - c) + s * n.z;
+    mat[1][1] = n.y * n.y * (1 - c) + c;
+    mat[1][2] = n.z * n.y * (1 - c) - s * n.x;
+
+    mat[2][0] = n.x * n.z * (1 - c) - s * n.y;
+    mat[2][1] = n.y * n.z * (1 - c) + s * n.x;
+    mat[2][2] = n.z * n.z * (1 - c) + c;
+
+    return *this;
+}
+
+template <class _T>
+matrix_t<_T> &matrix_t<_T>::set_scale(float &_x, float &_y, float &_z) {
+    assert(_x != 0);
+    assert(_y != 0);
+    assert(_z != 0);
+    mat[0][0] = _x;
+    mat[1][1] = _y;
+    mat[2][2] = _z;
+    mat[3][3] = 1;
+    return *this;
+}
+
+template <class _T>
+bool matrix_t<_T>::HasNaNs(void) const {
+    for (auto i : mat) {
+        if (std::isnan(*i) == true) {
+            return true;
         }
     }
-    return rows * cols;
+    return false;
 }
 
-template <class T>
-std::vector<std::vector<T>> Matrix<T>::to_vector(void) const {
-    return mat;
-}
+typedef matrix_t<float> matrix4f_t;
 
-// 输出
-template <class T>
-std::ostream &operator<<(std::ostream &_os, const Matrix<T> &_mat) {
-    _os << "[";
-    for (size_t i = 0; i < _mat.get_rows(); i++) {
-        if (i != 0) {
-            _os << "\n";
-            _os << " ";
-        }
-        for (size_t j = 0; j < _mat.get_cols(); j++) {
-            _os << std::setw(7) << std::setprecision(4)
-                << _mat.to_vector().at(i).at(j);
-            if (j != _mat.get_cols() - 1) {
-                _os << " ";
-            }
-        }
-    }
-    _os << std::setw(4) << "]";
-    return _os;
-}
-
-typedef Matrix<float> Matrixf4;
-
-#endif /* __MATRIX_HPP__ */
+#endif /* _MATRIX_HPP_ */
