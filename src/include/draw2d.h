@@ -24,9 +24,9 @@ class draw2d_t {
 private:
     framebuffer_t &framebuffer;
     /// 窗口宽度
-    uint32_t width;
+    int32_t width;
     /// 窗口高度
-    uint32_t height;
+    int32_t height;
 
     /**
      * @brief 判断 _p 点是否在由 _p0 _p1 _p2 三点构成的三角形内
@@ -47,8 +47,8 @@ public:
     draw2d_t(framebuffer_t &_framebuffer);
     ~draw2d_t(void);
 
-    void line(const uint32_t _x0, const uint32_t _y0, const uint32_t _x1,
-              const uint32_t _y1, const framebuffer_t::color_t &_color);
+    void line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
+              const int32_t _y1, const framebuffer_t::color_t &_color);
     void triangle(const vector2i_t &_v0, const vector2i_t &_v1,
                   const vector2i_t &_v2, const framebuffer_t::color_t &_color);
 };

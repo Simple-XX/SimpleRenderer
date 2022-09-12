@@ -38,9 +38,9 @@ public:
 
 private:
     /// 窗口宽度
-    uint32_t width;
+    int32_t width;
     /// 窗口高度
-    uint32_t height;
+    int32_t height;
 
     /// 颜色缓存锁
     std::mutex color_buffer_mutex;
@@ -65,7 +65,7 @@ public:
      * @param  _height          高度
      * @param  _color_type      颜色类型
      */
-    framebuffer_t(uint32_t _width, uint32_t _height);
+    framebuffer_t(const int32_t _width, const int32_t _height);
 
     /**
      * @brief 拷贝构造
@@ -87,15 +87,15 @@ public:
 
     /**
      * @brief 获取缓冲区宽度
-     * @return uint32_t         缓冲区宽度
+     * @return int32_t          缓冲区宽度
      */
-    uint32_t get_width(void) const;
+    int32_t get_width(void) const;
 
     /**
      * @brief 获取缓冲区高度
-     * @return uint32_t         缓冲区高度
+     * @return int32_t          缓冲区高度
      */
-    uint32_t get_height(void) const;
+    int32_t get_height(void) const;
 
     /**
      * @brief 清空
@@ -111,13 +111,13 @@ public:
 
     /**
      * @brief 设置像素
-     * @param  _i               横向坐标
-     * @param  _j               纵向坐标
+     * @param  _x               横向坐标
+     * @param  _y               纵向坐标
      * @param  _color           颜色
      * @param  _depth           深度
      * @note (0, 0) 在屏幕左上角
      */
-    void pixel(const uint32_t _i, const uint32_t _j, const color_t &_color,
+    void pixel(const int32_t _x, const int32_t _y, const color_t &_color,
                const depth_t &_depth = 0);
 
     /**

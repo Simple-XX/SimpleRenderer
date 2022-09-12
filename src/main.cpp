@@ -18,6 +18,7 @@
 #include "model.h"
 #include "display.h"
 #include "draw2d.h"
+#include "matrix.hpp"
 
 static constexpr const uint32_t                  WIDTH  = 1920;
 static constexpr const uint32_t                  HEIGHT = 1080;
@@ -26,6 +27,10 @@ static constexpr const uint32_t                  HEIGHT = 1080;
 [[maybe_unused]] static constexpr const uint32_t BLUE   = 0xFF0000FF;
 [[maybe_unused]] static constexpr const uint32_t WHITE  = 0xFFFFFFFF;
 [[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
+
+#define PI 3.1415927f
+
+#define TO_RADIANS(degrees) ((PI / 180) * (degrees))
 
 void draw(framebuffer_t *_framebuffer) {
     draw2d_t draw2d(*_framebuffer);
@@ -61,6 +66,10 @@ void draw(framebuffer_t *_framebuffer) {
     draw2d.triangle(v0, v1, v2, RED);
 
     return;
+}
+
+int aaaaa(float _aaa) {
+    return _aaa;
 }
 
 int main(int _argc, char **_argv) {
@@ -117,8 +126,32 @@ int main(int _argc, char **_argv) {
         }
     }
 
-    std::thread draw_thread = std::thread(draw, &framebuffer);
-    draw_thread.join();
+    //    std::thread draw_thread = std::thread(draw, &framebuffer);
+    //    draw_thread.join();
+
+    auto v = vector2i_t(400, 400);
+    auto m = matrix4f_t();
+#define RAD(x) ((3.1415 / 180) * x)
+    auto angle = RAD(90);
+    auto c     = std::cos(angle);
+    auto s     = std::sin(angle);
+
+    m[0][0] = c;
+    m[0][1] = -s;
+    m[1][0] = s;
+    m[1][1] = c;
+
+    std::cout << v << std::endl;
+    std::cout << m << std::endl;
+    std::cout << m * v << std::endl;
+
+    auto mv = m * v;
+    std::cout << "m*v" << m * v << std::endl;
+    std::cout << "mv" << mv << std::endl;
+    draw2d.line(0, 0, v.x, v.y, RED);
+    draw2d.line(0, 0, mv.x, (uint32_t)mv.y, RED);
+    std::cout << v.x * c - v.y * s << std::endl;
+    std::cout << v.x * s + v.y * c << std::endl;
 
     display_t display(framebuffer);
     display.loop();

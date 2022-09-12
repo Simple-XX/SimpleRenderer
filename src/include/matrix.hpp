@@ -43,6 +43,7 @@ public:
 
     matrix_t(const _T _arr[ORDER][ORDER]);
 
+    // 齐次坐标转换
     matrix_t(const vector2_t<_T> &_v);
     matrix_t(const vector3_t<_T> &_v);
 
@@ -73,8 +74,8 @@ public:
     bool operator==(const matrix_t<_T> &_mat) const;
     bool operator!=(const matrix_t<_T> &_mat) const;
     // 访问矩阵行/列
-    _T *const       operator[](const uint32_t _idx);
-    const _T *const operator[](const uint32_t _idx) const;
+    _T       *operator[](const uint32_t _idx);
+    const _T *operator[](const uint32_t _idx) const;
     // 获取阶数
     uint32_t get_order(void) const;
     // 矩阵转置
@@ -108,7 +109,8 @@ public:
     matrix_t<_T> &rotate(const float _x, const float _y, const float _z,
                          const float _angle);
     // 缩放矩阵
-    matrix_t<_T> &set_scale(float &_x, float &_y, float &_z);
+    matrix_t<_T> &set_scale(const float &_scale);
+    matrix_t<_T> &set_scale(const float &_x, const float &_y, const float &_z);
 
     bool HasNaNs(void) const;
 
@@ -201,6 +203,7 @@ matrix_t<_T>::matrix_t(const vector2_t<_T> &_v) {
     memset(mat, 0, ORDER * ORDER * sizeof(_T));
     mat[0][0] = _v.x;
     mat[1][1] = _v.y;
+    mat[2][2] = 0;
     return;
 }
 
@@ -320,12 +323,19 @@ matrix_t<_T> &matrix_t<_T>::operator*=(const matrix_t<_T> &_mat) {
 
 template <class _T>
 const vector2_t<_T> matrix_t<_T>::operator*(const vector2_t<_T> &_v) const {
-    return;
+    vector2_t<_T> res;
+    res.x = _v.x * mat[0][0] + _v.y * mat[0][1];
+    res.y = _v.x * mat[1][0] + _v.y * mat[1][1];
+    return res;
 }
 
 template <class _T>
 const vector3_t<_T> matrix_t<_T>::operator*(const vector3_t<_T> &_v) const {
-    return;
+    vector3_t<_T> res;
+    res.x = _v.x * mat[0][0] + _v.y * mat[0][1] + _v.z * mat[0][2];
+    res.y = _v.x * mat[1][0] + _v.y * mat[1][1] + _v.z * mat[1][2];
+    res.z = _v.x * mat[2][0] + _v.y * mat[2][1] + _v.z * mat[2][2];
+    return res;
 }
 
 template <class _T>
@@ -355,14 +365,14 @@ bool matrix_t<_T>::operator!=(const matrix_t<_T> &_mat) const {
 }
 
 template <class _T>
-_T *const matrix_t<_T>::operator[](const uint32_t _idx) {
-    assert(_idx >= 0 && _idx < ORDER);
+_T *matrix_t<_T>::operator[](const uint32_t _idx) {
+    assert(_idx < ORDER);
     return mat[_idx];
 }
 
 template <class _T>
-const _T *const matrix_t<_T>::operator[](const uint32_t _idx) const {
-    assert(_idx >= 0 && _idx < ORDER);
+const _T *matrix_t<_T>::operator[](const uint32_t _idx) const {
+    assert(_idx < ORDER);
     return mat[_idx];
 }
 
@@ -543,10 +553,17 @@ matrix_t<_T> &matrix_t<_T>::rotate(const float _x, const float _y,
 }
 
 template <class _T>
-matrix_t<_T> &matrix_t<_T>::set_scale(float &_x, float &_y, float &_z) {
-    assert(_x != 0);
-    assert(_y != 0);
-    assert(_z != 0);
+matrix_t<_T> &matrix_t<_T>::set_scale(const float &_scale) {
+    mat[0][0] = _scale;
+    mat[1][1] = _scale;
+    mat[2][2] = _scale;
+    mat[3][3] = 1;
+    return *this;
+}
+
+template <class _T>
+matrix_t<_T> &matrix_t<_T>::set_scale(const float &_x, const float &_y,
+                                      const float &_z) {
     mat[0][0] = _x;
     mat[1][1] = _y;
     mat[2][2] = _z;

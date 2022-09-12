@@ -62,8 +62,12 @@ draw2d_t::~draw2d_t(void) {
     return;
 }
 
-void draw2d_t::line(const uint32_t _x0, const uint32_t _y0, const uint32_t _x1,
-                    const uint32_t _y1, const framebuffer_t::color_t &_color) {
+void draw2d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
+                    const int32_t _y1, const framebuffer_t::color_t &_color) {
+    assert(_x0 >= 0);
+    assert(_x1 >= 0);
+    assert(_y0 >= 0);
+    assert(_y1 >= 0);
     assert(_x0 < width);
     assert(_x1 < width);
     assert(_y0 < height);

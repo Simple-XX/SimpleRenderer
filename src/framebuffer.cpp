@@ -17,8 +17,9 @@
 #include "memory"
 #include "cassert"
 #include "framebuffer.h"
+#include "cstring"
 
-framebuffer_t::framebuffer_t(uint32_t _width, uint32_t _height) {
+framebuffer_t::framebuffer_t(const int32_t _width, const int32_t _height) {
     width        = _width;
     height       = _height;
     color_buffer = new color_t[width * height];
@@ -75,17 +76,17 @@ framebuffer_t &framebuffer_t::operator=(const framebuffer_t &_framebuffer) {
     return *this;
 }
 
-uint32_t framebuffer_t::get_width(void) const {
+int32_t framebuffer_t::get_width(void) const {
     return width;
 }
 
-uint32_t framebuffer_t::get_height(void) const {
+int32_t framebuffer_t::get_height(void) const {
     return height;
 }
 
 void framebuffer_t::clear(void) {
-    for (uint32_t i = 0; i < width; i++) {
-        for (uint32_t j = 0; j < height; j++) {
+    for (auto i = 0; i < width; i++) {
+        for (auto j = 0; j < height; j++) {
             pixel(i, j, 0x00000000, 0);
         }
     }
@@ -93,24 +94,24 @@ void framebuffer_t::clear(void) {
 }
 
 void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
-    for (uint32_t i = 0; i < width; i++) {
-        for (uint32_t j = 0; j < height; j++) {
+    for (auto i = 0; i < width; i++) {
+        for (auto j = 0; j < height; j++) {
             pixel(i, j, _color, _depth);
         }
     }
     return;
 }
 
-void framebuffer_t::pixel(const uint32_t _i, const uint32_t _j,
+void framebuffer_t::pixel(const int32_t _x, const int32_t _y,
                           const color_t &_color, const depth_t &_depth) {
-    assert(_i >= 0);
-    assert(_j >= 0);
-    assert(_i < width);
-    assert(_j < height);
+    assert(_x >= 0);
+    assert(_y >= 0);
+    assert(_x < width);
+    assert(_y < height);
     std::lock_guard<std::mutex> color_buffer_lock(color_buffer_mutex);
     std::lock_guard<std::mutex> depth_buffer_lock(depth_buffer_mutex);
-    color_buffer[_j * width + _i] = _color;
-    depth_buffer[_j * width + _i] = _depth;
+    color_buffer[_y * width + _x] = _color;
+    depth_buffer[_y * width + _x] = _depth;
     return;
 }
 
