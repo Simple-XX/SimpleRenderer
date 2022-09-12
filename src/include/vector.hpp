@@ -153,9 +153,9 @@ public:
     /**
      * @brief [] 重载
      * @param  _idx            下标
-     * @return _T              结果
+     * @return const _T&       结果
      */
-    const _T operator[](const uint32_t _idx) const;
+    const _T &operator[](const uint32_t _idx) const;
 
     /**
      * @brief [] 重载
@@ -214,7 +214,11 @@ public:
      */
     const vector2_t<_T> max(const vector2_t<_T> &_v) const;
 
-    friend std::ostream &operator<<(std::ostream &_os, const vector2_t<_T> &_v);
+    friend std::ostream &operator<<(std::ostream        &_os,
+                                    const vector2_t<_T> &_v) {
+        _os << "[ " << _v.x << ", " << _v.y << " ]";
+        return _os;
+    }
 };
 
 template <class _T>
@@ -329,7 +333,7 @@ vector2_t<_T> &vector2_t<_T>::operator/=(const _U &_f) {
 }
 
 template <class _T>
-const _T vector2_t<_T>::operator[](const uint32_t _idx) const {
+const _T &vector2_t<_T>::operator[](const uint32_t _idx) const {
     assert(_idx >= 0 && _idx <= 1);
     if (_idx == 0) {
         return x;
@@ -388,12 +392,6 @@ const vector2_t<_T> vector2_t<_T>::max(const vector2_t<_T> &_v) const {
     auto max_x = std::max(x, _v.x);
     auto max_y = std::max(y, _v.y);
     return vector2_t<_T>(max_x, max_y);
-}
-
-template <class _T>
-std::ostream &operator<<(std::ostream &_os, const vector2_t<_T> &_v) {
-    _os << "[ " << _v.x << ", " << _v.y << " ]";
-    return _os;
 }
 
 /**
@@ -536,9 +534,9 @@ public:
     /**
      * @brief [] 重载
      * @param  _idx            下标
-     * @return const _T        结果
+     * @return const _T&       结果
      */
-    const _T operator[](const uint32_t _idx) const;
+    const _T &operator[](const uint32_t _idx) const;
 
     /**
      * @brief [] 重载
@@ -599,7 +597,11 @@ public:
      */
     const vector3_t<_T> max(const vector3_t<_T> &_v) const;
 
-    friend std::ostream &operator<<(std::ostream &_os, const vector3_t<_T> &_v);
+    friend std::ostream &operator<<(std::ostream        &_os,
+                                    const vector3_t<_T> &_v) {
+        _os << "[ " << _v.x << ", " << _v.y << ", " << _v.z << " ]";
+        return _os;
+    }
 };
 
 template <class _T>
@@ -729,7 +731,7 @@ vector3_t<_T> &vector3_t<_T>::operator/=(const _U &_f) {
 }
 
 template <class _T>
-const _T vector3_t<_T>::operator[](const uint32_t _idx) const {
+const _T &vector3_t<_T>::operator[](const uint32_t _idx) const {
     assert(_idx >= 0 && _idx <= 2);
     if (_idx == 0) {
         return x;
@@ -792,12 +794,6 @@ template <class _T>
 const vector3_t<_T> vector3_t<_T>::max(const vector3_t<_T> &_v) const {
     return vector3_t<_T>(std::max(x, _v.x), std::max(y, _v.y),
                          std::max(z, _v.z));
-}
-
-template <class _T>
-std::ostream &operator<<(std::ostream &_os, const vector3_t<_T> &_v) {
-    _os << "[ " << _v.x << ", " << _v.y << ", " << _v.z << " ]";
-    return _os;
 }
 
 typedef vector2_t<float>    vector2f_t;
