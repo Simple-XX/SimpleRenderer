@@ -103,8 +103,10 @@ void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
 
 void framebuffer_t::pixel(const uint32_t _i, const uint32_t _j,
                           const color_t &_color, const depth_t &_depth) {
-    assert(_i > width);
-    assert(_j > height);
+    assert(_i >= 0);
+    assert(_j >= 0);
+    assert(_i < width);
+    assert(_j < height);
     std::lock_guard<std::mutex> color_buffer_lock(color_buffer_mutex);
     std::lock_guard<std::mutex> depth_buffer_lock(depth_buffer_mutex);
     color_buffer[_j * width + _i] = _color;
