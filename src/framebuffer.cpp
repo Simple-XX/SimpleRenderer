@@ -120,6 +120,10 @@ const framebuffer_t::color_t *framebuffer_t::get_color_buffer(void) const {
     return color_buffer;
 }
 
+const framebuffer_t::depth_t *framebuffer_t::get_depth_buffer(void) const {
+    return depth_buffer;
+}
+
 framebuffer_t::color_t framebuffer_t::ARGB(const uint8_t _a, const uint8_t _r,
                                            const uint8_t _g, const uint8_t _b) {
     color_t color = 0x00000000;

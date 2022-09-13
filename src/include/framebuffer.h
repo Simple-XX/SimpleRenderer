@@ -127,6 +127,12 @@ public:
     const color_t *get_color_buffer(void) const;
 
     /**
+     * @brief 获取深度缓存
+     * @return const depth_t*   只读的深度缓存
+     */
+    const depth_t *get_depth_buffer(void) const;
+
+    /**
      * @brief 生成 argb
      * @param  _a               alpha
      * @param  _r               红
