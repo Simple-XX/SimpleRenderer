@@ -512,17 +512,20 @@ matrix_t<_T> &matrix_t<_T>::operator*=(const matrix_t<_T> &_mat) {
 template <class _T>
 const vector2_t<_T> matrix_t<_T>::operator*(const vector2_t<_T> &_v) const {
     vector2_t<_T> res;
-    res.x = _v.x * mat[0][0] + _v.y * mat[0][1];
-    res.y = _v.x * mat[1][0] + _v.y * mat[1][1];
+    res.x = _v.x * mat[0][0] + _v.y * mat[0][1] + 1 * mat[0][2] + 1 * mat[0][3];
+    res.y = _v.x * mat[1][0] + _v.y * mat[1][1] + 1 * mat[1][2] + 1 * mat[1][3];
     return res;
 }
 
 template <class _T>
 const vector3_t<_T> matrix_t<_T>::operator*(const vector3_t<_T> &_v) const {
     vector3_t<_T> res;
-    res.x = _v.x * mat[0][0] + _v.y * mat[0][1] + _v.z * mat[0][2];
-    res.y = _v.x * mat[1][0] + _v.y * mat[1][1] + _v.z * mat[1][2];
-    res.z = _v.x * mat[2][0] + _v.y * mat[2][1] + _v.z * mat[2][2];
+    res.x =
+        _v.x * mat[0][0] + _v.y * mat[0][1] + _v.z * mat[0][2] + 1 * mat[0][3];
+    res.y =
+        _v.x * mat[1][0] + _v.y * mat[1][1] + _v.z * mat[1][2] + 1 * mat[1][3];
+    res.z =
+        _v.x * mat[2][0] + _v.y * mat[2][1] + _v.z * mat[2][2] + 1 * mat[2][3];
     return res;
 }
 

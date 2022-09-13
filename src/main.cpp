@@ -114,13 +114,20 @@ int main(int _argc, char **_argv) {
             // * width(height) / 2 的操作学名为视口变换（Viewport
             // Transformation）
             auto m = matrix4f_t();
-            m.set_scale(WIDTH / 16., HEIGHT / 9., 1);
+            m.scale(WIDTH / 16., HEIGHT / 9., 1);
             auto m2 = matrix4f_t();
-            m2.rotate(0, 0, 1, matrix4f_t::RAD(-45));
-            auto       m3 = m2 * m;
-            vector2i_t p0 = (vector2i_t)(m3 * v0);
-            vector2i_t p1 = (vector2i_t)(m3 * v1);
-            vector2i_t p2 = (vector2i_t)(m3 * v2);
+            m2.rotate(0, 0, 1, matrix4f_t::RAD(-0));
+            auto m4 = matrix4f_t();
+            m4.translate(960, 540, 0);
+            auto m3 = m2 * m;
+            std::cout << m4 * m3 << std::endl;
+            auto       m5 = m4 * m3;
+            vector2i_t p0 = (vector2i_t)(m5 * v0);
+            vector2i_t p1 = (vector2i_t)(m5 * v1);
+            vector2i_t p2 = (vector2i_t)(m5 * v2);
+            std::cout << p0 << std::endl;
+            std::cout << p1 << std::endl;
+            std::cout << p2 << std::endl;
             // 画线
             draw2d.line(p0, p1, WHITE);
             draw2d.line(p1, p2, WHITE);
@@ -128,8 +135,8 @@ int main(int _argc, char **_argv) {
         }
     }
 
-    //    std::thread draw_thread = std::thread(draw, &framebuffer);
-    //    draw_thread.join();
+    std::thread draw_thread = std::thread(draw, &framebuffer);
+    draw_thread.join();
 
     //    auto v = vector2i_t(400, 400);
     //    auto m = matrix4f_t();
