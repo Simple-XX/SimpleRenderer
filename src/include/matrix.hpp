@@ -279,6 +279,20 @@ public:
      */
     bool HasNaNs(void) const;
 
+    /**
+     * @brief 角度转换为弧度
+     * @param  _deg             角度
+     * @return float            弧度
+     */
+    static float RAD(const float _deg);
+
+    /**
+     * @brief 弧度转换为角度
+     * @param  _rad             弧度
+     * @return float            角度
+     */
+    static float DEG(const float _rad);
+
     friend std::ostream &operator<<(std::ostream       &_os,
                                     const matrix_t<_T> &_mat) {
         _os << "[";
@@ -744,6 +758,16 @@ bool matrix_t<_T>::HasNaNs(void) const {
         }
     }
     return false;
+}
+
+template <class _T>
+float matrix_t<_T>::RAD(const float _deg) {
+    return ((M_PI / 180) * (_deg));
+}
+
+template <class _T>
+float matrix_t<_T>::DEG(const float _rad) {
+    return ((180 / M_PI) * (_rad));
 }
 
 typedef matrix_t<float> matrix4f_t;

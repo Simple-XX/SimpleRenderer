@@ -113,45 +113,37 @@ int main(int _argc, char **_argv) {
             // 1]^3，我们要把模型坐标平移到屏幕坐标中 下面 (point + 1)
             // * width(height) / 2 的操作学名为视口变换（Viewport
             // Transformation）
-            int x0 = (v0.x + 1.) * WIDTH / 16.;
-            int y0 = (v0.y + 1.) * HEIGHT / 9.;
-            int x1 = (v1.x + 1.) * WIDTH / 16.;
-            int y1 = (v1.y + 1.) * HEIGHT / 9.;
-            int x2 = (v2.x + 1.) * WIDTH / 16.;
-            int y2 = (v2.y + 1.) * HEIGHT / 9.;
+            auto m = matrix4f_t();
+            m.set_scale(WIDTH / 16., HEIGHT / 9., 1);
+            auto m2 = matrix4f_t();
+            m2.rotate(0, 0, 1, matrix4f_t::RAD(-45));
+            auto       m3 = m2 * m;
+            vector2i_t p0 = (vector2i_t)(m3 * v0);
+            vector2i_t p1 = (vector2i_t)(m3 * v1);
+            vector2i_t p2 = (vector2i_t)(m3 * v2);
             // 画线
-            draw2d.line(x0, y0, x1, y1, WHITE);
-            draw2d.line(x1, y1, x2, y2, WHITE);
-            draw2d.line(x2, y2, x0, y0, WHITE);
+            draw2d.line(p0, p1, WHITE);
+            draw2d.line(p1, p2, WHITE);
+            draw2d.line(p2, p0, WHITE);
         }
     }
 
     //    std::thread draw_thread = std::thread(draw, &framebuffer);
     //    draw_thread.join();
 
-    auto v = vector2i_t(400, 400);
-    auto m = matrix4f_t();
-#define RAD(x) ((3.1415 / 180) * x)
-    auto angle = RAD(90);
-    auto c     = std::cos(angle);
-    auto s     = std::sin(angle);
-
-    m[0][0] = c;
-    m[0][1] = -s;
-    m[1][0] = s;
-    m[1][1] = c;
-
-    std::cout << v << std::endl;
-    std::cout << m << std::endl;
-    std::cout << m * v << std::endl;
-
-    auto mv = m * v;
-    std::cout << "m*v" << m * v << std::endl;
-    std::cout << "mv" << mv << std::endl;
-    draw2d.line(0, 0, v.x, v.y, RED);
-    draw2d.line(0, 0, mv.x, (uint32_t)mv.y, RED);
-    std::cout << v.x * c - v.y * s << std::endl;
-    std::cout << v.x * s + v.y * c << std::endl;
+    //    auto v = vector2i_t(400, 400);
+    //    auto m = matrix4f_t();
+    // #define RAD(x) ((3.1415 / 180) * x)
+    //    m.rotate(0, 0, 1, RAD(-45));
+    //    std::cout << v << std::endl;
+    //    std::cout << m << std::endl;
+    //    std::cout << m * v << std::endl;
+    //
+    //    auto mv = m * v;
+    //    std::cout << "m*v" << m * v << std::endl;
+    //    std::cout << "mv" << mv << std::endl;
+    //    draw2d.line(0, 0, v.x, v.y, RED);
+    //    draw2d.line(0, 0, mv.x, (uint32_t)mv.y, RED);
 
     display_t display(framebuffer);
     display.loop();
