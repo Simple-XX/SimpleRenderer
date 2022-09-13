@@ -57,7 +57,9 @@ framebuffer_t::~framebuffer_t(void) {
 }
 
 framebuffer_t &framebuffer_t::operator=(const framebuffer_t &_framebuffer) {
-    assert(&_framebuffer == this);
+    if (&_framebuffer == this) {
+        return *this;
+    }
     assert(width == _framebuffer.get_width());
     assert(height == _framebuffer.get_height());
     if (color_buffer == nullptr) {
@@ -104,10 +106,9 @@ void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
 
 void framebuffer_t::pixel(const int32_t _x, const int32_t _y,
                           const color_t &_color, const depth_t &_depth) {
-    assert(_x >= 0);
-    assert(_y >= 0);
-    assert(_x < width);
-    assert(_y < height);
+    if (_x <= 0 || _y < 0 || _x >= width || _y >= height) {
+        return;
+    }
     std::lock_guard<std::mutex> color_buffer_lock(color_buffer_mutex);
     std::lock_guard<std::mutex> depth_buffer_lock(depth_buffer_mutex);
     color_buffer[_y * width + _x] = _color;
