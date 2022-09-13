@@ -106,7 +106,7 @@ void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
 
 void framebuffer_t::pixel(const int32_t _x, const int32_t _y,
                           const color_t &_color, const depth_t &_depth) {
-    if (_x <= 0 || _y < 0 || _x >= width || _y >= height) {
+    if (_x < 0 || _y < 0 || _x >= width || _y >= height) {
         return;
     }
     std::lock_guard<std::mutex> color_buffer_lock(color_buffer_mutex);

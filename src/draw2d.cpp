@@ -70,8 +70,7 @@ void draw2d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
     auto p1_y = _y1;
 
     auto steep = false;
-    if (std::abs((signed)p0_x - (signed)p1_x) <
-        std::abs((signed)p0_y - (signed)p1_y)) {
+    if (std::abs(p0_x - p1_x) < std::abs(p0_y - p1_y)) {
         std::swap(p0_x, p0_y);
         std::swap(p1_x, p1_y);
         steep = true;
@@ -83,8 +82,8 @@ void draw2d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
     }
 
     auto de  = 0;
-    auto dy2 = std::abs((signed)p1_y - (signed)p0_y) << 1;
-    auto dx2 = std::abs((signed)p1_x - (signed)p0_x) << 1;
+    auto dy2 = std::abs(p1_y - p0_y) << 1;
+    auto dx2 = std::abs(p1_x - p0_x) << 1;
     auto y   = p0_y;
     auto yi  = 1;
     if (p1_y <= p0_y) {
@@ -97,7 +96,7 @@ void draw2d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
         else {
             framebuffer.pixel(x, y, _color);
         }
-        de += std::abs((signed)dy2);
+        de += std::abs(dy2);
         if (de >= dx2) {
             y += yi;
             de -= dx2;
@@ -116,8 +115,8 @@ void draw2d_t::line(const vector2i_t &_p0, const vector2i_t &_p1,
 void draw2d_t::triangle(const vector2i_t &_v0, const vector2i_t &_v1,
                         const vector2i_t             &_v2,
                         const framebuffer_t::color_t &_color) {
-    vector2i_t min = _v0.min(_v1).min(_v2);
-    vector2i_t max = _v0.max(_v1).max(_v2);
+    auto min = _v0.min(_v1).min(_v2);
+    auto max = _v0.max(_v1).max(_v2);
     for (auto x = min.x; x <= max.x; x++) {
         for (auto y = min.y; y <= max.y; y++) {
             if (is_inside(_v0, _v1, _v2, vector2i_t(x, y)) == true) {
