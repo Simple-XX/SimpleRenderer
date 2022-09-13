@@ -22,6 +22,13 @@
 #include "cassert"
 #include "iostream"
 
+// 前置声明
+template <class _T>
+class vector2_t;
+
+template <class _T>
+class vector3_t;
+
 /**
  * @brief 2 维向量
  * @tparam _T                类型
@@ -163,6 +170,11 @@ public:
      * @return _T&             结果
      */
     _T &operator[](const uint32_t _idx);
+
+    /**
+     * @brief 转换为 int32_t 类型
+     */
+    operator vector2_t<int32_t>(void) const;
 
     /**
      * @brief 转换为 float 类型
@@ -348,6 +360,11 @@ _T &vector2_t<_T>::operator[](const uint32_t _idx) {
         return x;
     }
     return y;
+}
+
+template <class _T>
+vector2_t<_T>::operator vector2_t<int32_t>(void) const {
+    return vector2_t<int32_t>((int32_t)x, (int32_t)y);
 }
 
 template <class _T>
@@ -546,9 +563,24 @@ public:
     _T &operator[](const uint32_t _idx);
 
     /**
+     * @brief 转换为 int32_t 类型
+     */
+    operator vector3_t<int32_t>(void) const;
+
+    /**
      * @brief 转换为 float 类型
      */
     operator vector3_t<float>(void) const;
+
+    /**
+     * @brief 转换为 vector2_t<int32_t> 类型
+     */
+    operator vector2_t<int32_t>(void) const;
+
+    /**
+     * @brief 转换为 vector2_t<float> 类型
+     */
+    operator vector2_t<float>(void) const;
 
     /**
      * @brief 距离^2
@@ -755,8 +787,23 @@ _T &vector3_t<_T>::operator[](const uint32_t _idx) {
 }
 
 template <class _T>
+vector3_t<_T>::operator vector3_t<int32_t>(void) const {
+    return vector3_t<int32_t>((int32_t)x, (int32_t)y, (int32_t)z);
+}
+
+template <class _T>
 vector3_t<_T>::operator vector3_t<float>(void) const {
     return vector3_t<float>((float)x, (float)y, (float)z);
+}
+
+template <class _T>
+vector3_t<_T>::operator vector2_t<int32_t>(void) const {
+    return vector2_t<int32_t>((int32_t)x, (int32_t)y);
+}
+
+template <class _T>
+vector3_t<_T>::operator vector2_t<float>(void) const {
+    return vector2_t<float>((float)x, (float)y);
 }
 
 template <class _T>
@@ -796,9 +843,9 @@ const vector3_t<_T> vector3_t<_T>::max(const vector3_t<_T> &_v) const {
                          std::max(z, _v.z));
 }
 
-typedef vector2_t<float>    vector2f_t;
-typedef vector2_t<uint32_t> vector2i_t;
-typedef vector3_t<float>    vector3f_t;
-typedef vector3_t<uint32_t> vector3i_t;
+typedef vector2_t<float>   vector2f_t;
+typedef vector2_t<int32_t> vector2i_t;
+typedef vector3_t<float>   vector3f_t;
+typedef vector3_t<int32_t> vector3i_t;
 
 #endif /* _VECTOR_HPP_ */

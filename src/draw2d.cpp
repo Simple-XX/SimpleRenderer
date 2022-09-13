@@ -116,6 +116,12 @@ void draw2d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
     return;
 }
 
+void draw2d_t::line(const vector2i_t &_p0, const vector2i_t &_p1,
+                    const framebuffer_t::color_t &_color) {
+    line(_p0.x, _p0.y, _p1.x, _p1.y, _color);
+    return;
+}
+
 void draw2d_t::triangle(const vector2i_t &_v0, const vector2i_t &_v1,
                         const vector2i_t             &_v2,
                         const framebuffer_t::color_t &_color) {

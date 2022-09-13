@@ -32,3 +32,4 @@
 
 build
 cmake-build-debug
+cmake-build-debug-gcc
