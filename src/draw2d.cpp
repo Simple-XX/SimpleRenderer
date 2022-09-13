@@ -18,8 +18,10 @@
 #include "draw2d.h"
 
 template <class _T>
-bool draw2d_t::is_inside(const vector2_t<_T> &_p0, const vector2_t<_T> &_p1,
-                         const vector2_t<_T> &_p2, const vector2_t<_T> &_p) {
+const vector3f_t draw2d_t::get_barycentric_coord(const vector2_t<_T> &_p0,
+                                                 const vector2_t<_T> &_p1,
+                                                 const vector2_t<_T> &_p2,
+                                                 const vector2_t<_T> &_p) {
     // 边向量
     auto edge_p2p0 = (_p2 - _p0);
     auto edge_p1p0 = (_p1 - _p0);
@@ -35,20 +37,28 @@ bool draw2d_t::is_inside(const vector2_t<_T> &_p0, const vector2_t<_T> &_p1,
     auto deno = 1. / ((p0p0 * p1p1) - (p0p1 * p0p1));
 
     auto u = ((p1p1 * p0p2) - (p0p1 * p1p2)) * deno;
-    if (u < 0. || u > 1.) {
-        return false;
-    }
-
     auto v = ((p0p0 * p1p2) - (p0p1 * p0p2)) * deno;
-    if (v < 0. || v > 1.) {
+    auto w = 1 - u - v;
+
+    return vector3f_t(u, v, w);
+}
+
+template <class _T>
+bool draw2d_t::is_inside(const vector2_t<_T> &_p0, const vector2_t<_T> &_p1,
+                         const vector2_t<_T> &_p2, const vector2_t<_T> &_p) {
+    auto res = get_barycentric_coord(_p0, _p1, _p2, _p);
+
+    if (res.x < 0. || res.x > 1.) {
         return false;
     }
 
-    // 重心坐标的分量和为 1
-    if (u + v >= 1.) {
+    if (res.y < 0. || res.y > 1.) {
         return false;
     }
 
+    if (res.z < 0 || res.z > 1.) {
+        return false;
+    }
     return true;
 }
 
@@ -124,6 +134,5 @@ void draw2d_t::triangle(const vector2i_t &_v0, const vector2i_t &_v1,
             }
         }
     }
-    return;
     return;
 }

@@ -29,6 +29,20 @@ private:
     int32_t height;
 
     /**
+     * @brief 计算重心坐标
+     * @tparam _T 点类型
+     * @param  _p0              三角形的第一个点
+     * @param  _p1              三角形的第二个点
+     * @param  _p2              三角形的第三个点
+     * @param  _p               要判断的点
+     * @return const vector3f_t 重心坐标
+     */
+    template <class _T>
+    static const vector3f_t
+    get_barycentric_coord(const vector2_t<_T> &_p0, const vector2_t<_T> &_p1,
+                          const vector2_t<_T> &_p2, const vector2_t<_T> &_p);
+
+    /**
      * @brief 判断 _p 点是否在由 _p0 _p1 _p2 三点构成的三角形内
      * @tparam _T 点类型
      * @param  _p0              三角形的第一个点
