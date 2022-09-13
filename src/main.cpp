@@ -99,58 +99,29 @@ int main(int _argc, char **_argv) {
 
     draw2d_t draw2d(framebuffer);
 
+    auto m = matrix4f_t();
+    m      = m.rotate(0, 0, 1, matrix4f_t::RAD(-120));
+    m      = m.scale(WIDTH / 16., HEIGHT / 9., 1);
+    m      = m.translate(960, 540, 0);
+
     // 循环模型里的所有三角形
     for (size_t i = 0; i < model.get_face().size(); i++) {
         auto face = model.get_face()[i];
 
         // 循环三角形三个顶点，每两个顶点连一条线
         for (auto j = 0; j < 3; j++) {
-            auto v0 = face.p0;
-            auto v1 = face.p1;
-            auto v2 = face.p2;
-
-            // 因为模型空间取值范围是 [-1,
-            // 1]^3，我们要把模型坐标平移到屏幕坐标中 下面 (point + 1)
-            // * width(height) / 2 的操作学名为视口变换（Viewport
-            // Transformation）
-            auto m = matrix4f_t();
-            m.scale(WIDTH / 16., HEIGHT / 9., 1);
-            auto m2 = matrix4f_t();
-            m2.rotate(0, 0, 1, matrix4f_t::RAD(-0));
-            auto m4 = matrix4f_t();
-            m4.translate(960, 540, 0);
-            auto m3 = m2 * m;
-            std::cout << m4 * m3 << std::endl;
-            auto       m5 = m4 * m3;
-            vector2i_t p0 = (vector2i_t)(m5 * v0);
-            vector2i_t p1 = (vector2i_t)(m5 * v1);
-            vector2i_t p2 = (vector2i_t)(m5 * v2);
-            std::cout << p0 << std::endl;
-            std::cout << p1 << std::endl;
-            std::cout << p2 << std::endl;
+            auto v0 = m * face.p0;
+            auto v1 = m * face.p1;
+            auto v2 = m * face.p2;
             // 画线
-            draw2d.line(p0, p1, WHITE);
-            draw2d.line(p1, p2, WHITE);
-            draw2d.line(p2, p0, WHITE);
+            draw2d.line(v0, v1, WHITE);
+            draw2d.line(v1, v2, WHITE);
+            draw2d.line(v2, v0, WHITE);
         }
     }
 
     std::thread draw_thread = std::thread(draw, &framebuffer);
     draw_thread.join();
-
-    //    auto v = vector2i_t(400, 400);
-    //    auto m = matrix4f_t();
-    // #define RAD(x) ((3.1415 / 180) * x)
-    //    m.rotate(0, 0, 1, RAD(-45));
-    //    std::cout << v << std::endl;
-    //    std::cout << m << std::endl;
-    //    std::cout << m * v << std::endl;
-    //
-    //    auto mv = m * v;
-    //    std::cout << "m*v" << m * v << std::endl;
-    //    std::cout << "mv" << mv << std::endl;
-    //    draw2d.line(0, 0, v.x, v.y, RED);
-    //    draw2d.line(0, 0, mv.x, (uint32_t)mv.y, RED);
 
     display_t display(framebuffer);
     display.loop();

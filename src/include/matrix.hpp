@@ -249,25 +249,28 @@ public:
      * @param  _x               x 方向变换
      * @param  _y               y 方向变换
      * @param  _z               z 方向变换
-     * @return matrix_t<_T>&    构造好的平移矩阵
+     * @return const matrix_t<_T>   构造好的平移矩阵
+     * @note    先旋转再平移
      */
-    matrix_t<_T> &translate(const float _x, const float _y, const float _z);
+    const matrix_t<_T> translate(const float _x, const float _y,
+                                 const float _z) const;
 
     /**
      * @brief 缩放矩阵
      * @param  _scale           缩放倍数
-     * @return matrix_t<_T>&    构造好的旋转矩阵
+     * @return const matrix_t<_T>   构造好的旋转矩阵
      */
-    matrix_t<_T> &scale(const float _scale);
+    const matrix_t<_T> scale(const float _scale) const;
 
     /**
      * @brief 缩放矩阵
      * @param  _x               x 方向缩放倍数
      * @param  _y               y 方向缩放倍数
      * @param  _z               z 方向缩放倍数
-     * @return matrix_t<_T>&    构造好的旋转矩阵
+     * @return const matrix_t<_T>   构造好的旋转矩阵
      */
-    matrix_t<_T> &scale(const float _x, const float _y, const float _z);
+    const matrix_t<_T> scale(const float _x, const float _y,
+                             const float _z) const;
 
     /**
      * @brief 旋转矩阵
@@ -275,11 +278,12 @@ public:
      * @param  _y               旋转中心的 y 坐标
      * @param  _z               旋转中心的 z 坐标
      * @param  _angle           要旋转的弧度
-     * @return matrix_t<_T>&    构造好的旋转矩阵
+     * @return const matrix_t<_T>   构造好的旋转矩阵
      * @see http://docs.gl/gl2/glRotate
+     * @note    先旋转再平移
      */
-    matrix_t<_T> &rotate(const float _x, const float _y, const float _z,
-                         const float _angle);
+    const matrix_t<_T> rotate(const float _x, const float _y, const float _z,
+                              const float _angle) const;
 
     /**
      * @brief 是否有非数值
@@ -722,54 +726,58 @@ const matrix_t<float> matrix_t<_T>::inverse(void) const {
 // }
 
 template <class _T>
-matrix_t<_T> &matrix_t<_T>::translate(const float _x, const float _y,
-                                      const float _z) {
-    mat[0][3] = _x;
-    mat[1][3] = _y;
-    mat[2][3] = _z;
-    mat[3][3] = 1;
-    return *this;
+const matrix_t<_T> matrix_t<_T>::translate(const float _x, const float _y,
+                                           const float _z) const {
+    matrix_t<float> tmp;
+    tmp.mat[0][3] = _x;
+    tmp.mat[1][3] = _y;
+    tmp.mat[2][3] = _z;
+    return tmp * *this;
 }
 
 template <class _T>
-matrix_t<_T> &matrix_t<_T>::scale(const float _scale) {
-    mat[0][0] = _scale;
-    mat[1][1] = _scale;
-    mat[2][2] = _scale;
-    mat[3][3] = 1;
-    return *this;
+const matrix_t<_T> matrix_t<_T>::scale(const float _scale) const {
+    matrix_t<float> tmp;
+    tmp.mat[0][0] = _scale;
+    tmp.mat[1][1] = _scale;
+    tmp.mat[2][2] = _scale;
+    tmp.mat[3][3] = 1;
+    return tmp * *this;
 }
 
 template <class _T>
-matrix_t<_T> &matrix_t<_T>::scale(const float _x, const float _y,
-                                  const float _z) {
-    mat[0][0] = _x;
-    mat[1][1] = _y;
-    mat[2][2] = _z;
-    mat[3][3] = 1;
-    return *this;
+const matrix_t<_T> matrix_t<_T>::scale(const float _x, const float _y,
+                                       const float _z) const {
+    matrix_t<float> tmp;
+    tmp.mat[0][0] = _x;
+    tmp.mat[1][1] = _y;
+    tmp.mat[2][2] = _z;
+    tmp.mat[3][3] = 1;
+    return tmp * *this;
 }
 
 template <class _T>
-matrix_t<_T> &matrix_t<_T>::rotate(const float _x, const float _y,
-                                   const float _z, const float _angle) {
+const matrix_t<_T> matrix_t<_T>::rotate(const float _x, const float _y,
+                                        const float _z,
+                                        const float _angle) const {
     auto n = vector3_t(_x, _y, _z).normalize();
     auto c = std::cos(_angle);
     auto s = std::sin(_angle);
 
-    mat[0][0] = n.x * n.x * (1 - c) + c;
-    mat[0][1] = n.y * n.x * (1 - c) - s * n.z;
-    mat[0][2] = n.z * n.x * (1 - c) + s * n.y;
+    matrix_t<float> tmp;
+    tmp.mat[0][0] = n.x * n.x * (1 - c) + c;
+    tmp.mat[0][1] = n.y * n.x * (1 - c) - s * n.z;
+    tmp.mat[0][2] = n.z * n.x * (1 - c) + s * n.y;
 
-    mat[1][0] = n.x * n.y * (1 - c) + s * n.z;
-    mat[1][1] = n.y * n.y * (1 - c) + c;
-    mat[1][2] = n.z * n.y * (1 - c) - s * n.x;
+    tmp.mat[1][0] = n.x * n.y * (1 - c) + s * n.z;
+    tmp.mat[1][1] = n.y * n.y * (1 - c) + c;
+    tmp.mat[1][2] = n.z * n.y * (1 - c) - s * n.x;
 
-    mat[2][0] = n.x * n.z * (1 - c) - s * n.y;
-    mat[2][1] = n.y * n.z * (1 - c) + s * n.x;
-    mat[2][2] = n.z * n.z * (1 - c) + c;
+    tmp.mat[2][0] = n.x * n.z * (1 - c) - s * n.y;
+    tmp.mat[2][1] = n.y * n.z * (1 - c) + s * n.x;
+    tmp.mat[2][2] = n.z * n.z * (1 - c) + c;
 
-    return *this;
+    return tmp * *this;
 }
 
 template <class _T>
