@@ -21,97 +21,262 @@
 #include "iomanip"
 #include "vector.hpp"
 
+/**
+ * @brief 四阶矩阵
+ * @tparam _T 矩阵元素类型
+ */
 template <class _T>
 class matrix_t {
 private:
+    /// @brief  阶数
     static constexpr const uint32_t ORDER = 4;
-    _T                              mat[ORDER][ORDER];
-    // 矩阵求行列式值
+    /// @brief 矩阵元素
+    _T mat[ORDER][ORDER];
+
+    /**
+     * @brief 矩阵行列式的值
+     * @return _T               行列式的值
+     */
     _T determ(void) const;
-    // 矩阵求余子式
+
+    /**
+     * @brief 矩阵的余子式
+     * @param  _r               第几行
+     * @param  _c               第几列
+     * @return _T               结果
+     */
     _T minor(const uint32_t _r, const uint32_t _c) const;
-    // 矩阵求代数余子式
+
+    /**
+     * @brief 代数余子式
+     * @param  _r               第几行
+     * @param  _c               第几列
+     * @return _T               结果
+     */
     _T cofactor(const uint32_t _r, const uint32_t _c) const;
 
 public:
-    // 单位矩阵
+    /**
+     * @brief 构造函数，默认为单位矩阵
+     */
     matrix_t(void);
 
+    /**
+     * @brief 构造函数
+     * @param  _mat             另一个矩阵
+     */
     matrix_t(const matrix_t<_T> &_mat);
 
+    /**
+     * @brief 构造函数
+     * @param  _arr             指针
+     */
     matrix_t(const _T *const _arr);
 
+    /**
+     * @brief 构造函数
+     * @param  _arr             数组
+     */
     matrix_t(const _T _arr[ORDER][ORDER]);
 
-    // 齐次坐标转换
+    /**
+     * @brief 构造函数，构造齐次坐标，多余位置补 0
+     * @param  _v               二维向量
+     */
     matrix_t(const vector2_t<_T> &_v);
+
+    /**
+     * @brief 构造函数，构造齐次坐标，多余位置补 0
+     * @param  _v               三维向量
+     */
     matrix_t(const vector3_t<_T> &_v);
 
-    // 赋值
+    /**
+     * @brief 赋值
+     * @param  _mat             另一个 matrix_t
+     * @return matrix_t<_T>&    结果
+     */
     matrix_t<_T> &operator=(const matrix_t<_T> &_mat);
-    // 矩阵间加法
+
+    /**
+     * @brief 矩阵间加法
+     * @param  _mat             另一个 matrix_t
+     * @return const matrix_t<_T>   结果
+     */
     const matrix_t<_T> operator+(const matrix_t<_T> &_mat) const;
-    // 矩阵间自加
+
+    /**
+     * @brief 矩阵自加
+     * @param  _mat             另一个 matrix_t
+     * @return matrix_t<_T>&    结果
+     */
     matrix_t<_T> &operator+=(const matrix_t<_T> &_mat);
-    // 矩阵之间的减法运算
+
+    /**
+     * @brief 矩阵间减法
+     * @param  _mat             另一个 matrix_t
+     * @return const matrix_t<_T>   结果
+     */
     const matrix_t<_T> operator-(const matrix_t<_T> &_mat) const;
-    // 矩阵之间自减运算
+
+    /**
+     * @brief 矩阵自减
+     * @param  _mat             另一个 matrix_t
+     * @return matrix_t<_T>&    结果
+     */
     matrix_t<_T> &operator-=(const matrix_t<_T> &_mat);
-    // 矩阵与整数乘法
+
+    /**
+     * @brief 矩阵数乘
+     * @param  _v               数
+     * @return const matrix_t<_T>   结果
+     */
     const matrix_t<_T> operator*(const _T &_v) const;
-    // 矩阵间乘法
+
+    /**
+     * @brief 矩阵间乘法
+     * @param  _mat             另一个 matrix_t
+     * @return const matrix_t<_T>   结果
+     */
     const matrix_t<_T> operator*(const matrix_t<_T> &_mat) const;
-    // 矩阵与整数自乘
+
+    /**
+     * @brief 矩阵数乘的自乘
+     * @param  _v               数
+     * @return matrix_t<_T>&    结果
+     */
     matrix_t<_T> &operator*=(const _T &_v);
-    // 矩阵间自乘
+
+    /**
+     * @brief 矩阵间自乘
+     * @param  _mat             另一个 matrix_t
+     * @return matrix_t<_T>&    结果
+     */
     matrix_t<_T> &operator*=(const matrix_t<_T> &_mat);
 
+    /**
+     * @brief 矩阵与二维向量乘法
+     * @param  _v               向量
+     * @return const vector2_t<_T>  结果
+     * @note    只计算二维
+     */
     const vector2_t<_T> operator*(const vector2_t<_T> &_v) const;
 
+    /**
+     * @brief 矩阵与三维向量乘法
+     * @param  _v               向量
+     * @return const vector3_t<_T>  结果
+     * @note    只计算三维
+     */
     const vector3_t<_T> operator*(const vector3_t<_T> &_v) const;
 
-    // 矩阵相等
+    /**
+     * @brief 矩阵相等
+     * @param  _mat             另一个 matrix_t
+     * @return true             相等
+     * @return false            不等
+     */
     bool operator==(const matrix_t<_T> &_mat) const;
+    /**
+     * @brief 矩阵不等
+     * @param  _mat             另一个 matrix_t
+     * @return true             不等
+     * @return false            相等
+     */
     bool operator!=(const matrix_t<_T> &_mat) const;
-    // 访问矩阵行/列
-    _T       *operator[](const uint32_t _idx);
+
+    /**
+     * @brief 下标重载
+     * @param  _idx             行
+     * @return _T*              行指针
+     * @note    注意不要越界访问
+     */
+    _T *operator[](const uint32_t _idx);
+
+    /**
+     * @brief 下标重载
+     * @param  _idx             行
+     * @return const _T*        行指针
+     * @note    注意不要越界访问
+     */
     const _T *operator[](const uint32_t _idx) const;
-    // 获取阶数
+
+    /**
+     * @brief 获取矩阵阶数
+     * @return uint32_t         阶数
+     */
     uint32_t get_order(void) const;
-    // 矩阵转置
+
+    /**
+     * @brief 矩阵转置
+     * @return const matrix_t<_T>   转置矩阵
+     */
     const matrix_t<_T> transpose(void) const;
-    // 矩阵求逆
+
+    /**
+     * @brief 逆矩阵
+     * @return const matrix_t<float>    逆矩阵
+     */
     const matrix_t<float> inverse(void) const;
-    // PLU 分解，返回分解好的矩阵，参数用于获取主元表
+
+    /**
+     * @brief PLU 分解
+     * @param  _p               主元表
+     * @return matrix_t<float>  分解好的矩阵
+     */
     matrix_t<float> PLU(std::vector<uint32_t> &_p);
-    // 矩阵求余子式矩阵
+
+    /**
+     * @brief 余子式矩阵
+     * @return matrix_t<_T>     余子式矩阵
+     */
     matrix_t<_T> minor(void) const;
-    // 矩阵求代数余子式矩阵
+
+    /**
+     * @brief 代数余子式矩阵
+     * @return matrix_t<_T>     代数余子式矩阵
+     */
     matrix_t<_T> cofactor(void) const;
-    // 矩阵求伴随矩阵
+
+    /**
+     * @brief 伴随矩阵
+     * @return matrix_t<_T>     伴随矩阵
+     */
     matrix_t<_T> adjugate(void) const;
 
-    // 旋转矩阵
-    /*
-     * angle: the angle of rotation, in radians
-     * vx, vy, vz: the x, y, and z coordinates of a vector, respectively
-     *
-     * nx*nx*(1-c)+c     ny*nx*(1-c)-s*nz  nz*nx*(1-c)+s*ny  0
-     * nx*ny*(1-c)+s*nz  ny*ny*(1-c)+c     nz*ny*(1-c)-s*nx  0
-     * nx*nz*(1-c)-s*ny  ny*nz*(1-c)+s*nx  nz*nz*(1-c)+c     0
-     * 0                 0                 0                 1
-     *
-     * nx, ny, nz: the normalized coordinates of the vector, respectively
-     * s, c: sin(angle), cos(angle)
-     *
-     * see http://docs.gl/gl2/glRotate
+    /**
+     * @brief 旋转矩阵
+     * @param  _x               旋转中心的 x 坐标
+     * @param  _y               旋转中心的 y 坐标
+     * @param  _z               旋转中心的 z 坐标
+     * @param  _angle           要旋转的弧度
+     * @return matrix_t<_T>&    构造好的旋转矩阵
+     * @see http://docs.gl/gl2/glRotate
      */
     matrix_t<_T> &rotate(const float _x, const float _y, const float _z,
                          const float _angle);
-    // 缩放矩阵
+
+    /**
+     * @brief 缩放矩阵
+     * @param  _scale           缩放倍数
+     * @return matrix_t<_T>&    构造好的旋转矩阵
+     */
     matrix_t<_T> &set_scale(const float &_scale);
+
+    /**
+     * @brief 旋转矩阵
+     * @param  _x               x 方向缩放倍数
+     * @param  _y               y 方向缩放倍数
+     * @param  _z               z 方向缩放倍数
+     * @return matrix_t<_T>&    构造好的旋转矩阵
+     */
     matrix_t<_T> &set_scale(const float &_x, const float &_y, const float &_z);
 
+    /**
+     * @brief 是否有非数值
+     * @return true             有
+     * @return false            无
+     */
     bool HasNaNs(void) const;
 
     friend std::ostream &operator<<(std::ostream       &_os,
