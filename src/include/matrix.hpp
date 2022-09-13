@@ -245,6 +245,31 @@ public:
     matrix_t<_T> adjugate(void) const;
 
     /**
+     * @brief 平移矩阵
+     * @param  _x               x 方向变换
+     * @param  _y               y 方向变换
+     * @param  _z               z 方向变换
+     * @return matrix_t<_T>&    构造好的平移矩阵
+     */
+    matrix_t<_T> &translate(const float _x, const float _y, const float _z);
+
+    /**
+     * @brief 缩放矩阵
+     * @param  _scale           缩放倍数
+     * @return matrix_t<_T>&    构造好的旋转矩阵
+     */
+    matrix_t<_T> &scale(const float _scale);
+
+    /**
+     * @brief 缩放矩阵
+     * @param  _x               x 方向缩放倍数
+     * @param  _y               y 方向缩放倍数
+     * @param  _z               z 方向缩放倍数
+     * @return matrix_t<_T>&    构造好的旋转矩阵
+     */
+    matrix_t<_T> &scale(const float _x, const float _y, const float _z);
+
+    /**
      * @brief 旋转矩阵
      * @param  _x               旋转中心的 x 坐标
      * @param  _y               旋转中心的 y 坐标
@@ -255,22 +280,6 @@ public:
      */
     matrix_t<_T> &rotate(const float _x, const float _y, const float _z,
                          const float _angle);
-
-    /**
-     * @brief 缩放矩阵
-     * @param  _scale           缩放倍数
-     * @return matrix_t<_T>&    构造好的旋转矩阵
-     */
-    matrix_t<_T> &set_scale(const float &_scale);
-
-    /**
-     * @brief 旋转矩阵
-     * @param  _x               x 方向缩放倍数
-     * @param  _y               y 方向缩放倍数
-     * @param  _z               z 方向缩放倍数
-     * @return matrix_t<_T>&    构造好的旋转矩阵
-     */
-    matrix_t<_T> &set_scale(const float &_x, const float &_y, const float &_z);
 
     /**
      * @brief 是否有非数值
@@ -710,6 +719,35 @@ const matrix_t<float> matrix_t<_T>::inverse(void) const {
 // }
 
 template <class _T>
+matrix_t<_T> &matrix_t<_T>::translate(const float _x, const float _y,
+                                      const float _z) {
+    mat[0][3] = _x;
+    mat[1][3] = _y;
+    mat[2][3] = _z;
+    mat[3][3] = 1;
+    return *this;
+}
+
+template <class _T>
+matrix_t<_T> &matrix_t<_T>::scale(const float _scale) {
+    mat[0][0] = _scale;
+    mat[1][1] = _scale;
+    mat[2][2] = _scale;
+    mat[3][3] = 1;
+    return *this;
+}
+
+template <class _T>
+matrix_t<_T> &matrix_t<_T>::scale(const float _x, const float _y,
+                                  const float _z) {
+    mat[0][0] = _x;
+    mat[1][1] = _y;
+    mat[2][2] = _z;
+    mat[3][3] = 1;
+    return *this;
+}
+
+template <class _T>
 matrix_t<_T> &matrix_t<_T>::rotate(const float _x, const float _y,
                                    const float _z, const float _angle) {
     auto n = vector3_t(_x, _y, _z).normalize();
@@ -728,25 +766,6 @@ matrix_t<_T> &matrix_t<_T>::rotate(const float _x, const float _y,
     mat[2][1] = n.y * n.z * (1 - c) + s * n.x;
     mat[2][2] = n.z * n.z * (1 - c) + c;
 
-    return *this;
-}
-
-template <class _T>
-matrix_t<_T> &matrix_t<_T>::set_scale(const float &_scale) {
-    mat[0][0] = _scale;
-    mat[1][1] = _scale;
-    mat[2][2] = _scale;
-    mat[3][3] = 1;
-    return *this;
-}
-
-template <class _T>
-matrix_t<_T> &matrix_t<_T>::set_scale(const float &_x, const float &_y,
-                                      const float &_z) {
-    mat[0][0] = _x;
-    mat[1][1] = _y;
-    mat[2][2] = _z;
-    mat[3][3] = 1;
     return *this;
 }
 
