@@ -20,6 +20,7 @@
 #include "string"
 #include "source_location"
 #include "ctime"
+#include "sstream"
 
 /**
  * @brief 构造日志字符串
