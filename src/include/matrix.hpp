@@ -19,6 +19,8 @@
 
 #include "iostream"
 #include "iomanip"
+#include "optional"
+#include "log.hpp"
 #include "vector.hpp"
 
 /**
@@ -29,7 +31,7 @@ template <class _T>
 class matrix_t {
 private:
     /// @brief  阶数
-    static constexpr const uint32_t ORDER = 4;
+    static constexpr const int32_t ORDER = 4;
     /// @brief 矩阵元素
     _T mat[ORDER][ORDER];
 
@@ -372,26 +374,72 @@ matrix_t<_T>::matrix_t(void) {
 
 template <class _T>
 matrix_t<_T>::matrix_t(const matrix_t<_T> &_mat) {
-    assert(!_mat.HasNaNs());
+    try {
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        *this = matrix_t<_T>();
+        return;
+    }
     memcpy(mat, _mat.mat, ORDER * ORDER * sizeof(_T));
     return;
 }
 
 template <class _T>
 matrix_t<_T>::matrix_t(const _T *const _arr) {
-    assert(_arr != nullptr);
+    try {
+        if (_arr == nullptr) {
+            throw std::invalid_argument(log("_arr == nullptr"));
+        }
+        for (auto i = 0; i < ORDER * ORDER; i++) {
+            if (std::isnan(_arr[i])) {
+                throw std::invalid_argument(log("std::isnan(_arr[i])"));
+            }
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        *this = matrix_t<_T>();
+        return;
+    }
     memcpy(mat, _arr, ORDER * ORDER * sizeof(_T));
     return;
 }
 
 template <class _T>
 matrix_t<_T>::matrix_t(const _T _arr[ORDER][ORDER]) {
+    try {
+        if (_arr == nullptr) {
+            throw std::invalid_argument(log("_arr == nullptr"));
+        }
+        for (auto i = 0; i < ORDER; i++) {
+            for (auto j = 0; j < ORDER; j++) {
+                if (std::isnan(_arr[i][j])) {
+                    throw std::invalid_argument(log("std::isnan(_arr[i][j])"));
+                }
+            }
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        *this = matrix_t<_T>();
+        return;
+    }
     memcpy(mat, _arr, ORDER * ORDER * sizeof(_T));
     return;
 }
 
 template <class _T>
 matrix_t<_T>::matrix_t(const vector2_t<_T> &_v) {
+    try {
+        if (_v.HasNaNs()) {
+            throw std::invalid_argument(log("_v.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        *this = matrix_t<_T>();
+        return;
+    }
     memset(mat, 0, ORDER * ORDER * sizeof(_T));
     mat[0][0] = _v.x;
     mat[1][1] = _v.y;
@@ -401,6 +449,15 @@ matrix_t<_T>::matrix_t(const vector2_t<_T> &_v) {
 
 template <class _T>
 matrix_t<_T>::matrix_t(const vector3_t<_T> &_v) {
+    try {
+        if (_v.HasNaNs()) {
+            throw std::invalid_argument(log("_v.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        *this = matrix_t<_T>();
+        return;
+    }
     memset(mat, 0, ORDER * ORDER * sizeof(_T));
     mat[0][0] = _v.x;
     mat[1][1] = _v.y;
@@ -410,16 +467,34 @@ matrix_t<_T>::matrix_t(const vector3_t<_T> &_v) {
 
 template <class _T>
 matrix_t<_T> &matrix_t<_T>::operator=(const matrix_t<_T> &_mat) {
-    assert(!_mat.HasNaNs());
-    if (this != &_mat) {
-        memcpy(mat, _mat.mat, ORDER * ORDER * sizeof(_T));
+    try {
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+        if (this == &_mat) {
+            throw std::runtime_error(log("this == &_mat"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    } catch (std::runtime_error &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
     }
+    memcpy(mat, _mat.mat, ORDER * ORDER * sizeof(_T));
     return *this;
 }
 
 template <class _T>
 const matrix_t<_T> matrix_t<_T>::operator+(const matrix_t<_T> &_mat) const {
-    assert(!_mat.HasNaNs());
+    try {
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    }
     _T tmp[ORDER][ORDER] = {{0}};
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
@@ -431,7 +506,14 @@ const matrix_t<_T> matrix_t<_T>::operator+(const matrix_t<_T> &_mat) const {
 
 template <class _T>
 matrix_t<_T> &matrix_t<_T>::operator+=(const matrix_t<_T> &_mat) {
-    assert(!_mat.HasNaNs());
+    try {
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    }
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
             mat[i][j] += _mat[i][j];
@@ -442,7 +524,14 @@ matrix_t<_T> &matrix_t<_T>::operator+=(const matrix_t<_T> &_mat) {
 
 template <class _T>
 const matrix_t<_T> matrix_t<_T>::operator-(const matrix_t<_T> &_mat) const {
-    assert(!_mat.HasNaNs());
+    try {
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    }
     _T tmp[ORDER][ORDER] = {{0}};
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
@@ -454,7 +543,14 @@ const matrix_t<_T> matrix_t<_T>::operator-(const matrix_t<_T> &_mat) const {
 
 template <class _T>
 matrix_t<_T> &matrix_t<_T>::operator-=(const matrix_t<_T> &_mat) {
-    assert(!_mat.HasNaNs());
+    try {
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    }
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
             mat[i][j] -= _mat[i][j];
@@ -465,6 +561,14 @@ matrix_t<_T> &matrix_t<_T>::operator-=(const matrix_t<_T> &_mat) {
 
 template <class _T>
 const matrix_t<_T> matrix_t<_T>::operator*(const _T &_v) const {
+    try {
+        if (std::isnan(_v)) {
+            throw std::invalid_argument(log("std::isnan(_v)"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    }
     _T tmp[ORDER][ORDER] = {{0}};
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
@@ -476,7 +580,14 @@ const matrix_t<_T> matrix_t<_T>::operator*(const _T &_v) const {
 
 template <class _T>
 const matrix_t<_T> matrix_t<_T>::operator*(const matrix_t<_T> &_mat) const {
-    assert(!_mat.HasNaNs());
+    try {
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    }
     _T tmp[ORDER][ORDER] = {{0}};
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
@@ -490,6 +601,14 @@ const matrix_t<_T> matrix_t<_T>::operator*(const matrix_t<_T> &_mat) const {
 
 template <class _T>
 matrix_t<_T> &matrix_t<_T>::operator*=(const _T &_v) {
+    try {
+        if (std::isnan(_v)) {
+            throw std::invalid_argument(log("std::isnan(_v)"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    }
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
             mat[i][j] *= _v;
@@ -500,7 +619,14 @@ matrix_t<_T> &matrix_t<_T>::operator*=(const _T &_v) {
 
 template <class _T>
 matrix_t<_T> &matrix_t<_T>::operator*=(const matrix_t<_T> &_mat) {
-    assert(!_mat.HasNaNs());
+    try {
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    }
     _T tmp[ORDER][ORDER] = {{0}};
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < _mat.ORDER; j++) {
@@ -509,12 +635,20 @@ matrix_t<_T> &matrix_t<_T>::operator*=(const matrix_t<_T> &_mat) {
             }
         }
     }
-    mat = tmp;
+    memcpy(mat, tmp, ORDER * ORDER * sizeof(_T));
     return *this;
 }
 
 template <class _T>
 const vector2_t<_T> matrix_t<_T>::operator*(const vector2_t<_T> &_v) const {
+    try {
+        if (_v.HasNaNs()) {
+            throw std::invalid_argument(log("_v.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return vector2_t<_T>();
+    }
     vector2_t<_T> res;
     res.x = _v.x * mat[0][0] + _v.y * mat[0][1] + 1 * mat[0][2] + 1 * mat[0][3];
     res.y = _v.x * mat[1][0] + _v.y * mat[1][1] + 1 * mat[1][2] + 1 * mat[1][3];
@@ -523,6 +657,14 @@ const vector2_t<_T> matrix_t<_T>::operator*(const vector2_t<_T> &_v) const {
 
 template <class _T>
 const vector3_t<_T> matrix_t<_T>::operator*(const vector3_t<_T> &_v) const {
+    try {
+        if (_v.HasNaNs()) {
+            throw std::invalid_argument(log("_v.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return vector3_t<_T>();
+    }
     vector3_t<_T> res;
     res.x =
         _v.x * mat[0][0] + _v.y * mat[0][1] + _v.z * mat[0][2] + 1 * mat[0][3];
@@ -535,7 +677,14 @@ const vector3_t<_T> matrix_t<_T>::operator*(const vector3_t<_T> &_v) const {
 
 template <class _T>
 bool matrix_t<_T>::operator==(const matrix_t<_T> &_mat) const {
-    assert(!_mat.HasNaNs());
+    try {
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return false;
+    }
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
             if (mat[i][j] != _mat[i][j]) {
@@ -548,7 +697,14 @@ bool matrix_t<_T>::operator==(const matrix_t<_T> &_mat) const {
 
 template <class _T>
 bool matrix_t<_T>::operator!=(const matrix_t<_T> &_mat) const {
-    assert(!_mat.HasNaNs());
+    try {
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return false;
+    }
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
             if (mat[i][j] != _mat[i][j]) {
@@ -561,13 +717,27 @@ bool matrix_t<_T>::operator!=(const matrix_t<_T> &_mat) const {
 
 template <class _T>
 _T *matrix_t<_T>::operator[](const uint32_t _idx) {
-    assert(_idx < ORDER);
+    try {
+        if (_idx > ORDER) {
+            throw std::invalid_argument(log("_idx > ORDER"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return nullptr;
+    }
     return mat[_idx];
 }
 
 template <class _T>
 const _T *matrix_t<_T>::operator[](const uint32_t _idx) const {
-    assert(_idx < ORDER);
+    try {
+        if (_idx > ORDER) {
+            throw std::invalid_argument(log("_idx > ORDER"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return nullptr;
+    }
     return mat[_idx];
 }
 
@@ -605,7 +775,8 @@ const matrix_t<float> matrix_t<_T>::inverse(void) const {
 
 // template <class _T>
 // matrix_t<float> matrix_t<_T>::PLU(std::vector<uint32_t> &_p) {
-//     std::vector<std::vector<float>> tmp(ORDER, std::vector<float>(ORDER, 0));
+//     std::vector<std::vector<float>> tmp(ORDER, std::vector<float>(ORDER,
+//     0));
 //     // 转换为 float 类型
 //     for (uint32_t i = 0; i < ORDER; i++) {
 //         for (uint32_t j = 0; j < ORDER; j++) {
@@ -673,8 +844,8 @@ const matrix_t<float> matrix_t<_T>::inverse(void) const {
 
 // template <class _T>
 //_T matrix_t<_T>::minor(const uint32_t _r, const uint32_t _c) const {
-//     std::vector<std::vector<_T>> tmp(ORDER - 1, std::vector<_T>(ORDER - 1,
-//     0)); for (uint32_t i = 0; i < ORDER - 1; i++) {
+//     std::vector<std::vector<_T>> tmp(ORDER - 1, std::vector<_T>(ORDER -
+//     1, 0)); for (uint32_t i = 0; i < ORDER - 1; i++) {
 //         for (uint32_t j = 0; j < ORDER - 1; j++) {
 //             uint32_t idx_r = i;
 //             uint32_t idx_c = j;
@@ -728,6 +899,15 @@ const matrix_t<float> matrix_t<_T>::inverse(void) const {
 template <class _T>
 const matrix_t<_T> matrix_t<_T>::translate(const float _x, const float _y,
                                            const float _z) const {
+    try {
+        if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)) {
+            throw std::invalid_argument(
+                log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    }
     matrix_t<float> tmp;
     tmp.mat[0][3] = _x;
     tmp.mat[1][3] = _y;
@@ -737,6 +917,14 @@ const matrix_t<_T> matrix_t<_T>::translate(const float _x, const float _y,
 
 template <class _T>
 const matrix_t<_T> matrix_t<_T>::scale(const float _scale) const {
+    try {
+        if (std::isnan(_scale)) {
+            throw std::invalid_argument(log("std::isnan(_scale)"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    }
     matrix_t<float> tmp;
     tmp.mat[0][0] = _scale;
     tmp.mat[1][1] = _scale;
@@ -748,6 +936,15 @@ const matrix_t<_T> matrix_t<_T>::scale(const float _scale) const {
 template <class _T>
 const matrix_t<_T> matrix_t<_T>::scale(const float _x, const float _y,
                                        const float _z) const {
+    try {
+        if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)) {
+            throw std::invalid_argument(
+                log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    }
     matrix_t<float> tmp;
     tmp.mat[0][0] = _x;
     tmp.mat[1][1] = _y;
@@ -760,6 +957,17 @@ template <class _T>
 const matrix_t<_T> matrix_t<_T>::rotate(const float _x, const float _y,
                                         const float _z,
                                         const float _angle) const {
+    try {
+        if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z) ||
+            std::isnan(_angle)) {
+            throw std::invalid_argument(
+                log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)|| "
+                    "std::isnan(_angle)"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return *this;
+    }
     auto n = vector3_t(_x, _y, _z).normalize();
     auto c = std::cos(_angle);
     auto s = std::sin(_angle);
@@ -782,9 +990,11 @@ const matrix_t<_T> matrix_t<_T>::rotate(const float _x, const float _y,
 
 template <class _T>
 bool matrix_t<_T>::HasNaNs(void) const {
-    for (auto i : mat) {
-        if (std::isnan(*i) == true) {
-            return true;
+    for (auto i = 0; i < ORDER; i++) {
+        for (auto j = 0; j < ORDER; j++) {
+            if (std::isnan(mat[i][j]) == true) {
+                return true;
+            }
         }
     }
     return false;
@@ -792,11 +1002,27 @@ bool matrix_t<_T>::HasNaNs(void) const {
 
 template <class _T>
 float matrix_t<_T>::RAD(const float _deg) {
+    try {
+        if (std::isnan(_deg)) {
+            throw std::invalid_argument(log("std::isnan(_deg)"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return 0;
+    }
     return ((M_PI / 180) * (_deg));
 }
 
 template <class _T>
 float matrix_t<_T>::DEG(const float _rad) {
+    try {
+        if (std::isnan(_rad)) {
+            throw std::invalid_argument(log("std::isnan(_rad)"));
+        }
+    } catch (std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return 0;
+    }
     return ((180 / M_PI) * (_rad));
 }
 
