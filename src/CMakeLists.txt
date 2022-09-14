@@ -30,11 +30,13 @@ set(SimpleRender_src
         main.cpp
         model.cpp
         framebuffer.cpp
-        display.cpp draw2d.cpp include/draw2d.h)
+        display.cpp
+        draw2d.cpp
+        draw3d.cpp)
 
 # 生成可执行文件
 add_executable(SimpleRender
-    ${SimpleRender_src})
+        ${SimpleRender_src})
 
 target_link_libraries(SimpleRender
         ${SDL2_LIBRARIES})
