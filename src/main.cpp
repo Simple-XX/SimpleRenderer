@@ -79,8 +79,9 @@ int main(int _argc, char **_argv) {
     std::string mtl_path;
     // 如果没有指定那么使用默认值
     if (_argc == 1) {
-        obj_path = "../../src/obj/cube.obj";
-        mtl_path = "../../src/obj/";
+        // obj_path = "../../obj/helmet.obj";
+        obj_path = "../../obj/cube.obj";
+        mtl_path = "../../obj/";
     }
     // 否则使用指定的
     else {
