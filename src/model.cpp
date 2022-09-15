@@ -166,31 +166,31 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
     cb.group_cb    = group_cb;
     cb.object_cb   = object_cb;
 
-    std::string   warn;
-    std::string   err;
-    std::ifstream ifs(_obj_path.c_str());
+    try {
+        std::string   warn;
+        std::string   err;
+        std::ifstream ifs(_obj_path.c_str());
 
-    if (ifs.fail()) {
-        std::cerr << "file not found: " << _obj_path << "." << std::endl;
-        return;
-    }
+        if (ifs.fail()) {
+            throw(std::runtime_error(log("ifs.fail()")));
+        }
 
-    tinyobj::MaterialFileReader mtlReader(_mtl_path);
+        tinyobj::MaterialFileReader mtlReader(_mtl_path);
+        // 加载
+        auto ret = tinyobj::LoadObjWithCallback(ifs, cb, &mesh, &mtlReader,
+                                                &warn, &err);
+        if (ret == false) {
+            throw(std::runtime_error(log("ret == false")));
+        }
+        if (!warn.empty()) {
+            std::cout << "WARN: " << warn << std::endl;
+        }
+        if (!err.empty()) {
+            std::cerr << err << std::endl;
+        }
 
-    // 加载
-    bool ret =
-        tinyobj::LoadObjWithCallback(ifs, cb, &mesh, &mtlReader, &warn, &err);
-
-    if (!warn.empty()) {
-        std::cout << "WARN: " << warn << std::endl;
-    }
-
-    if (!err.empty()) {
-        std::cerr << err << std::endl;
-    }
-
-    if (!ret) {
-        std::cerr << "Failed to parse .obj" << std::endl;
+    } catch (const std::runtime_error &e) {
+        std::cerr << log(e.what()) << std::endl;
         return;
     }
 
