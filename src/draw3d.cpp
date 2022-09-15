@@ -18,10 +18,9 @@
 #include "draw3d.h"
 
 template <class _T>
-const vector3f_t draw3d_t::get_barycentric_coord(const vector3_t<_T> &_p0,
-                                                 const vector3_t<_T> &_p1,
-                                                 const vector3_t<_T> &_p2,
-                                                 const vector3_t<_T> &_p) {
+const std::pair<bool, vector3f_t> draw3d_t::get_barycentric_coord(
+    const vector3_t<_T> &_p0, const vector3_t<_T> &_p1,
+    const vector3_t<_T> &_p2, const vector3_t<_T> &_p) {
     // 边向量
     auto edge_p2p0 = (_p2 - _p0);
     auto edge_p1p0 = (_p1 - _p0);
@@ -40,26 +39,21 @@ const vector3f_t draw3d_t::get_barycentric_coord(const vector3_t<_T> &_p0,
     auto v = ((p0p0 * p1p2) - (p0p1 * p0p2)) * deno;
     auto w = 1 - u - v;
 
-    return vector3f_t(u, v, w);
-}
+    auto res = true;
 
-template <class _T>
-bool draw3d_t::is_inside(const vector3_t<_T> &_p0, const vector3_t<_T> &_p1,
-                         const vector3_t<_T> &_p2, const vector3_t<_T> &_p) {
-    auto res = get_barycentric_coord(_p0, _p1, _p2, _p);
-
-    if (res.x < 0. || res.x > 1.) {
-        return false;
+    if (u < 0. || u > 1.) {
+        res = false;
     }
 
-    if (res.y < 0. || res.y > 1.) {
-        return false;
+    if (v < 0. || v > 1.) {
+        res = false;
     }
 
-    if (res.z < 0 || res.z > 1.) {
-        return false;
+    if (w < 0 || w > 1.) {
+        res = false;
     }
-    return true;
+
+    return std::pair<bool, vector3f_t>(res, vector3f_t(u, v, w));
 }
 
 draw3d_t::draw3d_t(framebuffer_t &_framebuffer) : framebuffer(_framebuffer) {
@@ -79,14 +73,14 @@ void draw3d_t::triangle(const vector3i_t &_v0, const vector3i_t &_v1,
     auto max = _v0.max(_v1).max(_v2);
     for (auto x = min.x; x <= max.x; x++) {
         for (auto y = min.y; y <= max.y; y++) {
-            auto barycentric_coord =
+            auto [is_inside, barycentric_coord] =
                 get_barycentric_coord(_v0, _v1, _v2, vector3i_t(x, y, 0));
             auto z = 0.;
             z += _v0.z * barycentric_coord.x;
             z += _v1.z * barycentric_coord.y;
             z += _v2.z * barycentric_coord.z;
             if (framebuffer.get_depth_buffer()[y * width + x] < z) {
-                if (is_inside(_v0, _v1, _v2, vector3i_t(x, y, z)) == true) {
+                if (is_inside) {
                     framebuffer.pixel(x, y, _color, z);
                 }
             }

@@ -18,10 +18,9 @@
 #include "draw2d.h"
 
 template <class _T>
-const vector3f_t draw2d_t::get_barycentric_coord(const vector2_t<_T> &_p0,
-                                                 const vector2_t<_T> &_p1,
-                                                 const vector2_t<_T> &_p2,
-                                                 const vector2_t<_T> &_p) {
+const std::pair<bool, vector3f_t> draw2d_t::get_barycentric_coord(
+    const vector2_t<_T> &_p0, const vector2_t<_T> &_p1,
+    const vector2_t<_T> &_p2, const vector2_t<_T> &_p) {
     // 边向量
     auto edge_p2p0 = (_p2 - _p0);
     auto edge_p1p0 = (_p1 - _p0);
@@ -40,26 +39,21 @@ const vector3f_t draw2d_t::get_barycentric_coord(const vector2_t<_T> &_p0,
     auto v = ((p0p0 * p1p2) - (p0p1 * p0p2)) * deno;
     auto w = 1 - u - v;
 
-    return vector3f_t(u, v, w);
-}
+    auto res = true;
 
-template <class _T>
-bool draw2d_t::is_inside(const vector2_t<_T> &_p0, const vector2_t<_T> &_p1,
-                         const vector2_t<_T> &_p2, const vector2_t<_T> &_p) {
-    auto res = get_barycentric_coord(_p0, _p1, _p2, _p);
-
-    if (res.x < 0. || res.x > 1.) {
-        return false;
+    if (u < 0. || u > 1.) {
+        res = false;
     }
 
-    if (res.y < 0. || res.y > 1.) {
-        return false;
+    if (v < 0. || v > 1.) {
+        res = false;
     }
 
-    if (res.z < 0 || res.z > 1.) {
-        return false;
+    if (w < 0 || w > 1.) {
+        res = false;
     }
-    return true;
+
+    return std::pair<bool, vector3f_t>(res, vector3f_t(u, v, w));
 }
 
 draw2d_t::draw2d_t(framebuffer_t &_framebuffer) : framebuffer(_framebuffer) {
@@ -127,9 +121,13 @@ void draw2d_t::triangle(const vector2i_t &_v0, const vector2i_t &_v1,
                         const framebuffer_t::color_t &_color) {
     auto min = _v0.min(_v1).min(_v2);
     auto max = _v0.max(_v1).max(_v2);
+
     for (auto x = min.x; x <= max.x; x++) {
         for (auto y = min.y; y <= max.y; y++) {
-            if (is_inside(_v0, _v1, _v2, vector2i_t(x, y)) == true) {
+            auto [is_inside, _] =
+                get_barycentric_coord(_v0, _v1, _v2, vector2i_t(x, y));
+            if (is_inside) {
+                std::cout << _ << std::endl;
                 framebuffer.pixel(x, y, _color);
             }
         }

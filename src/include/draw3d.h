@@ -35,25 +35,12 @@ private:
      * @param  _p1              三角形的第二个点
      * @param  _p2              三角形的第三个点
      * @param  _p               要判断的点
-     * @return const vector3f_t 重心坐标
+     * @return const std::pair<bool, vector3f_t>
+     *  第一个返回为 _p 是否在三角形内，第二个为重心坐标
      */
     template <class _T>
-    static const vector3f_t
+    static const std::pair<bool, vector3f_t>
     get_barycentric_coord(const vector3_t<_T> &_p0, const vector3_t<_T> &_p1,
-                          const vector3_t<_T> &_p2, const vector3_t<_T> &_p);
-
-    /**
-     * @brief 判断 _p 点是否在由 _p0 _p1 _p2 三点构成的三角形内
-     * @tparam _T 点类型
-     * @param  _p0              三角形的第一个点
-     * @param  _p1              三角形的第二个点
-     * @param  _p2              三角形的第三个点
-     * @param  _p               要判断的点
-     * @return true             在内
-     * @return false            不在
-     */
-    template <class _T>
-    static bool is_inside(const vector3_t<_T> &_p0, const vector3_t<_T> &_p1,
                           const vector3_t<_T> &_p2, const vector3_t<_T> &_p);
 
 public:
