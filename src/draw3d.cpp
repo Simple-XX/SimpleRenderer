@@ -34,6 +34,9 @@ const std::pair<bool, vector3f_t> draw3d_t::get_barycentric_coord(
     float p1p2 = edge_p1p0 * edge_pp0;
 
     auto deno = 1. / ((p0p0 * p1p1) - (p0p1 * p0p1));
+    if (std::isinf(deno)) {
+        return std::pair<bool, vector3f_t>(false, vector3f_t());
+    }
 
     auto u = ((p1p1 * p0p2) - (p0p1 * p1p2)) * deno;
     auto v = ((p0p0 * p1p2) - (p0p1 * p0p2)) * deno;

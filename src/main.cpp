@@ -18,6 +18,7 @@
 #include "model.h"
 #include "display.h"
 #include "draw2d.h"
+#include "draw3d.h"
 #include "matrix.hpp"
 
 static constexpr const uint32_t                  WIDTH  = 1920;
@@ -68,10 +69,6 @@ void draw(framebuffer_t *_framebuffer) {
     return;
 }
 
-int aaaaa(float _aaa) {
-    return _aaa;
-}
-
 int main(int _argc, char **_argv) {
     // obj 路径
     std::string obj_path;
@@ -79,8 +76,8 @@ int main(int _argc, char **_argv) {
     std::string mtl_path;
     // 如果没有指定那么使用默认值
     if (_argc == 1) {
-        // obj_path = "../../obj/helmet.obj";
-        obj_path = "../../obj/cube.obj";
+        obj_path = "../../obj/helmet.obj";
+        //        obj_path = "../../obj/cube.obj";
         mtl_path = "../../obj/";
     }
     // 否则使用指定的
@@ -99,25 +96,29 @@ int main(int _argc, char **_argv) {
     framebuffer_t framebuffer(WIDTH, HEIGHT);
 
     draw2d_t draw2d(framebuffer);
+    draw3d_t draw3d(framebuffer);
 
     auto m = matrix4f_t();
-    m      = m.rotate(0, 0, 1, matrix4f_t::RAD(-120));
+    m      = m.rotate(1, 0, 1, matrix4f_t::RAD(-120));
     m      = m.scale(WIDTH / 16., HEIGHT / 9., 1);
     m      = m.translate(960, 540, 0);
 
     // 循环模型里的所有三角形
     for (size_t i = 0; i < model.get_face().size(); i++) {
         auto face = model.get_face()[i];
-
         // 循环三角形三个顶点，每两个顶点连一条线
         for (auto j = 0; j < 3; j++) {
             auto v0 = m * face.p0;
             auto v1 = m * face.p1;
             auto v2 = m * face.p2;
             // 画线
-            draw2d.line(v0, v1, WHITE);
-            draw2d.line(v1, v2, WHITE);
-            draw2d.line(v2, v0, WHITE);
+            //            draw2d.line(v0, v1, WHITE);
+            //            draw2d.line(v1, v2, WHITE);
+            //            draw2d.line(v2, v0, WHITE);
+            //            if (v0 != v1 && v0 != v2 && v1 != v2) {
+            draw2d.triangle(v0, v1, v2, RED);
+            //            draw3d.triangle(v0, v1, v2, RED);
+            //            }
         }
     }
 

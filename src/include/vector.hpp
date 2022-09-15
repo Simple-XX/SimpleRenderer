@@ -173,16 +173,6 @@ public:
     _T operator[](const uint32_t _idx);
 
     /**
-     * @brief 转换为 int32_t 类型
-     */
-    operator vector2_t<int32_t>(void) const;
-
-    /**
-     * @brief 转换为 float 类型
-     */
-    operator vector2_t<float>(void) const;
-
-    /**
      * @brief 是否有非数值
      * @return true             有
      * @return false            无
@@ -226,6 +216,26 @@ public:
      * @return const vector2_t<_T>  新的向量
      */
     const vector2_t<_T> max(const vector2_t<_T> &_v) const;
+
+    /**
+     * @brief 转换为 int32_t 类型
+     */
+    operator vector2_t<int32_t>(void) const;
+
+    /**
+     * @brief 转换为 float 类型
+     */
+    operator vector2_t<float>(void) const;
+
+    /**
+     * @brief 转换为 vector3_t<int32_t> 类型
+     */
+    operator vector3_t<int32_t>(void) const;
+
+    /**
+     * @brief 转换为 vector3_t<float> 类型
+     */
+    operator vector3_t<float>(void) const;
 
     friend std::ostream &operator<<(std::ostream        &_os,
                                     const vector2_t<_T> &_v) {
@@ -405,22 +415,6 @@ _T vector2_t<_T>::operator[](const uint32_t _idx) {
         return x;
     }
     return y;
-}
-
-template <class _T>
-vector2_t<_T>::operator vector2_t<int32_t>(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
-    return vector2_t<int32_t>((int32_t)x, (int32_t)y);
-}
-
-template <class _T>
-vector2_t<_T>::operator vector2_t<float>(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
-    return vector2_t<float>((float)x, (float)y);
 }
 
 template <class _T>
@@ -635,26 +629,6 @@ public:
     _T operator[](const uint32_t _idx);
 
     /**
-     * @brief 转换为 int32_t 类型
-     */
-    operator vector3_t<int32_t>(void) const;
-
-    /**
-     * @brief 转换为 float 类型
-     */
-    operator vector3_t<float>(void) const;
-
-    /**
-     * @brief 转换为 vector2_t<int32_t> 类型
-     */
-    operator vector2_t<int32_t>(void) const;
-
-    /**
-     * @brief 转换为 vector2_t<float> 类型
-     */
-    operator vector2_t<float>(void) const;
-
-    /**
      * @brief 距离^2
      * @return const _T         结果
      */
@@ -700,6 +674,26 @@ public:
      * @return const vector3_t<_T>  结果
      */
     const vector3_t<_T> max(const vector3_t<_T> &_v) const;
+
+    /**
+     * @brief 转换为 int32_t 类型
+     */
+    operator vector3_t<int32_t>(void) const;
+
+    /**
+     * @brief 转换为 float 类型
+     */
+    operator vector3_t<float>(void) const;
+
+    /**
+     * @brief 转换为 vector2_t<int32_t> 类型
+     */
+    operator vector2_t<int32_t>(void) const;
+
+    /**
+     * @brief 转换为 vector2_t<float> 类型
+     */
+    operator vector2_t<float>(void) const;
 
     friend std::ostream &operator<<(std::ostream        &_os,
                                     const vector3_t<_T> &_v) {
@@ -899,38 +893,6 @@ _T vector3_t<_T>::operator[](const uint32_t _idx) {
 }
 
 template <class _T>
-vector3_t<_T>::operator vector3_t<int32_t>(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
-    return vector3_t<int32_t>((int32_t)x, (int32_t)y, (int32_t)z);
-}
-
-template <class _T>
-vector3_t<_T>::operator vector3_t<float>(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
-    return vector3_t<float>((float)x, (float)y, (float)z);
-}
-
-template <class _T>
-vector3_t<_T>::operator vector2_t<int32_t>(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
-    return vector2_t<int32_t>((int32_t)x, (int32_t)y);
-}
-
-template <class _T>
-vector3_t<_T>::operator vector2_t<float>(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
-    return vector2_t<float>((float)x, (float)y);
-}
-
-template <class _T>
 bool vector3_t<_T>::HasNaNs(void) const {
     return std::isnan(x) || std::isnan(y) || std::isnan(z);
 }
@@ -986,6 +948,70 @@ const vector3_t<_T> vector3_t<_T>::max(const vector3_t<_T> &_v) const {
     }
     return vector3_t<_T>(std::max(x, _v.x), std::max(y, _v.y),
                          std::max(z, _v.z));
+}
+
+template <class _T>
+vector2_t<_T>::operator vector2_t<int32_t>(void) const {
+    if (HasNaNs()) {
+        throw std::invalid_argument(log("HasNaNs()"));
+    }
+    return vector2_t<int32_t>((int32_t)x, (int32_t)y);
+}
+
+template <class _T>
+vector2_t<_T>::operator vector2_t<float>(void) const {
+    if (HasNaNs()) {
+        throw std::invalid_argument(log("HasNaNs()"));
+    }
+    return vector2_t<float>((float)x, (float)y);
+}
+
+template <class _T>
+vector2_t<_T>::operator vector3_t<int32_t>(void) const {
+    if (HasNaNs()) {
+        throw std::invalid_argument(log("HasNaNs()"));
+    }
+    return vector3_t<int32_t>((int32_t)x, (int32_t)y, 0);
+}
+
+template <class _T>
+vector2_t<_T>::operator vector3_t<float>(void) const {
+    if (HasNaNs()) {
+        throw std::invalid_argument(log("HasNaNs()"));
+    }
+    return vector3_t<float>((float)x, (float)y, 0);
+}
+
+template <class _T>
+vector3_t<_T>::operator vector3_t<int32_t>(void) const {
+    if (HasNaNs()) {
+        throw std::invalid_argument(log("HasNaNs()"));
+    }
+    return vector3_t<int32_t>((int32_t)x, (int32_t)y, (int32_t)z);
+}
+
+template <class _T>
+vector3_t<_T>::operator vector3_t<float>(void) const {
+    if (HasNaNs()) {
+        throw std::invalid_argument(log("HasNaNs()"));
+    }
+    return vector3_t<float>((float)x, (float)y, (float)z);
+}
+
+template <class _T>
+vector3_t<_T>::operator vector2_t<int32_t>(void) const {
+    if (HasNaNs()) {
+        throw std::invalid_argument(log("HasNaNs()"));
+    }
+    return vector2_t<int32_t>((int32_t)x, (int32_t)y);
+}
+
+template <class _T>
+vector3_t<_T>::operator vector2_t<float>(void) const {
+    if (HasNaNs()) {
+        throw std::invalid_argument(log("HasNaNs()"));
+    }
+    return vector2_t<float>((float)x, (float)y);
 }
 
 typedef vector2_t<float>   vector2f_t;
