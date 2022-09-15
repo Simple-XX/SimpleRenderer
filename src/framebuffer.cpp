@@ -14,35 +14,64 @@
  * </table>
  */
 
+#include "iostream"
 #include "memory"
 #include "cassert"
-#include "framebuffer.h"
 #include "cstring"
+#include "cmath"
+#include "framebuffer.h"
+#include "log.hpp"
 
 framebuffer_t::framebuffer_t(const int32_t _width, const int32_t _height) {
-    width        = _width;
-    height       = _height;
-    color_buffer = new color_t[width * height];
-    depth_buffer = new depth_t[width * height];
+    width  = _width;
+    height = _height;
+    try {
+        color_buffer = new color_t[width * height];
+        depth_buffer = new depth_t[width * height];
+    } catch (const std::bad_alloc &e) {
+        std::cerr << log(e.what()) << std::endl;
+        if (color_buffer != nullptr) {
+            delete[] color_buffer;
+        }
+        if (depth_buffer != nullptr) {
+            delete[] depth_buffer;
+        }
+        return;
+    }
+
     return;
 }
 
 framebuffer_t::framebuffer_t(const framebuffer_t &_framebuffer) {
-    assert(width == _framebuffer.width);
-    assert(height == _framebuffer.height);
-    if (color_buffer == nullptr) {
-        color_buffer = new color_t[width * height];
+    try {
+        if (width != _framebuffer.get_width()) {
+            throw std::invalid_argument(
+                log("width != _framebuffer.get_width()"));
+        }
+        if (height != _framebuffer.get_height()) {
+            throw std::invalid_argument(
+                log("height != _framebuffer.get_height()"));
+        }
+        if (color_buffer == nullptr) {
+            throw std::invalid_argument(log("color_buffer == nullptr"));
+        }
+        if (depth_buffer == nullptr) {
+            throw std::invalid_argument(log("depth_buffer == nullptr"));
+        }
+        if (_framebuffer.get_color_buffer() == nullptr) {
+            throw std::invalid_argument(
+                log("_framebuffer.get_color_buffer() == nullptr"));
+        }
+        if (_framebuffer.get_depth_buffer() == nullptr) {
+            throw std::invalid_argument(
+                log("_framebuffer.get_depth_buffer() == nullptr"));
+        }
+    } catch (const std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return;
     }
-    if (depth_buffer == nullptr) {
-        depth_buffer = new depth_t[width * height];
-    }
-    if (_framebuffer.color_buffer != nullptr) {
-        memcpy(color_buffer, _framebuffer.color_buffer, width * height * BPP);
-    }
-    if (_framebuffer.depth_buffer != nullptr) {
-        memcpy(depth_buffer, _framebuffer.depth_buffer,
-               width * height * BPP_DEPTH);
-    }
+    memcpy(color_buffer, _framebuffer.color_buffer, width * height * BPP);
+    memcpy(depth_buffer, _framebuffer.depth_buffer, width * height * BPP_DEPTH);
     return;
 }
 
@@ -57,24 +86,39 @@ framebuffer_t::~framebuffer_t(void) {
 }
 
 framebuffer_t &framebuffer_t::operator=(const framebuffer_t &_framebuffer) {
-    if (&_framebuffer == this) {
+    try {
+        if (this == &_framebuffer) {
+            throw std::runtime_error(log("this == &_framebuffer"));
+        }
+        if (width != _framebuffer.get_width()) {
+            throw std::invalid_argument(
+                log("width != _framebuffer.get_width()"));
+        }
+        if (height != _framebuffer.get_height()) {
+            throw std::invalid_argument(
+                log("height != _framebuffer.get_height()"));
+        }
+        if (color_buffer == nullptr) {
+            throw std::invalid_argument(log("color_buffer == nullptr"));
+        }
+        if (depth_buffer == nullptr) {
+            throw std::invalid_argument(log("depth_buffer == nullptr"));
+        }
+        if (_framebuffer.get_color_buffer() == nullptr) {
+            throw std::invalid_argument(
+                log("_framebuffer.get_color_buffer() == nullptr"));
+        }
+        if (_framebuffer.get_depth_buffer() == nullptr) {
+            throw std::invalid_argument(
+                log("_framebuffer.get_depth_buffer() == nullptr"));
+        }
+    } catch (const std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
         return *this;
     }
-    assert(width == _framebuffer.get_width());
-    assert(height == _framebuffer.get_height());
-    if (color_buffer == nullptr) {
-        color_buffer = new color_t[width * height];
-    }
-    if (depth_buffer == nullptr) {
-        depth_buffer = new depth_t[width * height];
-    }
-    if (_framebuffer.color_buffer != nullptr) {
-        memcpy(color_buffer, _framebuffer.color_buffer, width * height * BPP);
-    }
-    if (_framebuffer.depth_buffer != nullptr) {
-        memcpy(depth_buffer, _framebuffer.depth_buffer,
-               width * height * BPP_DEPTH);
-    }
+    memcpy(color_buffer, _framebuffer.get_color_buffer(), width * height * BPP);
+    memcpy(depth_buffer, _framebuffer.get_depth_buffer(),
+           width * height * BPP_DEPTH);
     return *this;
 }
 
@@ -96,6 +140,14 @@ void framebuffer_t::clear(void) {
 }
 
 void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
+    try {
+        if (std::isnan(_depth)) {
+            throw(log("std::isnan(_depth)"));
+        }
+    } catch (const std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
+        return;
+    }
     for (auto i = 0; i < width; i++) {
         for (auto j = 0; j < height; j++) {
             pixel(i, j, _color, _depth);
@@ -106,7 +158,17 @@ void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
 
 void framebuffer_t::pixel(const int32_t _x, const int32_t _y,
                           const color_t &_color, const depth_t &_depth) {
-    if (_x < 0 || _y < 0 || _x >= width || _y >= height) {
+    try {
+        if (_x < 0 || _y < 0 || _x >= width || _y >= height) {
+            throw(std::invalid_argument(
+                log("_x < 0 || _y < 0 || _x >= width || _y >= height")));
+        }
+
+        if (std::isnan(_depth)) {
+            throw(log("std::isnan(_depth)"));
+        }
+    } catch (const std::invalid_argument &e) {
+        std::cerr << e.what() << std::endl;
         return;
     }
     std::lock_guard<std::mutex> color_buffer_lock(color_buffer_mutex);

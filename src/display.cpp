@@ -43,7 +43,7 @@ void display_t::pixel(SDL_Surface *_surface, const uint32_t _x,
         if (ret != 0) {
             throw std::runtime_error(log(SDL_GetError()));
         }
-    } catch (std::runtime_error &e) {
+    } catch (const std::runtime_error &e) {
         std::cerr << e.what() << std::endl;
         return;
     }
@@ -79,7 +79,7 @@ display_t::display_t(framebuffer_t &_framebuffer) : framebuffer(_framebuffer) {
         if (sdl_window == nullptr) {
             throw std::runtime_error(log(SDL_GetError()));
         }
-    } catch (std::runtime_error &e) {
+    } catch (const std::runtime_error &e) {
         std::cerr << e.what() << std::endl;
         return;
     }
@@ -125,7 +125,7 @@ void display_t::fill(void) {
         if (surface == nullptr) {
             throw std::runtime_error(log(SDL_GetError()));
         }
-    } catch (std::runtime_error &e) {
+    } catch (const std::runtime_error &e) {
         std::cerr << e.what() << std::endl;
         return;
     }
@@ -154,7 +154,7 @@ void display_t::loop(void) {
             if (ret != 0) {
                 throw std::runtime_error(log(SDL_GetError()));
             }
-        } catch (std::runtime_error &e) {
+        } catch (const std::runtime_error &e) {
             std::cerr << e.what() << std::endl;
             return;
         }

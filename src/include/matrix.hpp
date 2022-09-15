@@ -378,7 +378,7 @@ matrix_t<_T>::matrix_t(const matrix_t<_T> &_mat) {
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         *this = matrix_t<_T>();
         return;
@@ -398,7 +398,7 @@ matrix_t<_T>::matrix_t(const _T *const _arr) {
                 throw std::invalid_argument(log("std::isnan(_arr[i])"));
             }
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         *this = matrix_t<_T>();
         return;
@@ -420,7 +420,7 @@ matrix_t<_T>::matrix_t(const _T _arr[ORDER][ORDER]) {
                 }
             }
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         *this = matrix_t<_T>();
         return;
@@ -435,7 +435,7 @@ matrix_t<_T>::matrix_t(const vector2_t<_T> &_v) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         *this = matrix_t<_T>();
         return;
@@ -453,7 +453,7 @@ matrix_t<_T>::matrix_t(const vector3_t<_T> &_v) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         *this = matrix_t<_T>();
         return;
@@ -474,10 +474,10 @@ matrix_t<_T> &matrix_t<_T>::operator=(const matrix_t<_T> &_mat) {
         if (this == &_mat) {
             throw std::runtime_error(log("this == &_mat"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
-    } catch (std::runtime_error &e) {
+    } catch (const std::runtime_error &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -491,7 +491,7 @@ const matrix_t<_T> matrix_t<_T>::operator+(const matrix_t<_T> &_mat) const {
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -510,7 +510,7 @@ matrix_t<_T> &matrix_t<_T>::operator+=(const matrix_t<_T> &_mat) {
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -528,7 +528,7 @@ const matrix_t<_T> matrix_t<_T>::operator-(const matrix_t<_T> &_mat) const {
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -547,7 +547,7 @@ matrix_t<_T> &matrix_t<_T>::operator-=(const matrix_t<_T> &_mat) {
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -565,7 +565,7 @@ const matrix_t<_T> matrix_t<_T>::operator*(const _T &_v) const {
         if (std::isnan(_v)) {
             throw std::invalid_argument(log("std::isnan(_v)"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -584,7 +584,7 @@ const matrix_t<_T> matrix_t<_T>::operator*(const matrix_t<_T> &_mat) const {
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -605,7 +605,7 @@ matrix_t<_T> &matrix_t<_T>::operator*=(const _T &_v) {
         if (std::isnan(_v)) {
             throw std::invalid_argument(log("std::isnan(_v)"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -623,7 +623,7 @@ matrix_t<_T> &matrix_t<_T>::operator*=(const matrix_t<_T> &_mat) {
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -645,7 +645,7 @@ const vector2_t<_T> matrix_t<_T>::operator*(const vector2_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return vector2_t<_T>();
     }
@@ -661,7 +661,7 @@ const vector3_t<_T> matrix_t<_T>::operator*(const vector3_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return vector3_t<_T>();
     }
@@ -681,7 +681,7 @@ bool matrix_t<_T>::operator==(const matrix_t<_T> &_mat) const {
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return false;
     }
@@ -701,7 +701,7 @@ bool matrix_t<_T>::operator!=(const matrix_t<_T> &_mat) const {
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return false;
     }
@@ -721,7 +721,7 @@ _T *matrix_t<_T>::operator[](const uint32_t _idx) {
         if (_idx > ORDER) {
             throw std::invalid_argument(log("_idx > ORDER"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return nullptr;
     }
@@ -734,7 +734,7 @@ const _T *matrix_t<_T>::operator[](const uint32_t _idx) const {
         if (_idx > ORDER) {
             throw std::invalid_argument(log("_idx > ORDER"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return nullptr;
     }
@@ -904,7 +904,7 @@ const matrix_t<_T> matrix_t<_T>::translate(const float _x, const float _y,
             throw std::invalid_argument(
                 log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -921,7 +921,7 @@ const matrix_t<_T> matrix_t<_T>::scale(const float _scale) const {
         if (std::isnan(_scale)) {
             throw std::invalid_argument(log("std::isnan(_scale)"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -941,7 +941,7 @@ const matrix_t<_T> matrix_t<_T>::scale(const float _x, const float _y,
             throw std::invalid_argument(
                 log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -964,7 +964,7 @@ const matrix_t<_T> matrix_t<_T>::rotate(const float _x, const float _y,
                 log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)|| "
                     "std::isnan(_angle)"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -1006,7 +1006,7 @@ float matrix_t<_T>::RAD(const float _deg) {
         if (std::isnan(_deg)) {
             throw std::invalid_argument(log("std::isnan(_deg)"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return 0;
     }
@@ -1019,7 +1019,7 @@ float matrix_t<_T>::DEG(const float _rad) {
         if (std::isnan(_rad)) {
             throw std::invalid_argument(log("std::isnan(_rad)"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return 0;
     }

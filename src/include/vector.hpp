@@ -247,7 +247,7 @@ vector2_t<_T>::vector2_t(const _T &_x, const _T &_y) : x(_x), y(_y) {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return;
     }
@@ -260,7 +260,7 @@ vector2_t<_T>::vector2_t(const vector2_t<_T> &_v) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         *this = vector2_t();
         return;
@@ -276,7 +276,7 @@ vector2_t<_T> &vector2_t<_T>::operator=(const vector2_t<_T> &_v) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -291,7 +291,7 @@ bool vector2_t<_T>::operator==(const vector2_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return false;
     }
@@ -304,7 +304,7 @@ bool vector2_t<_T>::operator!=(const vector2_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return false;
     }
@@ -317,7 +317,7 @@ const vector2_t<_T> vector2_t<_T>::operator+(const vector2_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -330,7 +330,7 @@ vector2_t<_T> &vector2_t<_T>::operator+=(const vector2_t<_T> &_v) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -345,7 +345,7 @@ const vector2_t<_T> vector2_t<_T>::operator-(void) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -358,7 +358,7 @@ const vector2_t<_T> vector2_t<_T>::operator-(const vector2_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -371,7 +371,7 @@ vector2_t<_T> &vector2_t<_T>::operator-=(const vector2_t<_T> &_v) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -387,7 +387,7 @@ const vector2_t<_T> vector2_t<_T>::operator*(const _U &_f) const {
         if (std::isnan(_f)) {
             throw std::invalid_argument(log("std::isnan(_f)"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -400,7 +400,7 @@ const _T vector2_t<_T>::operator*(const vector2_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return 0;
     }
@@ -414,7 +414,7 @@ vector2_t<_T> &vector2_t<_T>::operator*=(const _U &_f) {
         if (std::isnan(_f)) {
             throw std::invalid_argument(log("std::isnan(_f)"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -433,7 +433,7 @@ const vector2_t<_T> vector2_t<_T>::operator/(const _U &_f) const {
         if (_f == 0) {
             throw std::invalid_argument(log("_f == 0"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -451,7 +451,7 @@ vector2_t<_T> &vector2_t<_T>::operator/=(const _U &_f) {
         if (_f == 0) {
             throw std::invalid_argument(log("_f == 0"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -467,7 +467,7 @@ const _T vector2_t<_T>::operator[](const uint32_t _idx) const {
         if (_idx > 1) {
             throw std::invalid_argument(log("_idx > 1"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return 0;
     }
@@ -483,7 +483,7 @@ _T vector2_t<_T>::operator[](const uint32_t _idx) {
         if (_idx > 1) {
             throw std::invalid_argument(log("_idx > 1"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return 0;
     }
@@ -499,7 +499,7 @@ vector2_t<_T>::operator vector2_t<int32_t>(void) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return vector2_t<int32_t>();
     }
@@ -512,7 +512,7 @@ vector2_t<_T>::operator vector2_t<float>(void) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return vector2_t<float>();
     }
@@ -530,7 +530,7 @@ const _T vector2_t<_T>::length_squared(void) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return 0;
     }
@@ -546,10 +546,10 @@ const _T vector2_t<_T>::length(void) const {
         if (x == 0 && y == 0) {
             throw std::runtime_error(log("x == 0 && y == 0"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return 0;
-    } catch (std::runtime_error &e) {
+    } catch (const std::runtime_error &e) {
         std::cerr << e.what() << std::endl;
         return 0;
     }
@@ -562,7 +562,7 @@ const vector2_t<_T> vector2_t<_T>::abs(void) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -578,10 +578,10 @@ const vector2_t<_T> vector2_t<_T>::normalize(void) const {
         if (length() == 0) {
             throw std::runtime_error(log("length() == 0"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
-    } catch (std::runtime_error &e) {
+    } catch (const std::runtime_error &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -594,7 +594,7 @@ const vector2_t<_T> vector2_t<_T>::min(const vector2_t<_T> &_v) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -609,7 +609,7 @@ const vector2_t<_T> vector2_t<_T>::max(const vector2_t<_T> &_v) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -858,7 +858,7 @@ vector3_t<_T>::vector3_t(const _T &_x, const _T &_y, const _T &_z)
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         *this = vector3_t<_T>();
         return;
@@ -872,7 +872,7 @@ vector3_t<_T>::vector3_t(const vector3_t<_T> &_v) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         *this = vector3_t<_T>();
         return;
@@ -889,7 +889,7 @@ vector3_t<_T> &vector3_t<_T>::operator=(const vector3_t<_T> &_v) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -905,7 +905,7 @@ bool vector3_t<_T>::operator==(const vector3_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return false;
     }
@@ -918,7 +918,7 @@ bool vector3_t<_T>::operator!=(const vector3_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return false;
     }
@@ -931,7 +931,7 @@ const vector3_t<_T> vector3_t<_T>::operator+(const vector3_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -944,7 +944,7 @@ vector3_t<_T> &vector3_t<_T>::operator+=(const vector3_t<_T> &_v) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -960,7 +960,7 @@ const vector3_t<_T> vector3_t<_T>::operator-(void) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -973,7 +973,7 @@ const vector3_t<_T> vector3_t<_T>::operator-(const vector3_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -986,7 +986,7 @@ vector3_t<_T> &vector3_t<_T>::operator-=(const vector3_t<_T> &_v) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -1003,7 +1003,7 @@ const vector3_t<_T> vector3_t<_T>::operator*(const _U _s) const {
         if (std::isnan(_s)) {
             throw std::invalid_argument(log("std::isnan(_s)"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -1016,7 +1016,7 @@ const _T vector3_t<_T>::operator*(const vector3_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return 0;
     }
@@ -1030,7 +1030,7 @@ vector3_t<_T> &vector3_t<_T>::operator*=(const _U _s) {
         if (std::isnan(_s)) {
             throw std::invalid_argument(log("std::isnan(_s)"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -1046,7 +1046,7 @@ const vector3_t<_T> vector3_t<_T>::operator^(const vector3_t<_T> &_v) const {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -1061,7 +1061,7 @@ const vector3_t<_T> vector3_t<_T>::operator/(const _U _f) const {
         if (_f == 0) {
             throw std::invalid_argument(log("_f == 0"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -1076,7 +1076,7 @@ vector3_t<_T> &vector3_t<_T>::operator/=(const _U _f) {
         if (_f == 0) {
             throw std::invalid_argument(log("_f == 0"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -1093,7 +1093,7 @@ const _T vector3_t<_T>::operator[](const uint32_t _idx) const {
         if (_idx > 2) {
             throw std::invalid_argument(log("_idx > 2"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return 0;
     }
@@ -1112,7 +1112,7 @@ _T vector3_t<_T>::operator[](const uint32_t _idx) {
         if (_idx > 2) {
             throw std::invalid_argument(log("_idx > 2"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return 0;
     }
@@ -1131,7 +1131,7 @@ vector3_t<_T>::operator vector3_t<int32_t>(void) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return vector3_t<int32_t>();
     }
@@ -1144,7 +1144,7 @@ vector3_t<_T>::operator vector3_t<float>(void) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return vector3_t<float>();
     }
@@ -1157,7 +1157,7 @@ vector3_t<_T>::operator vector2_t<int32_t>(void) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return vector2_t<int32_t>();
     }
@@ -1170,7 +1170,7 @@ vector3_t<_T>::operator vector2_t<float>(void) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return vector2_t<float>();
     }
@@ -1188,7 +1188,7 @@ const _T vector3_t<_T>::length_squared(void) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return 0;
     }
@@ -1204,10 +1204,10 @@ const _T vector3_t<_T>::length(void) const {
         if (x == 0 && y == 0 && z == 0) {
             throw std::runtime_error(log("x == 0 && y == 0 && z == 0"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return 0;
-    } catch (std::runtime_error &e) {
+    } catch (const std::runtime_error &e) {
         std::cerr << e.what() << std::endl;
         return 0;
     }
@@ -1220,7 +1220,7 @@ const vector3_t<_T> vector3_t<_T>::abs(const vector3_t<_T> &_v) {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -1236,10 +1236,10 @@ const vector3_t<_T> vector3_t<_T>::normalize(void) const {
         if (length() == 0) {
             throw std::runtime_error(log("length() == 0"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
-    } catch (std::runtime_error &e) {
+    } catch (const std::runtime_error &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -1252,7 +1252,7 @@ const vector3_t<_T> vector3_t<_T>::min(const vector3_t<_T> &_v) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }
@@ -1266,7 +1266,7 @@ const vector3_t<_T> vector3_t<_T>::max(const vector3_t<_T> &_v) const {
         if (HasNaNs()) {
             throw std::invalid_argument(log("HasNaNs()"));
         }
-    } catch (std::invalid_argument &e) {
+    } catch (const std::invalid_argument &e) {
         std::cerr << e.what() << std::endl;
         return *this;
     }

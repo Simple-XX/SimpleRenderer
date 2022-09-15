@@ -22,6 +22,7 @@
 
 /**
  * @brief 缓冲
+ * @todo 将 color_t 和 depth_t 单独抽象
  */
 class framebuffer_t {
 public:
