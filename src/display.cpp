@@ -16,6 +16,7 @@
 
 #include "iostream"
 #include "display.h"
+#include "log.hpp"
 
 uint8_t display_t::ARGB2A(uint32_t _color) {
     return (_color >> 24) & 0xFF;
@@ -37,7 +38,15 @@ void display_t::pixel(SDL_Surface *_surface, const uint32_t _x,
                       const uint32_t _y, const uint8_t _a, const uint8_t _r,
                       const uint8_t _g, const uint8_t _b) {
     // 加锁
-    SDL_LockSurface(_surface);
+    try {
+        auto ret = SDL_LockSurface(_surface);
+        if (ret != 0) {
+            throw std::runtime_error(log(SDL_GetError()));
+        }
+    } catch (std::runtime_error &e) {
+        std::cerr << e.what() << std::endl;
+        return;
+    }
     // 判断颜色深度
     int bpp = _surface->format->BytesPerPixel;
     if (bpp != 4) {
@@ -58,11 +67,22 @@ display_t::display_t(framebuffer_t &_framebuffer) : framebuffer(_framebuffer) {
     width  = framebuffer.get_width();
     height = framebuffer.get_height();
     // 初始化 sdl
-    SDL_Init(SDL_INIT_VIDEO);
-    // 创建窗口，居中，可见
-    sdl_window = SDL_CreateWindow("SimpleRenderer", SDL_WINDOWPOS_CENTERED,
-                                  SDL_WINDOWPOS_CENTERED, width, height,
-                                  SDL_WINDOW_SHOWN);
+    try {
+        auto ret = SDL_Init(SDL_INIT_VIDEO);
+        if (ret != 0) {
+            throw std::runtime_error(log(SDL_GetError()));
+        }
+        // 创建窗口，居中，可见
+        sdl_window = SDL_CreateWindow("SimpleRenderer", SDL_WINDOWPOS_CENTERED,
+                                      SDL_WINDOWPOS_CENTERED, width, height,
+                                      SDL_WINDOW_SHOWN);
+        if (sdl_window == nullptr) {
+            throw std::runtime_error(log(SDL_GetError()));
+        }
+    } catch (std::runtime_error &e) {
+        std::cerr << e.what() << std::endl;
+        return;
+    }
     return;
 }
 
@@ -101,6 +121,15 @@ void display_t::fill(void) {
     auto     color_buffer = framebuffer.get_color_buffer();
     uint32_t color        = 0x00000000;
     auto     surface      = SDL_GetWindowSurface(sdl_window);
+    try {
+        if (surface == nullptr) {
+            throw std::runtime_error(log(SDL_GetError()));
+        }
+    } catch (std::runtime_error &e) {
+        std::cerr << e.what() << std::endl;
+        return;
+    }
+
     // 填充整个屏幕
     for (uint32_t i = 0; i < width; i++) {
         for (uint32_t j = 0; j < height; j++) {
@@ -120,7 +149,15 @@ void display_t::loop(void) {
         // 填充窗口
         fill();
         // 刷新窗口
-        SDL_UpdateWindowSurface(sdl_window);
+        try {
+            auto ret = SDL_UpdateWindowSurface(sdl_window);
+            if (ret != 0) {
+                throw std::runtime_error(log(SDL_GetError()));
+            }
+        } catch (std::runtime_error &e) {
+            std::cerr << e.what() << std::endl;
+            return;
+        }
     }
     return;
 }
