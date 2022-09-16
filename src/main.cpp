@@ -77,7 +77,7 @@ int main(int _argc, char **_argv) {
     // 如果没有指定那么使用默认值
     if (_argc == 1) {
         obj_path = "../../obj/helmet.obj";
-        //        obj_path = "../../obj/cube.obj";
+        //                obj_path = "../../obj/cube.obj";
         mtl_path = "../../obj/";
     }
     // 否则使用指定的
@@ -116,8 +116,8 @@ int main(int _argc, char **_argv) {
             //            draw2d.line(v1, v2, WHITE);
             //            draw2d.line(v2, v0, WHITE);
             //            if (v0 != v1 && v0 != v2 && v1 != v2) {
-            draw2d.triangle(v0, v1, v2, RED);
-            //            draw3d.triangle(v0, v1, v2, RED);
+            //            draw2d.triangle(v0, v1, v2, RED);
+            draw3d.triangle(v0, v1, v2, RED);
             //            }
         }
     }

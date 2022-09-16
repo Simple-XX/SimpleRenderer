@@ -22,25 +22,26 @@ const std::pair<bool, vector3f_t> draw3d_t::get_barycentric_coord(
     const vector3_t<_T> &_p0, const vector3_t<_T> &_p1,
     const vector3_t<_T> &_p2, const vector3_t<_T> &_p) {
     // 边向量
-    auto edge_p2p0 = (_p2 - _p0);
     auto edge_p1p0 = (_p1 - _p0);
+    auto edge_p2p0 = (_p2 - _p0);
     // 到点 _p 的向量
     auto edge_pp0 = (_p - _p0);
 
-    float p0p0 = edge_p2p0 * edge_p2p0;
-    float p0p1 = edge_p2p0 * edge_p1p0;
-    float p0p2 = edge_p2p0 * edge_pp0;
-    float p1p1 = edge_p1p0 * edge_p1p0;
-    float p1p2 = edge_p1p0 * edge_pp0;
+    float p1p0p1p0 = edge_p1p0 * edge_p1p0;
+    float p1p0p2p0 = edge_p1p0 * edge_p2p0;
+    float p2p0p2p0 = edge_p2p0 * edge_p2p0;
+    float pp0p1p0  = edge_pp0 * edge_p1p0;
+    float pp0p2p0  = edge_pp0 * edge_p2p0;
 
-    auto deno = 1. / ((p0p0 * p1p1) - (p0p1 * p0p1));
+    auto deno = 1. / (p1p0p1p0 * p2p0p2p0 - p1p0p2p0 * p1p0p2p0);
+
     if (std::isinf(deno)) {
         return std::pair<bool, vector3f_t>(false, vector3f_t());
     }
 
-    auto u = ((p1p1 * p0p2) - (p0p1 * p1p2)) * deno;
-    auto v = ((p0p0 * p1p2) - (p0p1 * p0p2)) * deno;
-    auto w = 1 - u - v;
+    auto v = (p2p0p2p0 * pp0p1p0 - p1p0p2p0 * pp0p2p0) * deno;
+    auto w = (p1p0p1p0 * pp0p2p0 - p1p0p2p0 * pp0p1p0) * deno;
+    auto u = 1 - v - w;
 
     auto res = true;
 
@@ -82,7 +83,7 @@ void draw3d_t::triangle(const vector3i_t &_v0, const vector3i_t &_v1,
             z += _v0.z * barycentric_coord.x;
             z += _v1.z * barycentric_coord.y;
             z += _v2.z * barycentric_coord.z;
-            if (framebuffer.get_depth_buffer()[y * width + x] < z) {
+            if (framebuffer.get_depth_buffer()[y * width + x] > z) {
                 if (is_inside) {
                     framebuffer.pixel(x, y, _color, z);
                 }

@@ -39,6 +39,9 @@ framebuffer_t::framebuffer_t(const int32_t _width, const int32_t _height) {
         return;
     }
 
+    memset(color_buffer, 0, width * height * BPP);
+    memset(depth_buffer, 1, width * height * BPP_DEPTH);
+
     return;
 }
 
@@ -133,7 +136,7 @@ int32_t framebuffer_t::get_height(void) const {
 void framebuffer_t::clear(void) {
     for (auto i = 0; i < width; i++) {
         for (auto j = 0; j < height; j++) {
-            pixel(i, j, 0x00000000, 0);
+            pixel(i, j, 0x00000000, 1);
         }
     }
     return;
