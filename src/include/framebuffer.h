@@ -108,7 +108,7 @@ public:
      * @param  _color           指定颜色
      * @param  _depth           指定深度
      */
-    void clear(const color_t &_color, const depth_t &_depth = 1);
+    void clear(const color_t &_color, const depth_t &_depth = 0);
 
     /**
      * @brief 设置像素
@@ -119,7 +119,7 @@ public:
      * @note (0, 0) 在屏幕左上角
      */
     void pixel(const int32_t _x, const int32_t _y, const color_t &_color,
-               const depth_t &_depth = 1);
+               const depth_t &_depth = 0);
 
     /**
      * @brief 获取像素缓存

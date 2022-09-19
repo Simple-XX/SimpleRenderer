@@ -40,7 +40,7 @@ framebuffer_t::framebuffer_t(const int32_t _width, const int32_t _height) {
     }
 
     memset(color_buffer, 0, width * height * BPP);
-    memset(depth_buffer, 1, width * height * BPP_DEPTH);
+    memset(depth_buffer, 0, width * height * BPP_DEPTH);
 
     return;
 }

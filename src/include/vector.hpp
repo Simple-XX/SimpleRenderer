@@ -927,7 +927,8 @@ const vector3_t<_T> vector3_t<_T>::normalize(void) const {
         throw std::invalid_argument(log("HasNaNs()"));
     }
     if (length() == 0) {
-        throw std::runtime_error(log("length() == 0"));
+        return vector3_t<_T>(0, 0, 0);
+        //                throw std::runtime_error(log("length() == 0"));
     }
     return *this / length();
 }

@@ -131,7 +131,6 @@ void draw2d_t::triangle(const vector2i_t &_v0, const vector2i_t &_v1,
             auto [is_inside, _] =
                 get_barycentric_coord(_v0, _v1, _v2, vector2i_t(x, y));
             if (is_inside) {
-                std::cout << _ << std::endl;
                 framebuffer.pixel(x, y, _color);
             }
         }
