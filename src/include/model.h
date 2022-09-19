@@ -27,9 +27,7 @@ typedef vector3f_t vertex_t;
 /// 法向量
 typedef vector3f_t normal_t;
 /// 贴图
-typedef vector3f_t texcoord_t;
-/// 索引 顶点 v，法线 vn，贴图 vt
-typedef vector3i_t index_t;
+typedef vector2f_t texcoord_t;
 
 /**
  * @brief obj/mtl 文件的原始数据
@@ -41,8 +39,6 @@ struct mesh_t {
     std::vector<normal_t> normals;
     /// 贴图
     std::vector<texcoord_t> texcoords;
-    /// 索引
-    std::vector<index_t> indices;
     /// 材质
     std::vector<tinyobj::material_t> materials;
 };
@@ -108,12 +104,6 @@ public:
      * @return const std::vector<texcoord_t>&   所有贴图
      */
     const std::vector<texcoord_t> &get_texcoord(void) const;
-
-    /**
-     * @brief 获取所有索引
-     * @return const std::vector<index_t>&  所有索引
-     */
-    const std::vector<index_t> &get_index(void) const;
 
     /**
      * @brief 获取所有材质
