@@ -26,8 +26,18 @@
 typedef vector3f_t vertex_t;
 /// 法向量
 typedef vector3f_t normal_t;
+/// 颜色
+typedef vector3f_t color_t;
 /// 贴图
 typedef vector2f_t texcoord_t;
+
+struct vvv_t {
+    /// 坐标
+    /// 法线
+    /// 贴图
+    /// 颜色
+    /// 材质
+};
 
 /**
  * @brief obj/mtl 文件的原始数据
@@ -39,29 +49,10 @@ struct mesh_t {
     std::vector<normal_t> normals;
     /// 贴图
     std::vector<texcoord_t> texcoords;
+    /// 颜色
+    std::vector<color_t> colors;
     /// 材质
     std::vector<tinyobj::material_t> materials;
-};
-
-/**
- * @brief 面
- */
-struct face_t {
-    vertex_t p0;
-    vertex_t p1;
-    vertex_t p2;
-    /**
-     * @brief 构造函数
-     * @param  _p0              顶点 0
-     * @param  _p1              顶点 1
-     * @param  _p2              顶点 2
-     */
-    face_t(const vertex_t &_p0, const vertex_t &_p1, const vertex_t &_p2) {
-        p0 = _p0;
-        p1 = _p1;
-        p2 = _p2;
-        return;
-    }
 };
 
 /**
@@ -71,8 +62,6 @@ class model_t {
 private:
     /// 原始数据
     mesh_t mesh;
-    /// 所有三角形面
-    std::vector<face_t> faces;
 
 public:
     /**
@@ -110,12 +99,6 @@ public:
      * @return const std::vector<tinyobj::material_t>&  所有材质
      */
     const std::vector<tinyobj::material_t> &get_material(void) const;
-
-    /**
-     * @brief 获取所有面
-     * @return const std::vector<face_t>&   所有面
-     */
-    const std::vector<face_t> &get_face(void) const;
 };
 
 #endif /* _MODEL_H_ */

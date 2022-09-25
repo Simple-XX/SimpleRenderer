@@ -42,6 +42,7 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
 
     printf("顶点数：%ld, ", attrib.vertices.size() / 3);
     printf("法线数：%ld, ", attrib.normals.size() / 3);
+    printf("颜色数：%ld, ", attrib.colors.size() / 3);
     printf("UV数：%ld, ", attrib.texcoords.size() / 2);
     printf("子模型数：%ld, ", shapes.size());
     printf("材质数：%ld\n", materials.size());
@@ -50,27 +51,27 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
     for (size_t s = 0; s < shapes.size(); s++) {
         // Loop over faces(polygon)
         size_t index_offset = 0;
-        // 由于开启了三角化，所有的 shape 都是由三个点组成的，即 fv == 3
         for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
+            // 由于开启了三角化，所有的 shape 都是由三个点组成的，即 fv == 3
             size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
             if (fv != 3) {
                 throw(std::runtime_error(log("fv != 3")));
             }
-            // Loop over vertices in the face.
+            // 遍历面上的顶点，这里 fv == 3
             for (size_t v = 0; v < fv; v++) {
-                // access to vertex
+                // 获取索引
                 tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
 
+                // 构造顶点信息并保存
+                // 每组顶点信息有 xyz 三个分量，因此需要 3*
                 mesh.vertices.push_back(vertex_t(
                     attrib.vertices[3 * size_t(idx.vertex_index) + 0],
                     attrib.vertices[3 * size_t(idx.vertex_index) + 1],
                     attrib.vertices[3 * size_t(idx.vertex_index) + 2]));
 
-                // Check if `normal_index` is zero or positive. negative = no
-                // normal data
+                // 如果法线索引存在(即 idx.normal_index >= 0)，
+                // 则构造并保存，否则设置为 0
                 if (idx.normal_index >= 0) {
-                    std::cout << "size_t(idx.normal_index): "
-                              << size_t(idx.normal_index) << std::endl;
                     mesh.normals.push_back(normal_t(
                         attrib.normals[3 * size_t(idx.normal_index) + 0],
                         attrib.normals[3 * size_t(idx.normal_index) + 1],
@@ -80,8 +81,8 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
                     mesh.normals.push_back(normal_t(0, 0, 0));
                 }
 
-                // Check if `texcoord_index` is zero or positive. negative = no
-                // texcoord data
+                // 如果贴图索引存在(即 idx.texcoord_index >= 0)，
+                // 则构造并保存，否则设置为 0
                 if (idx.texcoord_index >= 0) {
                     mesh.texcoords.push_back(texcoord_t(
                         attrib.texcoords[2 * size_t(idx.texcoord_index) + 0],
@@ -92,18 +93,18 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
                 }
 
                 // Optional: vertex colors
-                // mesh.color.push_back(color_t(
-                // attrib.colors[3 * size_t(idx.vertex_index) + 0] * UINT8_MAX,
-                // attrib.colors[3 * size_t(idx.vertex_index) + 1] * UINT8_MAX,
-                // attrib.colors[3 * size_t(idx.vertex_index) + 2] *
-                // UINT8_MAX));
+                mesh.colors.push_back(color_t(
+                    attrib.colors[3 * size_t(idx.vertex_index) + 0] * UINT8_MAX,
+                    attrib.colors[3 * size_t(idx.vertex_index) + 1] * UINT8_MAX,
+                    attrib.colors[3 * size_t(idx.vertex_index) + 2] *
+                        UINT8_MAX));
             }
             index_offset += fv;
 
             // per-face material
-            std::cout << "shapes[s].mesh.material_ids[f]: "
-                      << shapes[s].mesh.material_ids[f] << std::endl;
-            mesh.materials.push_back(materials[s]);
+            if (materials.size() > 0) {
+                mesh.materials.push_back(materials[s]);
+            }
         }
     }
 
@@ -128,8 +129,4 @@ const std::vector<texcoord_t> &model_t::get_texcoord(void) const {
 
 const std::vector<tinyobj::material_t> &model_t::get_material(void) const {
     return mesh.materials;
-}
-
-const std::vector<face_t> &model_t::get_face(void) const {
-    return faces;
 }
