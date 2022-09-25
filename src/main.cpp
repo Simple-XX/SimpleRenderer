@@ -20,6 +20,7 @@
 #include "draw2d.h"
 #include "draw3d.h"
 #include "matrix.hpp"
+#include "camera.h"
 
 static constexpr const uint32_t                  WIDTH  = 1920;
 static constexpr const uint32_t                  HEIGHT = 1080;
@@ -28,10 +29,6 @@ static constexpr const uint32_t                  HEIGHT = 1080;
 [[maybe_unused]] static constexpr const uint32_t BLUE   = 0xFF0000FF;
 [[maybe_unused]] static constexpr const uint32_t WHITE  = 0xFFFFFFFF;
 [[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
-
-#define PI 3.1415927f
-
-#define TO_RADIANS(degrees) ((PI / 180) * (degrees))
 
 void draw(framebuffer_t *_framebuffer) {
     draw2d_t draw2d(*_framebuffer);
