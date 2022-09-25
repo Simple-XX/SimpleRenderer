@@ -24,6 +24,7 @@ find_package(SDL2 REQUIRED)
 # Set include dir
 include_directories(
         ./include
+        ./3rd
         ${SDL2_INCLUDE_DIRS})
 
 set(SimpleRender_src

@@ -19,7 +19,7 @@
 
 #include "vector"
 #include "string"
-#include "3rd/tiny_obj_loader.h"
+#include "tiny_obj_loader.h"
 #include "vector.hpp"
 
 /// 顶点
