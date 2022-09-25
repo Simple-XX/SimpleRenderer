@@ -17,9 +17,10 @@
 #ifndef _MATRIX_HPP_
 #define _MATRIX_HPP_
 
+#include "cstring"
 #include "iostream"
 #include "iomanip"
-#include "optional"
+#include "vector"
 #include "log.hpp"
 #include "vector.hpp"
 
