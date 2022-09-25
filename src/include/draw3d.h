@@ -30,7 +30,6 @@ private:
 
     /**
      * @brief 计算重心坐标
-     * @tparam _T 点类型
      * @param  _p0              三角形的第一个点
      * @param  _p1              三角形的第二个点
      * @param  _p2              三角形的第三个点
@@ -38,10 +37,9 @@ private:
      * @return const std::pair<bool, vector3f_t>
      *  第一个返回为 _p 是否在三角形内，第二个为重心坐标
      */
-    template <class _T>
     static const std::pair<bool, vector3f_t>
-    get_barycentric_coord(const vector3_t<_T> &_p0, const vector3_t<_T> &_p1,
-                          const vector3_t<_T> &_p2, const vector3_t<_T> &_p);
+    get_barycentric_coord(const vector3f_t &_p0, const vector3f_t &_p1,
+                          const vector3f_t &_p2, const vector3f_t &_p);
 
 public:
     /**
@@ -68,8 +66,8 @@ public:
      * @param  _color           填充的颜色
      * @todo 多线程支持
      */
-    void triangle(const vector3i_t &_v0, const vector3i_t &_v1,
-                  const vector3i_t &_v2, const framebuffer_t::color_t &_color);
+    void triangle(const vector3f_t &_v0, const vector3f_t &_v1,
+                  const vector3f_t &_v2, const framebuffer_t::color_t &_color);
 };
 
 #endif /* _DRAW3D_H_ */

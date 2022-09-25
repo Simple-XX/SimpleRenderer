@@ -50,13 +50,13 @@ public:
      * @param  _x              x 值
      * @param  _y              y 值
      */
-    vector2_t(const _T &_x, const _T &_y);
+    explicit vector2_t(const _T &_x, const _T &_y);
 
     /**
      * @brief 构造函数
      * @param  _v              另一个 vector2_t<_T>
      */
-    vector2_t(const vector2_t<_T> &_v);
+    explicit vector2_t(const vector2_t<_T> &_v);
 
     /**
      * @brief = 重载
@@ -218,19 +218,9 @@ public:
     const vector2_t<_T> max(const vector2_t<_T> &_v) const;
 
     /**
-     * @brief 转换为 int32_t 类型
-     */
-    operator vector2_t<int32_t>(void) const;
-
-    /**
      * @brief 转换为 float 类型
      */
     operator vector2_t<float>(void) const;
-
-    /**
-     * @brief 转换为 vector3_t<int32_t> 类型
-     */
-    operator vector3_t<int32_t>(void) const;
 
     /**
      * @brief 转换为 vector3_t<float> 类型
@@ -499,13 +489,13 @@ public:
      * @param  _y              y 值
      * @param  _z              z 值
      */
-    vector3_t(const _T &_x, const _T &_y, const _T &_z);
+    explicit vector3_t(const _T &_x, const _T &_y, const _T &_z);
 
     /**
      * @brief 构造函数
      * @param  _v               另一个 vector3_t<_T>
      */
-    vector3_t(const vector3_t<_T> &_v);
+    explicit vector3_t(const vector3_t<_T> &_v);
 
     /**
      * @brief = 重载
@@ -676,19 +666,9 @@ public:
     const vector3_t<_T> max(const vector3_t<_T> &_v) const;
 
     /**
-     * @brief 转换为 int32_t 类型
-     */
-    operator vector3_t<int32_t>(void) const;
-
-    /**
      * @brief 转换为 float 类型
      */
     operator vector3_t<float>(void) const;
-
-    /**
-     * @brief 转换为 vector2_t<int32_t> 类型
-     */
-    operator vector2_t<int32_t>(void) const;
 
     /**
      * @brief 转换为 vector2_t<float> 类型
@@ -952,27 +932,11 @@ const vector3_t<_T> vector3_t<_T>::max(const vector3_t<_T> &_v) const {
 }
 
 template <class _T>
-vector2_t<_T>::operator vector2_t<int32_t>(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
-    return vector2_t<int32_t>((int32_t)x, (int32_t)y);
-}
-
-template <class _T>
 vector2_t<_T>::operator vector2_t<float>(void) const {
     if (HasNaNs()) {
         throw std::invalid_argument(log("HasNaNs()"));
     }
     return vector2_t<float>((float)x, (float)y);
-}
-
-template <class _T>
-vector2_t<_T>::operator vector3_t<int32_t>(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
-    return vector3_t<int32_t>((int32_t)x, (int32_t)y, 0);
 }
 
 template <class _T>
@@ -984,27 +948,11 @@ vector2_t<_T>::operator vector3_t<float>(void) const {
 }
 
 template <class _T>
-vector3_t<_T>::operator vector3_t<int32_t>(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
-    return vector3_t<int32_t>((int32_t)x, (int32_t)y, (int32_t)z);
-}
-
-template <class _T>
 vector3_t<_T>::operator vector3_t<float>(void) const {
     if (HasNaNs()) {
         throw std::invalid_argument(log("HasNaNs()"));
     }
     return vector3_t<float>((float)x, (float)y, (float)z);
-}
-
-template <class _T>
-vector3_t<_T>::operator vector2_t<int32_t>(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
-    return vector2_t<int32_t>((int32_t)x, (int32_t)y);
 }
 
 template <class _T>
@@ -1015,9 +963,7 @@ vector3_t<_T>::operator vector2_t<float>(void) const {
     return vector2_t<float>((float)x, (float)y);
 }
 
-typedef vector2_t<float>   vector2f_t;
-typedef vector2_t<int32_t> vector2i_t;
-typedef vector3_t<float>   vector3f_t;
-typedef vector3_t<int32_t> vector3i_t;
+typedef vector2_t<float> vector2f_t;
+typedef vector3_t<float> vector3f_t;
 
 #endif /* _VECTOR_HPP_ */

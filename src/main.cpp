@@ -37,9 +37,9 @@ void draw(framebuffer_t *_framebuffer) {
     draw2d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
     draw2d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, WHITE);
 
-    vector2i_t v0(80, 80);
-    vector2i_t v1(800, 800);
-    vector2i_t v2(50, 900);
+    vector2f_t v0(80, 80);
+    vector2f_t v1(800, 800);
+    vector2f_t v2(50, 900);
     draw2d.line(v2.x, v2.y, v0.x, v0.y, GREEN);
     draw2d.line(v0.x, v0.y, v2.x, v2.y, GREEN);
 
@@ -57,9 +57,9 @@ void draw(framebuffer_t *_framebuffer) {
 
     draw2d.line(10, 20, 100, 200, RED);
 
-    vector2i_t v3(830, 984);
-    vector2i_t v4(400, 874);
-    vector2i_t v5(505, 456);
+    vector2f_t v3(830, 984);
+    vector2f_t v4(400, 874);
+    vector2f_t v5(505, 456);
     draw2d.triangle(v5, v3, v4, GREEN);
     draw2d.triangle(v0, v1, v2, RED);
 
@@ -74,10 +74,11 @@ int main(int _argc, char **_argv) {
     // 如果没有指定那么使用默认值
     if (_argc == 1) {
         //        obj_path = "../../obj/helmet.obj";
-        obj_path = "../../obj/cube.obj";
+        //        obj_path = "../../obj/cube.obj";
         //        obj_path = "../../obj/cornell_box.obj";
         //        mtl_path = "../../obj/cube.mtl";
         //        obj_path = "../../obj/catmark_torus_creases0.obj";
+        obj_path = "../../obj/box.obj";
     }
     // 否则使用指定的
     else {
@@ -110,7 +111,10 @@ int main(int _argc, char **_argv) {
         //                draw2d.line(v1, v2, BLUE);
         //                draw2d.line(v2, v0, WHITE);
         //        draw2d.triangle(v0, v1, v2, WHITE);
-        draw3d.triangle(v0, v1, v2, WHITE);
+        std::cout << v0 << std::endl;
+        std::cout << v1 << std::endl;
+        std::cout << v2 << std::endl;
+        draw2d.triangle(v0, v1, v2, WHITE);
     }
 
     std::thread draw_thread = std::thread(draw, &framebuffer);

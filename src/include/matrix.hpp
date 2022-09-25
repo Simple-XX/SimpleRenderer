@@ -68,31 +68,31 @@ public:
      * @brief 构造函数
      * @param  _mat             另一个矩阵
      */
-    matrix_t(const matrix_t<_T> &_mat);
+    explicit matrix_t(const matrix_t<_T> &_mat);
 
     /**
      * @brief 构造函数
      * @param  _arr             指针
      */
-    matrix_t(const _T *const _arr);
+    explicit matrix_t(const _T *const _arr);
 
     /**
      * @brief 构造函数
      * @param  _arr             数组
      */
-    matrix_t(const _T _arr[ORDER][ORDER]);
+    explicit matrix_t(const _T _arr[ORDER][ORDER]);
 
     /**
      * @brief 构造函数，构造齐次坐标，多余位置补 0
      * @param  _v               二维向量
      */
-    matrix_t(const vector2_t<_T> &_v);
+    explicit matrix_t(const vector2_t<_T> &_v);
 
     /**
      * @brief 构造函数，构造齐次坐标，多余位置补 0
      * @param  _v               三维向量
      */
-    matrix_t(const vector3_t<_T> &_v);
+    explicit matrix_t(const vector3_t<_T> &_v);
 
     /**
      * @brief 赋值
@@ -569,10 +569,9 @@ const vector2_t<_T> matrix_t<_T>::operator*(const vector2_t<_T> &_v) const {
     if (_v.HasNaNs()) {
         throw std::invalid_argument(log("_v.HasNaNs()"));
     }
-    vector2_t<_T> res;
-    res.x = _v.x * mat[0][0] + _v.y * mat[0][1] + 1 * mat[0][2] + 1 * mat[0][3];
-    res.y = _v.x * mat[1][0] + _v.y * mat[1][1] + 1 * mat[1][2] + 1 * mat[1][3];
-    return res;
+    return vector2_t<_T>(
+        _v.x * mat[0][0] + _v.y * mat[0][1] + 1 * mat[0][2] + 1 * mat[0][3],
+        _v.x * mat[1][0] + _v.y * mat[1][1] + 1 * mat[1][2] + 1 * mat[1][3]);
 }
 
 template <class _T>
@@ -580,14 +579,10 @@ const vector3_t<_T> matrix_t<_T>::operator*(const vector3_t<_T> &_v) const {
     if (_v.HasNaNs()) {
         throw std::invalid_argument(log("_v.HasNaNs()"));
     }
-    vector3_t<_T> res;
-    res.x =
-        _v.x * mat[0][0] + _v.y * mat[0][1] + _v.z * mat[0][2] + 1 * mat[0][3];
-    res.y =
-        _v.x * mat[1][0] + _v.y * mat[1][1] + _v.z * mat[1][2] + 1 * mat[1][3];
-    res.z =
-        _v.x * mat[2][0] + _v.y * mat[2][1] + _v.z * mat[2][2] + 1 * mat[2][3];
-    return res;
+    return vector3_t<_T>(
+        _v.x * mat[0][0] + _v.y * mat[0][1] + _v.z * mat[0][2] + 1 * mat[0][3],
+        _v.x * mat[1][0] + _v.y * mat[1][1] + _v.z * mat[1][2] + 1 * mat[1][3],
+        _v.x * mat[2][0] + _v.y * mat[2][1] + _v.z * mat[2][2] + 1 * mat[2][3]);
 }
 
 template <class _T>
