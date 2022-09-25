@@ -17,6 +17,7 @@
 #include "iostream"
 #include "display.h"
 #include "log.hpp"
+#include "camera.h"
 
 uint8_t display_t::ARGB2A(uint32_t _color) {
     return (_color >> 24) & 0xFF;
@@ -96,15 +97,59 @@ void display_t::input_handler(void) {
     // 捕获事件
     while (SDL_PollEvent(&sdl_event)) {
         switch (sdl_event.type) {
-                // 键盘事件
+            // 键盘事件
             case SDL_KEYDOWN: {
-                // 输出按键名
-                printf("key %s down！\n",
-                       SDL_GetKeyName(sdl_event.key.keysym.sym));
-                // 如果是 esc 键则将 is_shoule_quit 置位
-                if (sdl_event.key.keysym.sym == SDLK_ESCAPE) {
-                    is_shoule_quit = true;
+                switch (sdl_event.key.keysym.sym) {
+                    case SDLK_ESCAPE: {
+                        // 如果是 esc 键则将 is_shoule_quit 置位
+                        is_shoule_quit = true;
+                        break;
+                    }
+                    case SDLK_a: {
+                        camera.get_pos().x--;
+                        break;
+                    }
+                    case SDLK_d: {
+                        camera.get_pos().x++;
+                        break;
+                    }
+                    case SDLK_SPACE: {
+                        camera.get_pos().y++;
+                        break;
+                    }
+                    case SDLK_LCTRL: {
+                        camera.get_pos().y--;
+                        break;
+                    }
+                    case SDLK_w: {
+                        camera.get_pos().z++;
+                        break;
+                    }
+                    case SDLK_s: {
+                        camera.get_pos().z--;
+                        break;
+                    }
+                    default: {
+                        // 输出按键名
+                        printf("key %s down！\n",
+                               SDL_GetKeyName(sdl_event.key.keysym.sym));
+                    }
                 }
+
+                break;
+            }
+            // 鼠标移动
+            case SDL_MOUSEMOTION: {
+                camera.get_target().x += sdl_event.motion.xrel;
+                camera.get_target().y += sdl_event.motion.yrel;
+                break;
+            }
+            // 鼠标点击
+            case SDL_MOUSEBUTTONDOWN: {
+                break;
+            }
+            // 鼠标滚轮
+            case SDL_MOUSEWHEEL: {
                 break;
             }
             case SDL_QUIT: {
