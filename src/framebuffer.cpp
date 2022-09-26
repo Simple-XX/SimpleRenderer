@@ -39,9 +39,9 @@ framebuffer_t::framebuffer_t(const int32_t _width, const int32_t _height) {
         return;
     }
 
-    memset(color_buffer, 0, width * height * BPP);
-    memset(depth_buffer, std::numeric_limits<depth_t>::lowest(),
-           width * height * BPP_DEPTH);
+    std::fill_n(color_buffer, width * height, 0x00000000);
+    std::fill_n(depth_buffer, width * height,
+                std::numeric_limits<depth_t>::lowest());
 
     return;
 }

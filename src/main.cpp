@@ -105,6 +105,11 @@ int main(int _argc, char **_argv) {
     m      = m.scale(WIDTH / 16., HEIGHT / 9., 1);
     m      = m.translate(960, 540, 0);
 
+    auto m2 = matrix4f_t();
+    m2      = m2.rotate(0, 0, 1, matrix4f_t::RAD(180));
+    m2      = m2.scale(WIDTH / 16., HEIGHT / 9., 1);
+    m2      = m2.translate(1200, 540, 0);
+
     for (size_t i = 0; i < model.get_face().size(); i++) {
         auto v0 = m * model.get_face()[i].v0.coord;
         auto v1 = m * model.get_face()[i].v1.coord;
@@ -118,19 +123,21 @@ int main(int _argc, char **_argv) {
         draw2d.triangle(v0, v1, v2, RED);
     }
 
+    //    framebuffer.clear(BLACK, std::numeric_limits<float>::lowest());
+
     for (size_t i = 0; i < model.get_face().size(); i++) {
-        auto v0 = m * model.get_face()[i].v0.coord;
-        auto v1 = m * model.get_face()[i].v1.coord;
-        auto v2 = m * model.get_face()[i].v2.coord;
-        std::cout << v0 << std::endl;
-        std::cout << v1 << std::endl;
-        std::cout << v2 << std::endl;
-        //        draw3d.triangle(v0, v1, v2, WHITE);
+        auto v0 = m2 * model.get_face()[i].v0.coord;
+        auto v1 = m2 * model.get_face()[i].v1.coord;
+        auto v2 = m2 * model.get_face()[i].v2.coord;
+        //        std::cout << v0 << std::endl;
+        //        std::cout << v1 << std::endl;
+        //        std::cout << v2 << std::endl;
+        draw3d.triangle(v0, v1, v2, WHITE);
     }
 
     std::thread draw_thread = std::thread(draw, &framebuffer);
     draw_thread.join();
-
+    
     display_t display(framebuffer);
     display.loop();
 

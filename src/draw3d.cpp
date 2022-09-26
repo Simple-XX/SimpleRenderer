@@ -82,9 +82,6 @@ void draw3d_t::triangle(const vector4f_t &_v0, const vector4f_t &_v1,
             z += _v0.z * barycentric_coord.x;
             z += _v1.z * barycentric_coord.y;
             z += _v2.z * barycentric_coord.z;
-            //            std::cout << framebuffer.get_depth_buffer()[size_t(y *
-            //            width + x)]
-            //                      << ", " << z << std::endl;
             if (z >= framebuffer.get_depth_buffer()[size_t(y * width + x)]) {
                 if (is_inside) {
                     framebuffer.pixel(x, y, _color, z);
@@ -92,5 +89,10 @@ void draw3d_t::triangle(const vector4f_t &_v0, const vector4f_t &_v1,
             }
         }
     }
+    return;
+}
+
+void triangle(const model_t::vertex_t &_v0, const model_t::vertex_t &_v1,
+              const model_t::vertex_t &_v2) {
     return;
 }

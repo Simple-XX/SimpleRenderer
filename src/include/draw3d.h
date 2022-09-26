@@ -19,6 +19,7 @@
 
 #include "framebuffer.h"
 #include "vector.hpp"
+#include "model.h"
 
 class draw3d_t {
 private:
@@ -68,6 +69,17 @@ public:
      */
     void triangle(const vector4f_t &_v0, const vector4f_t &_v1,
                   const vector4f_t &_v2, const framebuffer_t::color_t &_color);
+
+    /**
+     * @brief 填充三角形，传入的顶点包含更多信息
+     * @param  _v0              第一个顶点
+     * @param  _v1              第二个顶点
+     * @param  _v2              第三个顶点
+     * @param  _color           填充的颜色
+     * @todo 多线程支持
+     */
+    void triangle(const model_t::vertex_t &_v0, const model_t::vertex_t &_v1,
+                  const model_t::vertex_t &_v2);
 };
 
 #endif /* _DRAW3D_H_ */
