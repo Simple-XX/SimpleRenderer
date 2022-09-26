@@ -77,7 +77,7 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
             color_t             color;
             texcoord_t          texcoord;
             tinyobj::material_t material;
-            vertex_t            v233[3];
+            vertex_t            vertexes[3];
             // 遍历面上的顶点，这里 fv == 3
             for (size_t v = 0; v < fv; v++) {
                 // 获取索引
@@ -120,7 +120,8 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
                     attrib.colors[3 * size_t(idx.vertex_index) + 2] *
                         UINT8_MAX);
 
-                v233[v] = vertex_t(coord, normal, texcoord, color, material);
+                vertexes[v] =
+                    vertex_t(coord, normal, texcoord, color, material);
             }
             index_offset += fv;
 
@@ -128,7 +129,8 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
             if (materials.size() > 0) {
                 material = materials[s];
             }
-            face.push_back(face_t(v233[0], v233[1], v233[2], material));
+            face.push_back(
+                face_t(vertexes[0], vertexes[1], vertexes[2], material));
         }
     }
 

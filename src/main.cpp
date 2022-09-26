@@ -61,6 +61,7 @@ void draw(framebuffer_t *_framebuffer) {
     vector4f_t v4(400, 874);
     vector4f_t v5(505, 456);
     draw2d.triangle(v5, v3, v4, GREEN);
+    model_t::vertex_t vertex;
     draw2d.triangle(v0, v1, v2, RED);
 
     return;
@@ -78,7 +79,8 @@ int main(int _argc, char **_argv) {
         //        obj_path = "../../obj/cornell_box.obj";
         //        mtl_path = "../../obj/cube.mtl";
         //        obj_path = "../../obj/catmark_torus_creases0.obj";
-        obj_path = "../../obj/box.obj";
+        //        obj_path = "../../obj/box.obj";
+        obj_path = "../../obj/african_head.obj";
     }
     // 否则使用指定的
     else {
@@ -99,7 +101,7 @@ int main(int _argc, char **_argv) {
     draw3d_t draw3d(framebuffer);
 
     auto m = matrix4f_t();
-    m      = m.rotate(1, 1, 0, matrix4f_t::RAD(-120));
+    m      = m.rotate(0, 0, 1, matrix4f_t::RAD(180));
     m      = m.scale(WIDTH / 16., HEIGHT / 9., 1);
     m      = m.translate(960, 540, 0);
 
@@ -107,10 +109,9 @@ int main(int _argc, char **_argv) {
         auto v0 = m * model.get_face()[i].v0.coord;
         auto v1 = m * model.get_face()[i].v1.coord;
         auto v2 = m * model.get_face()[i].v2.coord;
-        //                draw2d.line(v0, v1, RED);
-        //                draw2d.line(v1, v2, BLUE);
-        //                draw2d.line(v2, v0, WHITE);
-        //        draw2d.triangle(v0, v1, v2, WHITE);
+        //        draw2d.line(v0, v1, RED);
+        //        draw2d.line(v1, v2, BLUE);
+        //        draw2d.line(v2, v0, WHITE);
         std::cout << v0 << std::endl;
         std::cout << v1 << std::endl;
         std::cout << v2 << std::endl;
@@ -121,14 +122,10 @@ int main(int _argc, char **_argv) {
         auto v0 = m * model.get_face()[i].v0.coord;
         auto v1 = m * model.get_face()[i].v1.coord;
         auto v2 = m * model.get_face()[i].v2.coord;
-        //                draw2d.line(v0, v1, RED);
-        //                draw2d.line(v1, v2, BLUE);
-        //                draw2d.line(v2, v0, WHITE);
-        //        draw2d.triangle(v0, v1, v2, WHITE);
         std::cout << v0 << std::endl;
         std::cout << v1 << std::endl;
         std::cout << v2 << std::endl;
-        draw3d.triangle(v0, v1, v2, WHITE);
+        //        draw3d.triangle(v0, v1, v2, WHITE);
     }
 
     std::thread draw_thread = std::thread(draw, &framebuffer);

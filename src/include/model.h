@@ -77,6 +77,7 @@ public:
      * @brief 构造函数
      * @param  _obj_path        obj 文件路径
      * @param  _mtl_path        mtl 文件路径
+     * @todo 顶点去重
      */
     model_t(const std::string &_obj_path, const std::string &_mtl_path = "");
 
