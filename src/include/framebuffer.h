@@ -64,7 +64,6 @@ public:
      * @brief 构造函数
      * @param  _width           宽度
      * @param  _height          高度
-     * @param  _color_type      颜色类型
      */
     framebuffer_t(const int32_t _width, const int32_t _height);
 
