@@ -30,8 +30,8 @@ static constexpr const uint32_t                  HEIGHT = 1080;
 [[maybe_unused]] static constexpr const uint32_t WHITE  = 0xFFFFFFFF;
 [[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
 
-void draw(framebuffer_t *_framebuffer) {
-    draw2d_t draw2d(*_framebuffer);
+void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
+    draw2d_t draw2d(_framebuffer);
     draw2d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);
     draw2d.line(WIDTH - 1, HEIGHT - 1, 0, 0, WHITE);
     draw2d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
@@ -95,7 +95,7 @@ int main(int _argc, char **_argv) {
     // 读取模型与材质
     model_t model(obj_path, mtl_path);
 
-    framebuffer_t framebuffer(WIDTH, HEIGHT);
+    auto framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
 
     draw2d_t draw2d(framebuffer);
     draw3d_t draw3d(framebuffer);
@@ -135,9 +135,9 @@ int main(int _argc, char **_argv) {
         draw3d.triangle(v0, v1, v2, WHITE);
     }
 
-    std::thread draw_thread = std::thread(draw, &framebuffer);
+    std::thread draw_thread = std::thread(draw, framebuffer);
     draw_thread.join();
-    
+
     display_t display(framebuffer);
     display.loop();
 

@@ -64,9 +64,10 @@ void display_t::pixel(SDL_Surface *_surface, const uint32_t _x,
     return;
 }
 
-display_t::display_t(framebuffer_t &_framebuffer) : framebuffer(_framebuffer) {
-    width  = framebuffer.get_width();
-    height = framebuffer.get_height();
+display_t::display_t(std::shared_ptr<framebuffer_t> _framebuffer)
+    : framebuffer(_framebuffer) {
+    width  = framebuffer->get_width();
+    height = framebuffer->get_height();
     // 初始化 sdl
     try {
         auto ret = SDL_Init(SDL_INIT_VIDEO);
@@ -163,7 +164,7 @@ void display_t::input_handler(void) {
 
 void display_t::fill(void) {
     // 获取 framebuffer 颜色缓存
-    auto     color_buffer = framebuffer.get_color_buffer();
+    auto     color_buffer = framebuffer->get_color_buffer();
     uint32_t color        = 0x00000000;
     auto     surface      = SDL_GetWindowSurface(sdl_window);
     try {

@@ -59,9 +59,10 @@ draw2d_t::get_barycentric_coord(const vector4f_t &_p0, const vector4f_t &_p1,
     return std::pair<bool, vector4f_t>(res, vector4f_t(u, v, w));
 }
 
-draw2d_t::draw2d_t(framebuffer_t &_framebuffer) : framebuffer(_framebuffer) {
-    width  = framebuffer.get_width();
-    height = framebuffer.get_height();
+draw2d_t::draw2d_t(std::shared_ptr<framebuffer_t> _framebuffer)
+    : framebuffer(_framebuffer) {
+    width  = framebuffer->get_width();
+    height = framebuffer->get_height();
     return;
 }
 
@@ -98,10 +99,10 @@ void draw2d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
     }
     for (auto x = p0_x; x <= p1_x; x++) {
         if (steep == true) {
-            framebuffer.pixel(y, x, _color);
+            framebuffer->pixel(y, x, _color);
         }
         else {
-            framebuffer.pixel(x, y, _color);
+            framebuffer->pixel(x, y, _color);
         }
         de += std::abs(dy2);
         if (de >= dx2) {
@@ -130,7 +131,7 @@ void draw2d_t::triangle(const vector4f_t &_v0, const vector4f_t &_v1,
             auto [is_inside, _] =
                 get_barycentric_coord(_v0, _v1, _v2, vector4f_t(x, y));
             if (is_inside) {
-                framebuffer.pixel(x, y, _color);
+                framebuffer->pixel(x, y, _color);
             }
         }
     }

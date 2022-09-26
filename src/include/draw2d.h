@@ -22,7 +22,7 @@
 
 class draw2d_t {
 private:
-    framebuffer_t &framebuffer;
+    std::shared_ptr<framebuffer_t> framebuffer;
     /// 窗口宽度
     int32_t width;
     /// 窗口高度
@@ -52,7 +52,7 @@ public:
      * @brief 构造函数
      * @param  _framebuffer     另一个 framebuffer
      */
-    draw2d_t(framebuffer_t &_framebuffer);
+    draw2d_t(std::shared_ptr<framebuffer_t> _framebuffer);
 
     /**
      * @brief 析构函数

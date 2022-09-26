@@ -59,9 +59,10 @@ draw3d_t::get_barycentric_coord(const vector4f_t &_p0, const vector4f_t &_p1,
     return std::pair<bool, vector4f_t>(res, vector4f_t(u, v, w));
 }
 
-draw3d_t::draw3d_t(framebuffer_t &_framebuffer) : framebuffer(_framebuffer) {
-    width  = framebuffer.get_width();
-    height = framebuffer.get_height();
+draw3d_t::draw3d_t(std::shared_ptr<framebuffer_t> _framebuffer)
+    : framebuffer(_framebuffer) {
+    width  = framebuffer->get_width();
+    height = framebuffer->get_height();
     return;
 }
 
@@ -82,9 +83,9 @@ void draw3d_t::triangle(const vector4f_t &_v0, const vector4f_t &_v1,
             z += _v0.z * barycentric_coord.x;
             z += _v1.z * barycentric_coord.y;
             z += _v2.z * barycentric_coord.z;
-            if (z >= framebuffer.get_depth_buffer()[size_t(y * width + x)]) {
+            if (z >= framebuffer->get_depth_buffer()[size_t(y * width + x)]) {
                 if (is_inside) {
-                    framebuffer.pixel(x, y, _color, z);
+                    framebuffer->pixel(x, y, _color, z);
                 }
             }
         }

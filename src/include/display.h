@@ -28,7 +28,7 @@
 class display_t {
 private:
     /// @brief 保存要显示的 framebuffer
-    framebuffer_t &framebuffer;
+    std::shared_ptr<framebuffer_t> framebuffer;
     /// @brief sdl 窗口
     SDL_Window *sdl_window;
     /// @brief 标识窗口是否需要退出
@@ -104,7 +104,7 @@ public:
      * @brief 构造函数
      * @param  _framebuffer     要绑定的缓冲
      */
-    display_t(framebuffer_t &_framebuffer);
+    display_t(std::shared_ptr<framebuffer_t> _framebuffer);
 
     /**
      * @brief 析构函数
