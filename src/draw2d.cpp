@@ -17,9 +17,9 @@
 #include "cmath"
 #include "draw2d.h"
 
-const std::pair<bool, vector3f_t>
-draw2d_t::get_barycentric_coord(const vector2f_t &_p0, const vector2f_t &_p1,
-                                const vector2f_t &_p2, const vector2f_t &_p) {
+const std::pair<bool, vector4f_t>
+draw2d_t::get_barycentric_coord(const vector4f_t &_p0, const vector4f_t &_p1,
+                                const vector4f_t &_p2, const vector4f_t &_p) {
     // 边向量
     auto edge_p1p0 = (_p1 - _p0);
     auto edge_p2p0 = (_p2 - _p0);
@@ -35,7 +35,7 @@ draw2d_t::get_barycentric_coord(const vector2f_t &_p0, const vector2f_t &_p1,
     auto deno = 1. / (p1p0p1p0 * p2p0p2p0 - p1p0p2p0 * p1p0p2p0);
 
     if (std::isinf(deno)) {
-        return std::pair<bool, vector3f_t>(false, vector3f_t());
+        return std::pair<bool, vector4f_t>(false, vector4f_t());
     }
 
     auto v = (p2p0p2p0 * pp0p1p0 - p1p0p2p0 * pp0p2p0) * deno;
@@ -56,7 +56,7 @@ draw2d_t::get_barycentric_coord(const vector2f_t &_p0, const vector2f_t &_p1,
         res = false;
     }
 
-    return std::pair<bool, vector3f_t>(res, vector3f_t(u, v, w));
+    return std::pair<bool, vector4f_t>(res, vector4f_t(u, v, w));
 }
 
 draw2d_t::draw2d_t(framebuffer_t &_framebuffer) : framebuffer(_framebuffer) {
@@ -113,14 +113,14 @@ void draw2d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
     return;
 }
 
-void draw2d_t::line(const vector2f_t &_p0, const vector2f_t &_p1,
+void draw2d_t::line(const vector4f_t &_p0, const vector4f_t &_p1,
                     const framebuffer_t::color_t &_color) {
     line(_p0.x, _p0.y, _p1.x, _p1.y, _color);
     return;
 }
 
-void draw2d_t::triangle(const vector2f_t &_v0, const vector2f_t &_v1,
-                        const vector2f_t             &_v2,
+void draw2d_t::triangle(const vector4f_t &_v0, const vector4f_t &_v1,
+                        const vector4f_t             &_v2,
                         const framebuffer_t::color_t &_color) {
     auto min = _v0.min(_v1).min(_v2);
     auto max = _v0.max(_v1).max(_v2);
@@ -128,7 +128,7 @@ void draw2d_t::triangle(const vector2f_t &_v0, const vector2f_t &_v1,
     for (auto x = min.x; x <= max.x; x++) {
         for (auto y = min.y; y <= max.y; y++) {
             auto [is_inside, _] =
-                get_barycentric_coord(_v0, _v1, _v2, vector2f_t(x, y));
+                get_barycentric_coord(_v0, _v1, _v2, vector4f_t(x, y));
             if (is_inside) {
                 framebuffer.pixel(x, y, _color);
             }

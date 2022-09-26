@@ -31,7 +31,8 @@ set(test_src
         matrix_test.cpp
         ../src/display.cpp
         ../src/draw2d.cpp
-        ../src/framebuffer.cpp)
+        ../src/framebuffer.cpp
+        ../src/camera.cpp)
 
 enable_testing()
 

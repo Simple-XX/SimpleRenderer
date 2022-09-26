@@ -17,13 +17,13 @@
 #include "camera.h"
 
 camera_t::camera_t(void) {
-    pos    = vector3f_t();
-    target = vector3f_t();
+    pos    = vector4f_t();
+    target = vector4f_t();
     aspect = 1;
     return;
 }
 
-camera_t::camera_t(const vector3f_t &_pos, const vector3f_t &_target,
+camera_t::camera_t(const vector4f_t &_pos, const vector4f_t &_target,
                    const float _aspect)
     : pos(_pos), target(_target), aspect(_aspect) {
     return;
@@ -39,19 +39,19 @@ bool camera_t::operator!=(const camera_t &_camera) const {
            aspect != _camera.aspect;
 }
 
-const vector3f_t camera_t::operator*(const vector3f_t &_v) const {
-    return vector3f_t();
+const vector4f_t camera_t::operator*(const vector4f_t &_v) const {
+    return vector4f_t();
 }
 
 const matrix4f_t camera_t::operator*(const matrix4f_t &_m) const {
     return matrix4f_t();
 }
 
-vector3f_t &camera_t::get_pos(void) {
+vector4f_t &camera_t::get_pos(void) {
     return pos;
 }
 
-vector3f_t &camera_t::get_target(void) {
+vector4f_t &camera_t::get_target(void) {
     return target;
 }
 

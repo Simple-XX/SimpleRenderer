@@ -22,46 +22,55 @@
 #include "tiny_obj_loader.h"
 #include "vector.hpp"
 
-/// 顶点
-typedef vector3f_t vertex_t;
-/// 法向量
-typedef vector3f_t normal_t;
-/// 颜色
-typedef vector3f_t color_t;
-/// 贴图
-typedef vector2f_t texcoord_t;
-
-struct vvv_t {
-    /// 坐标
-    /// 法线
-    /// 贴图
-    /// 颜色
-    /// 材质
-};
-
-/**
- * @brief obj/mtl 文件的原始数据
- */
-struct mesh_t {
-    /// 顶点
-    std::vector<vertex_t> vertices;
-    /// 法线
-    std::vector<normal_t> normals;
-    /// 贴图
-    std::vector<texcoord_t> texcoords;
-    /// 颜色
-    std::vector<color_t> colors;
-    /// 材质
-    std::vector<tinyobj::material_t> materials;
-};
-
 /**
  * @brief 模型
  */
 class model_t {
+public:
+    /// 顶点坐标
+    typedef vector4f_t coord_t;
+    /// 法向量
+    typedef vector4f_t normal_t;
+    /// 颜色
+    typedef vector4f_t color_t;
+    /// 贴图
+    typedef vector4f_t texcoord_t;
+
+    /**
+     * @brief obj/mtl 文件的原始数据
+     */
+    struct vertex_t {
+        /// 坐标
+        coord_t coord;
+        /// 法线
+        normal_t normal;
+        /// 贴图(纹理)，范围为 0~1
+        texcoord_t texcoord;
+        /// 颜色
+        color_t color;
+        /// 材质
+        tinyobj::material_t material;
+
+        vertex_t(void) = default;
+
+        vertex_t(const coord_t &_coord, const normal_t &_normal,
+                 const texcoord_t &_texcoord, const color_t &_color,
+                 const tinyobj::material_t &_material);
+    };
+
+    struct face_t {
+        vertex_t            v0;
+        vertex_t            v1;
+        vertex_t            v2;
+        tinyobj::material_t material;
+        // 面的法向量为三个点的法向量矢量和
+        // 面的颜色为三个点的颜色插值
+        face_t(const vertex_t &_v0, const vertex_t &_v1, const vertex_t &_v2,
+               const tinyobj::material_t &_material);
+    };
+
 private:
-    /// 原始数据
-    mesh_t mesh;
+    std::vector<face_t> face;
 
 public:
     /**
@@ -77,28 +86,10 @@ public:
     ~model_t(void);
 
     /**
-     * @brief 获取所有顶点
-     * @return const std::vector<vertex_t>& 所有顶点
+     * @brief 获取面
+     * @return const std::vector<face_t>&   所有面
      */
-    const std::vector<vertex_t> &get_vertex(void) const;
-
-    /**
-     * @brief 获取所有法线
-     * @return const std::vector<normal_t>& 所有法线
-     */
-    const std::vector<normal_t> &get_normal(void) const;
-
-    /**
-     * @brief 获取所有贴图
-     * @return const std::vector<texcoord_t>&   所有贴图
-     */
-    const std::vector<texcoord_t> &get_texcoord(void) const;
-
-    /**
-     * @brief 获取所有材质
-     * @return const std::vector<tinyobj::material_t>&  所有材质
-     */
-    const std::vector<tinyobj::material_t> &get_material(void) const;
+    const std::vector<face_t> &get_face(void) const;
 };
 
 #endif /* _MODEL_H_ */

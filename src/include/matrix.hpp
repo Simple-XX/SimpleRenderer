@@ -84,15 +84,9 @@ public:
 
     /**
      * @brief 构造函数，构造齐次坐标，多余位置补 0
-     * @param  _v               二维向量
+     * @param  _v               四维向量
      */
-    explicit matrix_t(const vector2_t<_T> &_v);
-
-    /**
-     * @brief 构造函数，构造齐次坐标，多余位置补 0
-     * @param  _v               三维向量
-     */
-    explicit matrix_t(const vector3_t<_T> &_v);
+    explicit matrix_t(const vector4_t<_T> &_v);
 
     /**
      * @brief 赋值
@@ -158,20 +152,11 @@ public:
     matrix_t<_T> &operator*=(const matrix_t<_T> &_mat);
 
     /**
-     * @brief 矩阵与二维向量乘法
+     * @brief 矩阵与四维向量乘法
      * @param  _v               向量
-     * @return const vector2_t<_T>  结果
-     * @note    只计算二维
+     * @return const vector4_t<_T>  结果
      */
-    const vector2_t<_T> operator*(const vector2_t<_T> &_v) const;
-
-    /**
-     * @brief 矩阵与三维向量乘法
-     * @param  _v               向量
-     * @return const vector3_t<_T>  结果
-     * @note    只计算三维
-     */
-    const vector3_t<_T> operator*(const vector3_t<_T> &_v) const;
+    const vector4_t<_T> operator*(const vector4_t<_T> &_v) const;
 
     /**
      * @brief 矩阵相等
@@ -413,20 +398,7 @@ matrix_t<_T>::matrix_t(const _T _arr[ORDER][ORDER]) {
 }
 
 template <class _T>
-matrix_t<_T>::matrix_t(const vector2_t<_T> &_v) {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
-    memset(mat, 0, ORDER * ORDER * sizeof(_T));
-    mat[0][0] = _v.x;
-    mat[1][1] = _v.y;
-    mat[2][2] = 1;
-    mat[3][3] = 1;
-    return;
-}
-
-template <class _T>
-matrix_t<_T>::matrix_t(const vector3_t<_T> &_v) {
+matrix_t<_T>::matrix_t(const vector4_t<_T> &_v) {
     if (_v.HasNaNs()) {
         throw std::invalid_argument(log("_v.HasNaNs()"));
     }
@@ -434,7 +406,7 @@ matrix_t<_T>::matrix_t(const vector3_t<_T> &_v) {
     mat[0][0] = _v.x;
     mat[1][1] = _v.y;
     mat[2][2] = _v.z;
-    mat[3][3] = 1;
+    mat[3][3] = _v.w;
     return;
 }
 
@@ -565,21 +537,11 @@ matrix_t<_T> &matrix_t<_T>::operator*=(const matrix_t<_T> &_mat) {
 }
 
 template <class _T>
-const vector2_t<_T> matrix_t<_T>::operator*(const vector2_t<_T> &_v) const {
+const vector4_t<_T> matrix_t<_T>::operator*(const vector4_t<_T> &_v) const {
     if (_v.HasNaNs()) {
         throw std::invalid_argument(log("_v.HasNaNs()"));
     }
-    return vector2_t<_T>(
-        _v.x * mat[0][0] + _v.y * mat[0][1] + 1 * mat[0][2] + 1 * mat[0][3],
-        _v.x * mat[1][0] + _v.y * mat[1][1] + 1 * mat[1][2] + 1 * mat[1][3]);
-}
-
-template <class _T>
-const vector3_t<_T> matrix_t<_T>::operator*(const vector3_t<_T> &_v) const {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
-    return vector3_t<_T>(
+    return vector4_t<_T>(
         _v.x * mat[0][0] + _v.y * mat[0][1] + _v.z * mat[0][2] + 1 * mat[0][3],
         _v.x * mat[1][0] + _v.y * mat[1][1] + _v.z * mat[1][2] + 1 * mat[1][3],
         _v.x * mat[2][0] + _v.y * mat[2][1] + _v.z * mat[2][2] + 1 * mat[2][3]);
@@ -838,7 +800,7 @@ const matrix_t<_T> matrix_t<_T>::rotate(const float _x, const float _y,
             log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)|| "
                 "std::isnan(_angle)"));
     }
-    auto n = vector3_t(_x, _y, _z).normalize();
+    auto n = vector4_t(_x, _y, _z).normalize();
     auto c = std::cos(_angle);
     auto s = std::sin(_angle);
 

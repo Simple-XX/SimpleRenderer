@@ -20,6 +20,22 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "3rd/tiny_obj_loader.h"
 
+model_t::vertex_t::vertex_t(const coord_t &_coord, const normal_t &_normal,
+                            const texcoord_t &_texcoord, const color_t &_color,
+                            const tinyobj::material_t &_material)
+    : coord(_coord), normal(_normal), texcoord(_texcoord), color(_color),
+      material(_material) {
+    return;
+}
+
+model_t::face_t::face_t(const model_t::vertex_t   &_v0,
+                        const model_t::vertex_t   &_v1,
+                        const model_t::vertex_t   &_v2,
+                        const tinyobj::material_t &_material)
+    : v0(_v0), v1(_v1), v2(_v2), material(_material) {
+    return;
+}
+
 model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
     tinyobj::ObjReader       reader;
     tinyobj::ObjReaderConfig config;
@@ -46,7 +62,6 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
     printf("UV数：%ld, ", attrib.texcoords.size() / 2);
     printf("子模型数：%ld, ", shapes.size());
     printf("材质数：%ld\n", materials.size());
-
     // Loop over shapes
     for (size_t s = 0; s < shapes.size(); s++) {
         // Loop over faces(polygon)
@@ -57,6 +72,12 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
             if (fv != 3) {
                 throw(std::runtime_error(log("fv != 3")));
             }
+            coord_t             coord;
+            normal_t            normal;
+            color_t             color;
+            texcoord_t          texcoord;
+            tinyobj::material_t material;
+            vertex_t            v233[3];
             // 遍历面上的顶点，这里 fv == 3
             for (size_t v = 0; v < fv; v++) {
                 // 获取索引
@@ -64,47 +85,50 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
 
                 // 构造顶点信息并保存
                 // 每组顶点信息有 xyz 三个分量，因此需要 3*
-                mesh.vertices.push_back(vertex_t(
-                    attrib.vertices[3 * size_t(idx.vertex_index) + 0],
-                    attrib.vertices[3 * size_t(idx.vertex_index) + 1],
-                    attrib.vertices[3 * size_t(idx.vertex_index) + 2]));
+                coord =
+                    coord_t(attrib.vertices[3 * size_t(idx.vertex_index) + 0],
+                            attrib.vertices[3 * size_t(idx.vertex_index) + 1],
+                            attrib.vertices[3 * size_t(idx.vertex_index) + 2]);
 
                 // 如果法线索引存在(即 idx.normal_index >= 0)，
                 // 则构造并保存，否则设置为 0
                 if (idx.normal_index >= 0) {
-                    mesh.normals.push_back(normal_t(
+                    normal = normal_t(
                         attrib.normals[3 * size_t(idx.normal_index) + 0],
                         attrib.normals[3 * size_t(idx.normal_index) + 1],
-                        attrib.normals[3 * size_t(idx.normal_index) + 2]));
+                        attrib.normals[3 * size_t(idx.normal_index) + 2]);
                 }
                 else {
-                    mesh.normals.push_back(normal_t(0, 0, 0));
+                    normal = normal_t(0, 0, 0);
                 }
 
                 // 如果贴图索引存在(即 idx.texcoord_index >= 0)，
                 // 则构造并保存，否则设置为 0
                 if (idx.texcoord_index >= 0) {
-                    mesh.texcoords.push_back(texcoord_t(
+                    texcoord = texcoord_t(
                         attrib.texcoords[2 * size_t(idx.texcoord_index) + 0],
-                        attrib.texcoords[2 * size_t(idx.texcoord_index) + 1]));
+                        attrib.texcoords[2 * size_t(idx.texcoord_index) + 1]);
                 }
                 else {
-                    mesh.texcoords.push_back(texcoord_t(0, 0));
+                    texcoord = texcoord_t(0, 0);
                 }
 
                 // Optional: vertex colors
-                mesh.colors.push_back(color_t(
+                color = color_t(
                     attrib.colors[3 * size_t(idx.vertex_index) + 0] * UINT8_MAX,
                     attrib.colors[3 * size_t(idx.vertex_index) + 1] * UINT8_MAX,
                     attrib.colors[3 * size_t(idx.vertex_index) + 2] *
-                        UINT8_MAX));
+                        UINT8_MAX);
+
+                v233[v] = vertex_t(coord, normal, texcoord, color, material);
             }
             index_offset += fv;
 
             // per-face material
             if (materials.size() > 0) {
-                mesh.materials.push_back(materials[s]);
+                material = materials[s];
             }
+            face.push_back(face_t(v233[0], v233[1], v233[2], material));
         }
     }
 
@@ -115,18 +139,6 @@ model_t::~model_t(void) {
     return;
 }
 
-const std::vector<vertex_t> &model_t::get_vertex(void) const {
-    return mesh.vertices;
-}
-
-const std::vector<normal_t> &model_t::get_normal(void) const {
-    return mesh.normals;
-}
-
-const std::vector<texcoord_t> &model_t::get_texcoord(void) const {
-    return mesh.texcoords;
-}
-
-const std::vector<tinyobj::material_t> &model_t::get_material(void) const {
-    return mesh.materials;
+const std::vector<model_t::face_t> &model_t::get_face(void) const {
+    return face;
 }

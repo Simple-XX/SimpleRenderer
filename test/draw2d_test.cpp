@@ -35,9 +35,9 @@ TEST(draw2d_t, test1) {
     draw2d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
     draw2d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, WHITE);
 
-    vector2f_t v0(80, 80);
-    vector2f_t v1(800, 800);
-    vector2f_t v2(50, 900);
+    vector4f_t v0(80, 80);
+    vector4f_t v1(800, 800);
+    vector4f_t v2(50, 900);
     draw2d.line(v2.x, v2.y, v0.x, v0.y, GREEN);
     draw2d.line(v0.x, v0.y, v2.x, v2.y, GREEN);
 
@@ -55,9 +55,9 @@ TEST(draw2d_t, test1) {
 
     draw2d.line(10, 20, 100, 200, RED);
 
-    vector2f_t v3(830, 984);
-    vector2f_t v4(400, 874);
-    vector2f_t v5(505, 456);
+    vector4f_t v3(830, 984);
+    vector4f_t v4(400, 874);
+    vector4f_t v5(505, 456);
     draw2d.triangle(v5, v3, v4, GREEN);
     draw2d.triangle(v0, v1, v2, RED);
 
