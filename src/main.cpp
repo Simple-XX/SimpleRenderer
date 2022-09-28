@@ -110,6 +110,7 @@ int main(int _argc, char **_argv) {
     m2      = m2.scale(WIDTH / 16., HEIGHT / 9., 1);
     m2      = m2.translate(1200, 540, 0);
 
+    auto start = us();
     for (size_t i = 0; i < model.get_face().size(); i++) {
         auto v0 = m * model.get_face()[i].v0.coord;
         auto v1 = m * model.get_face()[i].v1.coord;
@@ -134,6 +135,9 @@ int main(int _argc, char **_argv) {
         //        std::cout << v2 << std::endl;
         draw3d.triangle(v0, v1, v2, WHITE);
     }
+
+    auto end = us();
+    std::cout << "time: " << end - start << std::endl;
 
     std::thread draw_thread = std::thread(draw, framebuffer);
     draw_thread.join();
