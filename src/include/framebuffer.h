@@ -28,8 +28,6 @@ class framebuffer_t {
 public:
     /// 颜色类型，格式为 ARGB32
     typedef uint32_t color_t;
-    /// 每像素字节数
-    static constexpr const uint8_t BPP = sizeof(color_t);
     /**
      * @brief 颜色缓冲抽象
      * @tparam _T 颜色缓冲元素类型
@@ -69,6 +67,7 @@ public:
          * @brief 析构函数
          */
         ~color_buffer_t(void);
+
         /**
          * @brief 赋值
          * @param  _color_buffer    另一个 color_buffer_t
@@ -81,8 +80,10 @@ public:
          * @param  _x               行
          * @param  _y               列
          * @return _T&              数据
+         * @todo 访问限制
          */
         _T &operator()(const int32_t _x, const int32_t _y);
+
         /**
          * @brief () 重载，获取第 _x 行 _y 列的数据
          * @param  _x               行
@@ -90,11 +91,13 @@ public:
          * @return const _T         只读的数据
          */
         const _T operator()(const int32_t _x, const int32_t _y) const;
+
         /**
          * @brief 清空，设置为指定值，默认为 0x00000000
          * @param  _color           颜色
          */
         void clear(const _T &_color = 0x00000000);
+
         /**
          * @brief 获取缓冲区大小(字节数)
          * @return size_t           字节数
@@ -156,8 +159,10 @@ public:
          * @param  _x               行
          * @param  _y               列
          * @return _T&              数据
+         * @todo 访问限制
          */
         _T &operator()(const int32_t _x, const int32_t _y);
+
         /**
          * @brief () 重载，获取第 _x 行 _y 列的数据
          * @param  _x               行
@@ -165,11 +170,13 @@ public:
          * @return const _T         只读的数据
          */
         const _T operator()(const int32_t _x, const int32_t _y) const;
+
         /**
          * @brief 清空，设置为指定值，默认为 std::numeric_limits<_T>::lowest()
          * @param  _depth           值
          */
         void clear(const _T &_depth = std::numeric_limits<_T>::lowest());
+
         /**
          * @brief 获取缓冲区大小(字节数)
          * @return size_t           字节数
@@ -185,13 +192,11 @@ private:
 
     /// 颜色缓存锁
     std::mutex color_buffer_mutex;
-
     /// 颜色缓存
     color_buffer_t<color_t> color_buffer;
 
     /// 深度缓存锁
     std::mutex depth_buffer_mutex;
-
     /// 深度缓存
     depth_buffer_t<depth_t> depth_buffer;
 
