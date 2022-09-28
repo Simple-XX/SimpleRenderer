@@ -32,6 +32,26 @@ public:
     /// 深度类型
     typedef float depth_t;
 
+    template <class _T = depth_t>
+    class depth_buffer_t {
+    private:
+        _T     *depth_arr;
+        int32_t width;
+        int32_t height;
+
+    public:
+        depth_buffer_t(void) = delete;
+        depth_buffer_t(const depth_buffer_t<_T> &_depth_buffer);
+        depth_buffer_t(const int32_t _w, const int32_t _h,
+                       const _T _val = std::numeric_limits<_T>::lowest());
+        ~depth_buffer_t(void);
+        depth_buffer_t<_T> &operator=(const depth_buffer_t<_T> &_depth_buffer);
+        _T                 &operator()(const int32_t _x, const int32_t _y);
+        const _T operator()(const int32_t _x, const int32_t _y) const;
+        void     clear(const _T &_val = std::numeric_limits<_T>::lowest());
+        size_t   length(void) const;
+    };
+
     /// 每像素字节数
     static constexpr const uint8_t BPP = sizeof(color_t);
     /// 每像素深度大小
@@ -52,7 +72,8 @@ private:
     /// 深度缓存锁
     std::mutex depth_buffer_mutex;
     /// 深度缓存
-    depth_t *depth_buffer;
+    //    depth_t *depth_buffer;
+    depth_buffer_t<depth_t> depth_buffer;
 
 public:
     /**
@@ -129,9 +150,15 @@ public:
 
     /**
      * @brief 获取深度缓存
-     * @return const depth_t*   只读的深度缓存
+     * depth_buffer_t<depth_t> &深度缓存
      */
-    const depth_t *get_depth_buffer(void) const;
+    depth_buffer_t<depth_t> &get_depth_buffer(void);
+
+    /**
+     * @brief 获取深度缓存
+     * const depth_buffer_t<depth_t> &  只读的深度缓存
+     */
+    const depth_buffer_t<depth_t> &get_depth_buffer(void) const;
 
     /**
      * @brief 生成 argb

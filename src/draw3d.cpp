@@ -75,15 +75,15 @@ void draw3d_t::triangle(const vector4f_t &_v0, const vector4f_t &_v1,
                         const framebuffer_t::color_t &_color) {
     auto min = _v0.min(_v1).min(_v2);
     auto max = _v0.max(_v1).max(_v2);
-    for (auto x = min.x; x <= max.x; x++) {
-        for (auto y = min.y; y <= max.y; y++) {
+    for (auto x = int32_t(min.x); x <= max.x; x++) {
+        for (auto y = int32_t(min.y); y <= max.y; y++) {
             auto [is_inside, barycentric_coord] =
                 get_barycentric_coord(_v0, _v1, _v2, vector4f_t(x, y, 0));
             auto z = 0.;
             z += _v0.z * barycentric_coord.x;
             z += _v1.z * barycentric_coord.y;
             z += _v2.z * barycentric_coord.z;
-            if (z >= framebuffer->get_depth_buffer()[size_t(y * width + x)]) {
+            if (z >= (framebuffer->get_depth_buffer()(x, y))) {
                 if (is_inside) {
                     framebuffer->pixel(x, y, _color, z);
                 }
