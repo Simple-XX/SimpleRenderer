@@ -21,6 +21,7 @@
 #include "source_location"
 #include "ctime"
 #include "sstream"
+#include "sys/time.h"
 
 /**
  * @brief 构造日志字符串
@@ -40,6 +41,16 @@ log(const std::string_view     &_msg,
         << _location.file_name() << "\', line " << _location.line()
         << ", function \'" << _location.function_name() << "\'.";
     return res.str();
+}
+
+/**
+ * @brief 获取当前微秒数，用于性能分析
+ * @return const auto       当前微秒
+ */
+inline const auto us(void) {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    return t.tv_sec * 1000000 + t.tv_usec;
 }
 
 #endif /* _LOG_HPP_ */
