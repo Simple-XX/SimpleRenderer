@@ -480,7 +480,7 @@ const vector4_t<_T> vector4_t<_T>::normalize(void) const {
     if (length() == 0) {
         return vector4_t<_T>();
     }
-    return *this / length();
+    return vector4_t<_T>(x / length(), y / length(), z / length(), 1);
 }
 
 template <class _T>
