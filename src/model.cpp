@@ -114,11 +114,10 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
                 }
 
                 // Optional: vertex colors
-                color = color_t(
-                    attrib.colors[3 * size_t(idx.vertex_index) + 0] * UINT8_MAX,
-                    attrib.colors[3 * size_t(idx.vertex_index) + 1] * UINT8_MAX,
-                    attrib.colors[3 * size_t(idx.vertex_index) + 2] *
-                        UINT8_MAX);
+                color =
+                    color_t(attrib.colors[3 * size_t(idx.vertex_index) + 0],
+                            attrib.colors[3 * size_t(idx.vertex_index) + 1],
+                            attrib.colors[3 * size_t(idx.vertex_index) + 2]);
 
                 vertexes[v] =
                     vertex_t(coord, normal, texcoord, color, material);
