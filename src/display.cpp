@@ -163,10 +163,7 @@ void display_t::input_handler(void) {
 }
 
 void display_t::fill(void) {
-    // 获取 framebuffer 颜色缓存
-    auto     color_buffer = framebuffer->get_color_buffer();
-    uint32_t color        = 0x00000000;
-    auto     surface      = SDL_GetWindowSurface(sdl_window);
+    auto surface = SDL_GetWindowSurface(sdl_window);
     try {
         if (surface == nullptr) {
             throw std::runtime_error(log(SDL_GetError()));
@@ -175,11 +172,11 @@ void display_t::fill(void) {
         std::cerr << e.what() << std::endl;
         return;
     }
-
+    uint32_t color = 0x00000000;
     // 填充整个屏幕
     for (uint32_t i = 0; i < width; i++) {
         for (uint32_t j = 0; j < height; j++) {
-            color = color_buffer[j * width + i];
+            color = framebuffer->get_color_buffer()(i, j);
             pixel(surface, i, j, ARGB2A(color), ARGB2R(color), ARGB2G(color),
                   ARGB2B(color));
         }
