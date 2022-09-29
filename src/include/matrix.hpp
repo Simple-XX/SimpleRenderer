@@ -138,6 +138,58 @@ public:
     const matrix_t<_T> operator*(const matrix_t<_T> &_mat) const;
 
     /**
+     * @brief 行向量乘矩阵
+     * @tparam _U 向量类型
+     * @param  _v               向量
+     * @param  _mat             矩阵
+     * @return const vector4_t<_U>  结果
+     */
+    template <class _U>
+    friend const vector4_t<_U> operator*(const vector4_t<_U> &_v,
+                                         const matrix_t<_T>  &_mat) {
+        if (_v.HasNaNs()) {
+            throw std::invalid_argument(log("_v.HasNaNs()"));
+        }
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+
+        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[0][1] + _v.z * _mat[0][2] +
+                     1 * _mat[0][3];
+        auto new_y = _v.x * _mat[1][0] + _v.y * _mat[1][1] + _v.z * _mat[1][2] +
+                     1 * _mat[1][3];
+        auto new_z = _v.x * _mat[2][0] + _v.y * _mat[2][1] + _v.z * _mat[2][2] +
+                     1 * _mat[2][3];
+        return vector4_t<_U>(new_x, new_y, new_z);
+    }
+
+    /**
+     * @brief 矩阵乘列向量
+     * @tparam _U 向量类型
+     * @param  _mat             矩阵
+     * @param  _v               向量
+     * @return const matrix_t<_T>   结果
+     */
+    template <class _U>
+    friend const matrix_t<_T> operator*(const matrix_t<_T>  &_mat,
+                                        const vector4_t<_U> &_v) {
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+        if (_v.HasNaNs()) {
+            throw std::invalid_argument(log("_v.HasNaNs()"));
+        }
+        _T tmp[ORDER][ORDER] = {{0}};
+        memcpy(tmp, _mat.mat, ORDER * ORDER * sizeof(_T));
+        for (uint32_t i = 0; i < ORDER; i++) {
+            for (uint32_t j = 0; j < ORDER; j++) {
+                tmp[i][j] *= _v[i];
+            }
+        }
+        return matrix_t<_T>(tmp);
+    }
+
+    /**
      * @brief 矩阵数乘的自乘
      * @param  _v               数
      * @return matrix_t<_T>&    结果
@@ -152,11 +204,56 @@ public:
     matrix_t<_T> &operator*=(const matrix_t<_T> &_mat);
 
     /**
-     * @brief 矩阵与四维向量乘法
+     * @brief 行向量乘矩阵
+     * @tparam _U 向量类型
      * @param  _v               向量
-     * @return const vector4_t<_T>  结果
+     * @param  _mat             矩阵
+     * @return vector4_t<_U>&   结果
      */
-    const vector4_t<_T> operator*(const vector4_t<_T> &_v) const;
+    template <class _U>
+    friend vector4_t<_U> &operator*=(vector4_t<_U>      &_v,
+                                     const matrix_t<_T> &_mat) {
+        if (_v.HasNaNs()) {
+            throw std::invalid_argument(log("_v.HasNaNs()"));
+        }
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[0][1] + _v.z * _mat[0][2] +
+                     1 * _mat[0][3];
+        auto new_y = _v.x * _mat[1][0] + _v.y * _mat[1][1] + _v.z * _mat[1][2] +
+                     1 * _mat[1][3];
+        auto new_z = _v.x * _mat[2][0] + _v.y * _mat[2][1] + _v.z * _mat[2][2] +
+                     1 * _mat[2][3];
+        _v.x = new_x;
+        _v.y = new_y;
+        _v.z = new_z;
+        return _v;
+    }
+
+    /**
+     * @brief 矩阵乘列向量
+     * @tparam _U 向量类型
+     * @param  _mat             矩阵
+     * @param  _v               向量
+     * @return matrix_t<_T>&    结果
+     */
+    template <class _U>
+    friend matrix_t<_T> &operator*=(matrix_t<_T>        &_mat,
+                                    const vector4_t<_U> &_v) {
+        if (_v.HasNaNs()) {
+            throw std::invalid_argument(log("_v.HasNaNs()"));
+        }
+        _T tmp[ORDER][ORDER] = {{0}};
+        memcpy(tmp, _mat.mat, ORDER * ORDER * sizeof(_T));
+        for (uint32_t i = 0; i < ORDER; i++) {
+            for (uint32_t j = 0; j < ORDER; j++) {
+                tmp[i][j] *= _v[i];
+            }
+        }
+        memcpy(_mat.mat, tmp, ORDER * ORDER * sizeof(_T));
+        return _mat;
+    }
 
     /**
      * @brief 矩阵相等
@@ -534,17 +631,6 @@ matrix_t<_T> &matrix_t<_T>::operator*=(const matrix_t<_T> &_mat) {
     }
     memcpy(mat, tmp, ORDER * ORDER * sizeof(_T));
     return *this;
-}
-
-template <class _T>
-const vector4_t<_T> matrix_t<_T>::operator*(const vector4_t<_T> &_v) const {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
-    return vector4_t<_T>(
-        _v.x * mat[0][0] + _v.y * mat[0][1] + _v.z * mat[0][2] + 1 * mat[0][3],
-        _v.x * mat[1][0] + _v.y * mat[1][1] + _v.z * mat[1][2] + 1 * mat[1][3],
-        _v.x * mat[2][0] + _v.y * mat[2][1] + _v.z * mat[2][2] + 1 * mat[2][3]);
 }
 
 template <class _T>

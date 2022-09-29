@@ -130,6 +130,8 @@ public:
      */
     const _T operator*(const vector4_t<_T> &_v) const;
 
+    /// @brief *矩阵见 matrix.hpp
+
     /**
      * @brief *= 重载，向量数乘
      * @tparam _U              数的类型
@@ -138,6 +140,8 @@ public:
      */
     template <class _U>
     vector4_t<_T> &operator*=(const _U _s);
+
+    /// @brief 行向量*=矩阵见 matrix.hpp
 
     /**
      * @brief ^ 重载，向量叉积
