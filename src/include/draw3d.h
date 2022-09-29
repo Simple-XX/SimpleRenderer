@@ -20,6 +20,7 @@
 #include "framebuffer.h"
 #include "vector.hpp"
 #include "model.h"
+#include "matrix.hpp"
 
 class draw3d_t {
 private:
@@ -75,11 +76,16 @@ public:
      * @param  _v0              第一个顶点
      * @param  _v1              第二个顶点
      * @param  _v2              第三个顶点
-     * @param  _color           填充的颜色
+     * @param  _normal          面的法向量
      * @todo 多线程支持
      */
     void triangle(const model_t::vertex_t &_v0, const model_t::vertex_t &_v1,
-                  const model_t::vertex_t &_v2);
+                  const model_t::vertex_t &_v2,
+                  const model_t::normal_t &_normal);
+
+    void triangle(const model_t::face_t &_face);
+
+    void model(const model_t &_model, const matrix4f_t &_tran);
 };
 
 #endif /* _DRAW3D_H_ */

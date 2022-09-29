@@ -20,11 +20,48 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "3rd/tiny_obj_loader.h"
 
+model_t::vertex_t::vertex_t(void) {
+    return;
+}
+
+model_t::vertex_t::vertex_t(const vertex_t &_vertex)
+    : coord(_vertex.coord), normal(_vertex.normal), texcoord(_vertex.texcoord),
+      color(_vertex.color) {
+    return;
+}
+
 model_t::vertex_t::vertex_t(const coord_t &_coord, const normal_t &_normal,
-                            const texcoord_t &_texcoord, const color_t &_color,
-                            const tinyobj::material_t &_material)
-    : coord(_coord), normal(_normal), texcoord(_texcoord), color(_color),
-      material(_material) {
+                            const texcoord_t &_texcoord, const color_t &_color)
+    : coord(_coord), normal(_normal), texcoord(_texcoord) {
+    // 将颜色归一化
+    if (_color.x > 1 || _color.y > 1 || _color.z > 1) {
+        color = _color / 255;
+    }
+    else {
+        color = _color;
+    }
+    return;
+}
+
+model_t::vertex_t::~vertex_t(void) {
+    return;
+}
+
+model_t::vertex_t &model_t::vertex_t::operator=(const vertex_t &_vertex) {
+    coord    = _vertex.coord;
+    normal   = _vertex.normal;
+    texcoord = _vertex.texcoord;
+    color    = _vertex.color;
+    return *this;
+}
+
+model_t::face_t::face_t(void) {
+    return;
+}
+
+model_t::face_t::face_t(const face_t &_face)
+    : v0(_face.v0), v1(_face.v1), v2(_face.v2), normal(_face.normal),
+      material(_face.material) {
     return;
 }
 
@@ -33,6 +70,59 @@ model_t::face_t::face_t(const model_t::vertex_t   &_v0,
                         const model_t::vertex_t   &_v2,
                         const tinyobj::material_t &_material)
     : v0(_v0), v1(_v1), v2(_v2), material(_material) {
+    // 计算法向量
+    // 如果 obj 内包含法向量，直接使用即可
+    if (_v0.normal.length() != 0 && _v1.normal.length() != 0 &&
+        _v2.normal.length() != 0) {
+        normal = (_v0.normal + _v1.normal + _v2.normal);
+        normal = normal.normalize();
+    }
+    // 手动计算
+    else {
+        // 两条相临边的叉积
+        auto v2v0   = _v2.coord - _v0.coord;
+        auto v1v0   = _v1.coord - _v0.coord;
+        auto normal = v2v0 ^ v1v0;
+        normal      = normal.normalize();
+    }
+    return;
+}
+
+model_t::face_t::~face_t(void) {
+    return;
+}
+
+model_t::face_t &model_t::face_t::operator=(const face_t &_face) {
+    v0       = _face.v0;
+    v1       = _face.v1;
+    v2       = _face.v2;
+    normal   = _face.normal;
+    material = _face.material;
+    return *this;
+}
+
+const model_t::face_t &model_t::face_t::operator*(const matrix4f_t &_matrix) {
+    v0.coord = _matrix * v0.coord;
+    v1.coord = _matrix * v1.coord;
+    v2.coord = _matrix * v2.coord;
+    return *this;
+}
+
+const model_t::face_t
+model_t::face_t::operator*(const matrix4f_t &_matrix) const {
+    face_t ret(*this);
+    ret.v0.coord = _matrix * ret.v0.coord;
+    ret.v1.coord = _matrix * ret.v1.coord;
+    ret.v2.coord = _matrix * ret.v2.coord;
+    return ret;
+}
+
+model_t::model_t(void) {
+    return;
+}
+
+model_t::model_t(const model_t &_model) {
+    face = _model.face;
     return;
 }
 
@@ -113,14 +203,12 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
                     texcoord = texcoord_t(0, 0);
                 }
 
-                // Optional: vertex colors
+                // 顶点颜色，如果 obj 文件中没有指定则设为 1(白色)，范围 [0, 1]
                 color =
                     color_t(attrib.colors[3 * size_t(idx.vertex_index) + 0],
                             attrib.colors[3 * size_t(idx.vertex_index) + 1],
                             attrib.colors[3 * size_t(idx.vertex_index) + 2]);
-
-                vertexes[v] =
-                    vertex_t(coord, normal, texcoord, color, material);
+                vertexes[v] = vertex_t(coord, normal, texcoord, color);
             }
             index_offset += fv;
 
@@ -138,6 +226,11 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
 
 model_t::~model_t(void) {
     return;
+}
+
+model_t &model_t::operator=(const model_t &_model) {
+    face = _model.face;
+    return *this;
 }
 
 const std::vector<model_t::face_t> &model_t::get_face(void) const {

@@ -76,11 +76,14 @@ int main(int _argc, char **_argv) {
     if (_argc == 1) {
         //        obj_path = "../../obj/helmet.obj";
         //        obj_path = "../../obj/cube.obj";
+        //        obj_path = "../../obj/cube2.obj";
+        //        obj_path = "../../obj/cube3.obj";
         //        obj_path = "../../obj/cornell_box.obj";
         //        mtl_path = "../../obj/cube.mtl";
         //        obj_path = "../../obj/catmark_torus_creases0.obj";
         //        obj_path = "../../obj/box.obj";
-        obj_path = "../../obj/african_head.obj";
+        //        obj_path = "../../obj/african_head.obj";
+        obj_path = "../../obj/utah-teapot/utah-teapot.obj";
     }
     // 否则使用指定的
     else {
@@ -100,41 +103,30 @@ int main(int _argc, char **_argv) {
     draw2d_t draw2d(framebuffer);
     draw3d_t draw3d(framebuffer);
 
+    // 不同的模型需要不同的变换矩阵
+    /// @todo 自动处理（需要裁剪）
     auto m = matrix4f_t();
     m      = m.rotate(0, 0, 1, matrix4f_t::RAD(180));
     m      = m.scale(WIDTH / 16., HEIGHT / 9., 1);
     m      = m.translate(960, 540, 0);
 
     auto m2 = matrix4f_t();
-    m2      = m2.rotate(0, 0, 1, matrix4f_t::RAD(180));
-    m2      = m2.scale(WIDTH / 16., HEIGHT / 9., 1);
-    m2      = m2.translate(1200, 540, 0);
+    m2      = m2.rotate(0, 0, 1, matrix4f_t::RAD(0));
+    m2      = m2.scale(WIDTH / 64., HEIGHT / 36., 1);
+    m2      = m2.translate(1000, 540, 0);
 
     auto start = us();
-    for (size_t i = 0; i < model.get_face().size(); i++) {
-        auto v0 = m * model.get_face()[i].v0.coord;
-        auto v1 = m * model.get_face()[i].v1.coord;
-        auto v2 = m * model.get_face()[i].v2.coord;
-        //        draw2d.line(v0, v1, RED);
-        //        draw2d.line(v1, v2, BLUE);
-        //        draw2d.line(v2, v0, WHITE);
-        std::cout << v0 << std::endl;
-        std::cout << v1 << std::endl;
-        std::cout << v2 << std::endl;
-        draw2d.triangle(v0, v1, v2, RED);
-    }
+    //    for (size_t i = 0; i < model.get_face().size(); i++) {
+    //        auto v0 = m * model.get_face()[i].v0.coord;
+    //        auto v1 = m * model.get_face()[i].v1.coord;
+    //        auto v2 = m * model.get_face()[i].v2.coord;
+    //        //        draw2d.line(v0, v1, RED);
+    //        //        draw2d.line(v1, v2, BLUE);
+    //        //        draw2d.line(v2, v0, WHITE);
+    //        draw2d.triangle(v0, v1, v2, RED);
+    //    }
 
-    //    framebuffer.clear(BLACK, std::numeric_limits<float>::lowest());
-
-    for (size_t i = 0; i < model.get_face().size(); i++) {
-        auto v0 = m2 * model.get_face()[i].v0.coord;
-        auto v1 = m2 * model.get_face()[i].v1.coord;
-        auto v2 = m2 * model.get_face()[i].v2.coord;
-        //        std::cout << v0 << std::endl;
-        //        std::cout << v1 << std::endl;
-        //        std::cout << v2 << std::endl;
-        draw3d.triangle(v0, v1, v2, WHITE);
-    }
+    draw3d.model(model, m2);
 
     auto end = us();
     std::cout << "time: " << end - start << std::endl;
