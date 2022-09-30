@@ -17,11 +17,13 @@
 #ifndef _MODEL_H_
 #define _MODEL_H_
 
-#include "vector"
 #include "string"
+#include "vector"
+
 #include "tiny_obj_loader.h"
-#include "vector.hpp"
+
 #include "matrix.hpp"
+#include "vector.hpp"
 
 /**
  * @brief 模型
@@ -42,16 +44,16 @@ public:
      */
     struct vertex_t {
         /// 坐标
-        coord_t coord;
+        coord_t    coord;
         /// 法线，顶点 v 的数量与 vn 的数量一样多
-        normal_t normal;
+        normal_t   normal;
         /// 贴图(纹理)，范围为 0~1，顶点 v 的个数不一定与纹理坐标 vt
         /// 的个数一样多， 因为有可能很多顶点公用一个纹理坐标的像素。
         texcoord_t texcoord;
         /// 颜色，最终每个三角面的颜色，是由构成这个三角面的三个顶点进行插值计算
         /// 如果 obj 文件中没有指定则设为 1(白色)
         /// 范围 [0, 1]
-        color_t color;
+        color_t    color;
 
         /**
          * @brief 构造函数
@@ -62,7 +64,7 @@ public:
          * @brief 构造函数
          * @param  _vertex          另一个 vertex_t
          */
-        vertex_t(const vertex_t &_vertex);
+        vertex_t(const vertex_t& _vertex);
 
         /**
          * @brief 构造函数
@@ -71,8 +73,8 @@ public:
          * @param  _texcoord        贴图
          * @param  _color           颜色
          */
-        vertex_t(const coord_t &_coord, const normal_t &_normal,
-                 const texcoord_t &_texcoord, const color_t &_color);
+        vertex_t(const coord_t& _coord, const normal_t& _normal,
+                 const texcoord_t& _texcoord, const color_t& _color);
 
         /**
          * @brief 析构函数
@@ -84,15 +86,15 @@ public:
          * @param  _vertex          另一个 vertex_t
          * @return vertex_t&        结果
          */
-        vertex_t &operator=(const vertex_t &_vertex);
+        vertex_t& operator=(const vertex_t& _vertex);
     };
 
     struct face_t {
-        vertex_t v0;
-        vertex_t v1;
-        vertex_t v2;
+        vertex_t            v0;
+        vertex_t            v1;
+        vertex_t            v2;
         /// 面的法向量为三个点的法向量矢量和
-        normal_t normal;
+        normal_t            normal;
         // 面的颜色为三个点的颜色插值
         tinyobj::material_t material;
 
@@ -105,7 +107,7 @@ public:
          * @brief 构造函数
          * @param  _face            另一个 face_t
          */
-        face_t(const face_t &_face);
+        face_t(const face_t& _face);
 
         /**
          * @brief 构造函数
@@ -114,8 +116,8 @@ public:
          * @param  _v2              第三个顶点
          * @param  _material        材质
          */
-        face_t(const vertex_t &_v0, const vertex_t &_v1, const vertex_t &_v2,
-               const tinyobj::material_t &_material);
+        face_t(const vertex_t& _v0, const vertex_t& _v1, const vertex_t& _v2,
+               const tinyobj::material_t& _material);
 
         /**
          * @brief 析构函数
@@ -127,21 +129,21 @@ public:
          * @param  _face            另一个 face_t
          * @return face_t&          结果
          */
-        face_t &operator=(const face_t &_face);
+        face_t&       operator=(const face_t& _face);
 
         /**
          * @brief 模型与矩阵进行运算，效果是对模型进行变换
          * @param  _matrix          变换矩阵
          * @return const face_t&    结果
          */
-        const face_t &operator*(const matrix4f_t &_matrix);
+        const face_t& operator*(const matrix4f_t& _matrix);
 
         /**
          * @brief 模型与矩阵进行运算，效果是对模型进行变换
          * @param  _matrix          变换矩阵
          * @return const face_t     结果
          */
-        const face_t operator*(const matrix4f_t &_matrix) const;
+        const face_t  operator*(const matrix4f_t& _matrix) const;
     };
 
 private:
@@ -157,7 +159,7 @@ public:
      * @brief 构造函数
      * @param  _model           另一个 model_t
      */
-    model_t(const model_t &_model);
+    model_t(const model_t& _model);
 
     /**
      * @brief 构造函数
@@ -165,7 +167,7 @@ public:
      * @param  _mtl_path        mtl 文件路径
      * @todo 顶点去重
      */
-    model_t(const std::string &_obj_path, const std::string &_mtl_path = "");
+    model_t(const std::string& _obj_path, const std::string& _mtl_path = "");
 
     /**
      * @brief 析构函数
@@ -177,13 +179,13 @@ public:
      * @param  _model           另一个 model_t
      * @return model_t&         结果
      */
-    model_t &operator=(const model_t &_model);
+    model_t&                   operator=(const model_t& _model);
 
     /**
      * @brief 获取面
      * @return const std::vector<face_t>&   所有面
      */
-    const std::vector<face_t> &get_face(void) const;
+    const std::vector<face_t>& get_face(void) const;
 };
 
 #endif /* _MODEL_H_ */

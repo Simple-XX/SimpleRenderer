@@ -15,9 +15,10 @@
  */
 
 #include "iostream"
+
+#include "camera.h"
 #include "display.h"
 #include "log.hpp"
-#include "camera.h"
 
 uint8_t display_t::ARGB2A(uint32_t _color) {
     return (_color >> 24) & 0xFF;
@@ -35,7 +36,7 @@ uint8_t display_t::ARGB2B(uint32_t _color) {
     return (_color >> 0) & 0xFF;
 }
 
-void display_t::pixel(SDL_Surface *_surface, const uint32_t _x,
+void display_t::pixel(SDL_Surface* _surface, const uint32_t _x,
                       const uint32_t _y, const uint8_t _a, const uint8_t _r,
                       const uint8_t _g, const uint8_t _b) {
     // 加锁
@@ -44,22 +45,22 @@ void display_t::pixel(SDL_Surface *_surface, const uint32_t _x,
         if (ret != 0) {
             throw std::runtime_error(log(SDL_GetError()));
         }
-    } catch (const std::runtime_error &e) {
+    } catch (const std::runtime_error& e) {
         std::cerr << e.what() << std::endl;
         return;
     }
     // 判断颜色深度
     int bpp = _surface->format->BytesPerPixel;
     if (bpp != 4) {
-        std::cerr << "Only support "
-                  << SDL_GetPixelFormatName(
-                         SDL_GetWindowPixelFormat(sdl_window))
-                  << std::endl;
+        std::cerr
+          << "Only support "
+          << SDL_GetPixelFormatName(SDL_GetWindowPixelFormat(sdl_window))
+          << std::endl;
         return;
     }
     // 计算像素位置
-    uint8_t *p = (uint8_t *)_surface->pixels + _y * _surface->pitch + _x * bpp;
-    *(uint32_t *)p = SDL_MapRGBA(_surface->format, _r, _g, _b, _a);
+    uint8_t* p = (uint8_t*)_surface->pixels + _y * _surface->pitch + _x * bpp;
+    *(uint32_t*)p = SDL_MapRGBA(_surface->format, _r, _g, _b, _a);
     SDL_UnlockSurface(_surface);
     return;
 }
@@ -81,7 +82,7 @@ display_t::display_t(std::shared_ptr<framebuffer_t> _framebuffer)
         if (sdl_window == nullptr) {
             throw std::runtime_error(log(SDL_GetError()));
         }
-    } catch (const std::runtime_error &e) {
+    } catch (const std::runtime_error& e) {
         std::cerr << e.what() << std::endl;
         return;
     }
@@ -168,7 +169,7 @@ void display_t::fill(void) {
         if (surface == nullptr) {
             throw std::runtime_error(log(SDL_GetError()));
         }
-    } catch (const std::runtime_error &e) {
+    } catch (const std::runtime_error& e) {
         std::cerr << e.what() << std::endl;
         return;
     }
@@ -197,7 +198,7 @@ void display_t::loop(void) {
             if (ret != 0) {
                 throw std::runtime_error(log(SDL_GetError()));
             }
-        } catch (const std::runtime_error &e) {
+        } catch (const std::runtime_error& e) {
             std::cerr << e.what() << std::endl;
             return;
         }

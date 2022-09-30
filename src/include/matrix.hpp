@@ -18,9 +18,10 @@
 #define _MATRIX_HPP_
 
 #include "cstring"
-#include "iostream"
 #include "iomanip"
+#include "iostream"
 #include "vector"
+
 #include "log.hpp"
 #include "vector.hpp"
 
@@ -34,13 +35,13 @@ private:
     /// @brief  阶数
     static constexpr const int32_t ORDER = 4;
     /// @brief 矩阵元素
-    _T mat[ORDER][ORDER];
+    _T                             mat[ORDER][ORDER];
 
     /**
      * @brief 矩阵行列式的值
      * @return _T               行列式的值
      */
-    _T determ(void) const;
+    _T                             determ(void) const;
 
     /**
      * @brief 矩阵的余子式
@@ -68,13 +69,13 @@ public:
      * @brief 构造函数
      * @param  _mat             另一个矩阵
      */
-    explicit matrix_t(const matrix_t<_T> &_mat);
+    explicit matrix_t(const matrix_t<_T>& _mat);
 
     /**
      * @brief 构造函数
      * @param  _arr             指针
      */
-    explicit matrix_t(const _T *const _arr);
+    explicit matrix_t(const _T* const _arr);
 
     /**
      * @brief 构造函数
@@ -86,56 +87,56 @@ public:
      * @brief 构造函数，构造齐次坐标，多余位置补 0
      * @param  _v               四维向量
      */
-    explicit matrix_t(const vector4_t<_T> &_v);
+    explicit matrix_t(const vector4_t<_T>& _v);
 
     /**
      * @brief 赋值
      * @param  _mat             另一个 matrix_t
      * @return matrix_t<_T>&    结果
      */
-    matrix_t<_T> &operator=(const matrix_t<_T> &_mat);
+    matrix_t<_T>&      operator=(const matrix_t<_T>& _mat);
 
     /**
      * @brief 矩阵间加法
      * @param  _mat             另一个 matrix_t
      * @return const matrix_t<_T>   结果
      */
-    const matrix_t<_T> operator+(const matrix_t<_T> &_mat) const;
+    const matrix_t<_T> operator+(const matrix_t<_T>& _mat) const;
 
     /**
      * @brief 矩阵自加
      * @param  _mat             另一个 matrix_t
      * @return matrix_t<_T>&    结果
      */
-    matrix_t<_T> &operator+=(const matrix_t<_T> &_mat);
+    matrix_t<_T>&      operator+=(const matrix_t<_T>& _mat);
 
     /**
      * @brief 矩阵间减法
      * @param  _mat             另一个 matrix_t
      * @return const matrix_t<_T>   结果
      */
-    const matrix_t<_T> operator-(const matrix_t<_T> &_mat) const;
+    const matrix_t<_T> operator-(const matrix_t<_T>& _mat) const;
 
     /**
      * @brief 矩阵自减
      * @param  _mat             另一个 matrix_t
      * @return matrix_t<_T>&    结果
      */
-    matrix_t<_T> &operator-=(const matrix_t<_T> &_mat);
+    matrix_t<_T>&      operator-=(const matrix_t<_T>& _mat);
 
     /**
      * @brief 矩阵数乘
      * @param  _v               数
      * @return const matrix_t<_T>   结果
      */
-    const matrix_t<_T> operator*(const _T &_v) const;
+    const matrix_t<_T> operator*(const _T& _v) const;
 
     /**
      * @brief 矩阵间乘法
      * @param  _mat             另一个 matrix_t
      * @return const matrix_t<_T>   结果
      */
-    const matrix_t<_T> operator*(const matrix_t<_T> &_mat) const;
+    const matrix_t<_T> operator*(const matrix_t<_T>& _mat) const;
 
     /**
      * @brief 行向量乘矩阵
@@ -145,8 +146,8 @@ public:
      * @return const vector4_t<_U>  结果
      */
     template <class _U>
-    friend const vector4_t<_U> operator*(const vector4_t<_U> &_v,
-                                         const matrix_t<_T>  &_mat) {
+    friend const vector4_t<_U>
+    operator*(const vector4_t<_U>& _v, const matrix_t<_T>& _mat) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
@@ -154,12 +155,12 @@ public:
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
 
-        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[0][1] + _v.z * _mat[0][2] +
-                     1 * _mat[0][3];
-        auto new_y = _v.x * _mat[1][0] + _v.y * _mat[1][1] + _v.z * _mat[1][2] +
-                     1 * _mat[1][3];
-        auto new_z = _v.x * _mat[2][0] + _v.y * _mat[2][1] + _v.z * _mat[2][2] +
-                     1 * _mat[2][3];
+        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[0][1] + _v.z * _mat[0][2]
+                   + 1 * _mat[0][3];
+        auto new_y = _v.x * _mat[1][0] + _v.y * _mat[1][1] + _v.z * _mat[1][2]
+                   + 1 * _mat[1][3];
+        auto new_z = _v.x * _mat[2][0] + _v.y * _mat[2][1] + _v.z * _mat[2][2]
+                   + 1 * _mat[2][3];
         return vector4_t<_U>(new_x, new_y, new_z);
     }
 
@@ -171,15 +172,15 @@ public:
      * @return const matrix_t<_T>   结果
      */
     template <class _U>
-    friend const matrix_t<_T> operator*(const matrix_t<_T>  &_mat,
-                                        const vector4_t<_U> &_v) {
+    friend const matrix_t<_T>
+    operator*(const matrix_t<_T>& _mat, const vector4_t<_U>& _v) {
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-        _T tmp[ORDER][ORDER] = {{0}};
+        _T tmp[ORDER][ORDER] = { { 0 } };
         memcpy(tmp, _mat.mat, ORDER * ORDER * sizeof(_T));
         for (uint32_t i = 0; i < ORDER; i++) {
             for (uint32_t j = 0; j < ORDER; j++) {
@@ -194,14 +195,14 @@ public:
      * @param  _v               数
      * @return matrix_t<_T>&    结果
      */
-    matrix_t<_T> &operator*=(const _T &_v);
+    matrix_t<_T>& operator*=(const _T& _v);
 
     /**
      * @brief 矩阵间自乘
      * @param  _mat             另一个 matrix_t
      * @return matrix_t<_T>&    结果
      */
-    matrix_t<_T> &operator*=(const matrix_t<_T> &_mat);
+    matrix_t<_T>& operator*=(const matrix_t<_T>& _mat);
 
     /**
      * @brief 行向量乘矩阵
@@ -211,20 +212,20 @@ public:
      * @return vector4_t<_U>&   结果
      */
     template <class _U>
-    friend vector4_t<_U> &operator*=(vector4_t<_U>      &_v,
-                                     const matrix_t<_T> &_mat) {
+    friend vector4_t<_U>&
+    operator*=(vector4_t<_U>& _v, const matrix_t<_T>& _mat) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
-        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[0][1] + _v.z * _mat[0][2] +
-                     1 * _mat[0][3];
-        auto new_y = _v.x * _mat[1][0] + _v.y * _mat[1][1] + _v.z * _mat[1][2] +
-                     1 * _mat[1][3];
-        auto new_z = _v.x * _mat[2][0] + _v.y * _mat[2][1] + _v.z * _mat[2][2] +
-                     1 * _mat[2][3];
+        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[0][1] + _v.z * _mat[0][2]
+                   + 1 * _mat[0][3];
+        auto new_y = _v.x * _mat[1][0] + _v.y * _mat[1][1] + _v.z * _mat[1][2]
+                   + 1 * _mat[1][3];
+        auto new_z = _v.x * _mat[2][0] + _v.y * _mat[2][1] + _v.z * _mat[2][2]
+                   + 1 * _mat[2][3];
         _v.x = new_x;
         _v.y = new_y;
         _v.z = new_z;
@@ -239,12 +240,12 @@ public:
      * @return matrix_t<_T>&    结果
      */
     template <class _U>
-    friend matrix_t<_T> &operator*=(matrix_t<_T>        &_mat,
-                                    const vector4_t<_U> &_v) {
+    friend matrix_t<_T>&
+    operator*=(matrix_t<_T>& _mat, const vector4_t<_U>& _v) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-        _T tmp[ORDER][ORDER] = {{0}};
+        _T tmp[ORDER][ORDER] = { { 0 } };
         memcpy(tmp, _mat.mat, ORDER * ORDER * sizeof(_T));
         for (uint32_t i = 0; i < ORDER; i++) {
             for (uint32_t j = 0; j < ORDER; j++) {
@@ -261,14 +262,14 @@ public:
      * @return true             相等
      * @return false            不等
      */
-    bool operator==(const matrix_t<_T> &_mat) const;
+    bool                  operator==(const matrix_t<_T>& _mat) const;
     /**
      * @brief 矩阵不等
      * @param  _mat             另一个 matrix_t
      * @return true             不等
      * @return false            相等
      */
-    bool operator!=(const matrix_t<_T> &_mat) const;
+    bool                  operator!=(const matrix_t<_T>& _mat) const;
 
     /**
      * @brief 下标重载
@@ -276,7 +277,7 @@ public:
      * @return _T*              行指针
      * @note    注意不要越界访问
      */
-    _T *operator[](const uint32_t _idx);
+    _T*                   operator[](const uint32_t _idx);
 
     /**
      * @brief 下标重载
@@ -284,19 +285,19 @@ public:
      * @return const _T*        行指针
      * @note    注意不要越界访问
      */
-    const _T *operator[](const uint32_t _idx) const;
+    const _T*             operator[](const uint32_t _idx) const;
 
     /**
      * @brief 获取矩阵阶数
      * @return uint32_t         阶数
      */
-    uint32_t get_order(void) const;
+    uint32_t              get_order(void) const;
 
     /**
      * @brief 矩阵转置
      * @return const matrix_t<_T>   转置矩阵
      */
-    const matrix_t<_T> transpose(void) const;
+    const matrix_t<_T>    transpose(void) const;
 
     /**
      * @brief 逆矩阵
@@ -309,25 +310,25 @@ public:
      * @param  _p               主元表
      * @return matrix_t<float>  分解好的矩阵
      */
-    matrix_t<float> PLU(std::vector<uint32_t> &_p);
+    matrix_t<float>       PLU(std::vector<uint32_t>& _p);
 
     /**
      * @brief 余子式矩阵
      * @return matrix_t<_T>     余子式矩阵
      */
-    matrix_t<_T> minor(void) const;
+    matrix_t<_T>          minor(void) const;
 
     /**
      * @brief 代数余子式矩阵
      * @return matrix_t<_T>     代数余子式矩阵
      */
-    matrix_t<_T> cofactor(void) const;
+    matrix_t<_T>          cofactor(void) const;
 
     /**
      * @brief 伴随矩阵
      * @return matrix_t<_T>     伴随矩阵
      */
-    matrix_t<_T> adjugate(void) const;
+    matrix_t<_T>          adjugate(void) const;
 
     /**
      * @brief 平移矩阵
@@ -337,8 +338,8 @@ public:
      * @return const matrix_t<_T>   构造好的平移矩阵
      * @note    先旋转再平移
      */
-    const matrix_t<_T> translate(const float _x, const float _y,
-                                 const float _z) const;
+    const matrix_t<_T>
+    translate(const float _x, const float _y, const float _z) const;
 
     /**
      * @brief 缩放矩阵
@@ -354,8 +355,8 @@ public:
      * @param  _z               z 方向缩放倍数
      * @return const matrix_t<_T>   构造好的旋转矩阵
      */
-    const matrix_t<_T> scale(const float _x, const float _y,
-                             const float _z) const;
+    const matrix_t<_T>
+    scale(const float _x, const float _y, const float _z) const;
 
     /**
      * @brief 旋转矩阵
@@ -375,24 +376,24 @@ public:
      * @return true             有
      * @return false            无
      */
-    bool HasNaNs(void) const;
+    bool               HasNaNs(void) const;
 
     /**
      * @brief 角度转换为弧度
      * @param  _deg             角度
      * @return float            弧度
      */
-    static float RAD(const float _deg);
+    static float       RAD(const float _deg);
 
     /**
      * @brief 弧度转换为角度
      * @param  _rad             弧度
      * @return float            角度
      */
-    static float DEG(const float _rad);
+    static float       DEG(const float _rad);
 
-    friend std::ostream &operator<<(std::ostream       &_os,
-                                    const matrix_t<_T> &_mat) {
+    friend std::ostream&
+    operator<<(std::ostream& _os, const matrix_t<_T>& _mat) {
         _os << "[";
         for (uint32_t i = 0; i < matrix_t<_T>::ORDER; i++) {
             if (i != 0) {
@@ -413,37 +414,37 @@ public:
 
 template <class _T>
 _T matrix_t<_T>::determ(void) const {
-    return mat[0][0] * mat[1][1] * mat[2][2] * mat[3][3] +
-           mat[0][0] * mat[2][1] * mat[3][2] * mat[1][3] +
-           mat[0][0] * mat[3][1] * mat[1][2] * mat[2][3] +
+    return mat[0][0] * mat[1][1] * mat[2][2] * mat[3][3]
+         + mat[0][0] * mat[2][1] * mat[3][2] * mat[1][3]
+         + mat[0][0] * mat[3][1] * mat[1][2] * mat[2][3] +
 
-           mat[1][0] * mat[0][1] * mat[3][2] * mat[2][3] +
-           mat[1][0] * mat[3][1] * mat[2][2] * mat[0][3] +
-           mat[1][0] * mat[2][1] * mat[0][2] * mat[3][3] +
+           mat[1][0] * mat[0][1] * mat[3][2] * mat[2][3]
+         + mat[1][0] * mat[3][1] * mat[2][2] * mat[0][3]
+         + mat[1][0] * mat[2][1] * mat[0][2] * mat[3][3] +
 
-           mat[2][0] * mat[3][1] * mat[0][2] * mat[1][3] +
-           mat[2][0] * mat[0][1] * mat[1][2] * mat[3][3] +
-           mat[2][0] * mat[1][1] * mat[3][2] * mat[0][3] +
+           mat[2][0] * mat[3][1] * mat[0][2] * mat[1][3]
+         + mat[2][0] * mat[0][1] * mat[1][2] * mat[3][3]
+         + mat[2][0] * mat[1][1] * mat[3][2] * mat[0][3] +
 
-           mat[3][0] * mat[2][1] * mat[1][2] * mat[0][3] +
-           mat[3][0] * mat[1][1] * mat[0][2] * mat[2][3] +
-           mat[3][0] * mat[0][1] * mat[2][2] * mat[1][3] -
+           mat[3][0] * mat[2][1] * mat[1][2] * mat[0][3]
+         + mat[3][0] * mat[1][1] * mat[0][2] * mat[2][3]
+         + mat[3][0] * mat[0][1] * mat[2][2] * mat[1][3] -
 
-           mat[0][0] * mat[1][1] * mat[3][2] * mat[2][3] -
-           mat[0][0] * mat[2][1] * mat[1][2] * mat[3][3] -
-           mat[0][0] * mat[3][1] * mat[2][2] * mat[1][3] -
+           mat[0][0] * mat[1][1] * mat[3][2] * mat[2][3]
+         - mat[0][0] * mat[2][1] * mat[1][2] * mat[3][3]
+         - mat[0][0] * mat[3][1] * mat[2][2] * mat[1][3] -
 
-           mat[1][0] * mat[0][1] * mat[2][2] * mat[3][3] -
-           mat[1][0] * mat[3][1] * mat[0][2] * mat[2][3] -
-           mat[1][0] * mat[2][1] * mat[3][2] * mat[0][3] -
+           mat[1][0] * mat[0][1] * mat[2][2] * mat[3][3]
+         - mat[1][0] * mat[3][1] * mat[0][2] * mat[2][3]
+         - mat[1][0] * mat[2][1] * mat[3][2] * mat[0][3] -
 
-           mat[2][0] * mat[3][1] * mat[1][2] * mat[0][3] -
-           mat[2][0] * mat[0][1] * mat[3][2] * mat[1][3] -
-           mat[2][0] * mat[1][1] * mat[0][2] * mat[3][3] -
+           mat[2][0] * mat[3][1] * mat[1][2] * mat[0][3]
+         - mat[2][0] * mat[0][1] * mat[3][2] * mat[1][3]
+         - mat[2][0] * mat[1][1] * mat[0][2] * mat[3][3] -
 
-           mat[3][0] * mat[2][1] * mat[0][2] * mat[1][3] -
-           mat[3][0] * mat[1][1] * mat[2][2] * mat[0][3] -
-           mat[3][0] * mat[0][1] * mat[1][2] * mat[2][3];
+           mat[3][0] * mat[2][1] * mat[0][2] * mat[1][3]
+         - mat[3][0] * mat[1][1] * mat[2][2] * mat[0][3]
+         - mat[3][0] * mat[0][1] * mat[1][2] * mat[2][3];
 }
 
 template <class _T>
@@ -456,7 +457,7 @@ matrix_t<_T>::matrix_t(void) {
 }
 
 template <class _T>
-matrix_t<_T>::matrix_t(const matrix_t<_T> &_mat) {
+matrix_t<_T>::matrix_t(const matrix_t<_T>& _mat) {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
     }
@@ -465,7 +466,7 @@ matrix_t<_T>::matrix_t(const matrix_t<_T> &_mat) {
 }
 
 template <class _T>
-matrix_t<_T>::matrix_t(const _T *const _arr) {
+matrix_t<_T>::matrix_t(const _T* const _arr) {
     if (_arr == nullptr) {
         throw std::invalid_argument(log("_arr == nullptr"));
     }
@@ -495,7 +496,7 @@ matrix_t<_T>::matrix_t(const _T _arr[ORDER][ORDER]) {
 }
 
 template <class _T>
-matrix_t<_T>::matrix_t(const vector4_t<_T> &_v) {
+matrix_t<_T>::matrix_t(const vector4_t<_T>& _v) {
     if (_v.HasNaNs()) {
         throw std::invalid_argument(log("_v.HasNaNs()"));
     }
@@ -508,7 +509,7 @@ matrix_t<_T>::matrix_t(const vector4_t<_T> &_v) {
 }
 
 template <class _T>
-matrix_t<_T> &matrix_t<_T>::operator=(const matrix_t<_T> &_mat) {
+matrix_t<_T>& matrix_t<_T>::operator=(const matrix_t<_T>& _mat) {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
     }
@@ -520,11 +521,11 @@ matrix_t<_T> &matrix_t<_T>::operator=(const matrix_t<_T> &_mat) {
 }
 
 template <class _T>
-const matrix_t<_T> matrix_t<_T>::operator+(const matrix_t<_T> &_mat) const {
+const matrix_t<_T> matrix_t<_T>::operator+(const matrix_t<_T>& _mat) const {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
     }
-    _T tmp[ORDER][ORDER] = {{0}};
+    _T tmp[ORDER][ORDER] = { { 0 } };
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
             tmp[i][j] = mat[i][j] + _mat[i][j];
@@ -534,7 +535,7 @@ const matrix_t<_T> matrix_t<_T>::operator+(const matrix_t<_T> &_mat) const {
 }
 
 template <class _T>
-matrix_t<_T> &matrix_t<_T>::operator+=(const matrix_t<_T> &_mat) {
+matrix_t<_T>& matrix_t<_T>::operator+=(const matrix_t<_T>& _mat) {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
     }
@@ -547,11 +548,11 @@ matrix_t<_T> &matrix_t<_T>::operator+=(const matrix_t<_T> &_mat) {
 }
 
 template <class _T>
-const matrix_t<_T> matrix_t<_T>::operator-(const matrix_t<_T> &_mat) const {
+const matrix_t<_T> matrix_t<_T>::operator-(const matrix_t<_T>& _mat) const {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
     }
-    _T tmp[ORDER][ORDER] = {{0}};
+    _T tmp[ORDER][ORDER] = { { 0 } };
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
             tmp[i][j] = mat[i][j] - _mat[i][j];
@@ -561,7 +562,7 @@ const matrix_t<_T> matrix_t<_T>::operator-(const matrix_t<_T> &_mat) const {
 }
 
 template <class _T>
-matrix_t<_T> &matrix_t<_T>::operator-=(const matrix_t<_T> &_mat) {
+matrix_t<_T>& matrix_t<_T>::operator-=(const matrix_t<_T>& _mat) {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
     }
@@ -574,11 +575,11 @@ matrix_t<_T> &matrix_t<_T>::operator-=(const matrix_t<_T> &_mat) {
 }
 
 template <class _T>
-const matrix_t<_T> matrix_t<_T>::operator*(const _T &_v) const {
+const matrix_t<_T> matrix_t<_T>::operator*(const _T& _v) const {
     if (std::isnan(_v)) {
         throw std::invalid_argument(log("std::isnan(_v)"));
     }
-    _T tmp[ORDER][ORDER] = {{0}};
+    _T tmp[ORDER][ORDER] = { { 0 } };
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
             tmp[i][j] = mat[i][j] * _v;
@@ -588,11 +589,11 @@ const matrix_t<_T> matrix_t<_T>::operator*(const _T &_v) const {
 }
 
 template <class _T>
-const matrix_t<_T> matrix_t<_T>::operator*(const matrix_t<_T> &_mat) const {
+const matrix_t<_T> matrix_t<_T>::operator*(const matrix_t<_T>& _mat) const {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
     }
-    _T tmp[ORDER][ORDER] = {{0}};
+    _T tmp[ORDER][ORDER] = { { 0 } };
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
             for (uint32_t k = 0; k < ORDER; k++) {
@@ -604,7 +605,7 @@ const matrix_t<_T> matrix_t<_T>::operator*(const matrix_t<_T> &_mat) const {
 }
 
 template <class _T>
-matrix_t<_T> &matrix_t<_T>::operator*=(const _T &_v) {
+matrix_t<_T>& matrix_t<_T>::operator*=(const _T& _v) {
     if (std::isnan(_v)) {
         throw std::invalid_argument(log("std::isnan(_v)"));
     }
@@ -617,11 +618,11 @@ matrix_t<_T> &matrix_t<_T>::operator*=(const _T &_v) {
 }
 
 template <class _T>
-matrix_t<_T> &matrix_t<_T>::operator*=(const matrix_t<_T> &_mat) {
+matrix_t<_T>& matrix_t<_T>::operator*=(const matrix_t<_T>& _mat) {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
     }
-    _T tmp[ORDER][ORDER] = {{0}};
+    _T tmp[ORDER][ORDER] = { { 0 } };
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < _mat.ORDER; j++) {
             for (uint32_t k = 0; k < ORDER; k++) {
@@ -634,7 +635,7 @@ matrix_t<_T> &matrix_t<_T>::operator*=(const matrix_t<_T> &_mat) {
 }
 
 template <class _T>
-bool matrix_t<_T>::operator==(const matrix_t<_T> &_mat) const {
+bool matrix_t<_T>::operator==(const matrix_t<_T>& _mat) const {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
     }
@@ -649,7 +650,7 @@ bool matrix_t<_T>::operator==(const matrix_t<_T> &_mat) const {
 }
 
 template <class _T>
-bool matrix_t<_T>::operator!=(const matrix_t<_T> &_mat) const {
+bool matrix_t<_T>::operator!=(const matrix_t<_T>& _mat) const {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
     }
@@ -664,7 +665,7 @@ bool matrix_t<_T>::operator!=(const matrix_t<_T> &_mat) const {
 }
 
 template <class _T>
-_T *matrix_t<_T>::operator[](const uint32_t _idx) {
+_T* matrix_t<_T>::operator[](const uint32_t _idx) {
     if (_idx > ORDER) {
         throw std::invalid_argument(log("_idx > ORDER"));
     }
@@ -672,7 +673,7 @@ _T *matrix_t<_T>::operator[](const uint32_t _idx) {
 }
 
 template <class _T>
-const _T *matrix_t<_T>::operator[](const uint32_t _idx) const {
+const _T* matrix_t<_T>::operator[](const uint32_t _idx) const {
     if (_idx > ORDER) {
         throw std::invalid_argument(log("_idx > ORDER"));
     }
@@ -686,7 +687,7 @@ uint32_t matrix_t<_T>::get_order(void) const {
 
 template <class _T>
 const matrix_t<_T> matrix_t<_T>::transpose(void) const {
-    _T tmp[ORDER][ORDER] = {{0}};
+    _T tmp[ORDER][ORDER] = { { 0 } };
     for (uint32_t i = 0; i < ORDER; i++) {
         for (uint32_t j = 0; j < ORDER; j++) {
             tmp[j][i] = mat[i][j];
@@ -697,7 +698,7 @@ const matrix_t<_T> matrix_t<_T>::transpose(void) const {
 
 template <class _T>
 const matrix_t<float> matrix_t<_T>::inverse(void) const {
-    _T tmp[ORDER][ORDER] = {{0}};
+    _T tmp[ORDER][ORDER] = { { 0 } };
     _T d                 = determ();
     if (d == 0) {
         return matrix_t<float>(tmp);
@@ -835,11 +836,11 @@ const matrix_t<float> matrix_t<_T>::inverse(void) const {
 // }
 
 template <class _T>
-const matrix_t<_T> matrix_t<_T>::translate(const float _x, const float _y,
-                                           const float _z) const {
+const matrix_t<_T>
+matrix_t<_T>::translate(const float _x, const float _y, const float _z) const {
     if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)) {
         throw std::invalid_argument(
-            log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
+          log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
     }
     matrix_t<float> tmp;
     tmp.mat[0][3] = _x;
@@ -862,11 +863,11 @@ const matrix_t<_T> matrix_t<_T>::scale(const float _scale) const {
 }
 
 template <class _T>
-const matrix_t<_T> matrix_t<_T>::scale(const float _x, const float _y,
-                                       const float _z) const {
+const matrix_t<_T>
+matrix_t<_T>::scale(const float _x, const float _y, const float _z) const {
     if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)) {
         throw std::invalid_argument(
-            log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
+          log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
     }
     matrix_t<float> tmp;
     tmp.mat[0][0] = _x;
@@ -877,18 +878,18 @@ const matrix_t<_T> matrix_t<_T>::scale(const float _x, const float _y,
 }
 
 template <class _T>
-const matrix_t<_T> matrix_t<_T>::rotate(const float _x, const float _y,
-                                        const float _z,
-                                        const float _angle) const {
-    if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z) ||
-        std::isnan(_angle)) {
+const matrix_t<_T>
+matrix_t<_T>::rotate(const float _x, const float _y, const float _z,
+                     const float _angle) const {
+    if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)
+        || std::isnan(_angle)) {
         throw std::invalid_argument(
-            log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)|| "
-                "std::isnan(_angle)"));
+          log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)|| "
+              "std::isnan(_angle)"));
     }
-    auto n = vector4_t(_x, _y, _z).normalize();
-    auto c = std::cos(_angle);
-    auto s = std::sin(_angle);
+    auto            n = vector4_t(_x, _y, _z).normalize();
+    auto            c = std::cos(_angle);
+    auto            s = std::sin(_angle);
 
     matrix_t<float> tmp;
     tmp.mat[0][0] = n.x * n.x * (1 - c) + c;
