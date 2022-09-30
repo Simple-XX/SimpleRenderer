@@ -17,7 +17,6 @@
 #include "thread"
 #include "model.h"
 #include "display.h"
-#include "draw2d.h"
 #include "draw3d.h"
 #include "matrix.hpp"
 #include "camera.h"
@@ -31,38 +30,38 @@ static constexpr const uint32_t                  HEIGHT = 1080;
 [[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
 
 void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
-    draw2d_t draw2d(_framebuffer);
-    draw2d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);
-    draw2d.line(WIDTH - 1, HEIGHT - 1, 0, 0, WHITE);
-    draw2d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
-    draw2d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, WHITE);
+    draw3d_t draw3d(_framebuffer);
+    draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);
+    draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, WHITE);
+    draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
+    draw3d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, WHITE);
 
     vector4f_t v0(80, 80);
     vector4f_t v1(800, 800);
     vector4f_t v2(50, 900);
-    draw2d.line(v2.x, v2.y, v0.x, v0.y, GREEN);
-    draw2d.line(v0.x, v0.y, v2.x, v2.y, GREEN);
+    draw3d.line(v2.x, v2.y, v0.x, v0.y, GREEN);
+    draw3d.line(v0.x, v0.y, v2.x, v2.y, GREEN);
 
-    draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 100, HEIGHT / 2 + 60, GREEN);
-    draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 50, HEIGHT / 2 + 100, GREEN);
+    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 100, HEIGHT / 2 + 60, GREEN);
+    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 50, HEIGHT / 2 + 100, GREEN);
 
-    draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 80, HEIGHT / 2 - 100, GREEN);
-    draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 100, HEIGHT / 2 - 50, GREEN);
+    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 80, HEIGHT / 2 - 100, GREEN);
+    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 100, HEIGHT / 2 - 50, GREEN);
 
-    draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 50, HEIGHT / 2 + 100, GREEN);
-    draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 100, HEIGHT / 2 + 90, GREEN);
+    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 50, HEIGHT / 2 + 100, GREEN);
+    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 100, HEIGHT / 2 + 90, GREEN);
 
-    draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 90, HEIGHT / 2 - 100, GREEN);
-    draw2d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 100, HEIGHT / 2 - 50, GREEN);
+    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 90, HEIGHT / 2 - 100, GREEN);
+    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 100, HEIGHT / 2 - 50, GREEN);
 
-    draw2d.line(10, 20, 100, 200, RED);
+    draw3d.line(10, 20, 100, 200, RED);
 
     vector4f_t v3(830, 984);
     vector4f_t v4(400, 874);
     vector4f_t v5(505, 456);
-    draw2d.triangle(v5, v3, v4, GREEN);
+    draw3d.triangle2d(v5, v3, v4, GREEN);
     model_t::vertex_t vertex;
-    draw2d.triangle(v0, v1, v2, RED);
+    draw3d.triangle2d(v0, v1, v2, RED);
 
     return;
 }
@@ -100,7 +99,6 @@ int main(int _argc, char **_argv) {
 
     auto framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
 
-    draw2d_t draw2d(framebuffer);
     draw3d_t draw3d(framebuffer);
 
     // 不同的模型需要不同的变换矩阵
@@ -120,10 +118,10 @@ int main(int _argc, char **_argv) {
     //        auto v0 = m * model.get_face()[i].v0.coord;
     //        auto v1 = m * model.get_face()[i].v1.coord;
     //        auto v2 = m * model.get_face()[i].v2.coord;
-    //        //        draw2d.line(v0, v1, RED);
-    //        //        draw2d.line(v1, v2, BLUE);
-    //        //        draw2d.line(v2, v0, WHITE);
-    //        draw2d.triangle(v0, v1, v2, RED);
+    //        //        draw3d.line(v0, v1, RED);
+    //        //        draw3d.line(v1, v2, BLUE);
+    //        //        draw3d.line(v2, v0, WHITE);
+    //        draw3d.triangle(v0, v1, v2, RED);
     //    }
 
     draw3d.model(model, m2);

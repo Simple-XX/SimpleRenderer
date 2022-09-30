@@ -27,10 +27,9 @@ include_directories(
 
 set(test_src
         vector_test.cpp
-        draw2d_test.cpp
+        draw3d_test.cpp
         matrix_test.cpp
         ../src/display.cpp
-        ../src/draw2d.cpp
         ../src/framebuffer.cpp
         ../src/camera.cpp)
 

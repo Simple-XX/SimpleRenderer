@@ -43,6 +43,24 @@ private:
     get_barycentric_coord(const vector4f_t &_p0, const vector4f_t &_p1,
                           const vector4f_t &_p2, const vector4f_t &_p);
 
+    /**
+     * @brief 填充三角形，传入的顶点包含更多信息
+     * @param  _v0              第一个顶点
+     * @param  _v1              第二个顶点
+     * @param  _v2              第三个顶点
+     * @param  _normal          面的法向量
+     * @todo 多线程支持
+     */
+    void triangle(const model_t::vertex_t &_v0, const model_t::vertex_t &_v1,
+                  const model_t::vertex_t &_v2,
+                  const model_t::normal_t &_normal);
+
+    /**
+     * @brief 填充三角形，传入面信息
+     * @param  _face            面
+     */
+    void triangle(const model_t::face_t &_face);
+
 public:
     /**
      * @brief 构造函数，不使用
@@ -61,6 +79,39 @@ public:
     ~draw3d_t(void);
 
     /**
+     * @brief 画直线 Bresenham 算法
+     * @param  _x0              第一个点的 x 坐标
+     * @param  _y0              第一个点的 y 坐标
+     * @param  _x1              第二个点的 x 坐标
+     * @param  _y1              第二个点的 y 坐标
+     * @param  _color           直线颜色
+     * @todo 多线程支持
+     */
+    void line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
+              const int32_t _y1, const framebuffer_t::color_t &_color);
+
+    /**
+     * @brief 直线重载
+     * @param  _p0              第一个点
+     * @param  _p1              第二个点
+     * @param  _color           颜色
+     */
+    void line(const vector4f_t &_p0, const vector4f_t &_p1,
+              const framebuffer_t::color_t &_color);
+
+    /**
+     * @brief 填充三角形
+     * @param  _v0              第一个顶点
+     * @param  _v1              第二个顶点
+     * @param  _v2              第三个顶点
+     * @param  _color           填充的颜色
+     * @todo 多线程支持
+     */
+    void triangle2d(const vector4f_t &_v0, const vector4f_t &_v1,
+                    const vector4f_t             &_v2,
+                    const framebuffer_t::color_t &_color);
+
+    /**
      * @brief 填充三角形
      * @param  _v0              第一个顶点
      * @param  _v1              第二个顶点
@@ -72,19 +123,10 @@ public:
                   const vector4f_t &_v2, const framebuffer_t::color_t &_color);
 
     /**
-     * @brief 填充三角形，传入的顶点包含更多信息
-     * @param  _v0              第一个顶点
-     * @param  _v1              第二个顶点
-     * @param  _v2              第三个顶点
-     * @param  _normal          面的法向量
-     * @todo 多线程支持
+     * @brief 绘制整个模型
+     * @param  _model           模型信息
+     * @param  _tran            变换矩阵
      */
-    void triangle(const model_t::vertex_t &_v0, const model_t::vertex_t &_v1,
-                  const model_t::vertex_t &_v2,
-                  const model_t::normal_t &_normal);
-
-    void triangle(const model_t::face_t &_face);
-
     void model(const model_t &_model, const matrix4f_t &_tran);
 };
 

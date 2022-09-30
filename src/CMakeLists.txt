@@ -32,7 +32,6 @@ set(SimpleRender_src
         model.cpp
         framebuffer.cpp
         display.cpp
-        draw2d.cpp
         draw3d.cpp
         camera.cpp)
 
