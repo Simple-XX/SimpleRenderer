@@ -2,8 +2,9 @@
 # (https://github.com/Simple-XX/SimpleRenderer).
 #
 # CMakeLists.txt for Simple-XX/SimpleRenderer.
+
 ---
-# @version clang-format version 14.0.6
+# @version clang-format version 15
 # @see https://clang.llvm.org/docs/ClangFormatStyleOptions.html
 
 # 访问说明符 public/private 的偏移，与类对齐
@@ -138,8 +139,6 @@ BraceWrapping:
   SplitEmptyRecord: true
   # 空 namespace 的大括号换行
   SplitEmptyNamespace: true
-# json 数组换行，clang-format 16 支持
-# BreakArrays: true
 # 在二元操作符前换行
 BreakBeforeBinaryOperators: All
 # 在大括号前换行，使用自定义规则，在 BraceWrapping 中规定
