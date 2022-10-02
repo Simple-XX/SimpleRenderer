@@ -14,12 +14,12 @@
  * </table>
  */
 
-#include "thread"
-#include "model.h"
+#include "camera.h"
 #include "display.h"
 #include "draw3d.h"
 #include "matrix.hpp"
-#include "camera.h"
+#include "model.h"
+#include "thread"
 
 static constexpr const uint32_t                  WIDTH  = 1920;
 static constexpr const uint32_t                  HEIGHT = 1080;
@@ -39,49 +39,29 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
     vector4f_t v0(80, 80);
     vector4f_t v1(800, 800);
     vector4f_t v2(50, 900);
-    draw3d.line(v2.x, v2.y, v0.x, v0.y, GREEN);
-    draw3d.line(v0.x, v0.y, v2.x, v2.y, GREEN);
-
-    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 100, HEIGHT / 2 + 60, GREEN);
-    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 50, HEIGHT / 2 + 100, GREEN);
-
-    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 80, HEIGHT / 2 - 100, GREEN);
-    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 100, HEIGHT / 2 - 50, GREEN);
-
-    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 50, HEIGHT / 2 + 100, GREEN);
-    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 - 100, HEIGHT / 2 + 90, GREEN);
-
-    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 90, HEIGHT / 2 - 100, GREEN);
-    draw3d.line(WIDTH / 2, HEIGHT / 2, WIDTH / 2 + 100, HEIGHT / 2 - 50, GREEN);
-
-    draw3d.line(10, 20, 100, 200, RED);
-
     vector4f_t v3(830, 984);
     vector4f_t v4(400, 874);
     vector4f_t v5(505, 456);
-    draw3d.triangle2d(v5, v3, v4, GREEN);
-    model_t::vertex_t vertex;
-    draw3d.triangle2d(v0, v1, v2, RED);
+    // draw3d.triangle2d(v5, v3, v4, GREEN);
+    // draw3d.triangle2d(v0, v1, v2, RED);
 
     return;
 }
 
-int main(int _argc, char **_argv) {
+int main(int _argc, char** _argv) {
     // obj 路径
     std::string obj_path;
     // 材质路径
     std::string mtl_path;
     // 如果没有指定那么使用默认值
     if (_argc == 1) {
-        //        obj_path = "../../obj/helmet.obj";
-        //        obj_path = "../../obj/cube.obj";
-        //        obj_path = "../../obj/cube2.obj";
-        //        obj_path = "../../obj/cube3.obj";
-        //        obj_path = "../../obj/cornell_box.obj";
-        //        mtl_path = "../../obj/cube.mtl";
-        //        obj_path = "../../obj/catmark_torus_creases0.obj";
-        //        obj_path = "../../obj/box.obj";
-        //        obj_path = "../../obj/african_head.obj";
+        // obj_path = "../../obj/helmet.obj";
+        //  obj_path = "../../obj/cube.obj";
+        //  obj_path = "../../obj/cube2.obj";
+        // obj_path = "../../obj/cube3.obj";
+        //  obj_path = "../../obj/cornell_box.obj";
+        //  mtl_path = "../../obj/cube.mtl";
+        // obj_path = "../../obj/african_head.obj";
         obj_path = "../../obj/utah-teapot/utah-teapot.obj";
     }
     // 否则使用指定的
@@ -95,36 +75,40 @@ int main(int _argc, char **_argv) {
     }
 
     // 读取模型与材质
-    model_t model(obj_path, mtl_path);
+    model_t  model(obj_path, mtl_path);
 
-    auto framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
+    auto     framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
 
     draw3d_t draw3d(framebuffer);
 
     // 不同的模型需要不同的变换矩阵
     /// @todo 自动处理（需要裁剪）
-    auto m = matrix4f_t();
-    m      = m.rotate(0, 0, 1, matrix4f_t::RAD(180));
-    m      = m.scale(WIDTH / 16., HEIGHT / 9., 1);
-    m      = m.translate(960, 540, 0);
+    auto     m = matrix4f_t();
+    m          = m.rotate(0, 0, 1, matrix4f_t::RAD(90));
+    m          = m.scale(WIDTH / 16., HEIGHT / 9., 1);
+    // m          = m.scale(480, 480, 1);
+    m          = m.translate(960, 540, 0);
+    // std::cout << "m: " << m << std::endl;
+    auto m2    = matrix4f_t();
+    // m2      = m2.rotate(0, 0, 1, matrix4f_t::RAD(180));
+    m2         = m2.scale(WIDTH / 64., HEIGHT / 36., 1);
+    // m2      = m2.scale(WIDTH / 16., HEIGHT / 9., 1);
+    m2         = m2.translate(1000, 540, 0);
+    // std::cout << "m2: " << m2 << std::endl;
 
-    auto m2 = matrix4f_t();
-    m2      = m2.rotate(0, 0, 1, matrix4f_t::RAD(0));
-    m2      = m2.scale(WIDTH / 64., HEIGHT / 36., 1);
-    m2      = m2.translate(1000, 540, 0);
+    // draw3d.model(model, m);
+    draw3d.model(model);
 
     auto start = us();
-    //    for (size_t i = 0; i < model.get_face().size(); i++) {
-    //        auto v0 = m * model.get_face()[i].v0.coord;
-    //        auto v1 = m * model.get_face()[i].v1.coord;
-    //        auto v2 = m * model.get_face()[i].v2.coord;
-    //        //        draw3d.line(v0, v1, RED);
-    //        //        draw3d.line(v1, v2, BLUE);
-    //        //        draw3d.line(v2, v0, WHITE);
-    //        draw3d.triangle(v0, v1, v2, RED);
-    //    }
-
-    draw3d.model(model, m2);
+    for (size_t i = 0; i < model.get_face().size(); i++) {
+        auto v0 = model.get_face()[i].v0.coord * m;
+        auto v1 = model.get_face()[i].v1.coord * m;
+        auto v2 = model.get_face()[i].v2.coord * m;
+        // draw3d.line(v0, v1, RED);
+        // draw3d.line(v1, v2, BLUE);
+        // draw3d.line(v2, v0, WHITE);
+        // draw3d.triangle2d(v0, v1, v2, RED);
+    }
 
     auto end = us();
     std::cout << "time: " << end - start << std::endl;

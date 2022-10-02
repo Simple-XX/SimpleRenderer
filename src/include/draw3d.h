@@ -18,17 +18,17 @@
 #define _DRAW3D_H_
 
 #include "framebuffer.h"
-#include "vector.hpp"
-#include "model.h"
 #include "matrix.hpp"
+#include "model.h"
+#include "vector.hpp"
 
 class draw3d_t {
 private:
     std::shared_ptr<framebuffer_t> framebuffer;
     /// 窗口宽度
-    int32_t width;
+    uint32_t                       width;
     /// 窗口高度
-    int32_t height;
+    uint32_t                       height;
 
     /**
      * @brief 计算重心坐标
@@ -38,10 +38,25 @@ private:
      * @param  _p               要判断的点
      * @return const std::pair<bool, vector4f_t>
      *  第一个返回为 _p 是否在三角形内，第二个为重心坐标
+     * @see http://blackpawn.com/texts/pointinpoly/
+     * solve
+     *     P = A + s * AB + t * AC  -->  AP = s * AB + t * AC
+     * then
+     *     s = (AC.y * AP.x - AC.x * AP.y) / (AB.x * AC.y - AB.y * AC.x)
+     *     t = (AB.x * AP.y - AB.y * AP.x) / (AB.x * AC.y - AB.y * AC.x)
+     *
+     * notice
+     *     P = A + s * AB + t * AC
+     *       = A + s * (B - A) + t * (C - A)
+     *       = (1 - s - t) * A + s * B + t * C
+     * then
+     *     weight_A = 1 - s - t
+     *     weight_B = s
+     *     weight_C = t
      */
     static const std::pair<bool, vector4f_t>
-    get_barycentric_coord(const vector4f_t &_p0, const vector4f_t &_p1,
-                          const vector4f_t &_p2, const vector4f_t &_p);
+    get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
+                          const vector4f_t& _p2, const vector4f_t& _p);
 
     /**
      * @brief 填充三角形，传入的顶点包含更多信息
@@ -51,15 +66,22 @@ private:
      * @param  _normal          面的法向量
      * @todo 多线程支持
      */
-    void triangle(const model_t::vertex_t &_v0, const model_t::vertex_t &_v1,
-                  const model_t::vertex_t &_v2,
-                  const model_t::normal_t &_normal);
+    void
+         triangle(const model_t::vertex_t& _v0, const model_t::vertex_t& _v1,
+                  const model_t::vertex_t& _v2, const model_t::normal_t& _normal);
 
     /**
      * @brief 填充三角形，传入面信息
      * @param  _face            面
      */
-    void triangle(const model_t::face_t &_face);
+    void triangle(const model_t::face_t& _face);
+
+    /**
+     * @brief 计算变换矩阵，缩放 + 移动到 (0, 0)，屏幕左上角
+     * @param  _model           要被应用的模型
+     * @return const matrix4f_t 变换矩阵
+     */
+    const matrix4f_t model2world_tran(const model_t& _model) const;
 
 public:
     /**
@@ -88,7 +110,7 @@ public:
      * @todo 多线程支持
      */
     void line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
-              const int32_t _y1, const framebuffer_t::color_t &_color);
+              const int32_t _y1, const framebuffer_t::color_t& _color);
 
     /**
      * @brief 直线重载
@@ -96,8 +118,8 @@ public:
      * @param  _p1              第二个点
      * @param  _color           颜色
      */
-    void line(const vector4f_t &_p0, const vector4f_t &_p1,
-              const framebuffer_t::color_t &_color);
+    void line(const vector4f_t& _p0, const vector4f_t& _p1,
+              const framebuffer_t::color_t& _color);
 
     /**
      * @brief 填充三角形
@@ -107,9 +129,9 @@ public:
      * @param  _color           填充的颜色
      * @todo 多线程支持
      */
-    void triangle2d(const vector4f_t &_v0, const vector4f_t &_v1,
-                    const vector4f_t             &_v2,
-                    const framebuffer_t::color_t &_color);
+    void
+         triangle2d(const vector4f_t& _v0, const vector4f_t& _v1,
+                    const vector4f_t& _v2, const framebuffer_t::color_t& _color);
 
     /**
      * @brief 填充三角形
@@ -119,15 +141,21 @@ public:
      * @param  _color           填充的颜色
      * @todo 多线程支持
      */
-    void triangle(const vector4f_t &_v0, const vector4f_t &_v1,
-                  const vector4f_t &_v2, const framebuffer_t::color_t &_color);
+    void triangle(const vector4f_t& _v0, const vector4f_t& _v1,
+                  const vector4f_t& _v2, const framebuffer_t::color_t& _color);
 
     /**
-     * @brief 绘制整个模型
+     * @brief 绘制整个模型，自动计算变换矩阵
+     * @param  _model           模型
+     */
+    void model(const model_t& _model);
+
+    /**
+     * @brief 绘制整个模型，指定变换矩阵
      * @param  _model           模型信息
      * @param  _tran            变换矩阵
      */
-    void model(const model_t &_model, const matrix4f_t &_tran);
+    void model(const model_t& _model, const matrix4f_t& _tran);
 };
 
 #endif /* _DRAW3D_H_ */
