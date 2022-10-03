@@ -62,6 +62,21 @@ private:
                           const vector4f_t& _p2, const vector4f_t& _p);
 
     /**
+     * @brief 计算变换矩阵，缩放 + 移动到 (0, 0)，屏幕左上角
+     * @param  _model           要被应用的模型
+     * @bug 变换可能有问题
+     * @param  _rotate          在默认变换的基础上进行变换的旋转矩阵，默认为 1
+     * @param  _scale           在默认变换的基础上进行变换的缩放矩阵，默认为 1
+     * @param  _translate       在默认变换的基础上进行变换的平移矩阵，默认为 1
+     * @return const matrix4f_t 变换矩阵
+     */
+    const matrix4f_t
+    model2world_tran(const model_t&    _model,
+                     const matrix4f_t& _rotate    = matrix4f_t(),
+                     const matrix4f_t& _scale     = matrix4f_t(),
+                     const matrix4f_t& _translate = matrix4f_t()) const;
+
+    /**
      * @brief 填充三角形，传入的顶点包含更多信息
      * @param  _v0              第一个顶点
      * @param  _v1              第二个顶点
@@ -78,21 +93,6 @@ private:
      * @param  _face            面
      */
     void triangle(const model_t::face_t& _face);
-
-    /**
-     * @brief 计算变换矩阵，缩放 + 移动到 (0, 0)，屏幕左上角
-     * @param  _model           要被应用的模型
-     * @bug 变换可能有问题
-     * @param  _rotate          在默认变换的基础上进行变换的旋转矩阵，默认为 1
-     * @param  _scale           在默认变换的基础上进行变换的缩放矩阵，默认为 1
-     * @param  _translate       在默认变换的基础上进行变换的平移矩阵，默认为 1
-     * @return const matrix4f_t 变换矩阵
-     */
-    const matrix4f_t
-    model2world_tran(const model_t&    _model,
-                     const matrix4f_t& _rotate    = matrix4f_t(),
-                     const matrix4f_t& _scale     = matrix4f_t(),
-                     const matrix4f_t& _translate = matrix4f_t()) const;
 
 public:
     /**

@@ -31,6 +31,7 @@ static constexpr const uint32_t                  HEIGHT = 1080;
 std::vector<model_t>                             models;
 
 void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
+    auto     start = us();
     draw3d_t draw3d(_framebuffer);
     draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);
     draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, WHITE);
@@ -40,17 +41,18 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
     auto x_offset = 0;
     auto y_offset = 0;
     for (auto& i : models) {
-        draw3d.model(i, matrix4f_t().rotate(0, 0, 1, matrix4f_t::RAD(180)),
+        draw3d.model(i, matrix4f_t().rotate(1, 1, 1, matrix4f_t::RAD(180)),
                      matrix4f_t(),
                      matrix4f_t().translate(x_offset, y_offset, 0));
-        x_offset += WIDTH / 4;
+        x_offset += WIDTH / 2;
     }
 
+    auto end = us();
+    std::cout << "time: " << end - start << std::endl;
     return;
 }
 
 int main(int _argc, char** _argv) {
-    auto                     start = us();
     // obj 路径
     std::vector<std::string> obj_path;
     // 如果没有指定那么使用默认值
@@ -60,8 +62,8 @@ int main(int _argc, char** _argv) {
         //  obj_path = "../../obj/cube2.obj";
         // obj_path = "../../obj/cube3.obj";
         // obj_path = "../../obj/cornell_box.obj";
-        // mtl_path = "../../obj/cube.mtl";
-        obj_path.push_back("../../obj/african_head.obj");
+        obj_path.push_back("../../obj/helmet.obj");
+        // obj_path.push_back("../../obj/african_head.obj");
         obj_path.push_back("../../obj/utah-teapot/utah-teapot.obj");
     }
     // 否则使用指定的
@@ -84,9 +86,6 @@ int main(int _argc, char** _argv) {
 
     display_t display(framebuffer);
     display.loop();
-
-    auto end = us();
-    std::cout << "time: " << end - start << std::endl;
 
     return 0;
 }

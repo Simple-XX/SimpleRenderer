@@ -41,60 +41,6 @@ draw3d_t::get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
     return std::pair<bool, vector4f_t>(res, weights);
 }
 
-void draw3d_t::triangle(const model_t::vertex_t& _v0,
-                        const model_t::vertex_t& _v1,
-                        const model_t::vertex_t& _v2,
-                        const model_t::normal_t& _normal) {
-    auto min = _v0.coord.min(_v1.coord).min(_v2.coord);
-    auto max = _v0.coord.max(_v1.coord).max(_v2.coord);
-    for (auto x = int32_t(min.x); x <= max.x; x++) {
-        for (auto y = int32_t(min.y); y <= max.y; y++) {
-            auto [is_inside, barycentric_coord]
-              = get_barycentric_coord(_v0.coord, _v1.coord, _v2.coord,
-                                      vector4f_t(x, y, 0));
-            // 如果点在三角形内再进行下一步
-            if (is_inside == true) {
-                // 计算该点的深度，通过重心坐标插值计算
-                auto z = 0.;
-                z      += _v0.coord.z * barycentric_coord.x;
-                z      += _v1.coord.z * barycentric_coord.y;
-                z      += _v2.coord.z * barycentric_coord.z;
-                // 深度在已有颜色之上
-                if (z >= (framebuffer->get_depth_buffer()(x, y))) {
-                    // 光照方向为正，不绘制背面
-                    /// @bug cube3 法线方向可能有问题
-                    auto intensity = _normal * light;
-                    if (intensity > 0) {
-                        // 计算颜色，颜色为三个点的颜色的重心坐标插值
-                        model_t::color_t       color_v;
-                        framebuffer_t::color_t color = 0xFFFFFFFF;
-                        color_v = (_v0.color * barycentric_coord.x,
-                                   _v1.color * barycentric_coord.y,
-                                   _v2.color * barycentric_coord.z);
-                        color_v = color_v.normalize();
-                        // color_v = vector4f_t(1, 1, 1, 1);
-                        // color
-                        //   = framebuffer_t::ARGB(255,
-                        //                         255 * color_v.x * intensity,
-                        //                         255 * color_v.y * intensity,
-                        //                         255 * color_v.z * intensity);
-                        color   = framebuffer_t::ARGB(255, 255 * intensity,
-                                                      255 * intensity,
-                                                      255 * intensity);
-                        framebuffer->pixel(x, y, color, z);
-                    }
-                }
-            }
-        }
-    }
-    return;
-}
-
-void draw3d_t::triangle(const model_t::face_t& _face) {
-    triangle(_face.v0, _face.v1, _face.v2, _face.normal);
-    return;
-}
-
 const matrix4f_t
 draw3d_t::model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
                            const matrix4f_t& _scale,
@@ -156,6 +102,60 @@ draw3d_t::model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
     mat = _translate * mat;
 
     return matrix4f_t(mat);
+}
+
+void draw3d_t::triangle(const model_t::vertex_t& _v0,
+                        const model_t::vertex_t& _v1,
+                        const model_t::vertex_t& _v2,
+                        const model_t::normal_t& _normal) {
+    auto min = _v0.coord.min(_v1.coord).min(_v2.coord);
+    auto max = _v0.coord.max(_v1.coord).max(_v2.coord);
+    for (auto x = int32_t(min.x); x <= max.x; x++) {
+        for (auto y = int32_t(min.y); y <= max.y; y++) {
+            auto [is_inside, barycentric_coord]
+              = get_barycentric_coord(_v0.coord, _v1.coord, _v2.coord,
+                                      vector4f_t(x, y, 0));
+            // 如果点在三角形内再进行下一步
+            if (is_inside == true) {
+                // 计算该点的深度，通过重心坐标插值计算
+                auto z = 0.;
+                z      += _v0.coord.z * barycentric_coord.x;
+                z      += _v1.coord.z * barycentric_coord.y;
+                z      += _v2.coord.z * barycentric_coord.z;
+                // 深度在已有颜色之上
+                if (z >= (framebuffer->get_depth_buffer()(x, y))) {
+                    // 光照方向为正，不绘制背面
+                    /// @bug cube3 法线方向可能有问题
+                    auto intensity = _normal * light;
+                    if (intensity > 0) {
+                        // 计算颜色，颜色为三个点的颜色的重心坐标插值
+                        model_t::color_t       color_v;
+                        framebuffer_t::color_t color = 0xFFFFFFFF;
+                        color_v = (_v0.color * barycentric_coord.x,
+                                   _v1.color * barycentric_coord.y,
+                                   _v2.color * barycentric_coord.z);
+                        color_v = color_v.normalize();
+                        // color_v = vector4f_t(1, 1, 1, 1);
+                        // color
+                        //   = framebuffer_t::ARGB(255,
+                        //                         255 * color_v.x * intensity,
+                        //                         255 * color_v.y * intensity,
+                        //                         255 * color_v.z * intensity);
+                        color   = framebuffer_t::ARGB(255, 255 * intensity,
+                                                      255 * intensity,
+                                                      255 * intensity);
+                        framebuffer->pixel(x, y, color, z);
+                    }
+                }
+            }
+        }
+    }
+    return;
+}
+
+void draw3d_t::triangle(const model_t::face_t& _face) {
+    triangle(_face.v0, _face.v1, _face.v2, _face.normal);
+    return;
 }
 
 draw3d_t::draw3d_t(std::shared_ptr<framebuffer_t> _framebuffer)
