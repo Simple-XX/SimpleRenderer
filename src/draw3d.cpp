@@ -53,9 +53,7 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
               = get_barycentric_coord(_v0.coord, _v1.coord, _v2.coord,
                                       vector4f_t(x, y, 0));
             // 如果点在三角形内再进行下一步
-            static uint32_t aaa = 0;
             if (is_inside == true) {
-                aaa++;
                 // 计算该点的深度，通过重心坐标插值计算
                 auto z = 0.;
                 z      += _v0.coord.z * barycentric_coord.x;
@@ -65,18 +63,24 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
                 if (z >= (framebuffer->get_depth_buffer()(x, y))) {
                     // 光照方向为正，不绘制背面
                     /// @bug cube3 法线方向可能有问题
-                    if (_normal * vector4f_t(0, 0, -1) > 0) {
+                    auto intensity = _normal * light;
+                    if (intensity > 0) {
                         // 计算颜色，颜色为三个点的颜色的重心坐标插值
                         model_t::color_t       color_v;
                         framebuffer_t::color_t color = 0xFFFFFFFF;
                         color_v = (_v0.color * barycentric_coord.x,
                                    _v1.color * barycentric_coord.y,
                                    _v2.color * barycentric_coord.z);
-                        // color_v = color_v.normalize();
-                        color_v = vector4f_t(1, 1, 1, 1);
-                        color   = framebuffer_t::ARGB(255, 255 * color_v.x,
-                                                      255 * color_v.y,
-                                                      255 * color_v.z);
+                        color_v = color_v.normalize();
+                        // color_v = vector4f_t(1, 1, 1, 1);
+                        // color
+                        //   = framebuffer_t::ARGB(255,
+                        //                         255 * color_v.x * intensity,
+                        //                         255 * color_v.y * intensity,
+                        //                         255 * color_v.z * intensity);
+                        color   = framebuffer_t::ARGB(255, 255 * intensity,
+                                                      255 * intensity,
+                                                      255 * intensity);
                         framebuffer->pixel(x, y, color, z);
                     }
                 }
@@ -95,19 +99,17 @@ const matrix4f_t
 draw3d_t::model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
                            const matrix4f_t& _scale,
                            const matrix4f_t& _translate) const {
-    (void)_rotate;
-    (void)_scale;
-    (void)_translate;
     // 变换矩阵
     matrix4f_t mat;
+    mat        = _rotate * mat;
     // 用旋转后的顶点计算极值
-    auto       tmp   = _model.get_face()[0].v0.coord.x;
-    auto       x_max = std::numeric_limits<decltype(tmp)>::lowest();
-    auto       x_min = std::numeric_limits<decltype(tmp)>::max();
-    auto       y_max = x_max;
-    auto       y_min = x_min;
-    auto       z_max = x_max;
-    auto       z_min = x_min;
+    auto tmp   = _model.get_face()[0].v0.coord.x;
+    auto x_max = std::numeric_limits<decltype(tmp)>::lowest();
+    auto x_min = std::numeric_limits<decltype(tmp)>::max();
+    auto y_max = x_max;
+    auto y_min = x_min;
+    auto z_max = x_max;
+    auto z_min = x_min;
     for (auto& i : _model.get_face()) {
         auto v0 = i.v0.coord * mat;
         auto v1 = i.v1.coord * mat;
@@ -147,8 +149,11 @@ draw3d_t::model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
     auto scale         = multi / delta_xyz_max;
     // 缩放
     mat                = mat.scale(scale);
+    mat                = _scale * mat;
     // 移动到左上角
     mat = mat.translate(std::abs(x_min) * scale, std::abs(y_min) * scale, 0);
+    // 从左上角移动到指定位置
+    mat = _translate * mat;
 
     return matrix4f_t(mat);
 }
