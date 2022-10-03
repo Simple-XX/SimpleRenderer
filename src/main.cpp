@@ -28,6 +28,7 @@ static constexpr const uint32_t                  HEIGHT = 1080;
 [[maybe_unused]] static constexpr const uint32_t BLUE   = 0xFF0000FF;
 [[maybe_unused]] static constexpr const uint32_t WHITE  = 0xFFFFFFFF;
 [[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
+std::vector<model_t>                             models;
 
 void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
     draw3d_t draw3d(_framebuffer);
@@ -36,64 +37,47 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
     draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
     draw3d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, WHITE);
 
-    vector4f_t v0(80, 80);
-    vector4f_t v1(800, 800);
-    vector4f_t v2(50, 900);
-    vector4f_t v3(830, 984);
-    vector4f_t v4(400, 874);
-    vector4f_t v5(505, 456);
-    // draw3d.triangle2d(v5, v3, v4, GREEN);
-    // draw3d.triangle2d(v0, v1, v2, RED);
+    auto x_offset = 0;
+    auto y_offset = 0;
+    for (auto& i : models) {
+        draw3d.model(i, matrix4f_t().rotate(0, 0, 1, matrix4f_t::RAD(180)),
+                     matrix4f_t(),
+                     matrix4f_t().translate(x_offset, y_offset, 0));
+        x_offset += WIDTH / 4;
+    }
 
     return;
 }
 
 int main(int _argc, char** _argv) {
-    auto        start = us();
+    auto                     start = us();
     // obj 路径
-    std::string obj_path;
-    // 材质路径
-    std::string mtl_path;
+    std::vector<std::string> obj_path;
     // 如果没有指定那么使用默认值
     if (_argc == 1) {
         // obj_path = "../../obj/helmet.obj";
         //  obj_path = "../../obj/cube.obj";
         //  obj_path = "../../obj/cube2.obj";
         // obj_path = "../../obj/cube3.obj";
-        //  obj_path = "../../obj/cornell_box.obj";
-        //  mtl_path = "../../obj/cube.mtl";
-        // obj_path = "../../obj/african_head.obj";
-        obj_path = "../../obj/utah-teapot/utah-teapot.obj";
+        // obj_path = "../../obj/cornell_box.obj";
+        // mtl_path = "../../obj/cube.mtl";
+        obj_path.push_back("../../obj/african_head.obj");
+        obj_path.push_back("../../obj/utah-teapot/utah-teapot.obj");
     }
     // 否则使用指定的
     else {
-        if (_argc == 2) {
-            obj_path = _argv[1];
-        }
-        if (_argc == 3) {
-            mtl_path = _argv[2];
+        for (auto i = 1; i < _argc; i++) {
+            obj_path.push_back(_argv[i]);
         }
     }
 
     // 读取模型与材质
-    model_t  model(obj_path, mtl_path);
-
-    auto     framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
-
-    draw3d_t draw3d(framebuffer);
-
-    draw3d.model(model);
-
-    auto m = matrix4f_t();
-    for (size_t i = 0; i < model.get_face().size(); i++) {
-        auto v0 = model.get_face()[i].v0.coord * m;
-        auto v1 = model.get_face()[i].v1.coord * m;
-        auto v2 = model.get_face()[i].v2.coord * m;
-        // draw3d.line(v0, v1, RED);
-        // draw3d.line(v1, v2, BLUE);
-        // draw3d.line(v2, v0, WHITE);
-        draw3d.triangle2d(v0, v1, v2, RED);
+    for (auto& i : obj_path) {
+        model_t model(i);
+        models.push_back(model);
     }
+
+    auto        framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
 
     std::thread draw_thread = std::thread(draw, framebuffer);
     draw_thread.join();

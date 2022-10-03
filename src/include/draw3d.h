@@ -30,6 +30,9 @@ private:
     /// 窗口高度
     uint32_t                       height;
 
+    /// 光照方向
+    vector4f_t                     light = vector4f_t(0, 0, -1);
+
     /**
      * @brief 计算重心坐标
      * @param  _p0              三角形的第一个点
@@ -79,7 +82,7 @@ private:
     /**
      * @brief 计算变换矩阵，缩放 + 移动到 (0, 0)，屏幕左上角
      * @param  _model           要被应用的模型
-     * @todo
+     * @bug 变换可能有问题
      * @param  _rotate          在默认变换的基础上进行变换的旋转矩阵，默认为 1
      * @param  _scale           在默认变换的基础上进行变换的缩放矩阵，默认为 1
      * @param  _translate       在默认变换的基础上进行变换的平移矩阵，默认为 1
