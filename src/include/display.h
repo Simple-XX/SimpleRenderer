@@ -18,8 +18,8 @@
 #define _DISPLAY_H_
 
 #include "cstdint"
-#include "SDL.h"
 #include "framebuffer.h"
+#include "SDL.h"
 
 /**
  * @brief 对 sdl 的抽象
@@ -30,43 +30,43 @@ private:
     /// @brief 保存要显示的 framebuffer
     std::shared_ptr<framebuffer_t> framebuffer;
     /// @brief sdl 窗口
-    SDL_Window *sdl_window;
+    SDL_Window*                    sdl_window;
     /// @brief 标识窗口是否需要退出
-    bool is_shoule_quit = false;
+    bool                           is_shoule_quit = false;
     /// @brief sdl 事件
-    SDL_Event sdl_event;
+    SDL_Event                      sdl_event;
     /// 窗口宽度
-    uint32_t width;
+    uint32_t                       width;
     /// 窗口高度
-    uint32_t height;
+    uint32_t                       height;
 
     /**
      * @brief 从 argb32 中获取 alpha 通道
      * @param  _color           argb32
      * @return uint8_t          alpha
      */
-    static uint8_t ARGB2A(uint32_t _color);
+    static uint8_t                 ARGB2A(uint32_t _color);
 
     /**
      * @brief 从 argb32 中获取 red 通道
      * @param  _color           argb32
      * @return uint8_t          red
      */
-    static uint8_t ARGB2R(uint32_t _color);
+    static uint8_t                 ARGB2R(uint32_t _color);
 
     /**
      * @brief 从 argb32 中获取 green 通道
      * @param  _color           argb32
      * @return uint8_t          green
      */
-    static uint8_t ARGB2G(uint32_t _color);
+    static uint8_t                 ARGB2G(uint32_t _color);
 
     /**
      * @brief 从 argb32 中获取 blue 通道
      * @param  _color           argb32
      * @return uint8_t          blue
      */
-    static uint8_t ARGB2B(uint32_t _color);
+    static uint8_t                 ARGB2B(uint32_t _color);
 
     /**
      * @brief 设置像素
@@ -80,7 +80,7 @@ private:
      * @note (0, 0) 为屏幕左上角
      * @note alpha 通道无效
      */
-    void pixel(SDL_Surface *_surface, const uint32_t _x, const uint32_t _y,
+    void pixel(SDL_Surface* _surface, const uint32_t _x, const uint32_t _y,
                const uint8_t _a, const uint8_t _r, const uint8_t _g,
                const uint8_t _b);
 

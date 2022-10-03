@@ -18,8 +18,8 @@
 #define _CAMERA_H_
 
 #include "log.hpp"
-#include "vector.hpp"
 #include "matrix.hpp"
+#include "vector.hpp"
 
 class camera_t {
 private:
@@ -28,22 +28,22 @@ private:
     /// 方向
     vector4f_t target;
     /// 比例
-    float aspect;
+    float      aspect;
 
 public:
     camera_t(void);
-    camera_t(const camera_t &_camera);
-    camera_t(const vector4f_t &_pos, const vector4f_t &_target,
+    camera_t(const camera_t& _camera);
+    camera_t(const vector4f_t& _pos, const vector4f_t& _target,
              const float _aspect);
-    camera_t        &operator=(const camera_t &_camera);
-    bool             operator==(const camera_t &_camera) const;
-    bool             operator!=(const camera_t &_camera) const;
-    const vector4f_t operator*(const vector4f_t &_v) const;
-    const matrix4f_t operator*(const matrix4f_t &_m) const;
+    camera_t&        operator=(const camera_t& _camera);
+    bool             operator==(const camera_t& _camera) const;
+    bool             operator!=(const camera_t& _camera) const;
+    const vector4f_t operator*(const vector4f_t& _v) const;
+    const matrix4f_t operator*(const matrix4f_t& _m) const;
 
-    vector4f_t &get_pos(void);
-    vector4f_t &get_target(void);
-    float       get_aspect(void) const;
+    vector4f_t&      get_pos(void);
+    vector4f_t&      get_target(void);
+    float            get_aspect(void) const;
 };
 
 static camera_t camera;

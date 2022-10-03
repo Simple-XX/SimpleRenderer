@@ -14,10 +14,10 @@
  * </table>
  */
 
-#include "gtest/gtest.h"
-#include "vector.hpp"
 #include "draw3d.h"
 #include "display.h"
+#include "vector.hpp"
+#include "gtest/gtest.h"
 
 static constexpr const uint32_t                  WIDTH  = 1920;
 static constexpr const uint32_t                  HEIGHT = 1080;
@@ -28,8 +28,9 @@ static constexpr const uint32_t                  HEIGHT = 1080;
 [[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
 
 TEST(draw2d_t, test1) {
-    framebuffer_t framebuffer(WIDTH, HEIGHT);
-    draw3d_t      draw3d(framebuffer);
+    auto     framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
+
+    draw3d_t draw3d(framebuffer);
     draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);
     draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, WHITE);
     draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);

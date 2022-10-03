@@ -91,55 +91,65 @@ void draw3d_t::triangle(const model_t::face_t& _face) {
     return;
 }
 
-const matrix4f_t draw3d_t::model2world_tran(const model_t& _model) const {
-    // 计算极值
-    auto x_max = _model.get_face()[0].v0.coord.x;
-    auto x_min = _model.get_face()[0].v0.coord.x;
-    auto y_max = _model.get_face()[0].v0.coord.y;
-    auto y_min = _model.get_face()[0].v0.coord.y;
-    auto z_max = _model.get_face()[0].v0.coord.z;
-    auto z_min = _model.get_face()[0].v0.coord.z;
+const matrix4f_t
+draw3d_t::model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
+                           const matrix4f_t& _scale,
+                           const matrix4f_t& _translate) const {
+    (void)_rotate;
+    (void)_scale;
+    (void)_translate;
+    // 变换矩阵
+    matrix4f_t mat;
+    // 用旋转后的顶点计算极值
+    auto       tmp   = _model.get_face()[0].v0.coord.x;
+    auto       x_max = std::numeric_limits<decltype(tmp)>::lowest();
+    auto       x_min = std::numeric_limits<decltype(tmp)>::max();
+    auto       y_max = x_max;
+    auto       y_min = x_min;
+    auto       z_max = x_max;
+    auto       z_min = x_min;
     for (auto& i : _model.get_face()) {
-        x_max = std::max(x_max, i.v0.coord.x);
-        x_max = std::max(x_max, i.v1.coord.x);
-        x_max = std::max(x_max, i.v2.coord.x);
-        x_min = std::min(x_min, i.v0.coord.x);
-        x_min = std::min(x_min, i.v1.coord.x);
-        x_min = std::min(x_min, i.v2.coord.x);
+        auto v0 = i.v0.coord * mat;
+        auto v1 = i.v1.coord * mat;
+        auto v2 = i.v2.coord * mat;
+        x_max   = std::max(x_max, v0.x);
+        x_max   = std::max(x_max, v1.x);
+        x_max   = std::max(x_max, v2.x);
+        x_min   = std::min(x_min, v0.x);
+        x_min   = std::min(x_min, v1.x);
+        x_min   = std::min(x_min, v2.x);
 
-        y_max = std::max(y_max, i.v0.coord.y);
-        y_max = std::max(y_max, i.v1.coord.y);
-        y_max = std::max(y_max, i.v2.coord.y);
-        y_min = std::min(y_min, i.v0.coord.y);
-        y_min = std::min(y_min, i.v1.coord.y);
-        y_min = std::min(y_min, i.v2.coord.y);
+        y_max   = std::max(y_max, v0.y);
+        y_max   = std::max(y_max, v1.y);
+        y_max   = std::max(y_max, v2.y);
+        y_min   = std::min(y_min, v0.y);
+        y_min   = std::min(y_min, v1.y);
+        y_min   = std::min(y_min, v2.y);
 
-        z_max = std::max(z_max, i.v0.coord.z);
-        z_max = std::max(z_max, i.v1.coord.z);
-        z_max = std::max(z_max, i.v2.coord.z);
-        z_min = std::min(z_min, i.v0.coord.z);
-        z_min = std::min(z_min, i.v1.coord.z);
-        z_min = std::min(z_min, i.v2.coord.z);
+        z_max   = std::max(z_max, v0.z);
+        z_max   = std::max(z_max, v1.z);
+        z_max   = std::max(z_max, v2.z);
+        z_min   = std::min(z_min, v0.z);
+        z_min   = std::min(z_min, v1.z);
+        z_min   = std::min(z_min, v2.z);
     }
 
     // 各分量的长度
-    auto       delta_x       = (std::abs(x_max) + std::abs(x_min));
-    auto       delta_y       = (std::abs(y_max) + std::abs(y_min));
-    auto       delta_z       = (std::abs(z_max) + std::abs(z_min));
-    auto       delta_xy_max  = std::max(delta_x, delta_y);
-    auto       delta_xyz_max = std::max(delta_xy_max, delta_z);
+    auto delta_x       = (std::abs(x_max) + std::abs(x_min));
+    auto delta_y       = (std::abs(y_max) + std::abs(y_min));
+    auto delta_z       = (std::abs(z_max) + std::abs(z_min));
+    auto delta_xy_max  = std::max(delta_x, delta_y);
+    auto delta_xyz_max = std::max(delta_xy_max, delta_z);
 
     // 缩放倍数
-    auto       multi         = (height + width) / 4;
+    auto multi         = (height + width) / 4;
     // 归一化并乘倍数
-    auto       scale         = multi / delta_xyz_max;
-
-    // 构建变换矩阵
-    matrix4f_t mat;
+    auto scale         = multi / delta_xyz_max;
     // 缩放
-    mat = mat.scale(scale, scale, scale);
+    mat                = mat.scale(scale);
     // 移动到左上角
     mat = mat.translate(std::abs(x_min) * scale, std::abs(y_min) * scale, 0);
+
     return matrix4f_t(mat);
 }
 
@@ -264,18 +274,12 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
     return;
 }
 
-void draw3d_t::model(const model_t& _model) {
-    auto& tran = model2world_tran(_model);
+void draw3d_t::model(const model_t& _model, const matrix4f_t& _rotate,
+                     const matrix4f_t& _scale, const matrix4f_t& _translate) {
+    auto& tran = model2world_tran(_model, _rotate, _scale, _translate);
     std::cout << "tran: " << tran << std::endl;
     for (auto f : _model.get_face()) {
         triangle(f * tran);
-    }
-    return;
-}
-
-void draw3d_t::model(const model_t& _model, const matrix4f_t& _tran) {
-    for (auto f : _model.get_face()) {
-        triangle(f * _tran);
     }
     return;
 }

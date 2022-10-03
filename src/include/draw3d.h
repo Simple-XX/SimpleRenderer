@@ -79,9 +79,17 @@ private:
     /**
      * @brief 计算变换矩阵，缩放 + 移动到 (0, 0)，屏幕左上角
      * @param  _model           要被应用的模型
+     * @todo
+     * @param  _rotate          在默认变换的基础上进行变换的旋转矩阵，默认为 1
+     * @param  _scale           在默认变换的基础上进行变换的缩放矩阵，默认为 1
+     * @param  _translate       在默认变换的基础上进行变换的平移矩阵，默认为 1
      * @return const matrix4f_t 变换矩阵
      */
-    const matrix4f_t model2world_tran(const model_t& _model) const;
+    const matrix4f_t
+    model2world_tran(const model_t&    _model,
+                     const matrix4f_t& _rotate    = matrix4f_t(),
+                     const matrix4f_t& _scale     = matrix4f_t(),
+                     const matrix4f_t& _translate = matrix4f_t()) const;
 
 public:
     /**
@@ -145,17 +153,16 @@ public:
                   const vector4f_t& _v2, const framebuffer_t::color_t& _color);
 
     /**
-     * @brief 绘制整个模型，自动计算变换矩阵
-     * @param  _model           模型
-     */
-    void model(const model_t& _model);
-
-    /**
      * @brief 绘制整个模型，指定变换矩阵
      * @param  _model           模型信息
-     * @param  _tran            变换矩阵
+     * @todo
+     * @param  _rotate          在默认变换的基础上进行变换的旋转矩阵，默认为 1
+     * @param  _scale           在默认变换的基础上进行变换的缩放矩阵，默认为 1
+     * @param  _translate       在默认变换的基础上进行变换的平移矩阵，默认为 1
      */
-    void model(const model_t& _model, const matrix4f_t& _tran);
+    void model(const model_t& _model, const matrix4f_t& _rotate = matrix4f_t(),
+               const matrix4f_t& _scale     = matrix4f_t(),
+               const matrix4f_t& _translate = matrix4f_t());
 };
 
 #endif /* _DRAW3D_H_ */

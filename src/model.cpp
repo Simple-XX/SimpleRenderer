@@ -14,8 +14,8 @@
  * </table>
  */
 
-#include "iostream"
 #include "model.h"
+#include "iostream"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "3rd/tiny_obj_loader.h"
@@ -24,14 +24,16 @@ model_t::vertex_t::vertex_t(void) {
     return;
 }
 
-model_t::vertex_t::vertex_t(const vertex_t &_vertex)
-    : coord(_vertex.coord), normal(_vertex.normal), texcoord(_vertex.texcoord),
+model_t::vertex_t::vertex_t(const vertex_t& _vertex)
+    : coord(_vertex.coord),
+      normal(_vertex.normal),
+      texcoord(_vertex.texcoord),
       color(_vertex.color) {
     return;
 }
 
-model_t::vertex_t::vertex_t(const coord_t &_coord, const normal_t &_normal,
-                            const texcoord_t &_texcoord, const color_t &_color)
+model_t::vertex_t::vertex_t(const coord_t& _coord, const normal_t& _normal,
+                            const texcoord_t& _texcoord, const color_t& _color)
     : coord(_coord), normal(_normal), texcoord(_texcoord) {
     // 将颜色归一化
     if (_color.x > 1 || _color.y > 1 || _color.z > 1) {
@@ -47,7 +49,7 @@ model_t::vertex_t::~vertex_t(void) {
     return;
 }
 
-model_t::vertex_t &model_t::vertex_t::operator=(const vertex_t &_vertex) {
+model_t::vertex_t& model_t::vertex_t::operator=(const vertex_t& _vertex) {
     coord    = _vertex.coord;
     normal   = _vertex.normal;
     texcoord = _vertex.texcoord;
@@ -59,21 +61,24 @@ model_t::face_t::face_t(void) {
     return;
 }
 
-model_t::face_t::face_t(const face_t &_face)
-    : v0(_face.v0), v1(_face.v1), v2(_face.v2), normal(_face.normal),
+model_t::face_t::face_t(const face_t& _face)
+    : v0(_face.v0),
+      v1(_face.v1),
+      v2(_face.v2),
+      normal(_face.normal),
       material(_face.material) {
     return;
 }
 
-model_t::face_t::face_t(const model_t::vertex_t   &_v0,
-                        const model_t::vertex_t   &_v1,
-                        const model_t::vertex_t   &_v2,
-                        const tinyobj::material_t &_material)
+model_t::face_t::face_t(const model_t::vertex_t&   _v0,
+                        const model_t::vertex_t&   _v1,
+                        const model_t::vertex_t&   _v2,
+                        const tinyobj::material_t& _material)
     : v0(_v0), v1(_v1), v2(_v2), material(_material) {
     // 计算法向量
     // 如果 obj 内包含法向量，直接使用即可
-    if (_v0.normal.length() != 0 && _v1.normal.length() != 0 &&
-        _v2.normal.length() != 0) {
+    if (_v0.normal.length() != 0 && _v1.normal.length() != 0
+        && _v2.normal.length() != 0) {
         normal = (_v0.normal + _v1.normal + _v2.normal);
         normal = normal.normalize();
     }
@@ -92,7 +97,7 @@ model_t::face_t::~face_t(void) {
     return;
 }
 
-model_t::face_t &model_t::face_t::operator=(const face_t &_face) {
+model_t::face_t& model_t::face_t::operator=(const face_t& _face) {
     v0       = _face.v0;
     v1       = _face.v1;
     v2       = _face.v2;
@@ -101,7 +106,7 @@ model_t::face_t &model_t::face_t::operator=(const face_t &_face) {
     return *this;
 }
 
-const model_t::face_t &model_t::face_t::operator*(const matrix4f_t &_matrix) {
+const model_t::face_t& model_t::face_t::operator*(const matrix4f_t& _matrix) {
     v0.coord *= _matrix;
     v1.coord *= _matrix;
     v2.coord *= _matrix;
@@ -109,7 +114,7 @@ const model_t::face_t &model_t::face_t::operator*(const matrix4f_t &_matrix) {
 }
 
 const model_t::face_t
-model_t::face_t::operator*(const matrix4f_t &_matrix) const {
+model_t::face_t::operator*(const matrix4f_t& _matrix) const {
     face_t ret(*this);
     ret.v0.coord *= _matrix;
     ret.v1.coord *= _matrix;
@@ -121,17 +126,17 @@ model_t::model_t(void) {
     return;
 }
 
-model_t::model_t(const model_t &_model) {
+model_t::model_t(const model_t& _model) {
     face = _model.face;
     return;
 }
 
-model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
+model_t::model_t(const std::string& _obj_path, const std::string& _mtl_path) {
     tinyobj::ObjReader       reader;
     tinyobj::ObjReaderConfig config;
     config.mtl_search_path = _mtl_path;
     // 默认开启三角化
-    auto ret = reader.ParseFromFile(_obj_path, config);
+    auto ret               = reader.ParseFromFile(_obj_path, config);
     if (ret == false) {
         if (reader.Error().empty() == false) {
             throw(std::runtime_error(log(reader.Error())));
@@ -142,9 +147,9 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
         std::cout << "TinyObjReader: " << reader.Warning();
     }
 
-    const auto &attrib    = reader.GetAttrib();
-    const auto &shapes    = reader.GetShapes();
-    const auto &materials = reader.GetMaterials();
+    const auto& attrib    = reader.GetAttrib();
+    const auto& shapes    = reader.GetShapes();
+    const auto& materials = reader.GetMaterials();
 
     printf("顶点数：%ld, ", attrib.vertices.size() / 3);
     printf("法线数：%ld, ", attrib.normals.size() / 3);
@@ -175,8 +180,8 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
 
                 // 构造顶点信息并保存
                 // 每组顶点信息有 xyz 三个分量，因此需要 3*
-                coord =
-                    coord_t(attrib.vertices[3 * size_t(idx.vertex_index) + 0],
+                coord
+                  = coord_t(attrib.vertices[3 * size_t(idx.vertex_index) + 0],
                             attrib.vertices[3 * size_t(idx.vertex_index) + 1],
                             attrib.vertices[3 * size_t(idx.vertex_index) + 2]);
 
@@ -184,9 +189,9 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
                 // 则构造并保存，否则设置为 0
                 if (idx.normal_index >= 0) {
                     normal = normal_t(
-                        attrib.normals[3 * size_t(idx.normal_index) + 0],
-                        attrib.normals[3 * size_t(idx.normal_index) + 1],
-                        attrib.normals[3 * size_t(idx.normal_index) + 2]);
+                      attrib.normals[3 * size_t(idx.normal_index) + 0],
+                      attrib.normals[3 * size_t(idx.normal_index) + 1],
+                      attrib.normals[3 * size_t(idx.normal_index) + 2]);
                 }
                 else {
                     normal = normal_t(0, 0, 0);
@@ -196,16 +201,16 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
                 // 则构造并保存，否则设置为 0
                 if (idx.texcoord_index >= 0) {
                     texcoord = texcoord_t(
-                        attrib.texcoords[2 * size_t(idx.texcoord_index) + 0],
-                        attrib.texcoords[2 * size_t(idx.texcoord_index) + 1]);
+                      attrib.texcoords[2 * size_t(idx.texcoord_index) + 0],
+                      attrib.texcoords[2 * size_t(idx.texcoord_index) + 1]);
                 }
                 else {
                     texcoord = texcoord_t(0, 0);
                 }
 
                 // 顶点颜色，如果 obj 文件中没有指定则设为 1(白色)，范围 [0, 1]
-                color =
-                    color_t(attrib.colors[3 * size_t(idx.vertex_index) + 0],
+                color
+                  = color_t(attrib.colors[3 * size_t(idx.vertex_index) + 0],
                             attrib.colors[3 * size_t(idx.vertex_index) + 1],
                             attrib.colors[3 * size_t(idx.vertex_index) + 2]);
                 vertexes[v] = vertex_t(coord, normal, texcoord, color);
@@ -216,8 +221,8 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
             if (materials.size() > 0) {
                 material = materials[s];
             }
-            face.push_back(
-                face_t(vertexes[0], vertexes[1], vertexes[2], material));
+            face.push_back(face_t(vertexes[0], vertexes[1], vertexes[2],
+                                  material));
         }
     }
 
@@ -228,11 +233,11 @@ model_t::~model_t(void) {
     return;
 }
 
-model_t &model_t::operator=(const model_t &_model) {
+model_t& model_t::operator=(const model_t& _model) {
     face = _model.face;
     return *this;
 }
 
-const std::vector<model_t::face_t> &model_t::get_face(void) const {
+const std::vector<model_t::face_t>& model_t::get_face(void) const {
     return face;
 }

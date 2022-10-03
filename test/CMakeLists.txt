@@ -23,15 +23,18 @@ find_package(SDL2 REQUIRED)
 # Set include dir
 include_directories(
         ${SimpleRender_SOURCE_DIR}/src/include
+        ${SimpleRender_SOURCE_DIR}/src/3rd
         ${SDL2_INCLUDE_DIRS})
 
 set(test_src
         vector_test.cpp
         draw3d_test.cpp
         matrix_test.cpp
-        ../src/display.cpp
-        ../src/framebuffer.cpp
-        ../src/camera.cpp)
+        ${SimpleRender_SOURCE_DIR}/src/model.cpp
+        ${SimpleRender_SOURCE_DIR}/src/draw3d.cpp
+        ${SimpleRender_SOURCE_DIR}/src/display.cpp
+        ${SimpleRender_SOURCE_DIR}/src/framebuffer.cpp
+        ${SimpleRender_SOURCE_DIR}/src/camera.cpp)
 
 enable_testing()
 

@@ -17,10 +17,10 @@
 #ifndef _LOG_HPP_
 #define _LOG_HPP_
 
-#include "string"
-#include "source_location"
 #include "ctime"
+#include "source_location"
 #include "sstream"
+#include "string"
 #include "sys/time.h"
 
 /**
@@ -31,8 +31,8 @@
  * @todo    精确到毫秒
  */
 inline const std::string
-log(const std::string_view     &_msg,
-    const std::source_location &_location = std::source_location::current()) {
+log(const std::string_view&     _msg,
+    const std::source_location& _location = std::source_location::current()) {
     auto              tm         = time(0);
     auto              local_time = localtime(&tm);
     std::stringstream res;

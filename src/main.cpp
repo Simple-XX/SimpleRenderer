@@ -49,6 +49,7 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
 }
 
 int main(int _argc, char** _argv) {
+    auto        start = us();
     // obj 路径
     std::string obj_path;
     // 材质路径
@@ -81,25 +82,9 @@ int main(int _argc, char** _argv) {
 
     draw3d_t draw3d(framebuffer);
 
-    // 不同的模型需要不同的变换矩阵
-    /// @todo 自动处理（需要裁剪）
-    auto     m = matrix4f_t();
-    m          = m.rotate(0, 0, 1, matrix4f_t::RAD(90));
-    m          = m.scale(WIDTH / 16., HEIGHT / 9., 1);
-    // m          = m.scale(480, 480, 1);
-    m          = m.translate(960, 540, 0);
-    // std::cout << "m: " << m << std::endl;
-    auto m2    = matrix4f_t();
-    // m2      = m2.rotate(0, 0, 1, matrix4f_t::RAD(180));
-    m2         = m2.scale(WIDTH / 64., HEIGHT / 36., 1);
-    // m2      = m2.scale(WIDTH / 16., HEIGHT / 9., 1);
-    m2         = m2.translate(1000, 540, 0);
-    // std::cout << "m2: " << m2 << std::endl;
-
-    // draw3d.model(model, m);
     draw3d.model(model);
 
-    auto start = us();
+    auto m = matrix4f_t();
     for (size_t i = 0; i < model.get_face().size(); i++) {
         auto v0 = model.get_face()[i].v0.coord * m;
         auto v1 = model.get_face()[i].v1.coord * m;
@@ -107,17 +92,17 @@ int main(int _argc, char** _argv) {
         // draw3d.line(v0, v1, RED);
         // draw3d.line(v1, v2, BLUE);
         // draw3d.line(v2, v0, WHITE);
-        // draw3d.triangle2d(v0, v1, v2, RED);
+        draw3d.triangle2d(v0, v1, v2, RED);
     }
-
-    auto end = us();
-    std::cout << "time: " << end - start << std::endl;
 
     std::thread draw_thread = std::thread(draw, framebuffer);
     draw_thread.join();
 
     display_t display(framebuffer);
     display.loop();
+
+    auto end = us();
+    std::cout << "time: " << end - start << std::endl;
 
     return 0;
 }

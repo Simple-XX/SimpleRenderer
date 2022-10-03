@@ -14,8 +14,8 @@
  * </table>
  */
 
-#include "gtest/gtest.h"
 #include "matrix.hpp"
+#include "gtest/gtest.h"
 
 TEST(matrix_t, test1) {
     matrix4f_t mat;
