@@ -17,7 +17,7 @@
 #include "vector.hpp"
 #include "gtest/gtest.h"
 
-TEST(vector2f_t, test1) {
+TEST(vector4f_t, test1) {
     vector4f_t test(2, 3);
     vector4f_t test2(-1, 3);
     vector4f_t test3 = test - test2;
@@ -33,10 +33,6 @@ TEST(vector2f_t, test1) {
     EXPECT_EQ(test.length_squared(), 13);
     EXPECT_EQ((-test).x, -2);
     EXPECT_EQ((-test).y, -3);
-    return;
-}
-
-TEST(vector3f_t, test1) {
     vector4f_t test5(2, 3, 4);
     vector4f_t test6(-1, 3, -2);
     vector4f_t test7 = test5 - test6;

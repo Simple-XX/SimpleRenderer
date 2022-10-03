@@ -295,7 +295,24 @@ bool vector4_t<_T>::operator==(const vector4_t<_T>& _v) const {
     if (_v.HasNaNs()) {
         throw std::invalid_argument(log("_v.HasNaNs()"));
     }
-    return x == _v.x && y == _v.y && z == _v.z && w == _v.w;
+
+    if (std::abs(x - _v.x) > std::numeric_limits<_T>::epsilon()) {
+        return false;
+    }
+
+    if (std::abs(y - _v.y) > std::numeric_limits<_T>::epsilon()) {
+        return false;
+    }
+
+    if (std::abs(z - _v.z) > std::numeric_limits<_T>::epsilon()) {
+        return false;
+    }
+
+    if (std::abs(w - _v.w) > std::numeric_limits<_T>::epsilon()) {
+        return false;
+    }
+
+    return true;
 }
 
 template <class _T>
@@ -303,7 +320,24 @@ bool vector4_t<_T>::operator!=(const vector4_t<_T>& _v) const {
     if (_v.HasNaNs()) {
         throw std::invalid_argument(log("_v.HasNaNs()"));
     }
-    return x != _v.x || y != _v.y || z != _v.z || w != _v.w;
+
+    if (std::abs(x - _v.x) > std::numeric_limits<_T>::epsilon()) {
+        return true;
+    }
+
+    if (std::abs(y - _v.y) > std::numeric_limits<_T>::epsilon()) {
+        return true;
+    }
+
+    if (std::abs(z - _v.z) > std::numeric_limits<_T>::epsilon()) {
+        return true;
+    }
+
+    if (std::abs(w - _v.w) > std::numeric_limits<_T>::epsilon()) {
+        return true;
+    }
+
+    return false;
 }
 
 template <class _T>
