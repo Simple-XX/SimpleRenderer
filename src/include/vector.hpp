@@ -211,10 +211,15 @@ public:
 
     /**
      * @brief 归一化
-     * @param  _v              向量
      * @return const vector4_t<_T>  结果
      */
     const vector4_t<_T> normalize(void) const;
+
+    /**
+     * @brief 单位向量
+     * @return const vector4_t<_T>  结果
+     */
+    const vector4_t<_T> unit(void) const;
 
     /**
      * @brief 构造最小向量
@@ -486,6 +491,17 @@ const vector4_t<_T> vector4_t<_T>::normalize(void) const {
         return vector4_t<_T>();
     }
     return vector4_t<_T>(x / length(), y / length(), z / length(), 1);
+}
+
+template <class _T>
+const vector4_t<_T> vector4_t<_T>::unit(void) const {
+    if (HasNaNs()) {
+        throw std::invalid_argument(log("HasNaNs()"));
+    }
+    if (length() == 0) {
+        return vector4_t<_T>();
+    }
+    return vector4_t(*this / max());
 }
 
 template <class _T>
