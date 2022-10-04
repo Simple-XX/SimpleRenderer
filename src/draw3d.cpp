@@ -108,6 +108,40 @@ draw3d_t::model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
       matrix4f_t(coord_mat), matrix4f_t(normal_mat));
 }
 
+framebuffer_t::depth_t
+draw3d_t::interpolate_depth(const framebuffer_t::depth_t& _depth0,
+                            const framebuffer_t::depth_t& _depth1,
+                            const framebuffer_t::depth_t& _depth2,
+                            const vector4f_t& _barycentric_coord) const {
+    auto z = _depth0 * _barycentric_coord.x;
+    z      += _depth1 * _barycentric_coord.y;
+    z      += _depth2 * _barycentric_coord.z;
+    return z;
+}
+
+framebuffer_t::color_t
+draw3d_t::interpolate_color(const model_t::color_t&  _c0,
+                            const model_t::color_t&  _c1,
+                            const model_t::color_t&  _c2,
+                            const vector4f_t&        _barycentric_coord,
+                            const model_t::normal_t& _normal) const {
+    // 光照强度
+    auto intensity = _normal * light;
+    auto color_v   = model_t::color_t(
+      _c0.x * _barycentric_coord.x + _c1.x * _barycentric_coord.y
+        + _c2.x * _barycentric_coord.z,
+      _c0.y * _barycentric_coord.x + _c1.y * _barycentric_coord.y
+        + _c2.y * _barycentric_coord.z,
+      _c0.z * _barycentric_coord.x + _c1.z * _barycentric_coord.y
+        + _c2.z * _barycentric_coord.z);
+    auto color = framebuffer_t::ARGB(
+      std::numeric_limits<uint8_t>::max(),
+      std::numeric_limits<uint8_t>::max() * color_v.x * intensity,
+      std::numeric_limits<uint8_t>::max() * color_v.y * intensity,
+      std::numeric_limits<uint8_t>::max() * color_v.z * intensity);
+    return color;
+}
+
 void draw3d_t::triangle(const model_t::vertex_t& _v0,
                         const model_t::vertex_t& _v1,
                         const model_t::vertex_t& _v2,
@@ -124,38 +158,21 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
                 continue;
             }
             // 计算该点的深度，通过重心坐标插值计算
-            auto z = 0.;
-            z      += _v0.coord.z * barycentric_coord.x;
-            z      += _v1.coord.z * barycentric_coord.y;
-            z      += _v2.coord.z * barycentric_coord.z;
+            auto z = interpolate_depth(_v0.coord.z, _v1.coord.z, _v2.coord.z,
+                                       barycentric_coord);
             // 深度在已有颜色之上
             if (z < (framebuffer->get_depth_buffer()(x, y))) {
                 continue;
             }
             // 光照方向为正，不绘制背面
-            /// @bug cube3 法线方向可能有问题
             auto intensity = _normal * light;
             if (intensity <= 0) {
                 continue;
             }
 
             // 计算颜色，颜色为三个点的颜色的重心坐标插值
-            auto color_v
-              = model_t::color_t(_v0.color.x * barycentric_coord.x
-                                   + _v1.color.x * barycentric_coord.y
-                                   + _v2.color.x * barycentric_coord.z,
-                                 _v0.color.y * barycentric_coord.x
-                                   + _v1.color.y * barycentric_coord.y
-                                   + _v2.color.y * barycentric_coord.z,
-                                 _v0.color.z * barycentric_coord.x
-                                   + _v1.color.z * barycentric_coord.y
-                                   + _v2.color.z * barycentric_coord.z);
-            auto color = framebuffer_t::ARGB(
-              std::numeric_limits<uint8_t>::max(),
-              std::numeric_limits<uint8_t>::max() * color_v.x * intensity,
-              std::numeric_limits<uint8_t>::max() * color_v.y * intensity,
-              std::numeric_limits<uint8_t>::max() * color_v.z * intensity);
-
+            auto color = interpolate_color(_v0.color, _v1.color, _v2.color,
+                                           barycentric_coord, _normal);
             // 填充像素
             framebuffer->pixel(x, y, color, z);
         }

@@ -78,6 +78,35 @@ private:
                      const matrix4f_t& _translate = matrix4f_t()) const;
 
     /**
+     * @brief 深度插值，由重心坐标计算出对应点的深度值
+     * @param  _v0              点 1
+     * @param  _v1              点 2
+     * @param  _v2              点 3
+     * @param  _barycentric_coord   重心坐标
+     * @return framebuffer_t::depth_t 深度值
+     */
+    framebuffer_t::depth_t
+    interpolate_depth(const framebuffer_t::depth_t& _v0,
+                      const framebuffer_t::depth_t& _v1,
+                      const framebuffer_t::depth_t& _v2,
+                      const vector4f_t&             _barycentric_coord) const;
+
+    /**
+     * @brief 颜色插值，由重心坐标计算出对应点的颜色，同时会处理光照强度
+     * @param  _c0              第一个点的颜色
+     * @param  _c1              第二个点的颜色
+     * @param  _c2              第三个点的颜色
+     * @param  _barycentric_coord   重心坐标
+     * @param  _normal          当前点的法向量
+     * @return framebuffer_t::color_t 颜色值
+     */
+    framebuffer_t::color_t
+    interpolate_color(const model_t::color_t& _c0, const model_t::color_t& _c1,
+                      const model_t::color_t&  _c2,
+                      const vector4f_t&        _barycentric_coord,
+                      const model_t::normal_t& _normal) const;
+
+    /**
      * @brief 填充三角形，传入的顶点包含更多信息
      * @param  _v0              第一个顶点
      * @param  _v1              第二个顶点
@@ -159,7 +188,6 @@ public:
     /**
      * @brief 绘制整个模型，指定变换矩阵
      * @param  _model           模型信息
-     * @todo
      * @param  _rotate          在默认变换的基础上进行变换的旋转矩阵，默认为 1
      * @param  _scale           在默认变换的基础上进行变换的缩放矩阵，默认为 1
      * @param  _translate       在默认变换的基础上进行变换的平移矩阵，默认为 1

@@ -44,7 +44,7 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
     auto x_offset = 0;
     auto y_offset = 0;
     for (auto& i : models) {
-        draw3d.model(i, matrix4f_t().rotate(1, 1, 1, matrix4f_t::RAD(180)),
+        draw3d.model(i, matrix4f_t().rotate(1, 1, 1, matrix4f_t::RAD(145)),
                      matrix4f_t(),
                      matrix4f_t().translate(x_offset, y_offset, 0));
         x_offset += WIDTH / 2;
@@ -63,9 +63,9 @@ int main(int _argc, char** _argv) {
         // obj_path = "../../obj/helmet.obj";
         //  obj_path = "../../obj/cube.obj";
         //  obj_path = "../../obj/cube2.obj";
-        obj_path.push_back("../../obj/cube3.obj");
+        // obj_path.push_back("../../obj/cube3.obj");
         // obj_path = "../../obj/cornell_box.obj";
-        // obj_path.push_back("../../obj/helmet.obj");
+        obj_path.push_back("../../obj/helmet.obj");
         // obj_path.push_back("../../obj/african_head.obj");
         obj_path.push_back("../../obj/utah-teapot/utah-teapot.obj");
     }
