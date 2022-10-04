@@ -14,12 +14,15 @@
  * </table>
  */
 
+#include "thread"
+
 #include "camera.h"
 #include "display.h"
 #include "draw3d.h"
 #include "matrix.hpp"
 #include "model.h"
-#include "thread"
+
+/// @bug 在坐标系上可能有问题，设计的部分：法向量计算，光照方向，屏幕原点
 
 static constexpr const uint32_t                  WIDTH  = 1920;
 static constexpr const uint32_t                  HEIGHT = 1080;
@@ -60,9 +63,9 @@ int main(int _argc, char** _argv) {
         // obj_path = "../../obj/helmet.obj";
         //  obj_path = "../../obj/cube.obj";
         //  obj_path = "../../obj/cube2.obj";
-        // obj_path = "../../obj/cube3.obj";
+        obj_path.push_back("../../obj/cube3.obj");
         // obj_path = "../../obj/cornell_box.obj";
-        obj_path.push_back("../../obj/helmet.obj");
+        // obj_path.push_back("../../obj/helmet.obj");
         // obj_path.push_back("../../obj/african_head.obj");
         obj_path.push_back("../../obj/utah-teapot/utah-teapot.obj");
     }

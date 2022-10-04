@@ -164,15 +164,16 @@ public:
          * @param  _matrices        变换矩阵，第一个是坐标变换，第二个是法线变换
          * @return const face_t     结果
          */
-        const face_t
-        operator*(const std::pair<matrix4f_t, matrix4f_t>& _matrices) const;
+        const face_t operator*(
+          const std::pair<const matrix4f_t, const matrix4f_t>& _matrices) const;
 
         /**
          * @brief 模型与矩阵进行运算，效果是对模型进行变换
          * @param  _matrices        变换矩阵，第一个是坐标变换，第二个是法线变换
          * @return face_t&          结果
          */
-        face_t& operator*=(const std::pair<matrix4f_t, matrix4f_t>& _matrices);
+        face_t& operator*=(
+          const std::pair<const matrix4f_t, const matrix4f_t>& _matrices);
     };
 
 private:

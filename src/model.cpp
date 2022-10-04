@@ -37,7 +37,7 @@ model_t::vertex_t::vertex_t(const coord_t& _coord, const normal_t& _normal,
     : coord(_coord), normal(_normal), texcoord(_texcoord) {
     // 将颜色归一化
     if (_color.x > 1 || _color.y > 1 || _color.z > 1) {
-        color = _color / 255;
+        color = _color / std::numeric_limits<uint8_t>::max();
     }
     else {
         color = _color;
@@ -123,7 +123,7 @@ model_t::face_t& model_t::face_t::operator*=(const matrix4f_t& _matrix) {
 }
 
 const model_t::face_t model_t::face_t::operator*(
-  const std::pair<matrix4f_t, matrix4f_t>& _matrices) const {
+  const std::pair<const matrix4f_t, const matrix4f_t>& _matrices) const {
     face_t ret(*this);
     // 变换坐标
     ret.v0.coord *= _matrices.first;
@@ -135,7 +135,7 @@ const model_t::face_t model_t::face_t::operator*(
 }
 
 model_t::face_t& model_t::face_t::operator*=(
-  const std::pair<matrix4f_t, matrix4f_t>& _matrices) {
+  const std::pair<const matrix4f_t, const matrix4f_t>& _matrices) {
     // 变换坐标
     v0.coord *= _matrices.first;
     v1.coord *= _matrices.first;

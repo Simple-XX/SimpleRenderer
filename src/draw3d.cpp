@@ -18,7 +18,7 @@
 
 #include "draw3d.h"
 
-const std::pair<bool, vector4f_t>
+const std::pair<bool, const vector4f_t>
 draw3d_t::get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
                                 const vector4f_t& _p2, const vector4f_t& _p) {
     auto ab   = _p1 - _p0;
@@ -27,7 +27,7 @@ draw3d_t::get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
 
     auto deno = (ab.x * ac.y - ab.y * ac.x);
     if (deno == 0) {
-        return std::pair<bool, vector4f_t>(false, vector4f_t());
+        return std::pair<bool, const vector4f_t>(false, vector4f_t());
     }
 
     auto s       = (ac.y * ap.x - ac.x * ap.y) / deno;
@@ -38,16 +38,19 @@ draw3d_t::get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
             && ((weights.y <= 1) && (weights.y >= 0))
             && ((weights.z <= 1) && (weights.z >= 0));
 
-    return std::pair<bool, vector4f_t>(res, weights);
+    return std::pair<bool, const vector4f_t>(res, weights);
 }
 
-const matrix4f_t
+const std::pair<const matrix4f_t, const matrix4f_t>
 draw3d_t::model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
                            const matrix4f_t& _scale,
                            const matrix4f_t& _translate) const {
-    // 变换矩阵
-    matrix4f_t mat;
-    mat        = _rotate * mat;
+    // 坐标变换矩阵
+    matrix4f_t coord_mat;
+    coord_mat = _rotate * coord_mat;
+    // 法线变换矩阵
+    matrix4f_t normal_mat;
+    normal_mat = coord_mat.inverse().transpose();
     // 用旋转后的顶点计算极值
     auto tmp   = _model.get_face()[0].v0.coord.x;
     auto x_max = std::numeric_limits<decltype(tmp)>::lowest();
@@ -57,9 +60,9 @@ draw3d_t::model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
     auto z_max = x_max;
     auto z_min = x_min;
     for (auto& i : _model.get_face()) {
-        auto v0 = i.v0.coord * mat;
-        auto v1 = i.v1.coord * mat;
-        auto v2 = i.v2.coord * mat;
+        auto v0 = i.v0.coord * coord_mat;
+        auto v1 = i.v1.coord * coord_mat;
+        auto v2 = i.v2.coord * coord_mat;
         x_max   = std::max(x_max, v0.x);
         x_max   = std::max(x_max, v1.x);
         x_max   = std::max(x_max, v2.x);
@@ -94,14 +97,15 @@ draw3d_t::model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
     // 归一化并乘倍数
     auto scale         = multi / delta_xyz_max;
     // 缩放
-    mat                = mat.scale(scale);
-    mat                = _scale * mat;
+    coord_mat          = coord_mat.scale(scale);
+    coord_mat          = _scale * coord_mat;
     // 移动到左上角
-    mat = mat.translate(std::abs(x_min) * scale, std::abs(y_min) * scale, 0);
+    coord_mat          = coord_mat.translate(std::abs(x_min) * scale,
+                                             std::abs(y_min) * scale, 0);
     // 从左上角移动到指定位置
-    mat = _translate * mat;
-
-    return matrix4f_t(mat);
+    coord_mat          = _translate * coord_mat;
+    return std::pair<const matrix4f_t, const matrix4f_t>(
+      matrix4f_t(coord_mat), matrix4f_t(normal_mat));
 }
 
 void draw3d_t::triangle(const model_t::vertex_t& _v0,
@@ -116,38 +120,44 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
               = get_barycentric_coord(_v0.coord, _v1.coord, _v2.coord,
                                       vector4f_t(x, y, 0));
             // 如果点在三角形内再进行下一步
-            if (is_inside == true) {
-                // 计算该点的深度，通过重心坐标插值计算
-                auto z = 0.;
-                z      += _v0.coord.z * barycentric_coord.x;
-                z      += _v1.coord.z * barycentric_coord.y;
-                z      += _v2.coord.z * barycentric_coord.z;
-                // 深度在已有颜色之上
-                if (z >= (framebuffer->get_depth_buffer()(x, y))) {
-                    // 光照方向为正，不绘制背面
-                    /// @bug cube3 法线方向可能有问题
-                    auto intensity = _normal * light;
-                    if (intensity > 0) {
-                        // 计算颜色，颜色为三个点的颜色的重心坐标插值
-                        model_t::color_t       color_v;
-                        framebuffer_t::color_t color = 0xFFFFFFFF;
-                        color_v = (_v0.color * barycentric_coord.x,
-                                   _v1.color * barycentric_coord.y,
-                                   _v2.color * barycentric_coord.z);
-                        color_v = color_v.normalize();
-                        // color_v = vector4f_t(1, 1, 1, 1);
-                        // color
-                        //   = framebuffer_t::ARGB(255,
-                        //                         255 * color_v.x * intensity,
-                        //                         255 * color_v.y * intensity,
-                        //                         255 * color_v.z * intensity);
-                        color   = framebuffer_t::ARGB(255, 255 * intensity,
-                                                      255 * intensity,
-                                                      255 * intensity);
-                        framebuffer->pixel(x, y, color, z);
-                    }
-                }
+            if (is_inside == false) {
+                continue;
             }
+            // 计算该点的深度，通过重心坐标插值计算
+            auto z = 0.;
+            z      += _v0.coord.z * barycentric_coord.x;
+            z      += _v1.coord.z * barycentric_coord.y;
+            z      += _v2.coord.z * barycentric_coord.z;
+            // 深度在已有颜色之上
+            if (z < (framebuffer->get_depth_buffer()(x, y))) {
+                continue;
+            }
+            // 光照方向为正，不绘制背面
+            /// @bug cube3 法线方向可能有问题
+            auto intensity = _normal * light;
+            if (intensity <= 0) {
+                continue;
+            }
+
+            // 计算颜色，颜色为三个点的颜色的重心坐标插值
+            auto color_v
+              = model_t::color_t(_v0.color.x * barycentric_coord.x
+                                   + _v1.color.x * barycentric_coord.y
+                                   + _v2.color.x * barycentric_coord.z,
+                                 _v0.color.y * barycentric_coord.x
+                                   + _v1.color.y * barycentric_coord.y
+                                   + _v2.color.y * barycentric_coord.z,
+                                 _v0.color.z * barycentric_coord.x
+                                   + _v1.color.z * barycentric_coord.y
+                                   + _v2.color.z * barycentric_coord.z);
+            auto color = framebuffer_t::ARGB(
+              std::numeric_limits<uint8_t>::max(),
+              std::numeric_limits<uint8_t>::max() * color_v.x * intensity,
+              std::numeric_limits<uint8_t>::max() * color_v.y * intensity,
+              std::numeric_limits<uint8_t>::max() * color_v.z * intensity);
+
+            // 填充像素
+            framebuffer->pixel(x, y, color, z);
         }
     }
     return;
@@ -264,11 +274,7 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
                     auto v1v0      = _v1 - _v0;
                     auto normal    = v2v0 ^ v1v0;
                     normal         = normal.normalize();
-                    // std::cout << "normal: " << normal <<
-                    // std::endl;
                     auto intensity = normal * vector4f_t(0, 0, -1);
-                    // std::cout << "intensity: " <<
-                    // intensity << std::endl;
                     if (intensity > 0) {
                         framebuffer->pixel(x, y, _color * intensity, z);
                     }
@@ -282,7 +288,6 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
 void draw3d_t::model(const model_t& _model, const matrix4f_t& _rotate,
                      const matrix4f_t& _scale, const matrix4f_t& _translate) {
     auto& tran = model2world_tran(_model, _rotate, _scale, _translate);
-    std::cout << "tran: " << tran << std::endl;
     for (auto f : _model.get_face()) {
         triangle(f * tran);
     }

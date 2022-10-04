@@ -535,7 +535,8 @@ const vector4_t<_T> vector4_t<_T>::unit(void) const {
     if (length() == 0) {
         return vector4_t<_T>();
     }
-    return vector4_t(*this / max());
+    auto max = std::max(std::abs(x), std::max(std::abs(y), std::abs(z)));
+    return vector4_t(*this / max);
 }
 
 template <class _T>

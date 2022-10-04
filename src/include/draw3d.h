@@ -31,7 +31,8 @@ private:
     uint32_t                       height;
 
     /// 光照方向
-    vector4f_t                     light = vector4f_t(0, 0, -1);
+    /// @bug 这里要注意与法线正方向配合
+    vector4f_t                     light = vector4f_t(0, 0, 1);
 
     /**
      * @brief 计算重心坐标
@@ -39,7 +40,7 @@ private:
      * @param  _p1              三角形的第二个点
      * @param  _p2              三角形的第三个点
      * @param  _p               要判断的点
-     * @return const std::pair<bool, vector4f_t>
+     * @return const std::pair<bool, const vector4f_t>
      *  第一个返回为 _p 是否在三角形内，第二个为重心坐标
      * @see http://blackpawn.com/texts/pointinpoly/
      * solve
@@ -57,7 +58,7 @@ private:
      *     weight_B = s
      *     weight_C = t
      */
-    static const std::pair<bool, vector4f_t>
+    static const std::pair<bool, const vector4f_t>
     get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
                           const vector4f_t& _p2, const vector4f_t& _p);
 
@@ -68,9 +69,9 @@ private:
      * @param  _rotate          在默认变换的基础上进行变换的旋转矩阵，默认为 1
      * @param  _scale           在默认变换的基础上进行变换的缩放矩阵，默认为 1
      * @param  _translate       在默认变换的基础上进行变换的平移矩阵，默认为 1
-     * @return const matrix4f_t 变换矩阵
+     * @return const std::pair<const matrix4f_t, const matrix4f_t>  变换矩阵
      */
-    const matrix4f_t
+    const std::pair<const matrix4f_t, const matrix4f_t>
     model2world_tran(const model_t&    _model,
                      const matrix4f_t& _rotate    = matrix4f_t(),
                      const matrix4f_t& _scale     = matrix4f_t(),
