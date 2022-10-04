@@ -306,6 +306,7 @@ public:
     /**
      * @brief 逆矩阵
      * @return const matrix_t<_T>       逆矩阵
+     * @see https://www.geeksforgeeks.org/adjoint-inverse-matrix/
      */
     const matrix_t<_T> inverse(void) const;
 
@@ -704,24 +705,19 @@ const matrix_t<_T> matrix_t<_T>::inverse(void) const {
     if (HasNaNs()) {
         throw std::invalid_argument(log("HasNaNs()"));
     }
-    _T tmp[ORDER][ORDER] = { { 0 } };
-    // Find determ of A[][]
-    _T det               = determ(ORDER);
-    if (det == 0) {
+    // 计算行列式
+    _T det = determ(ORDER);
+    if (std::abs(det) <= std::numeric_limits<_T>::epsilon()) {
         throw std::runtime_error(
-          log("det == 0, Singular matrix, can't find its inverse"));
+          log("std::abs(det) <= std::numeric_limits<_T>::epsilon(), Singular "
+              "matrix, can't find its inverse"));
     }
 
-    // Find adjoint
+    // 计算伴随矩阵
     auto adj = adjoint();
 
-    // Find Inverse using formula "inverse(A) =
-    // adj(A)/det(A)"
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            tmp[i][j] = adj[i][j] / float(det);
-        }
-    }
+    // 逆矩阵=伴随矩阵/行列式
+    auto tmp = adj * (1 / det);
 
     return matrix_t<_T>(tmp);
 }
