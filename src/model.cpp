@@ -70,10 +70,10 @@ model_t::face_t::face_t(const face_t& _face)
     return;
 }
 
-model_t::face_t::face_t(const model_t::vertex_t&   _v0,
-                        const model_t::vertex_t&   _v1,
-                        const model_t::vertex_t&   _v2,
-                        const tinyobj::material_t& _material)
+model_t::face_t::face_t(const model_t::vertex_t& _v0,
+                        const model_t::vertex_t& _v1,
+                        const model_t::vertex_t& _v2,
+                        const material_t&        _material)
     : v0(_v0), v1(_v1), v2(_v2), material(_material) {
     // 计算法向量
     // 如果 obj 内包含法向量，直接使用即可
@@ -106,13 +106,6 @@ model_t::face_t& model_t::face_t::operator=(const face_t& _face) {
     return *this;
 }
 
-const model_t::face_t& model_t::face_t::operator*(const matrix4f_t& _matrix) {
-    v0.coord *= _matrix;
-    v1.coord *= _matrix;
-    v2.coord *= _matrix;
-    return *this;
-}
-
 const model_t::face_t
 model_t::face_t::operator*(const matrix4f_t& _matrix) const {
     face_t ret(*this);
@@ -120,6 +113,36 @@ model_t::face_t::operator*(const matrix4f_t& _matrix) const {
     ret.v1.coord *= _matrix;
     ret.v2.coord *= _matrix;
     return ret;
+}
+
+model_t::face_t& model_t::face_t::operator*=(const matrix4f_t& _matrix) {
+    v0.coord *= _matrix;
+    v1.coord *= _matrix;
+    v2.coord *= _matrix;
+    return *this;
+}
+
+const model_t::face_t model_t::face_t::operator*(
+  const std::pair<matrix4f_t, matrix4f_t>& _matrices) const {
+    face_t ret(*this);
+    // 变换坐标
+    ret.v0.coord *= _matrices.first;
+    ret.v1.coord *= _matrices.first;
+    ret.v2.coord *= _matrices.first;
+    // 变换法线
+    ret.normal   *= _matrices.second;
+    return ret;
+}
+
+model_t::face_t& model_t::face_t::operator*=(
+  const std::pair<matrix4f_t, matrix4f_t>& _matrices) {
+    // 变换坐标
+    v0.coord *= _matrices.first;
+    v1.coord *= _matrices.first;
+    v2.coord *= _matrices.first;
+    // 变换法线
+    normal   *= _matrices.second;
+    return *this;
 }
 
 model_t::model_t(void) {
@@ -167,12 +190,12 @@ model_t::model_t(const std::string& _obj_path, const std::string& _mtl_path) {
             if (fv != 3) {
                 throw(std::runtime_error(log("fv != 3")));
             }
-            coord_t             coord;
-            normal_t            normal;
-            color_t             color;
-            texcoord_t          texcoord;
-            tinyobj::material_t material;
-            vertex_t            vertexes[3];
+            coord_t    coord;
+            normal_t   normal;
+            color_t    color;
+            texcoord_t texcoord;
+            material_t material;
+            vertex_t   vertexes[3];
             // 遍历面上的顶点，这里 fv == 3
             for (size_t v = 0; v < fv; v++) {
                 // 获取索引
@@ -219,7 +242,22 @@ model_t::model_t(const std::string& _obj_path, const std::string& _mtl_path) {
 
             // per-face material
             if (materials.size() > 0) {
-                material = materials[s];
+                // std::cout << "materials[s].name: " << materials[s].name
+                //           << std::endl;
+                // std::cout << "materials[s].diffuse_texname: "
+                //           << materials[s].diffuse_texname << std::endl;
+                // std::cout << "materials[s].diffuse_texname: "
+                //           << materials[s].ambient[0] << std::endl;
+                material.shininess = materials[s].shininess;
+                material.ambient
+                  = vector4f_t(materials[s].ambient[0], materials[s].ambient[1],
+                               materials[s].ambient[2]);
+                material.diffuse
+                  = vector4f_t(materials[s].diffuse[0], materials[s].diffuse[1],
+                               materials[s].diffuse[2]);
+                material.specular = vector4f_t(materials[s].specular[0],
+                                               materials[s].specular[1],
+                                               materials[s].specular[2]);
             }
             face.push_back(face_t(vertexes[0], vertexes[1], vertexes[2],
                                   material));

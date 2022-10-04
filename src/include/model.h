@@ -39,6 +39,19 @@ public:
     /// 贴图
     typedef vector4f_t texcoord_t;
 
+    struct material_t {
+        /// 反光度
+        float      shininess;
+        /// 环境光照
+        vector4f_t ambient;
+        /// 漫反射光照
+        vector4f_t diffuse;
+        /// 镜面光照
+        vector4f_t specular;
+        material_t(void)  = default;
+        ~material_t(void) = default;
+    };
+
     /**
      * @brief obj/mtl 文件的原始数据
      */
@@ -90,13 +103,14 @@ public:
     };
 
     struct face_t {
-        vertex_t            v0;
-        vertex_t            v1;
-        vertex_t            v2;
+        vertex_t   v0;
+        vertex_t   v1;
+        vertex_t   v2;
         /// 面的法向量为三个点的法向量矢量和
-        normal_t            normal;
+        normal_t   normal;
         // 面的颜色为三个点的颜色插值
-        tinyobj::material_t material;
+        // 材质信息
+        material_t material;
 
         /**
          * @brief 构造函数
@@ -117,7 +131,7 @@ public:
          * @param  _material        材质
          */
         face_t(const vertex_t& _v0, const vertex_t& _v1, const vertex_t& _v2,
-               const tinyobj::material_t& _material);
+               const material_t& _material);
 
         /**
          * @brief 析构函数
@@ -129,21 +143,36 @@ public:
          * @param  _face            另一个 face_t
          * @return face_t&          结果
          */
-        face_t&       operator=(const face_t& _face);
-
-        /**
-         * @brief 模型与矩阵进行运算，效果是对模型进行变换
-         * @param  _matrix          变换矩阵
-         * @return const face_t&    结果
-         */
-        const face_t& operator*(const matrix4f_t& _matrix);
+        face_t&      operator=(const face_t& _face);
 
         /**
          * @brief 模型与矩阵进行运算，效果是对模型进行变换
          * @param  _matrix          变换矩阵
          * @return const face_t     结果
          */
-        const face_t  operator*(const matrix4f_t& _matrix) const;
+        const face_t operator*(const matrix4f_t& _matrix) const;
+
+        /**
+         * @brief 模型与矩阵进行运算，效果是对模型进行变换
+         * @param  _matrix          变换矩阵
+         * @return face_t&          结果
+         */
+        face_t&      operator*=(const matrix4f_t& _matrix);
+
+        /**
+         * @brief 模型与矩阵进行运算，效果是对模型进行变换
+         * @param  _matrices        变换矩阵，第一个是坐标变换，第二个是法线变换
+         * @return const face_t     结果
+         */
+        const face_t
+        operator*(const std::pair<matrix4f_t, matrix4f_t>& _matrices) const;
+
+        /**
+         * @brief 模型与矩阵进行运算，效果是对模型进行变换
+         * @param  _matrices        变换矩阵，第一个是坐标变换，第二个是法线变换
+         * @return face_t&          结果
+         */
+        face_t& operator*=(const std::pair<matrix4f_t, matrix4f_t>& _matrices);
     };
 
 private:
