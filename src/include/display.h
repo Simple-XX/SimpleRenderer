@@ -18,8 +18,10 @@
 #define _DISPLAY_H_
 
 #include "cstdint"
-#include "framebuffer.h"
+
 #include "SDL.h"
+
+#include "framebuffer.h"
 
 /**
  * @brief 对 sdl 的抽象
@@ -27,6 +29,8 @@
  */
 class display_t {
 private:
+    /// @brief 窗口标题
+    static constexpr const char*   WINDOW_TITLE = (char*)"SimpleRenderer";
     /// @brief 保存要显示的 framebuffer
     std::shared_ptr<framebuffer_t> framebuffer;
     /// @brief sdl 窗口
@@ -45,28 +49,28 @@ private:
      * @param  _color           argb32
      * @return uint8_t          alpha
      */
-    static uint8_t                 ARGB2A(uint32_t _color);
+    static uint8_t                 ARGB2A(const uint32_t _color);
 
     /**
      * @brief 从 argb32 中获取 red 通道
      * @param  _color           argb32
      * @return uint8_t          red
      */
-    static uint8_t                 ARGB2R(uint32_t _color);
+    static uint8_t                 ARGB2R(const uint32_t _color);
 
     /**
      * @brief 从 argb32 中获取 green 通道
      * @param  _color           argb32
      * @return uint8_t          green
      */
-    static uint8_t                 ARGB2G(uint32_t _color);
+    static uint8_t                 ARGB2G(const uint32_t _color);
 
     /**
      * @brief 从 argb32 中获取 blue 通道
      * @param  _color           argb32
      * @return uint8_t          blue
      */
-    static uint8_t                 ARGB2B(uint32_t _color);
+    static uint8_t                 ARGB2B(const uint32_t _color);
 
     /**
      * @brief 设置像素

@@ -20,19 +20,19 @@
 #include "display.h"
 #include "log.hpp"
 
-uint8_t display_t::ARGB2A(uint32_t _color) {
+uint8_t display_t::ARGB2A(const uint32_t _color) {
     return (_color >> 24) & 0xFF;
 }
 
-uint8_t display_t::ARGB2R(uint32_t _color) {
+uint8_t display_t::ARGB2R(const uint32_t _color) {
     return (_color >> 16) & 0xFF;
 }
 
-uint8_t display_t::ARGB2G(uint32_t _color) {
+uint8_t display_t::ARGB2G(const uint32_t _color) {
     return (_color >> 8) & 0xFF;
 }
 
-uint8_t display_t::ARGB2B(uint32_t _color) {
+uint8_t display_t::ARGB2B(const uint32_t _color) {
     return (_color >> 0) & 0xFF;
 }
 
@@ -51,15 +51,15 @@ void display_t::pixel(SDL_Surface* _surface, const uint32_t _x,
     }
     // 判断颜色深度
     int bpp = _surface->format->BytesPerPixel;
+    // 只支持深度为 4 的，即 32 位色
     if (bpp != 4) {
-        std::cerr
-          << "Only support "
-          << SDL_GetPixelFormatName(SDL_GetWindowPixelFormat(sdl_window))
-          << std::endl;
-        return;
+        auto err = log("bpp != 4 ") + "Only support "
+                 + SDL_GetPixelFormatName(SDL_GetWindowPixelFormat(sdl_window));
+        throw std::runtime_error(err);
     }
     // 计算像素位置
-    uint8_t* p = (uint8_t*)_surface->pixels + _y * _surface->pitch + _x * bpp;
+    auto p = (uint8_t*)_surface->pixels + _y * _surface->pitch + _x * bpp;
+    // 写入
     *(uint32_t*)p = SDL_MapRGBA(_surface->format, _r, _g, _b, _a);
     SDL_UnlockSurface(_surface);
     return;
@@ -76,7 +76,7 @@ display_t::display_t(std::shared_ptr<framebuffer_t> _framebuffer)
             throw std::runtime_error(log(SDL_GetError()));
         }
         // 创建窗口，居中，可见
-        sdl_window = SDL_CreateWindow("SimpleRenderer", SDL_WINDOWPOS_CENTERED,
+        sdl_window = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_CENTERED,
                                       SDL_WINDOWPOS_CENTERED, width, height,
                                       SDL_WINDOW_SHOWN);
         if (sdl_window == nullptr) {
@@ -173,7 +173,7 @@ void display_t::fill(void) {
         std::cerr << e.what() << std::endl;
         return;
     }
-    uint32_t color = 0x00000000;
+    uint32_t color = 0xFFFFFFFF;
     // 填充整个屏幕
     for (uint32_t i = 0; i < width; i++) {
         for (uint32_t j = 0; j < height; j++) {
