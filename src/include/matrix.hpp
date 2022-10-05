@@ -135,17 +135,55 @@ public:
 
     /**
      * @brief 矩阵数乘
+     * @tparam _U 数类型
+     * @param  _v               数
+     * @param  _mat             矩阵
+     * @return const matrix_t<_T>   结果
+     */
+    template <class _U>
+    friend const matrix_t<_T>
+    operator*(const _U& _v, const matrix_t<_T>& _mat) {
+        if (std::isnan(_v)) {
+            throw std::invalid_argument(log("std::isnan(_v)"));
+        }
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
+
+        _T tmp[ORDER][ORDER] = { { 0 } };
+        for (uint8_t i = 0; i < ORDER; i++) {
+            for (uint8_t j = 0; j < ORDER; j++) {
+                tmp[i][j] = _mat[i][j] * _v;
+            }
+        }
+        return matrix_t<_T>(tmp);
+    }
+
+    /**
+     * @brief 矩阵数乘
+     * @tparam _U 数类型
+     * @param  _mat             矩阵
      * @param  _v               数
      * @return const matrix_t<_T>   结果
      */
-    const matrix_t<_T> operator*(const _T& _v) const;
+    template <class _U>
+    friend const matrix_t<_T>
+    operator*(const matrix_t<_T>& _mat, const _U& _v) {
+        if (std::isnan(_v)) {
+            throw std::invalid_argument(log("std::isnan(_v)"));
+        }
+        if (_mat.HasNaNs()) {
+            throw std::invalid_argument(log("_mat.HasNaNs()"));
+        }
 
-    /**
-     * @brief 矩阵间乘法
-     * @param  _mat             另一个 matrix_t
-     * @return const matrix_t<_T>   结果
-     */
-    const matrix_t<_T> operator*(const matrix_t<_T>& _mat) const;
+        _T tmp[ORDER][ORDER] = { { 0 } };
+        for (uint8_t i = 0; i < ORDER; i++) {
+            for (uint8_t j = 0; j < ORDER; j++) {
+                tmp[i][j] = _v * _mat[i][j];
+            }
+        }
+        return matrix_t<_T>(tmp);
+    }
 
     /**
      * @brief 行向量乘矩阵
@@ -164,13 +202,15 @@ public:
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
 
-        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[0][1] + _v.z * _mat[0][2]
-                   + 1 * _mat[0][3];
-        auto new_y = _v.x * _mat[1][0] + _v.y * _mat[1][1] + _v.z * _mat[1][2]
-                   + 1 * _mat[1][3];
-        auto new_z = _v.x * _mat[2][0] + _v.y * _mat[2][1] + _v.z * _mat[2][2]
-                   + 1 * _mat[2][3];
-        return vector4_t<_U>(new_x, new_y, new_z);
+        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[1][0] + _v.z * _mat[2][0]
+                   + _v.w * _mat[3][0];
+        auto new_y = _v.x * _mat[0][1] + _v.y * _mat[1][1] + _v.z * _mat[2][1]
+                   + _v.w * _mat[3][1];
+        auto new_z = _v.x * _mat[0][2] + _v.y * _mat[1][2] + _v.z * _mat[2][2]
+                   + _v.w * _mat[3][2];
+        auto new_w = _v.x * _mat[0][3] + _v.y * _mat[1][3] + _v.z * _mat[2][3]
+                   + _v.w * _mat[3][3];
+        return vector4_t<_U>(new_x, new_y, new_z, new_w);
     }
 
     /**
@@ -193,25 +233,25 @@ public:
         memcpy(tmp, _mat.mat, ORDER * ORDER * sizeof(_T));
         for (uint8_t i = 0; i < ORDER; i++) {
             for (uint8_t j = 0; j < ORDER; j++) {
-                tmp[i][j] *= _v[i];
+                tmp[i][j] *= _v[j];
             }
         }
         return matrix_t<_T>(tmp);
     }
 
     /**
+     * @brief 矩阵间乘法
+     * @param  _mat             另一个 matrix_t
+     * @return const matrix_t<_T>   结果
+     */
+    const matrix_t<_T> operator*(const matrix_t<_T>& _mat) const;
+
+    /**
      * @brief 矩阵数乘的自乘
      * @param  _v               数
      * @return matrix_t<_T>&    结果
      */
-    matrix_t<_T>& operator*=(const _T& _v);
-
-    /**
-     * @brief 矩阵间自乘
-     * @param  _mat             另一个 matrix_t
-     * @return matrix_t<_T>&    结果
-     */
-    matrix_t<_T>& operator*=(const matrix_t<_T>& _mat);
+    matrix_t<_T>&      operator*=(const _T& _v);
 
     /**
      * @brief 行向量乘矩阵
@@ -229,15 +269,18 @@ public:
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
         }
-        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[0][1] + _v.z * _mat[0][2]
-                   + 1 * _mat[0][3];
-        auto new_y = _v.x * _mat[1][0] + _v.y * _mat[1][1] + _v.z * _mat[1][2]
-                   + 1 * _mat[1][3];
-        auto new_z = _v.x * _mat[2][0] + _v.y * _mat[2][1] + _v.z * _mat[2][2]
-                   + 1 * _mat[2][3];
+        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[1][0] + _v.z * _mat[2][0]
+                   + _v.w * _mat[3][0];
+        auto new_y = _v.x * _mat[0][1] + _v.y * _mat[1][1] + _v.z * _mat[2][1]
+                   + _v.w * _mat[3][1];
+        auto new_z = _v.x * _mat[0][2] + _v.y * _mat[1][2] + _v.z * _mat[2][2]
+                   + _v.w * _mat[3][2];
+        auto new_w = _v.x * _mat[0][3] + _v.y * _mat[1][3] + _v.z * _mat[2][3]
+                   + _v.w * _mat[3][3];
         _v.x = new_x;
         _v.y = new_y;
         _v.z = new_z;
+        _v.w = new_w;
         return _v;
     }
 
@@ -258,12 +301,19 @@ public:
         memcpy(tmp, _mat.mat, ORDER * ORDER * sizeof(_T));
         for (uint8_t i = 0; i < ORDER; i++) {
             for (uint8_t j = 0; j < ORDER; j++) {
-                tmp[i][j] *= _v[i];
+                tmp[i][j] *= _v[j];
             }
         }
         memcpy(_mat.mat, tmp, ORDER * ORDER * sizeof(_T));
         return _mat;
     }
+
+    /**
+     * @brief 矩阵间自乘
+     * @param  _mat             另一个 matrix_t
+     * @return matrix_t<_T>&    结果
+     */
+    matrix_t<_T>&      operator*=(const matrix_t<_T>& _mat);
 
     /**
      * @brief 矩阵相等
@@ -293,7 +343,6 @@ public:
      * @brief 下标重载
      * @param  _idx             行
      * @return const _T*        行指针
-     * @note    注意不要越界访问
      */
     const _T*          operator[](const uint8_t _idx) const;
 
@@ -318,15 +367,14 @@ public:
      * @return const matrix_t<_T>   构造好的平移矩阵
      * @note    先旋转再平移
      */
-    const matrix_t<_T>
-    translate(const float _x, const float _y, const float _z) const;
+    const matrix_t<_T> translate(const _T _x, const _T _y, const _T _z) const;
 
     /**
      * @brief 缩放矩阵
      * @param  _scale           缩放倍数
      * @return const matrix_t<_T>   构造好的旋转矩阵
      */
-    const matrix_t<_T> scale(const float _scale) const;
+    const matrix_t<_T> scale(const _T _scale) const;
 
     /**
      * @brief 缩放矩阵
@@ -335,8 +383,7 @@ public:
      * @param  _z               z 方向缩放倍数
      * @return const matrix_t<_T>   构造好的旋转矩阵
      */
-    const matrix_t<_T>
-    scale(const float _x, const float _y, const float _z) const;
+    const matrix_t<_T> scale(const _T _x, const _T _y, const _T _z) const;
 
     /**
      * @brief 旋转矩阵
@@ -348,22 +395,22 @@ public:
      * @see http://docs.gl/gl2/glRotate
      * @note    先旋转再平移
      */
-    const matrix_t<_T> rotate(const float _x, const float _y, const float _z,
-                              const float _angle) const;
+    const matrix_t<_T>
+    rotate(const _T _x, const _T _y, const _T _z, const float _angle) const;
 
     /**
      * @brief 角度转换为弧度
      * @param  _deg             角度
      * @return float            弧度
      */
-    static float       RAD(const float _deg);
+    static float RAD(const float _deg);
 
     /**
      * @brief 弧度转换为角度
      * @param  _rad             弧度
      * @return float            角度
      */
-    static float       DEG(const float _rad);
+    static float DEG(const float _rad);
 
     friend std::ostream&
     operator<<(std::ostream& _os, const matrix_t<_T>& _mat) {
@@ -582,20 +629,6 @@ matrix_t<_T>& matrix_t<_T>::operator-=(const matrix_t<_T>& _mat) {
 }
 
 template <class _T>
-const matrix_t<_T> matrix_t<_T>::operator*(const _T& _v) const {
-    if (std::isnan(_v)) {
-        throw std::invalid_argument(log("std::isnan(_v)"));
-    }
-    _T tmp[ORDER][ORDER] = { { 0 } };
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            tmp[i][j] = mat[i][j] * _v;
-        }
-    }
-    return matrix_t<_T>(tmp);
-}
-
-template <class _T>
 const matrix_t<_T> matrix_t<_T>::operator*(const matrix_t<_T>& _mat) const {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
@@ -724,7 +757,7 @@ const matrix_t<_T> matrix_t<_T>::inverse(void) const {
 
 template <class _T>
 const matrix_t<_T>
-matrix_t<_T>::translate(const float _x, const float _y, const float _z) const {
+matrix_t<_T>::translate(const _T _x, const _T _y, const _T _z) const {
     if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)) {
         throw std::invalid_argument(
           log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
@@ -737,7 +770,7 @@ matrix_t<_T>::translate(const float _x, const float _y, const float _z) const {
 }
 
 template <class _T>
-const matrix_t<_T> matrix_t<_T>::scale(const float _scale) const {
+const matrix_t<_T> matrix_t<_T>::scale(const _T _scale) const {
     if (std::isnan(_scale)) {
         throw std::invalid_argument(log("std::isnan(_scale)"));
     }
@@ -751,7 +784,7 @@ const matrix_t<_T> matrix_t<_T>::scale(const float _scale) const {
 
 template <class _T>
 const matrix_t<_T>
-matrix_t<_T>::scale(const float _x, const float _y, const float _z) const {
+matrix_t<_T>::scale(const _T _x, const _T _y, const _T _z) const {
     if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)) {
         throw std::invalid_argument(
           log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
@@ -765,20 +798,19 @@ matrix_t<_T>::scale(const float _x, const float _y, const float _z) const {
 }
 
 template <class _T>
-const matrix_t<_T>
-matrix_t<_T>::rotate(const float _x, const float _y, const float _z,
-                     const float _angle) const {
+const matrix_t<_T> matrix_t<_T>::rotate(const _T _x, const _T _y, const _T _z,
+                                        const float _angle) const {
     if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)
         || std::isnan(_angle)) {
         throw std::invalid_argument(
           log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)|| "
               "std::isnan(_angle)"));
     }
-    auto            n = vector4_t(_x, _y, _z).normalize();
-    auto            c = std::cos(_angle);
-    auto            s = std::sin(_angle);
+    auto         n = vector4_t(_x, _y, _z).normalize();
+    auto         c = std::cos(_angle);
+    auto         s = std::sin(_angle);
 
-    matrix_t<float> tmp;
+    matrix_t<_T> tmp;
     tmp.mat[0][0] = n.x * n.x * (1 - c) + c;
     tmp.mat[0][1] = n.y * n.x * (1 - c) - s * n.z;
     tmp.mat[0][2] = n.z * n.x * (1 - c) + s * n.y;
