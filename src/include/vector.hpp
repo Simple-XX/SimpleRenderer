@@ -27,7 +27,7 @@
 /**
  * @brief 4 维向量
  * @tparam _T                类型
- * @note w 不一般参与运算
+ * @note w 为 0 时表示向量，w 为 1 时表示点
  */
 template <class _T>
 class vector4_t {

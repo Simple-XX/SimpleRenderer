@@ -106,22 +106,6 @@ model_t::face_t& model_t::face_t::operator=(const face_t& _face) {
     return *this;
 }
 
-const model_t::face_t
-model_t::face_t::operator*(const matrix4f_t& _matrix) const {
-    face_t ret(*this);
-    ret.v0.coord *= _matrix;
-    ret.v1.coord *= _matrix;
-    ret.v2.coord *= _matrix;
-    return ret;
-}
-
-model_t::face_t& model_t::face_t::operator*=(const matrix4f_t& _matrix) {
-    v0.coord *= _matrix;
-    v1.coord *= _matrix;
-    v2.coord *= _matrix;
-    return *this;
-}
-
 const model_t::face_t model_t::face_t::operator*(
   const std::pair<const matrix4f_t, const matrix4f_t>& _matrices) const {
     face_t ret(*this);

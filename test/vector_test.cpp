@@ -14,8 +14,9 @@
  * </table>
  */
 
-#include "vector.hpp"
 #include "gtest/gtest.h"
+
+#include "vector.hpp"
 
 TEST(vector4f_t, test1) {
     vector4f_t test(2, 3);

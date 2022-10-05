@@ -374,7 +374,7 @@ public:
                 _os << " ";
             }
             for (uint8_t j = 0; j < matrix_t<_T>::ORDER; j++) {
-                _os << std::setw(7) << std::setprecision(4) << _mat[i][j];
+                _os << std::setw(7) << std::setprecision(8) << _mat[i][j];
                 if (j != matrix_t<_T>::ORDER - 1) {
                     _os << " ";
                 }
@@ -649,7 +649,7 @@ bool matrix_t<_T>::operator==(const matrix_t<_T>& _mat) const {
     for (uint8_t i = 0; i < ORDER; i++) {
         for (uint8_t j = 0; j < ORDER; j++) {
             if (std::abs(mat[i][j] - _mat[i][j])
-                <= std::numeric_limits<_T>::epsilon()) {
+                > std::numeric_limits<_T>::epsilon()) {
                 return false;
             }
         }
@@ -729,7 +729,7 @@ matrix_t<_T>::translate(const float _x, const float _y, const float _z) const {
         throw std::invalid_argument(
           log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
     }
-    matrix_t<float> tmp;
+    matrix_t<_T> tmp;
     tmp.mat[0][3] = _x;
     tmp.mat[1][3] = _y;
     tmp.mat[2][3] = _z;
@@ -741,7 +741,7 @@ const matrix_t<_T> matrix_t<_T>::scale(const float _scale) const {
     if (std::isnan(_scale)) {
         throw std::invalid_argument(log("std::isnan(_scale)"));
     }
-    matrix_t<float> tmp;
+    matrix_t<_T> tmp;
     tmp.mat[0][0] = _scale;
     tmp.mat[1][1] = _scale;
     tmp.mat[2][2] = _scale;
@@ -756,7 +756,7 @@ matrix_t<_T>::scale(const float _x, const float _y, const float _z) const {
         throw std::invalid_argument(
           log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
     }
-    matrix_t<float> tmp;
+    matrix_t<_T> tmp;
     tmp.mat[0][0] = _x;
     tmp.mat[1][1] = _y;
     tmp.mat[2][2] = _z;
