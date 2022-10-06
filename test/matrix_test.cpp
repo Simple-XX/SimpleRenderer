@@ -43,19 +43,13 @@ TEST(matrix_t, test1) {
 
     // 矩阵与向量乘法
     vector4f_t vec1(1, 2, 3, 4);
-    // 矩阵在左，向量在右，结果为矩阵
-    float      res2[4][4] = {
-        { 5, -4,   6, 28},
-        { 1,  0,   0, 12},
-        {-3,  2,  15,  0},
-        { 3, -2, -27, 16}
-    };
-    auto res_mat2 = matrix4f_t(res2);
-    ret           = (res_mat2 == (mat1 * vec1));
+    // 矩阵在左，向量在右
+    auto       res_vec1 = vector4f_t(35, 13, 14, -10);
+    ret                 = (res_vec1 == (mat1 * vec1));
     EXPECT_EQ(ret, true);
-    // 向量在左，矩阵在右，结果为向量
-    auto res_vec1 = vector4f_t(10, -3, -19, 29);
-    ret           = (res_vec1 == (vec1 * mat1));
+    // 向量在左，矩阵在右
+    auto res_vec2 = vector4f_t(10, -3, -19, 29);
+    ret           = (res_vec2 == (vec1 * mat1));
     EXPECT_EQ(ret, true);
 
     // 矩阵与矩阵乘法

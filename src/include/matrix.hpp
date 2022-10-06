@@ -218,10 +218,10 @@ public:
      * @tparam _U 向量类型
      * @param  _mat             矩阵
      * @param  _v               向量
-     * @return const matrix_t<_T>   结果
+     * @return const vector4_t<_U>  结果
      */
     template <class _U>
-    friend const matrix_t<_T>
+    friend const vector4_t<_U>
     operator*(const matrix_t<_T>& _mat, const vector4_t<_U>& _v) {
         if (_mat.HasNaNs()) {
             throw std::invalid_argument(log("_mat.HasNaNs()"));
@@ -229,14 +229,15 @@ public:
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-        _T tmp[ORDER][ORDER] = { { 0 } };
-        memcpy(tmp, _mat.mat, ORDER * ORDER * sizeof(_T));
-        for (uint8_t i = 0; i < ORDER; i++) {
-            for (uint8_t j = 0; j < ORDER; j++) {
-                tmp[i][j] *= _v[j];
-            }
-        }
-        return matrix_t<_T>(tmp);
+        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[0][1] + _v.z * _mat[0][2]
+                   + _v.w * _mat[0][3];
+        auto new_y = _v.x * _mat[1][0] + _v.y * _mat[1][1] + _v.z * _mat[1][2]
+                   + _v.w * _mat[1][3];
+        auto new_z = _v.x * _mat[2][0] + _v.y * _mat[2][1] + _v.z * _mat[2][2]
+                   + _v.w * _mat[2][3];
+        auto new_w = _v.x * _mat[3][0] + _v.y * _mat[3][1] + _v.z * _mat[3][2]
+                   + _v.w * _mat[3][3];
+        return vector4_t<_U>(new_x, new_y, new_z, new_w);
     }
 
     /**
@@ -289,23 +290,27 @@ public:
      * @tparam _U 向量类型
      * @param  _mat             矩阵
      * @param  _v               向量
-     * @return matrix_t<_T>&    结果
+     * @return vector4_t<_U>&   结果
      */
     template <class _U>
-    friend matrix_t<_T>&
-    operator*=(matrix_t<_T>& _mat, const vector4_t<_U>& _v) {
+    friend vector4_t<_U>&
+    operator*=(const matrix_t<_T>& _mat, vector4_t<_U>& _v) {
         if (_v.HasNaNs()) {
             throw std::invalid_argument(log("_v.HasNaNs()"));
         }
-        _T tmp[ORDER][ORDER] = { { 0 } };
-        memcpy(tmp, _mat.mat, ORDER * ORDER * sizeof(_T));
-        for (uint8_t i = 0; i < ORDER; i++) {
-            for (uint8_t j = 0; j < ORDER; j++) {
-                tmp[i][j] *= _v[j];
-            }
-        }
-        memcpy(_mat.mat, tmp, ORDER * ORDER * sizeof(_T));
-        return _mat;
+        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[0][1] + _v.z * _mat[0][2]
+                   + _v.w * _mat[0][3];
+        auto new_y = _v.x * _mat[1][0] + _v.y * _mat[1][1] + _v.z * _mat[1][2]
+                   + _v.w * _mat[1][3];
+        auto new_z = _v.x * _mat[2][0] + _v.y * _mat[2][1] + _v.z * _mat[2][2]
+                   + _v.w * _mat[2][3];
+        auto new_w = _v.x * _mat[3][0] + _v.y * _mat[3][1] + _v.z * _mat[3][2]
+                   + _v.w * _mat[3][3];
+        _v.x = new_x;
+        _v.y = new_y;
+        _v.z = new_z;
+        _v.w = new_w;
+        return _v;
     }
 
     /**
@@ -766,6 +771,7 @@ matrix_t<_T>::translate(const _T _x, const _T _y, const _T _z) const {
     tmp.mat[0][3] = _x;
     tmp.mat[1][3] = _y;
     tmp.mat[2][3] = _z;
+    tmp.mat[3][3] = 1;
     return tmp * *this;
 }
 

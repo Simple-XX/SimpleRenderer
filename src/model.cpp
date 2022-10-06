@@ -110,22 +110,22 @@ const model_t::face_t model_t::face_t::operator*(
   const std::pair<const matrix4f_t, const matrix4f_t>& _matrices) const {
     face_t ret(*this);
     // 变换坐标
-    ret.v0.coord *= _matrices.first;
-    ret.v1.coord *= _matrices.first;
-    ret.v2.coord *= _matrices.first;
+    ret.v0.coord = _matrices.first * ret.v0.coord;
+    ret.v1.coord = _matrices.first * ret.v1.coord;
+    ret.v2.coord = _matrices.first * ret.v2.coord;
     // 变换法线
-    ret.normal   *= _matrices.second;
+    ret.normal   = _matrices.second * ret.normal;
     return ret;
 }
 
 model_t::face_t& model_t::face_t::operator*=(
   const std::pair<const matrix4f_t, const matrix4f_t>& _matrices) {
     // 变换坐标
-    v0.coord *= _matrices.first;
-    v1.coord *= _matrices.first;
-    v2.coord *= _matrices.first;
+    v0.coord = _matrices.first * v0.coord;
+    v1.coord = _matrices.first * v1.coord;
+    v2.coord = _matrices.first * v2.coord;
     // 变换法线
-    normal   *= _matrices.second;
+    normal   = _matrices.second * normal;
     return *this;
 }
 
