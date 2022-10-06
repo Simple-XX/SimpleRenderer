@@ -365,21 +365,11 @@ public:
     const matrix_t<_T> inverse(void) const;
 
     /**
-     * @brief 平移矩阵
-     * @param  _x               x 方向变换
-     * @param  _y               y 方向变换
-     * @param  _z               z 方向变换
-     * @return const matrix_t<_T>   构造好的平移矩阵
-     * @note    先旋转再平移
-     */
-    const matrix_t<_T> translate(const _T _x, const _T _y, const _T _z) const;
-
-    /**
      * @brief 缩放矩阵
      * @param  _scale           缩放倍数
      * @return const matrix_t<_T>   构造好的旋转矩阵
      */
-    const matrix_t<_T> scale(const _T _scale) const;
+    const matrix_t<_T> scale(const _T& _scale) const;
 
     /**
      * @brief 缩放矩阵
@@ -388,7 +378,7 @@ public:
      * @param  _z               z 方向缩放倍数
      * @return const matrix_t<_T>   构造好的旋转矩阵
      */
-    const matrix_t<_T> scale(const _T _x, const _T _y, const _T _z) const;
+    const matrix_t<_T> scale(const _T& _x, const _T& _y, const _T& _z) const;
 
     /**
      * @brief 旋转矩阵
@@ -404,18 +394,28 @@ public:
     rotate(const _T _x, const _T _y, const _T _z, const float _angle) const;
 
     /**
+     * @brief 平移矩阵
+     * @param  _x               x 方向变换
+     * @param  _y               y 方向变换
+     * @param  _z               z 方向变换
+     * @return const matrix_t<_T>   构造好的平移矩阵
+     * @note    先旋转再平移
+     */
+
+    const matrix_t<_T> translate(const _T _x, const _T _y, const _T _z) const;
+    /**
      * @brief 角度转换为弧度
      * @param  _deg             角度
      * @return float            弧度
      */
-    static float RAD(const float _deg);
+    static float       RAD(const float _deg);
 
     /**
      * @brief 弧度转换为角度
      * @param  _rad             弧度
      * @return float            角度
      */
-    static float DEG(const float _rad);
+    static float       DEG(const float _rad);
 
     friend std::ostream&
     operator<<(std::ostream& _os, const matrix_t<_T>& _mat) {
@@ -761,21 +761,6 @@ const matrix_t<_T> matrix_t<_T>::inverse(void) const {
 }
 
 template <class _T>
-const matrix_t<_T>
-matrix_t<_T>::translate(const _T _x, const _T _y, const _T _z) const {
-    if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)) {
-        throw std::invalid_argument(
-          log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
-    }
-    matrix_t<_T> tmp;
-    tmp.mat[0][3] = _x;
-    tmp.mat[1][3] = _y;
-    tmp.mat[2][3] = _z;
-    tmp.mat[3][3] = 1;
-    return tmp * *this;
-}
-
-template <class _T>
 const matrix_t<_T> matrix_t<_T>::scale(const _T _scale) const {
     if (std::isnan(_scale)) {
         throw std::invalid_argument(log("std::isnan(_scale)"));
@@ -829,6 +814,21 @@ const matrix_t<_T> matrix_t<_T>::rotate(const _T _x, const _T _y, const _T _z,
     tmp.mat[2][1] = n.y * n.z * (1 - c) + s * n.x;
     tmp.mat[2][2] = n.z * n.z * (1 - c) + c;
 
+    return tmp * *this;
+}
+
+template <class _T>
+const matrix_t<_T>
+matrix_t<_T>::translate(const _T _x, const _T _y, const _T _z) const {
+    if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)) {
+        throw std::invalid_argument(
+          log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
+    }
+    matrix_t<_T> tmp;
+    tmp.mat[0][3] = _x;
+    tmp.mat[1][3] = _y;
+    tmp.mat[2][3] = _z;
+    tmp.mat[3][3] = 1;
     return tmp * *this;
 }
 

@@ -63,7 +63,8 @@ private:
                           const vector4f_t& _p2, const vector4f_t& _p);
 
     /**
-     * @brief 计算变换矩阵，缩放 + 移动到 (0, 0)，屏幕左上角
+     * @brief 计算从模型坐标(局部坐标)到世界坐标的变换矩阵，缩放 + 移动到 (0,
+     * 0)，屏幕左上角
      * @param  _model           要被应用的模型
      * @bug 变换可能有问题
      * @param  _rotate          在默认变换的基础上进行变换的旋转矩阵，默认为 1
@@ -195,6 +196,16 @@ public:
     void model(const model_t& _model, const matrix4f_t& _rotate = matrix4f_t(),
                const matrix4f_t& _scale     = matrix4f_t(),
                const matrix4f_t& _translate = matrix4f_t());
+
+    // /**
+    //  * @brief 绘制整个模型，指定 mvp 矩阵
+    //  * @param  _model           模型信息
+    //  * @param  _model_mat       模型变换矩阵
+    //  * @param  _view_mat        观测变换矩阵
+    //  * @param  _proj_mat        投影变换矩阵
+    //  */
+    // void model(const model_t& _model, const matrix4f_t& _model_mat,
+    //            const matrix4f_t& _view_mat, const matrix4f_t& _proj_mat);
 };
 
 #endif /* _DRAW3D_H_ */
