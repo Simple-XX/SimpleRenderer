@@ -391,7 +391,7 @@ public:
      * @note    先旋转再平移
      */
     const matrix_t<_T>
-    rotate(const _T _x, const _T _y, const _T _z, const float _angle) const;
+    rotate(const _T& _x, const _T& _y, const _T& _z, const float& _angle) const;
 
     /**
      * @brief 平移矩阵
@@ -402,20 +402,21 @@ public:
      * @note    先旋转再平移
      */
 
-    const matrix_t<_T> translate(const _T _x, const _T _y, const _T _z) const;
+    const matrix_t<_T>
+                 translate(const _T& _x, const _T& _y, const _T& _z) const;
     /**
      * @brief 角度转换为弧度
      * @param  _deg             角度
      * @return float            弧度
      */
-    static float       RAD(const float _deg);
+    static float RAD(const float _deg);
 
     /**
      * @brief 弧度转换为角度
      * @param  _rad             弧度
      * @return float            角度
      */
-    static float       DEG(const float _rad);
+    static float DEG(const float _rad);
 
     friend std::ostream&
     operator<<(std::ostream& _os, const matrix_t<_T>& _mat) {
@@ -761,7 +762,7 @@ const matrix_t<_T> matrix_t<_T>::inverse(void) const {
 }
 
 template <class _T>
-const matrix_t<_T> matrix_t<_T>::scale(const _T _scale) const {
+const matrix_t<_T> matrix_t<_T>::scale(const _T& _scale) const {
     if (std::isnan(_scale)) {
         throw std::invalid_argument(log("std::isnan(_scale)"));
     }
@@ -775,7 +776,7 @@ const matrix_t<_T> matrix_t<_T>::scale(const _T _scale) const {
 
 template <class _T>
 const matrix_t<_T>
-matrix_t<_T>::scale(const _T _x, const _T _y, const _T _z) const {
+matrix_t<_T>::scale(const _T& _x, const _T& _y, const _T& _z) const {
     if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)) {
         throw std::invalid_argument(
           log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
@@ -789,8 +790,9 @@ matrix_t<_T>::scale(const _T _x, const _T _y, const _T _z) const {
 }
 
 template <class _T>
-const matrix_t<_T> matrix_t<_T>::rotate(const _T _x, const _T _y, const _T _z,
-                                        const float _angle) const {
+const matrix_t<_T>
+matrix_t<_T>::rotate(const _T& _x, const _T& _y, const _T& _z,
+                     const float& _angle) const {
     if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)
         || std::isnan(_angle)) {
         throw std::invalid_argument(
@@ -819,7 +821,7 @@ const matrix_t<_T> matrix_t<_T>::rotate(const _T _x, const _T _y, const _T _z,
 
 template <class _T>
 const matrix_t<_T>
-matrix_t<_T>::translate(const _T _x, const _T _y, const _T _z) const {
+matrix_t<_T>::translate(const _T& _x, const _T& _y, const _T& _z) const {
     if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)) {
         throw std::invalid_argument(
           log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
