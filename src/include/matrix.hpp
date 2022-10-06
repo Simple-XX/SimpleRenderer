@@ -381,17 +381,22 @@ public:
     const matrix_t<_T> scale(const _T& _x, const _T& _y, const _T& _z) const;
 
     /**
-     * @brief 旋转矩阵
-     * @param  _x               旋转中心的 x 坐标
-     * @param  _y               旋转中心的 y 坐标
-     * @param  _z               旋转中心的 z 坐标
-     * @param  _angle           要旋转的弧度
+     * @brief 旋转矩阵，Rodriguez 方法
+     * @param  _axis            旋转轴
+     * @param  _angle           要旋转的角度
      * @return const matrix_t<_T>   构造好的旋转矩阵
-     * @see http://docs.gl/gl2/glRotate
-     * @note    先旋转再平移
+     * @see https://zhuanlan.zhihu.com/p/401806150
+     * R(_axis, _angle) = cos(_angle) * I
+     *                  + (1 - cos(_angle)) * r * rt
+     *                  + sin(_angle) * N
+     * 其中，_axis 为旋转轴，_angle 为要旋转的弧度，I 为单位矩阵，
+     * r 为 [_axis.x, _axis.y, _axis.z]，rt 为 r 的转置
+     * N 为 {       0, -_axis.z,  _axis.y},
+     *      { _axis.z,        0, -_axis.x},
+     *      {-_axis.y,  _axis.x,        0}
      */
     const matrix_t<_T>
-    rotate(const _T& _x, const _T& _y, const _T& _z, const float& _angle) const;
+    rotate(const vector4_t<_T>& _axis, const float& _angle) const;
 
     /**
      * @brief 平移矩阵
@@ -427,7 +432,7 @@ public:
                 _os << " ";
             }
             for (uint8_t j = 0; j < matrix_t<_T>::ORDER; j++) {
-                _os << std::setw(7) << std::setprecision(8) << _mat[i][j];
+                _os << std::setw(10) << std::setprecision(8) << _mat[i][j];
                 if (j != matrix_t<_T>::ORDER - 1) {
                     _os << " ";
                 }
@@ -436,6 +441,10 @@ public:
         _os << std::setw(4) << "]";
         return _os;
     }
+
+    /// @todo 逗号初始化
+    /// @see https://gitee.com/aczz/cv-dbg/blob/master/comma_init/v4.cpp
+    /// @see https://zhuanlan.zhihu.com/p/377573738
 };
 
 template <class _T>
@@ -791,32 +800,50 @@ matrix_t<_T>::scale(const _T& _x, const _T& _y, const _T& _z) const {
 
 template <class _T>
 const matrix_t<_T>
-matrix_t<_T>::rotate(const _T& _x, const _T& _y, const _T& _z,
-                     const float& _angle) const {
-    if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)
-        || std::isnan(_angle)) {
+matrix_t<_T>::rotate(const vector4_t<_T>& _axis, const float& _angle) const {
+    if (_axis.HasNaNs() || std::isnan(_angle)) {
         throw std::invalid_argument(
           log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)|| "
               "std::isnan(_angle)"));
     }
-    auto         n = vector4_t(_x, _y, _z).normalize();
-    auto         c = std::cos(_angle);
-    auto         s = std::sin(_angle);
 
-    matrix_t<_T> tmp;
-    tmp.mat[0][0] = n.x * n.x * (1 - c) + c;
-    tmp.mat[0][1] = n.y * n.x * (1 - c) - s * n.z;
-    tmp.mat[0][2] = n.z * n.x * (1 - c) + s * n.y;
+    _T r_arr[ORDER][ORDER] = {
+        {_axis.x, 0, 0, 0},
+        {_axis.y, 0, 0, 0},
+        {_axis.z, 0, 0, 0},
+        {      0, 0, 0, 1}
+    };
+    matrix_t<_T> r(r_arr);
 
-    tmp.mat[1][0] = n.x * n.y * (1 - c) + s * n.z;
-    tmp.mat[1][1] = n.y * n.y * (1 - c) + c;
-    tmp.mat[1][2] = n.z * n.y * (1 - c) - s * n.x;
+    _T           rt_arr[ORDER][ORDER] = {
+        {_axis.x, _axis.y, _axis.z, 0},
+        {      0,       0,       0, 0},
+        {      0,       0,       0, 0},
+        {      0,       0,       0, 1}
+    };
+    matrix_t<_T> rt(rt_arr);
 
-    tmp.mat[2][0] = n.x * n.z * (1 - c) - s * n.y;
-    tmp.mat[2][1] = n.y * n.z * (1 - c) + s * n.x;
-    tmp.mat[2][2] = n.z * n.z * (1 - c) + c;
+    _T           N_arr[ORDER][ORDER] = {
+        {       0, -_axis.z,  _axis.y, 0},
+        { _axis.z,        0, -_axis.x, 0},
+        {-_axis.y,  _axis.x,        0, 0},
+        {       0,        0,        0, 1}
+    };
+    matrix_t<_T> N(N_arr);
 
-    return tmp * *this;
+    // 角度转弧度
+    auto         rad = RAD(_angle);
+
+    // 计算公式中的参数
+    auto         c   = std::cos(rad);
+    auto         s   = std::sin(rad);
+    auto         I   = matrix_t<_T>();
+    // 计算结果
+    auto         res = (c * I) + ((1 - c) * (r * rt)) + (s * N);
+    res[3][3]        = 1;
+
+    /// @todo 这里可能有顺序问题
+    return res * *this;
 }
 
 template <class _T>
