@@ -382,10 +382,12 @@ public:
 
     /**
      * @brief 旋转矩阵，Rodriguez 方法
-     * @param  _axis            旋转轴
+     * @param  _axis            旋转轴，起点为原点
      * @param  _angle           要旋转的角度
      * @return const matrix_t<_T>   构造好的旋转矩阵
      * @see https://zhuanlan.zhihu.com/p/401806150
+     * @todo 四元数实现
+     * @see https://krasjet.github.io/quaternion/quaternion.pdf
      * R(_axis, _angle) = cos(_angle) * I
      *                  + (1 - cos(_angle)) * r * rt
      *                  + sin(_angle) * N
