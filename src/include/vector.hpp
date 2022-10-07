@@ -479,7 +479,7 @@ _T vector4_t<_T>::operator[](const uint32_t _idx) {
     else if (_idx == 1) {
         return y;
     }
-    else if (_idx == 1) {
+    else if (_idx == 2) {
         return z;
     }
     else {
