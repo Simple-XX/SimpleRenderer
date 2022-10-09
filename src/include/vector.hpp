@@ -25,17 +25,22 @@
 #include "log.hpp"
 
 /**
- * @brief 4 维向量
+ * @brief 4 维向量，默认为列向量
  * @tparam _T                类型
  * @note w 为 0 时表示向量，w 为 1 时表示点
  */
 template <class _T>
 class vector4_t {
 public:
-    _T x;
-    _T y;
-    _T z;
-    _T w;
+    /// 表示一个向量
+    static constexpr const _T W_VECTOR = 0;
+    /// 表示一个顶点
+    static constexpr const _T W_POINT  = 1;
+
+    _T                        x;
+    _T                        y;
+    _T                        z;
+    _T                        w;
 
     /**
      * @brief 构造函数
@@ -148,6 +153,7 @@ public:
      * @brief ^ 重载，向量叉积
      * @param  _v              要乘的向量
      * @return const vector4_t<_T>  结果
+     * @note w 不参与运算
      */
     const vector4_t<_T> operator^(const vector4_t<_T>& _v) const;
 
@@ -184,18 +190,6 @@ public:
     _T                  operator[](const uint32_t _idx);
 
     /**
-     * @brief 距离^2
-     * @return const _T         结果
-     */
-    const _T            length_squared(void) const;
-
-    /**
-     * @brief 距离
-     * @return const _T         结果
-     */
-    const _T            length(void) const;
-
-    /**
      * @brief 是否有非数值
      * @return true             有
      * @return false            无
@@ -203,23 +197,33 @@ public:
     bool                HasNaNs(void) const;
 
     /**
+     * @brief 长度的平方
+     * @return const _T         结果
+     * @note w 不参与运算
+     */
+    const _T            length_squared(void) const;
+
+    /**
+     * @brief 长度
+     * @return const _T         结果
+     * @note w 不参与运算
+     */
+    const _T            length(void) const;
+
+    /**
      * @brief 对所有分量取绝对值
      * @param  _v              向量
      * @return const vector4_t<_T>  结果
+     * @note w 不参与运算
      */
     const vector4_t<_T> abs(const vector4_t<_T>& _v);
 
     /**
      * @brief 归一化
      * @return const vector4_t<_T>  结果
+     * @note w 不参与运算
      */
     const vector4_t<_T> normalize(void) const;
-
-    /**
-     * @brief 单位向量
-     * @return const vector4_t<_T>  结果
-     */
-    const vector4_t<_T> unit(void) const;
 
     /**
      * @brief 构造最小向量
@@ -345,7 +349,7 @@ const vector4_t<_T> vector4_t<_T>::operator+(const vector4_t<_T>& _v) const {
     if (_v.HasNaNs()) {
         throw std::invalid_argument(log("_v.HasNaNs()"));
     }
-    return vector4_t(x + _v.x, y + _v.y, z + _v.z);
+    return vector4_t(x + _v.x, y + _v.y, z + _v.z, w + _v.w);
 }
 
 template <class _T>
@@ -356,6 +360,7 @@ vector4_t<_T>& vector4_t<_T>::operator+=(const vector4_t<_T>& _v) {
     x += _v.x;
     y += _v.y;
     z += _v.z;
+    w += _v.w;
     return *this;
 }
 
@@ -364,7 +369,7 @@ const vector4_t<_T> vector4_t<_T>::operator-(void) const {
     if (HasNaNs()) {
         throw std::invalid_argument(log("HasNaNs()"));
     }
-    return vector4_t<_T>(-x, -y, -z);
+    return vector4_t<_T>(-x, -y, -z, -w);
 }
 
 template <class _T>
@@ -372,7 +377,7 @@ const vector4_t<_T> vector4_t<_T>::operator-(const vector4_t<_T>& _v) const {
     if (_v.HasNaNs()) {
         throw std::invalid_argument(log("_v.HasNaNs()"));
     }
-    return vector4_t(x - _v.x, y - _v.y, z - _v.z);
+    return vector4_t(x - _v.x, y - _v.y, z - _v.z, w - _v.w);
 }
 
 template <class _T>
@@ -383,6 +388,7 @@ vector4_t<_T>& vector4_t<_T>::operator-=(const vector4_t<_T>& _v) {
     x -= _v.x;
     y -= _v.y;
     z -= _v.z;
+    w -= _v.w;
     return *this;
 }
 
@@ -400,7 +406,7 @@ const _T vector4_t<_T>::operator*(const vector4_t<_T>& _v) const {
     if (_v.HasNaNs()) {
         throw std::invalid_argument(log("_v.HasNaNs()"));
     }
-    return x * _v.x + y * _v.y + z * _v.z;
+    return x * _v.x + y * _v.y + z * _v.z + w * _v.w;
 }
 
 template <class _T>
@@ -422,7 +428,7 @@ const vector4_t<_T> vector4_t<_T>::operator^(const vector4_t<_T>& _v) const {
         throw std::invalid_argument(log("_v.HasNaNs()"));
     }
     return vector4_t<_T>((y * _v.z) - (z * _v.y), (z * _v.x) - (x * _v.z),
-                         (x * _v.y) - (y * _v.x));
+                         (x * _v.y) - (y * _v.x), w);
 }
 
 template <class _T>
@@ -524,19 +530,7 @@ const vector4_t<_T> vector4_t<_T>::normalize(void) const {
     if (length() == 0) {
         return vector4_t<_T>();
     }
-    return vector4_t<_T>(x / length(), y / length(), z / length(), 1);
-}
-
-template <class _T>
-const vector4_t<_T> vector4_t<_T>::unit(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
-    if (length() == 0) {
-        return vector4_t<_T>();
-    }
-    auto max = std::max(std::abs(x), std::max(std::abs(y), std::abs(z)));
-    return vector4_t(*this / max);
+    return vector4_t<_T>(x / length(), y / length(), z / length(), w);
 }
 
 template <class _T>

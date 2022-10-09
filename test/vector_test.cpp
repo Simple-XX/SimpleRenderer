@@ -18,55 +18,136 @@
 
 #include "vector.hpp"
 
-TEST(vector4f_t, test1) {
-    vector4f_t test(2, 3);
-    vector4f_t test2(-1, 3);
-    vector4f_t test3 = test - test2;
-    EXPECT_EQ(test.x, 2);
-    EXPECT_EQ(test.y, 3);
-    EXPECT_EQ(test2.x, -1);
-    EXPECT_EQ(test2.y, 3);
-    EXPECT_EQ(test3.x, 3);
-    EXPECT_EQ(test3.y, 0);
-    EXPECT_EQ((test3 * 3).x, 9);
-    EXPECT_EQ((test3 * 3).y, 0);
-    EXPECT_EQ((vector4f_t(0, 1) * vector4f_t(1, 0)), 0);
-    EXPECT_EQ(test.length_squared(), 13);
-    EXPECT_EQ((-test).x, -2);
-    EXPECT_EQ((-test).y, -3);
-    vector4f_t test5(2, 3, 4);
-    vector4f_t test6(-1, 3, -2);
-    vector4f_t test7 = test5 - test6;
-    EXPECT_EQ(test5.x, 2);
-    EXPECT_EQ(test5.y, 3);
-    EXPECT_EQ(test5.z, 4);
-    EXPECT_EQ(test6.x, -1);
-    EXPECT_EQ(test6.y, 3);
-    EXPECT_EQ(test6.z, -2);
-    EXPECT_EQ(test7.x, 3);
-    EXPECT_EQ(test7.y, 0);
-    EXPECT_EQ(test7.z, 6);
-    EXPECT_EQ((test7 * 3).x, 9);
-    EXPECT_EQ((test7 * 3).y, 0);
-    EXPECT_EQ((test7 * 3).z, 18);
-    EXPECT_EQ((vector4f_t(0, 1, 0) * vector4f_t(1, 0, 0)), 0);
-    EXPECT_EQ(test5.length_squared(), 29);
-    EXPECT_EQ((-test5).x, -2);
-    EXPECT_EQ((-test5).y, -3);
-    EXPECT_EQ((-test5).z, -4);
-    vector4f_t test8;
-    vector4f_t test9(1, 1, 1);
-    test9 = test5 ^ test6;
-    EXPECT_EQ(test9.x, -18);
-    EXPECT_EQ(test9.y, 0);
-    EXPECT_EQ(test9.z, 9);
-    vector4f_t test10(1, 2, 3);
-    EXPECT_EQ(test10.x, 1);
-    EXPECT_EQ(test10.y, 2);
-    EXPECT_EQ(test10.z, 3);
-    vector4f_t test11(test10);
-    EXPECT_EQ(test11.x, 1);
-    EXPECT_EQ(test11.y, 2);
-    EXPECT_EQ(test11.z, 3);
+// 构造
+TEST(vector4f_t, ctor) {
+    [[maybe_unused]] auto vec1 = vector4f_t();
+    [[maybe_unused]] auto vec2 = vector4f_t(1, 2, 3, 4);
+    [[maybe_unused]] auto vec3 = vector4f_t(1, 2, 3, 4);
+    [[maybe_unused]] auto vec4 = vector4f_t(vec3);
+
+    return;
+}
+
+// 加法
+TEST(vector4f_t, plus) {
+    auto vec1 = vector4f_t(2, 3, 4, 5);
+    auto vec2 = vector4f_t(4, 5, 6, 7);
+    auto res  = vector4f_t(6, 8, 10, 12);
+    auto ret  = (res == (vec1 + vec2));
+    EXPECT_EQ(ret, true);
+
+    auto vec3 = vector4f_t(-1, -100, 101, 233);
+    res       = vector4f_t(1, -97, 105, 238);
+    ret       = (res == (vec1 + vec3));
+    EXPECT_EQ(ret, true);
+    return;
+}
+
+// 减法
+TEST(vector4f_t, sub) {
+    auto vec1 = vector4f_t(9, 10, 11, 12);
+    auto vec2 = vector4f_t(9, 10, 11, 12);
+    auto res  = vector4f_t(0, 0, 0, 0);
+    auto ret  = (res == (vec1 - vec2));
+    EXPECT_EQ(ret, true);
+
+    auto vec3 = vector4f_t(-1, -100, 3, 4);
+    res       = vector4f_t(10, 110, 8, 8);
+    ret       = (res == (vec1 - vec3));
+    EXPECT_EQ(ret, true);
+
+    return;
+}
+
+// 乘法
+TEST(vector4f_t, mult) {
+    auto vec1 = vector4f_t(1, 2, 3, 4);
+    auto res  = vector4f_t(2, 4, 6, 8);
+    auto ret  = (res == (vec1 * 2));
+    EXPECT_EQ(ret, true);
+
+    auto vec2 = vector4f_t(5, 6, 7, 8);
+    ret       = (70 == (vec1 * vec2));
+    EXPECT_EQ(ret, true);
+
+    ret = (70 == (vec2 * vec1));
+    EXPECT_EQ(ret, true);
+
+    return;
+}
+
+// 除法
+/// @todo 暂无除法，用 1/a 代替
+TEST(vector4f_t, div) {
+    auto vec1 = vector4f_t(1, 2, 3, 4);
+    auto res  = vector4f_t(2, 4, 6, 8);
+    auto ret  = (res == (vec1 * 2));
+    EXPECT_EQ(ret, true);
+
+    auto vec2 = vector4f_t(5, 6, 7, 8);
+    ret       = (70 == (vec1 * vec2));
+    EXPECT_EQ(ret, true);
+
+    ret = (70 == (vec2 * vec1));
+    EXPECT_EQ(ret, true);
+
+    return;
+}
+
+// 逆向量
+TEST(vector4f_t, inv) {
+    auto vec1 = vector4f_t(9, 10, 11, 12);
+    auto res  = vector4f_t(-9, -10, -11, -12);
+    auto ret  = (res == (-vec1));
+    EXPECT_EQ(ret, true);
+
+    return;
+}
+
+// 长度
+TEST(vector4f_t, length) {
+    auto vec1 = vector4f_t(9, 10, 11, 12);
+    auto res  = std::sqrt(302.);
+    auto ret  = (std::abs(vec1.length() - res)
+                < std::numeric_limits<decltype(vec1.length())>::epsilon());
+    EXPECT_EQ(ret, true);
+
+    auto vec2 = vector4f_t(9, 10, 11, 0);
+    res       = std::sqrt(302);
+    ret       = (std::abs(vec2.length() - res)
+           < std::numeric_limits<decltype(vec1.length())>::epsilon());
+    EXPECT_EQ(ret, true);
+
+    return;
+}
+
+// 标准化
+TEST(vector4f_t, normalize) {
+    auto vec1 = vector4f_t(9, 10, 11, 12).normalize();
+    auto res
+      = vector4f_t(0.517891803883592, 0.575435337648436, 0.63297887141328, 12);
+    auto ret = (res == vec1);
+    EXPECT_EQ(ret, true);
+
+    auto vec2 = vector4f_t(9, 10, 11, 0).normalize();
+    res = vector4f_t(0.517891803883592, 0.575435337648436, 0.63297887141328, 0);
+    ret = (res == vec2);
+    EXPECT_EQ(ret, true);
+
+    return;
+}
+
+// 叉积
+TEST(vector4f_t, cross) {
+    auto vec1 = vector4f_t(9, 10, 11, 12);
+    auto vec2 = vector4f_t(-1, -2, 2, 1);
+    auto res  = vector4f_t(42, -29, -8, 12);
+    auto ret  = (res == (vec1 ^ vec2));
+    EXPECT_EQ(ret, true);
+
+    res = vector4f_t(-42, 29, 8, 1);
+    ret = (res == (vec2 ^ vec1));
+    EXPECT_EQ(ret, true);
+
     return;
 }
