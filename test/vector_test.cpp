@@ -33,13 +33,11 @@ TEST(vector4f_t, plus) {
     auto vec1 = vector4f_t(2, 3, 4, 5);
     auto vec2 = vector4f_t(4, 5, 6, 7);
     auto res  = vector4f_t(6, 8, 10, 12);
-    auto ret  = (res == (vec1 + vec2));
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((res == (vec1 + vec2)), true);
 
     auto vec3 = vector4f_t(-1, -100, 101, 233);
     res       = vector4f_t(1, -97, 105, 238);
-    ret       = (res == (vec1 + vec3));
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((res == (vec1 + vec3)), true);
     return;
 }
 
@@ -48,13 +46,11 @@ TEST(vector4f_t, sub) {
     auto vec1 = vector4f_t(9, 10, 11, 12);
     auto vec2 = vector4f_t(9, 10, 11, 12);
     auto res  = vector4f_t(0, 0, 0, 0);
-    auto ret  = (res == (vec1 - vec2));
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((res == (vec1 - vec2)), true);
 
     auto vec3 = vector4f_t(-1, -100, 3, 4);
     res       = vector4f_t(10, 110, 8, 8);
-    ret       = (res == (vec1 - vec3));
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((res == (vec1 - vec3)), true);
 
     return;
 }
@@ -63,15 +59,11 @@ TEST(vector4f_t, sub) {
 TEST(vector4f_t, mult) {
     auto vec1 = vector4f_t(1, 2, 3, 4);
     auto res  = vector4f_t(2, 4, 6, 8);
-    auto ret  = (res == (vec1 * 2));
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((res == (vec1 * 2)), true);
 
     auto vec2 = vector4f_t(5, 6, 7, 8);
-    ret       = (70 == (vec1 * vec2));
-    EXPECT_EQ(ret, true);
-
-    ret = (70 == (vec2 * vec1));
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((70 == (vec1 * vec2)), true);
+    EXPECT_EQ((70 == (vec2 * vec1)), true);
 
     return;
 }
@@ -81,15 +73,11 @@ TEST(vector4f_t, mult) {
 TEST(vector4f_t, div) {
     auto vec1 = vector4f_t(1, 2, 3, 4);
     auto res  = vector4f_t(2, 4, 6, 8);
-    auto ret  = (res == (vec1 * 2));
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((res == (vec1 * 2)), true);
 
     auto vec2 = vector4f_t(5, 6, 7, 8);
-    ret       = (70 == (vec1 * vec2));
-    EXPECT_EQ(ret, true);
-
-    ret = (70 == (vec2 * vec1));
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((70 == (vec1 * vec2)), true);
+    EXPECT_EQ((70 == (vec2 * vec1)), true);
 
     return;
 }
@@ -98,8 +86,7 @@ TEST(vector4f_t, div) {
 TEST(vector4f_t, inv) {
     auto vec1 = vector4f_t(9, 10, 11, 12);
     auto res  = vector4f_t(-9, -10, -11, -12);
-    auto ret  = (res == (-vec1));
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((res == (-vec1)), true);
 
     return;
 }
@@ -108,15 +95,15 @@ TEST(vector4f_t, inv) {
 TEST(vector4f_t, length) {
     auto vec1 = vector4f_t(9, 10, 11, 12);
     auto res  = std::sqrt(302.);
-    auto ret  = (std::abs(vec1.length() - res)
-                < std::numeric_limits<decltype(vec1.length())>::epsilon());
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((std::abs(vec1.length() - res)
+               < std::numeric_limits<decltype(vec1.length())>::epsilon()),
+              true);
 
     auto vec2 = vector4f_t(9, 10, 11, 0);
     res       = std::sqrt(302);
-    ret       = (std::abs(vec2.length() - res)
-           < std::numeric_limits<decltype(vec1.length())>::epsilon());
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((std::abs(vec2.length() - res)
+               < std::numeric_limits<decltype(vec1.length())>::epsilon()),
+              true);
 
     return;
 }
@@ -126,13 +113,11 @@ TEST(vector4f_t, normalize) {
     auto vec1 = vector4f_t(9, 10, 11, 12).normalize();
     auto res
       = vector4f_t(0.517891803883592, 0.575435337648436, 0.63297887141328, 12);
-    auto ret = (res == vec1);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((res == vec1), true);
 
     auto vec2 = vector4f_t(9, 10, 11, 0).normalize();
     res = vector4f_t(0.517891803883592, 0.575435337648436, 0.63297887141328, 0);
-    ret = (res == vec2);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((res == vec2), true);
 
     return;
 }
@@ -142,12 +127,10 @@ TEST(vector4f_t, cross) {
     auto vec1 = vector4f_t(9, 10, 11, 12);
     auto vec2 = vector4f_t(-1, -2, 2, 1);
     auto res  = vector4f_t(42, -29, -8, 12);
-    auto ret  = (res == (vec1 ^ vec2));
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((res == (vec1 ^ vec2)), true);
 
     res = vector4f_t(-42, 29, 8, 1);
-    ret = (res == (vec2 ^ vec1));
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ((res == (vec2 ^ vec1)), true);
 
     return;
 }
