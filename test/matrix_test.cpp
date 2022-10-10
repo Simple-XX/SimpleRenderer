@@ -552,14 +552,15 @@ TEST(matrix_t, rotate_from_to) {
                                                       vector4f_t(-2, 1, 0, 0));
 
     float res_arr[4][4] = {
-        { 0, 1,  0, 0},
-        {-1, 0, -0, 0},
-        {-0, 0,  1, 0},
-        { 0, 0,  0, 1}
+        {0, -1, 0, 0},
+        {1,  0, 0, 0},
+        {0,  0, 1, 0},
+        {0,  0, 0, 1}
     };
     matrix4f_t res_mat(res_arr);
-    auto       res_vec = vector4f_t(-2, 1, 0, vector4f_t::W_POINT);
     EXPECT_EQ((res_mat == mat), true);
+    auto res_vec = vector4f_t(-2, 1, 0, 0);
+    EXPECT_EQ((res_vec == mat * vec), true);
 
     return;
 }

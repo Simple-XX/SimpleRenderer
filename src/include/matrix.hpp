@@ -904,16 +904,16 @@ const matrix4_t<_T> matrix4_t<_T>::rotate_from_to(const vector4f_t& _from,
     vt.z       *= v.x;
     vt.y       *= v.z;
 
-    M[1]       = vt.x - vs.z;
-    M[2]       = vt.z + vs.y;
+    M[1]       = vt.x + vs.z;
+    M[2]       = vt.z - vs.y;
     M[3]       = 0;
 
-    M[4]       = vt.x + vs.z;
-    M[6]       = vt.y - vs.x;
+    M[4]       = vt.x - vs.z;
+    M[6]       = vt.y + vs.x;
     M[7]       = 0;
 
-    M[8]       = vt.z - vs.y;
-    M[9]       = vt.y + vs.x;
+    M[8]       = vt.z + vs.y;
+    M[9]       = vt.y - vs.x;
     M[11]      = 0;
 
     M[12]      = 0;
