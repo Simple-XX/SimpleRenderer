@@ -389,6 +389,7 @@ public:
      * @param  _angle           要旋转的角度
      * @return const matrix4_t<_T>   构造好的旋转矩阵
      * @note 旋转的是顶点，逆时针为正方向
+     * @note 旋转轴如无特殊需要应使用单位向量
      * @see https://zhuanlan.zhihu.com/p/401806150
      * @todo 四元数实现
      * @see https://krasjet.github.io/quaternion/quaternion.pdf
