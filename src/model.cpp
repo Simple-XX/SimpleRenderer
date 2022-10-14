@@ -106,6 +106,7 @@ model_t::face_t& model_t::face_t::operator=(const face_t& _face) {
     return *this;
 }
 
+/// @todo 确认这里的乘法顺序
 const model_t::face_t model_t::face_t::operator*(
   const std::pair<const matrix4f_t, const matrix4f_t>& _matrices) const {
     face_t ret(*this);
