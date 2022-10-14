@@ -302,11 +302,17 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
     return;
 }
 
-void draw3d_t::model(const model_t& _model, const matrix4f_t& _rotate,
-                     const matrix4f_t& _scale, const matrix4f_t& _translate) {
-    auto& tran = model2world_tran(_model, _rotate, _scale, _translate);
+void draw3d_t::model(const model_t& _model, const matrix4f_t& _model_mat,
+                     const matrix4f_t& _view_mat, const matrix4f_t& _proj_mat) {
+    // auto& tran = model2world_tran(_model, _model_mat, _view_mat, _proj_mat);
+    // for (auto f : _model.get_face()) {
+    //     triangle(f * tran);
+    // }
+    const std::pair<const matrix4f_t, const matrix4f_t> tran(
+      _proj_mat * _view_mat * _model_mat, matrix4f_t());
     for (auto f : _model.get_face()) {
         triangle(f * tran);
     }
+
     return;
 }
