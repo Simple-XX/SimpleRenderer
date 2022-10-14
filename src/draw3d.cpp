@@ -136,9 +136,12 @@ draw3d_t::interpolate_color(const model_t::color_t&  _c0,
         + _c2.z * _barycentric_coord.z);
     auto color = framebuffer_t::ARGB(
       std::numeric_limits<uint8_t>::max(),
-      std::numeric_limits<uint8_t>::max() * color_v.x * intensity,
-      std::numeric_limits<uint8_t>::max() * color_v.y * intensity,
-      std::numeric_limits<uint8_t>::max() * color_v.z * intensity);
+      static_cast<uint8_t>(std::numeric_limits<uint8_t>::max() * color_v.x
+                           * intensity),
+      static_cast<uint8_t>(std::numeric_limits<uint8_t>::max() * color_v.y
+                           * intensity),
+      static_cast<uint8_t>(std::numeric_limits<uint8_t>::max() * color_v.z
+                           * intensity));
     return color;
 }
 
