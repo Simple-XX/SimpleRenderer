@@ -697,9 +697,7 @@ const matrix4_t<_T> matrix4_t<_T>::operator*(const matrix4_t<_T>& _mat) const {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
     }
-    // std::cout << name << ", " << _mat.name << std::endl;
-    // std::cout << *this << std::endl;
-    // std::cout << _mat << std::endl;
+
     _T tmp[ORDER][ORDER] = { { 0 } };
     for (uint8_t i = 0; i < ORDER; i++) {
         for (uint8_t j = 0; j < ORDER; j++) {
