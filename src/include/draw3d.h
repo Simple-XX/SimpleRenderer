@@ -30,9 +30,10 @@ private:
     /// 窗口高度
     uint32_t                       height;
 
+public:
     /// 光照方向
     /// @bug 这里要注意与法线正方向配合
-    vector4f_t                     light = vector4f_t(0, 0, 1);
+    vector4f_t light = vector4f_t(0, 0, 1);
 
     /**
      * @brief 计算重心坐标
