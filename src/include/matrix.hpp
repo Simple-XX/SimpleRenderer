@@ -107,6 +107,22 @@ public:
     matrix4_t<_T>&      operator=(const matrix4_t<_T>& _mat);
 
     /**
+     * @brief 矩阵相等
+     * @param  _mat             另一个 matrix4_t
+     * @return true             相等
+     * @return false            不等
+     */
+    bool                operator==(const matrix4_t<_T>& _mat) const;
+
+    /**
+     * @brief 矩阵不等
+     * @param  _mat             另一个 matrix4_t
+     * @return true             不等
+     * @return false            相等
+     */
+    bool                operator!=(const matrix4_t<_T>& _mat) const;
+
+    /**
      * @brief 矩阵间加法
      * @param  _mat             另一个 matrix4_t
      * @return const matrix4_t<_T>  结果
@@ -320,22 +336,6 @@ public:
      * @return matrix4_t<_T>&    结果
      */
     matrix4_t<_T>&      operator*=(const matrix4_t<_T>& _mat);
-
-    /**
-     * @brief 矩阵相等
-     * @param  _mat             另一个 matrix4_t
-     * @return true             相等
-     * @return false            不等
-     */
-    bool                operator==(const matrix4_t<_T>& _mat) const;
-
-    /**
-     * @brief 矩阵不等
-     * @param  _mat             另一个 matrix4_t
-     * @return true             不等
-     * @return false            相等
-     */
-    bool                operator!=(const matrix4_t<_T>& _mat) const;
 
     /**
      * @brief 下标重载
@@ -606,6 +606,38 @@ matrix4_t<_T>& matrix4_t<_T>::operator=(const matrix4_t<_T>& _mat) {
 }
 
 template <class _T>
+bool matrix4_t<_T>::operator==(const matrix4_t<_T>& _mat) const {
+    if (_mat.HasNaNs()) {
+        throw std::invalid_argument(log("_mat.HasNaNs()"));
+    }
+    for (uint8_t i = 0; i < ORDER; i++) {
+        for (uint8_t j = 0; j < ORDER; j++) {
+            if (std::abs(mat[i][j] - _mat[i][j])
+                > std::numeric_limits<_T>::epsilon()) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+template <class _T>
+bool matrix4_t<_T>::operator!=(const matrix4_t<_T>& _mat) const {
+    if (_mat.HasNaNs()) {
+        throw std::invalid_argument(log("_mat.HasNaNs()"));
+    }
+    for (uint8_t i = 0; i < ORDER; i++) {
+        for (uint8_t j = 0; j < ORDER; j++) {
+            if (std::abs(mat[i][j] - _mat[i][j])
+                > std::numeric_limits<_T>::epsilon()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+template <class _T>
 const matrix4_t<_T> matrix4_t<_T>::operator+(const matrix4_t<_T>& _mat) const {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
@@ -706,38 +738,6 @@ matrix4_t<_T>& matrix4_t<_T>::operator*=(const matrix4_t<_T>& _mat) {
     }
     memcpy(mat, tmp, ORDER * ORDER * sizeof(_T));
     return *this;
-}
-
-template <class _T>
-bool matrix4_t<_T>::operator==(const matrix4_t<_T>& _mat) const {
-    if (_mat.HasNaNs()) {
-        throw std::invalid_argument(log("_mat.HasNaNs()"));
-    }
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            if (std::abs(mat[i][j] - _mat[i][j])
-                > std::numeric_limits<_T>::epsilon()) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-template <class _T>
-bool matrix4_t<_T>::operator!=(const matrix4_t<_T>& _mat) const {
-    if (_mat.HasNaNs()) {
-        throw std::invalid_argument(log("_mat.HasNaNs()"));
-    }
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            if (std::abs(mat[i][j] - _mat[i][j])
-                > std::numeric_limits<_T>::epsilon()) {
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 template <class _T>

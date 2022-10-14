@@ -190,7 +190,8 @@ model_t::model_t(const std::string& _obj_path, const std::string& _mtl_path) {
                 coord
                   = coord_t(attrib.vertices[3 * size_t(idx.vertex_index) + 0],
                             attrib.vertices[3 * size_t(idx.vertex_index) + 1],
-                            attrib.vertices[3 * size_t(idx.vertex_index) + 2]);
+                            attrib.vertices[3 * size_t(idx.vertex_index) + 2],
+                            vector4f_t::W_POINT);
 
                 // 如果法线索引存在(即 idx.normal_index >= 0)，
                 // 则构造并保存，否则设置为 0
