@@ -55,7 +55,7 @@ public:
      * @param  _w              w 值
      */
     explicit vector4_t(const _T& _x, const _T& _y, const _T& _z = 0,
-                       const _T& _w = 1);
+                       const _T& _w = 0);
 
     /**
      * @brief 构造函数
@@ -153,7 +153,7 @@ public:
      * @brief ^ 重载，向量叉积
      * @param  _v              要乘的向量
      * @return const vector4_t<_T>  结果
-     * @note w 不参与运算
+     * @note w 为 W_VECTOR
      */
     const vector4_t<_T> operator^(const vector4_t<_T>& _v) const;
 
@@ -257,7 +257,7 @@ vector4_t<_T>::vector4_t(void) {
     x = 0;
     y = 0;
     z = 0;
-    w = 1;
+    w = 0;
     return;
 }
 
@@ -428,7 +428,7 @@ const vector4_t<_T> vector4_t<_T>::operator^(const vector4_t<_T>& _v) const {
         throw std::invalid_argument(log("_v.HasNaNs()"));
     }
     return vector4_t<_T>((y * _v.z) - (z * _v.y), (z * _v.x) - (x * _v.z),
-                         (x * _v.y) - (y * _v.x), w);
+                         (x * _v.y) - (y * _v.x), W_VECTOR);
 }
 
 template <class _T>
@@ -503,7 +503,7 @@ const _T vector4_t<_T>::length_squared(void) const {
     if (HasNaNs()) {
         throw std::invalid_argument(log("HasNaNs()"));
     }
-    return x * x + y * y + z * z;
+    return x * x + y * y + z * z + w * w;
 }
 
 template <class _T>
@@ -530,7 +530,8 @@ const vector4_t<_T> vector4_t<_T>::normalize(void) const {
     if (length() == 0) {
         return vector4_t<_T>();
     }
-    return vector4_t<_T>(x / length(), y / length(), z / length(), w);
+    return vector4_t<_T>(x / length(), y / length(), z / length(),
+                         w / length());
 }
 
 template <class _T>
