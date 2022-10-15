@@ -51,6 +51,6 @@ public:
     float            get_aspect(void);
 };
 
-static camera_t camera;
+extern camera_t camera;
 
 #endif /* _CAMERA_H_ */

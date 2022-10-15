@@ -64,3 +64,5 @@ vector4f_t& camera_t::get_up(void) {
 float camera_t::get_aspect(void) {
     return aspect;
 }
+
+camera_t camera;

@@ -36,10 +36,12 @@ std::vector<model_t>                             models;
 void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
     draw3d_t draw3d(_framebuffer);
 
+    auto     obj_path = "../../obj/cube3.obj";
+    auto     model    = model_t(obj_path);
+    camera.pos        = vector4f_t(500, 500, 0);
+    uint64_t frames   = 0;
+    uint64_t sec      = 0;
     while (1) {
-        if (shoule_update == false) {
-            continue;
-        }
         auto start = us();
         draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);
         draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, WHITE);
@@ -51,23 +53,29 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
         // for (auto& i : models) {
         //     draw3d.model(i,
         //                  matrix4f_t()
-        //                    .rotate(vector4f_t(0, 0, 1), matrix4f_t::RAD(90))
+        //                    .rotate(vector4f_t(0, 0, 1).normalize(),
+        //                            matrix4f_t::RAD(90))
         //                    .translate(1000, 500, 0),
         //                  matrix4f_t(), matrix4f_t());
         //     x_offset += WIDTH / 2;
         // }
 
-        auto obj_path = "../../obj/cube3.obj";
-        auto model    = model_t(obj_path);
         // auto ro       = matrix4f_t().rotate(vector4f_t(1, 1, 1), 60);
-        auto ro       = matrix4f_t().rotate(vector4f_t(0, 0, 1), 60);
+        auto ro = matrix4f_t().rotate(vector4f_t(0, 0, 1), 60);
 
-        auto sc       = matrix4f_t().scale(1000, 1000, 1);
-        auto tr       = matrix4f_t().translate(500, 500, 0);
+        auto sc = matrix4f_t().scale(1000, 1000, 1);
+        // auto tr       = matrix4f_t().translate(500, 500, 0);
+        auto tr = matrix4f_t().translate(camera.pos.x, camera.pos.y, 0);
         draw3d.model(model, ro, sc, tr);
 
+        frames++;
         auto end = us();
-        std::cout << "time: " << end - start << std::endl;
+        sec      += end - start;
+        if (sec >= 1000000) {
+            std::cout << "fps: " << frames << std::endl;
+            frames = 0;
+            sec    = 0;
+        }
     }
     return;
 }
@@ -102,7 +110,7 @@ int main(int _argc, char** _argv) {
     auto        framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
 
     std::thread draw_thread = std::thread(draw, framebuffer);
-    draw_thread.join();
+    draw_thread.detach();
 
     display_t display(framebuffer);
     display.loop();
