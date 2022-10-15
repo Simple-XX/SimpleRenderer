@@ -20,6 +20,7 @@
 #include "cstdint"
 
 #include "SDL.h"
+#include "SDL_ttf.h"
 
 #include "framebuffer.h"
 
@@ -35,8 +36,24 @@ private:
     std::shared_ptr<framebuffer_t> framebuffer;
     /// @brief sdl 窗口
     SDL_Window*                    sdl_window;
+    /// @brief 字体文件
+    std::string                    font_file_path = "../../wqy-zenhei.ttc";
+    /// @brief 字体指针
+    TTF_Font*                      font;
+    /// @brief 字体大小
+    uint8_t                        fone_size = 32;
+    /// @brief 当前 fps
+    uint32_t                       fps       = 0;
+
+    /// @brief fps 文字
+    SDL_Surface*                   fps_surface;
+    /// @brief fps 内容
+    std::string                    fps_text  = "FPS: " + std::to_string(fps);
+    /// @brief fps 颜色 绿色
+    SDL_Color                      fps_color = SDL_Color { 0, 255, 0, 255 };
+
     /// @brief 标识窗口是否需要退出
-    bool                           is_shoule_quit = false;
+    bool                           is_should_quit = false;
     /// @brief sdl 事件
     SDL_Event                      sdl_event;
     /// 窗口宽度
@@ -98,6 +115,20 @@ private:
      */
     void fill(void);
 
+    /**
+     * @brief 将 _src 绘制到当前窗口 _x, _y 处
+     * @param  _x               横坐标
+     * @param  _y               纵坐标
+     * @param  _src             要绘制的内容
+     */
+    void apply_surface(uint32_t _x, uint32_t _y, SDL_Surface* _src) const;
+
+    /**
+     * @brief 在屏幕左上角显示 fps
+     * @todo fps 计算方式可能有误
+     */
+    void show_fps(void);
+
 public:
     /**
      * @brief 不使用空构造函数
@@ -120,7 +151,5 @@ public:
      */
     void loop(void);
 };
-
-static bool shoule_update = true;
 
 #endif /* _DISPLAY_H_ */

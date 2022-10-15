@@ -65,6 +65,47 @@ void display_t::pixel(SDL_Surface* _surface, const uint32_t _x,
     return;
 }
 
+void display_t::fill(void) {
+    auto surface = SDL_GetWindowSurface(sdl_window);
+    try {
+        if (surface == nullptr) {
+            throw std::runtime_error(log(SDL_GetError()));
+        }
+    } catch (const std::runtime_error& e) {
+        std::cerr << e.what() << std::endl;
+        return;
+    }
+    uint32_t color = 0xFFFFFFFF;
+    // 填充整个屏幕
+    for (uint32_t i = 0; i < width; i++) {
+        for (uint32_t j = 0; j < height; j++) {
+            color = framebuffer->get_color_buffer()(i, j);
+            pixel(surface, i, j, ARGB2A(color), ARGB2R(color), ARGB2G(color),
+                  ARGB2B(color));
+        }
+    }
+    return;
+}
+
+void display_t::apply_surface(uint32_t _x, uint32_t _y,
+                              SDL_Surface* _src) const {
+    SDL_Rect offset;
+    offset.x = _x;
+    offset.y = _y;
+    SDL_BlitSurface(_src, NULL, SDL_GetWindowSurface(sdl_window), &offset);
+    return;
+}
+
+void display_t::show_fps(void) {
+    fps_text    = "FPS: " + std::to_string(fps);
+    fps_surface = TTF_RenderText_Solid(font, fps_text.c_str(), fps_color);
+    if (fps_surface == nullptr) {
+        throw std::runtime_error(log(TTF_GetError()));
+    }
+    apply_surface(4, 0, fps_surface);
+    return;
+}
+
 display_t::display_t(std::shared_ptr<framebuffer_t> _framebuffer)
     : framebuffer(_framebuffer) {
     width  = framebuffer->get_width();
@@ -80,17 +121,36 @@ display_t::display_t(std::shared_ptr<framebuffer_t> _framebuffer)
                                       SDL_WINDOWPOS_CENTERED, width, height,
                                       SDL_WINDOW_SHOWN);
         if (sdl_window == nullptr) {
+            SDL_Quit();
             throw std::runtime_error(log(SDL_GetError()));
+        }
+
+        // 文字显示
+        if (TTF_Init() != 0) {
+            SDL_DestroyWindow(sdl_window);
+            SDL_Quit();
+            throw std::runtime_error(log(TTF_GetError()));
+        }
+        // 打开字体库
+        font = TTF_OpenFont(font_file_path.c_str(), fone_size);
+        if (font == nullptr) {
+            TTF_Quit();
+            SDL_DestroyWindow(sdl_window);
+            SDL_Quit();
+            throw std::runtime_error(log(TTF_GetError()));
         }
     } catch (const std::runtime_error& e) {
         std::cerr << e.what() << std::endl;
         return;
     }
+
     return;
 }
 
 display_t::~display_t(void) {
     // 回收资源
+    TTF_CloseFont(font);
+    TTF_Quit();
     SDL_DestroyWindow(sdl_window);
     SDL_Quit();
 }
@@ -103,8 +163,8 @@ void display_t::input_handler(void) {
             case SDL_KEYDOWN: {
                 switch (sdl_event.key.keysym.sym) {
                     case SDLK_ESCAPE: {
-                        // 如果是 esc 键则将 is_shoule_quit 置位
-                        is_shoule_quit = true;
+                        // 如果是 esc 键则将 is_should_quit 置位
+                        is_should_quit = true;
                         break;
                     }
                     case SDLK_a: {
@@ -155,7 +215,7 @@ void display_t::input_handler(void) {
                 break;
             }
             case SDL_QUIT: {
-                is_shoule_quit = true;
+                is_should_quit = true;
                 break;
             }
         }
@@ -163,36 +223,18 @@ void display_t::input_handler(void) {
     return;
 }
 
-void display_t::fill(void) {
-    auto surface = SDL_GetWindowSurface(sdl_window);
-    try {
-        if (surface == nullptr) {
-            throw std::runtime_error(log(SDL_GetError()));
-        }
-    } catch (const std::runtime_error& e) {
-        std::cerr << e.what() << std::endl;
-        return;
-    }
-    uint32_t color = 0xFFFFFFFF;
-    // 填充整个屏幕
-    for (uint32_t i = 0; i < width; i++) {
-        for (uint32_t j = 0; j < height; j++) {
-            color = framebuffer->get_color_buffer()(i, j);
-            pixel(surface, i, j, ARGB2A(color), ARGB2R(color), ARGB2G(color),
-                  ARGB2B(color));
-        }
-    }
-    return;
-}
-
 void display_t::loop(void) {
+    uint64_t sec = 0;
     // 主循环
-    while (is_shoule_quit == false) {
+    while (is_should_quit == false) {
+        auto start = us();
         // 处理输入
         input_handler();
         // 填充窗口
         framebuffer->clear();
         fill();
+        // 显示 fps
+        show_fps();
         // 刷新窗口
         try {
             auto ret = SDL_UpdateWindowSurface(sdl_window);
@@ -202,6 +244,14 @@ void display_t::loop(void) {
         } catch (const std::runtime_error& e) {
             std::cerr << e.what() << std::endl;
             return;
+        }
+        fps++;
+        auto end = us();
+        sec      += end - start;
+        if (sec >= 1000000) {
+            // std::cout << "fps_window: " << fps << std::endl;
+            fps = 0;
+            sec = 0;
         }
     }
     return;

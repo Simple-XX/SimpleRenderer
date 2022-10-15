@@ -60,19 +60,21 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
         //     x_offset += WIDTH / 2;
         // }
 
-        // auto ro       = matrix4f_t().rotate(vector4f_t(1, 1, 1), 60);
-        auto ro = matrix4f_t().rotate(vector4f_t(0, 0, 1), 60);
-
-        auto sc = matrix4f_t().scale(1000, 1000, 1);
-        // auto tr       = matrix4f_t().translate(500, 500, 0);
-        auto tr = matrix4f_t().translate(camera.pos.x, camera.pos.y, 0);
-        draw3d.model(model, ro, sc, tr);
+        auto model_mat = get_model_matrix(vector4f_t(1000, 1000, 1),
+                                          vector4f_t(1, 1, 1).normalize(), 190,
+                                          vector4f_t(1000, 500, 0));
+        camera.pos     = vector4f_t(0, 0, 0);
+        camera.up      = vector4f_t(0, 0, -1);
+        camera.target  = vector4f_t(1, 1, 0);
+        // auto view_mat  = get_view_matrix(camera);
+        auto view_mat  = matrix4f_t();
+        draw3d.model(model, model_mat, view_mat, matrix4f_t());
 
         frames++;
         auto end = us();
         sec      += end - start;
         if (sec >= 1000000) {
-            std::cout << "fps: " << frames << std::endl;
+            // std::cout << "fps_draw: " << frames << std::endl;
             frames = 0;
             sec    = 0;
         }
