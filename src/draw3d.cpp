@@ -307,12 +307,9 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
 
 void draw3d_t::model(const model_t& _model, const matrix4f_t& _model_mat,
                      const matrix4f_t& _view_mat, const matrix4f_t& _proj_mat) {
-    // auto& tran = model2world_tran(_model, _model_mat, _view_mat, _proj_mat);
-    // for (auto f : _model.get_face()) {
-    //     triangle(f * tran);
-    // }
+    /// @bug 法线问题
     const std::pair<const matrix4f_t, const matrix4f_t> tran(
-      _proj_mat * _view_mat * _model_mat, matrix4f_t());
+      _proj_mat * _view_mat * _model_mat, _model_mat.inverse().transpose());
     for (auto f : _model.get_face()) {
         triangle(f * tran);
     }

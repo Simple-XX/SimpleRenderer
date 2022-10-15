@@ -34,35 +34,41 @@ static constexpr const uint32_t                  HEIGHT = 1080;
 std::vector<model_t>                             models;
 
 void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
-    auto     start = us();
     draw3d_t draw3d(_framebuffer);
-    draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);
-    draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, WHITE);
-    draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
-    draw3d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, WHITE);
 
-    // auto x_offset = 0;
-    // auto y_offset = 0;
-    // for (auto& i : models) {
-    //     draw3d.model(i,
-    //                  matrix4f_t()
-    //                    .rotate(vector4f_t(0, 0, 1), matrix4f_t::RAD(90))
-    //                    .translate(1000, 500, 0),
-    //                  matrix4f_t(), matrix4f_t());
-    //     x_offset += WIDTH / 2;
-    // }
+    while (1) {
+        if (shoule_update == false) {
+            continue;
+        }
+        auto start = us();
+        draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);
+        draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, WHITE);
+        draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
+        draw3d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, WHITE);
 
-    auto obj_path = "../../obj/cube3.obj";
-    auto model    = model_t(obj_path);
-    // auto ro       = matrix4f_t().rotate(vector4f_t(1, 1, 1), 60);
-    auto ro       = matrix4f_t().rotate(vector4f_t(0, 0, 1), 60);
+        // auto x_offset = 0;
+        // auto y_offset = 0;
+        // for (auto& i : models) {
+        //     draw3d.model(i,
+        //                  matrix4f_t()
+        //                    .rotate(vector4f_t(0, 0, 1), matrix4f_t::RAD(90))
+        //                    .translate(1000, 500, 0),
+        //                  matrix4f_t(), matrix4f_t());
+        //     x_offset += WIDTH / 2;
+        // }
 
-    auto sc       = matrix4f_t().scale(1000, 1000, 1);
-    auto tr       = matrix4f_t().translate(500, 500, 0);
-    draw3d.model(model, ro, sc, tr);
+        auto obj_path = "../../obj/cube3.obj";
+        auto model    = model_t(obj_path);
+        // auto ro       = matrix4f_t().rotate(vector4f_t(1, 1, 1), 60);
+        auto ro       = matrix4f_t().rotate(vector4f_t(0, 0, 1), 60);
 
-    auto end = us();
-    std::cout << "time: " << end - start << std::endl;
+        auto sc       = matrix4f_t().scale(1000, 1000, 1);
+        auto tr       = matrix4f_t().translate(500, 500, 0);
+        draw3d.model(model, ro, sc, tr);
+
+        auto end = us();
+        std::cout << "time: " << end - start << std::endl;
+    }
     return;
 }
 

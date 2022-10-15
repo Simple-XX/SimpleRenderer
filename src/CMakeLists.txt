@@ -33,7 +33,8 @@ set(SimpleRender_src
         framebuffer.cpp
         display.cpp
         draw3d.cpp
-        camera.cpp)
+        camera.cpp
+        shader.cpp)
 
 # 生成可执行文件
 add_executable(SimpleRender

@@ -23,10 +23,14 @@
 
 class camera_t {
 private:
+
+public:
     /// 位置
     vector4f_t pos;
     /// 方向
     vector4f_t target;
+    /// 上方向
+    vector4f_t up;
     /// 比例
     float      aspect;
 
@@ -43,7 +47,8 @@ public:
 
     vector4f_t&      get_pos(void);
     vector4f_t&      get_target(void);
-    float            get_aspect(void) const;
+    vector4f_t&      get_up(void);
+    float            get_aspect(void);
 };
 
 static camera_t camera;

@@ -20,6 +20,7 @@
 #include "framebuffer.h"
 #include "matrix.hpp"
 #include "model.h"
+#include "shader.h"
 #include "vector.hpp"
 
 class draw3d_t {
@@ -186,6 +187,11 @@ public:
      */
     void triangle(const vector4f_t& _v0, const vector4f_t& _v1,
                   const vector4f_t& _v2, const framebuffer_t::color_t& _color);
+
+    // 指定着色器绘制三角形
+    void triangle(const vector4f_t& _v0, const vector4f_t& _v1,
+                  const vector4f_t& _v2, const framebuffer_t::color_t& _color,
+                  const shader_base_t& _shader);
 
     /**
      * @brief 绘制整个模型，指定变换矩阵

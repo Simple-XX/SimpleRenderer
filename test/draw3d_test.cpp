@@ -14,10 +14,12 @@
  * </table>
  */
 
-#include "draw3d.h"
-#include "display.h"
-#include "vector.hpp"
 #include "gtest/gtest.h"
+
+#include "camera.h"
+#include "display.h"
+#include "draw3d.h"
+#include "vector.hpp"
 
 static constexpr const uint32_t                  WIDTH  = 1920;
 static constexpr const uint32_t                  HEIGHT = 1080;
@@ -66,8 +68,8 @@ TEST(draw3d_t, line) {
     line1 = mmm * line1;
     draw3d.line(0, 0, line1.x, line1.y, GREEN);
 
-    display_t display(framebuffer);
-    display.loop();
+    // display_t display(framebuffer);
+    // display.loop();
 
     return;
 }
@@ -86,64 +88,47 @@ get_model_matrix(const vector4f_t& _scale, const vector4f_t& _rotate,
     auto translate
       = matrix4f_t().translate(_translate.x, _translate.y, _translate.z);
 
-    // std::cout << "++++++++++" << std::endl;
-    // std::cout << scale << std::endl;
-    // std::cout << rotation << std::endl;
-    // std::cout << translate << std::endl;
-    // std::cout << translate * rotation * scale << std::endl;
-    // std::cout << "--------" << std::endl;
     // 应用到向量上时先线性变换(缩放，旋转)再平移
-    // return translate * (rotation * scale);
-    return translate * (scale * rotation);
+    /// @bug 临时写成 tsr 顺序
+    // return translate * rotation * scale;
+    return translate * scale * rotation;
 }
 
 // 视图变换
 // 将相机移动到原点，方向指向 -z，即屏幕里，up 为 -y，即屏幕向上
-const matrix4f_t get_view_matrix(const vector4f_t& _eye_pos) {
+const matrix4f_t get_view_matrix(const camera_t& _camera) {
     // 相机位置
-    vector4f_t pos(1, 2, 3, 1);
+    const auto& pos      = camera.pos;
     // 相机方向
-    vector4f_t target(1, 2, 3, 0);
-    // vector4f_t target(1, 0, 0, 0);
+    const auto& target   = camera.target;
     // 相机上
-    vector4f_t up(4, 5, 6, 0);
-    // vector4f_t up(0, 1, 0, 0);
+    const auto& up       = camera.up;
     // 相机 z 轴方向
-    auto       camera_c  = target ^ up;
+    const auto  camera_c = target ^ up;
 
-    // 移动到原点
-    auto       translate = matrix4f_t().translate(-pos.x, -pos.y, -pos.z);
+    // auto rotation = matrix4f_t().rotate_from_to(up, vector4f_t(0, 0, 1));
+    auto        rotation = matrix4f_t().rotate(up.normalize(), 180);
 
-    // 先求旋转矩阵的逆矩阵
-    auto       g(target);
-    auto       t(up);
-    auto       e(target ^ up);
-    float      rotation_rev_arr[4][4] = {
-        {(g ^ t).x, t.x, -g.x, 0},
-        {(g ^ t).y, t.y, -g.y, 0},
-        {(g ^ t).z, t.z, -g.z, 0},
-        {        0,   0,    0, 1}
-    };
-    // 由于旋转矩阵为正交矩阵，转置后即可得到旋转矩阵
-    auto rotation = matrix4f_t(rotation_rev_arr).transpose();
-
-    // std::cout << "++++++++++" << std::endl;
+    std::cout << "++++++++++" << std::endl;
     // std::cout << g << std::endl;
     // std::cout << t << std::endl;
     // std::cout << e << std::endl;
 
     // throw(66);
 
-    // std::cout << rotation << std::endl;
+    std::cout << rotation << std::endl;
     // std::cout << translate * rotation << std::endl;
     //
     // std::cout << rotation * (translate * target) << std::endl;
     // std::cout << rotation * (translate * up) << std::endl;
     // std::cout << rotation * (translate * pos) << std::endl;
-    // std::cout << "--------" << std::endl;
+    std::cout << "--------" << std::endl;
 
     // 先平移再旋转
-    return rotation * translate;
+    // 移动到原点
+    auto translate = matrix4f_t().translate(-pos.x, -pos.y, -pos.z);
+
+    return translate * rotation;
 }
 
 const matrix4f_t get_projection_matrix(float _eye_fov, float _aspect_ratio,
@@ -195,18 +180,22 @@ TEST(draw3d_t, obj) {
     auto     obj_path = "../../obj/utah-teapot/utah-teapot.obj";
     model_t  model(obj_path);
     auto     model_mat
-      = get_model_matrix(vector4f_t(10, 10, 1), vector4f_t(1, 1, 1), 190,
-                         vector4f_t(500, 500, 0));
+      = get_model_matrix(vector4f_t(10, 10, 1), vector4f_t(1, 1, 1).normalize(),
+                         190, vector4f_t(500, 500, 0));
+    camera.pos    = vector4f_t(900, 0, 0);
+    camera.up     = vector4f_t(0, 0, -1);
+    camera.target = vector4f_t(1, 1, 0);
+    auto view_mat = get_view_matrix(camera);
 
-    // std::cout << model_mat << std::endl;
-    draw3d.model(model, model_mat, matrix4f_t(), matrix4f_t());
+    draw3d.model(model, model_mat, view_mat, matrix4f_t());
 
     // 颜色正方体
     obj_path  = "../../obj/cube3.obj";
     model     = model_t(obj_path);
-    model_mat = get_model_matrix(vector4f_t(1000, 1000, 1), vector4f_t(0, 1, 1),
-                                 45, vector4f_t(500, 200, 0));
-    // draw3d.model(model, model_mat, matrix4f_t(), matrix4f_t());
+    model_mat = get_model_matrix(vector4f_t(1000, 1000, 1),
+                                 vector4f_t(1, 1, 1).normalize(), 190,
+                                 vector4f_t(1000, 500, 0));
+    // draw3d.model(model, model_mat, view_mat, matrix4f_t());
 
     display_t display(framebuffer);
     display.loop();

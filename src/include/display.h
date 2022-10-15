@@ -121,4 +121,6 @@ public:
     void loop(void);
 };
 
+static bool shoule_update = true;
+
 #endif /* _DISPLAY_H_ */

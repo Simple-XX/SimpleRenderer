@@ -57,6 +57,10 @@ vector4f_t& camera_t::get_target(void) {
     return target;
 }
 
-float camera_t::get_aspect(void) const {
+vector4f_t& camera_t::get_up(void) {
+    return up;
+}
+
+float camera_t::get_aspect(void) {
     return aspect;
 }

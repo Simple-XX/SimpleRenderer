@@ -190,6 +190,8 @@ void display_t::loop(void) {
     while (is_shoule_quit == false) {
         // 处理输入
         input_handler();
+        // 通知 draw3d 重绘
+        shoule_update = true;
         // 填充窗口
         fill();
         // 刷新窗口
