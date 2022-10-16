@@ -245,16 +245,11 @@ public:
     uint32_t       get_height(void) const;
 
     /**
-     * @brief 清空
-     */
-    void           clear(void);
-
-    /**
      * @brief 清空成指定颜色
      * @param  _color           指定颜色
      * @param  _depth           指定深度
      */
-    void           clear(const color_t& _color,
+    void           clear(const color_t& _color = 0x00000000,
                          const depth_t& _depth = std::numeric_limits<depth_t>::lowest());
 
     /**

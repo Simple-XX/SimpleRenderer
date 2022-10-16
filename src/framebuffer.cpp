@@ -18,7 +18,6 @@
 #include "cmath"
 #include "cstring"
 #include "iostream"
-#include "memory"
 
 #include "framebuffer.h"
 #include "log.hpp"
@@ -265,24 +264,12 @@ uint32_t framebuffer_t::get_height(void) const {
     return height;
 }
 
-void framebuffer_t::clear(void) {
-    for (uint32_t i = 0; i < width; i++) {
-        for (uint32_t j = 0; j < height; j++) {
-            pixel(i, j, 0x00000000, std::numeric_limits<depth_t>::lowest());
-        }
-    }
-    return;
-}
-
 void framebuffer_t::clear(const color_t& _color, const depth_t& _depth) {
     if (std::isnan(_depth)) {
         throw(log("std::isnan(_depth)"));
     }
-    for (uint32_t i = 0; i < width; i++) {
-        for (uint32_t j = 0; j < height; j++) {
-            pixel(i, j, _color, _depth);
-        }
-    }
+    color_buffer.clear(_color);
+    depth_buffer.clear(_depth);
     return;
 }
 
@@ -297,8 +284,9 @@ void framebuffer_t::pixel(const uint32_t _x, const uint32_t _y,
     if (std::isnan(_depth)) {
         throw(log("std::isnan(_depth)"));
     }
-    std::lock_guard<std::mutex> color_buffer_lock(color_buffer_mutex);
-    std::lock_guard<std::mutex> depth_buffer_lock(depth_buffer_mutex);
+    /// @todo 性能瓶颈
+    // std::lock_guard<std::mutex> color_buffer_lock(color_buffer_mutex);
+    // std::lock_guard<std::mutex> depth_buffer_lock(depth_buffer_mutex);
     color_buffer(_x, _y) = _color;
     depth_buffer(_x, _y) = _depth;
     return;

@@ -23,6 +23,9 @@
 #include "string"
 #include "sys/time.h"
 
+/// 微秒到秒
+static constexpr const uint32_t US2S = 1000000;
+
 /**
  * @brief 构造日志字符串
  * @param  _msg             日志信息

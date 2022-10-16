@@ -77,6 +77,7 @@ void display_t::fill(void) {
     }
     uint32_t color = 0xFFFFFFFF;
     // 填充整个屏幕
+    /// @todo 优化，看看能不能直接写整个 buf
     for (uint32_t i = 0; i < width; i++) {
         for (uint32_t j = 0; j < height; j++) {
             color = framebuffer->get_color_buffer()(i, j);
@@ -168,27 +169,27 @@ void display_t::input_handler(void) {
                         break;
                     }
                     case SDLK_a: {
-                        camera.get_pos().x--;
+                        camera.get_pos().x -= camera.speed;
                         break;
                     }
                     case SDLK_d: {
-                        camera.get_pos().x++;
+                        camera.get_pos().x += camera.speed;
                         break;
                     }
                     case SDLK_SPACE: {
-                        camera.get_pos().y++;
+                        camera.get_pos().y += camera.speed;
                         break;
                     }
                     case SDLK_LCTRL: {
-                        camera.get_pos().y--;
+                        camera.get_pos().y -= camera.speed;
                         break;
                     }
                     case SDLK_w: {
-                        camera.get_pos().z++;
+                        camera.get_pos().z += camera.speed;
                         break;
                     }
                     case SDLK_s: {
-                        camera.get_pos().z--;
+                        camera.get_pos().z -= camera.speed;
                         break;
                     }
                     default: {
@@ -224,10 +225,13 @@ void display_t::input_handler(void) {
 }
 
 void display_t::loop(void) {
-    uint64_t sec = 0;
+    uint64_t sec    = 0;
+    uint32_t frames = 0;
+    auto     start  = us();
+    auto     end    = us();
     // 主循环
     while (is_should_quit == false) {
-        auto start = us();
+        start = us();
         // 处理输入
         input_handler();
         // 填充窗口
@@ -245,13 +249,14 @@ void display_t::loop(void) {
             std::cerr << e.what() << std::endl;
             return;
         }
-        fps++;
-        auto end = us();
-        sec      += end - start;
-        if (sec >= 1000000) {
+        frames++;
+        end = us();
+        sec += end - start;
+        if (sec >= US2S) {
             // std::cout << "fps_window: " << fps << std::endl;
-            fps = 0;
-            sec = 0;
+            fps    = frames;
+            frames = 0;
+            sec    = 0;
         }
     }
     return;
