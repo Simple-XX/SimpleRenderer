@@ -204,4 +204,22 @@ public:
     const std::vector<face_t>& get_face(void) const;
 };
 
+// 模型变换
+inline const matrix4f_t
+get_model_matrix(const vector4f_t& _scale, const vector4f_t& _rotate,
+                 const float& _angle, const vector4f_t& _translate) {
+    // 缩放
+    auto scale    = matrix4f_t().scale(_scale.x, _scale.y, _scale.z);
+
+    // 旋转
+    auto rotation = matrix4f_t().rotate(_rotate, _angle);
+
+    // 平移
+    auto translate
+      = matrix4f_t().translate(_translate.x, _translate.y, _translate.z);
+
+    // 应用到向量上时先线性变换(缩放，旋转)再平移
+    return translate * rotation * scale;
+}
+
 #endif /* _MODEL_H_ */
