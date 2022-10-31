@@ -17,6 +17,7 @@
 #include "iostream"
 
 #include "camera.h"
+#include "config.h"
 #include "display.h"
 #include "log.hpp"
 
@@ -177,6 +178,10 @@ void display_t::input_handler(void) {
                         break;
                     }
                     case SDLK_SPACE: {
+                        camera.get_pos().y -= camera.speed;
+                        break;
+                    }
+                    case SDLK_z: {
                         camera.get_pos().y += camera.speed;
                         break;
                     }
@@ -192,6 +197,10 @@ void display_t::input_handler(void) {
                         camera.get_pos().z -= camera.speed;
                         break;
                     }
+                    case SDLK_LSHIFT: {
+                        config.draw_wireframe = !config.draw_wireframe;
+                        break;
+                    }
                     default: {
                         // 输出按键名
                         printf("key %s down！\n",
@@ -203,8 +212,8 @@ void display_t::input_handler(void) {
             }
             // 鼠标移动
             case SDL_MOUSEMOTION: {
-                camera.get_target().x += sdl_event.motion.xrel;
-                camera.get_target().y += sdl_event.motion.yrel;
+                // camera.get_target().x += sdl_event.motion.xrel;
+                // camera.get_target().y += sdl_event.motion.yrel;
                 break;
             }
             // 鼠标点击

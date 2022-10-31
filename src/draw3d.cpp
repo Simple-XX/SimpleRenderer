@@ -16,6 +16,7 @@
 
 #include "cmath"
 
+#include "config.h"
 #include "draw3d.h"
 
 const std::pair<bool, const vector4f_t>
@@ -153,6 +154,10 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
     auto max = _v0.coord.max(_v1.coord).max(_v2.coord);
     for (auto x = int32_t(min.x); x <= max.x; x++) {
         for (auto y = int32_t(min.y); y <= max.y; y++) {
+            /// @todo 这里要用裁剪替换掉
+            if (x >= width || y >= height) {
+                continue;
+            }
             auto [is_inside, barycentric_coord]
               = get_barycentric_coord(_v0.coord, _v1.coord, _v2.coord,
                                       vector4f_t(x, y, 0));
@@ -228,9 +233,17 @@ void draw3d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
     }
     for (auto x = p0_x; x <= p1_x; x++) {
         if (steep == true) {
+            /// @todo 这里要用裁剪替换掉
+            if (y >= width || x >= height) {
+                continue;
+            }
             framebuffer->pixel(y, x, _color);
         }
         else {
+            /// @todo 这里要用裁剪替换掉
+            if (x >= width || y >= height) {
+                continue;
+            }
             framebuffer->pixel(x, y, _color);
         }
         de += std::abs(dy2);
@@ -307,11 +320,25 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
 
 void draw3d_t::model(const model_t& _model, const matrix4f_t& _model_mat,
                      const matrix4f_t& _view_mat, const matrix4f_t& _proj_mat) {
-    /// @bug 法线问题
+    /// @todo 法线变换
     const std::pair<const matrix4f_t, const matrix4f_t> tran(
       _proj_mat * _view_mat * _model_mat, _model_mat.inverse().transpose());
-    for (auto f : _model.get_face()) {
-        triangle(f * tran);
+    // std::cout << tran.first << std::endl;
+    if (config.draw_wireframe == true) {
+        for (auto f : _model.get_face()) {
+            auto tmp = f * tran;
+            line(tmp.v0.coord.x, tmp.v0.coord.y, tmp.v1.coord.x, tmp.v1.coord.y,
+                 0xFFFFFFFF);
+            line(tmp.v1.coord.x, tmp.v1.coord.y, tmp.v2.coord.x, tmp.v2.coord.y,
+                 0xFFFFFFFF);
+            line(tmp.v2.coord.x, tmp.v2.coord.y, tmp.v0.coord.x, tmp.v0.coord.y,
+                 0xFFFFFFFF);
+        }
+    }
+    else {
+        for (auto f : _model.get_face()) {
+            triangle(f * tran);
+        }
     }
 
     return;

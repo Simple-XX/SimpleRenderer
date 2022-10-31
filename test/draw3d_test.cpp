@@ -74,63 +74,6 @@ TEST(draw3d_t, line) {
     return;
 }
 
-// 模型变换
-const matrix4f_t
-get_model_matrix(const vector4f_t& _scale, const vector4f_t& _rotate,
-                 const float& _angle, const vector4f_t& _translate) {
-    // 缩放
-    auto scale    = matrix4f_t().scale(_scale.x, _scale.y, _scale.z);
-
-    // 旋转
-    auto rotation = matrix4f_t().rotate(_rotate, _angle);
-
-    // 平移
-    auto translate
-      = matrix4f_t().translate(_translate.x, _translate.y, _translate.z);
-
-    // 应用到向量上时先线性变换(缩放，旋转)再平移
-    /// @bug 临时写成 tsr 顺序
-    // return translate * rotation * scale;
-    return translate * scale * rotation;
-}
-
-// 视图变换
-// 将相机移动到原点，方向指向 -z，即屏幕里，up 为 -y，即屏幕向上
-const matrix4f_t get_view_matrix(const camera_t& _camera) {
-    // 相机位置
-    const auto& pos      = camera.pos;
-    // 相机方向
-    const auto& target   = camera.target;
-    // 相机上
-    const auto& up       = camera.up;
-    // 相机 z 轴方向
-    const auto  camera_c = target ^ up;
-
-    // auto rotation = matrix4f_t().rotate_from_to(up, vector4f_t(0, 0, 1));
-    auto        rotation = matrix4f_t().rotate(up.normalize(), 180);
-
-    std::cout << "++++++++++" << std::endl;
-    // std::cout << g << std::endl;
-    // std::cout << t << std::endl;
-    // std::cout << e << std::endl;
-
-    // throw(66);
-
-    std::cout << rotation << std::endl;
-    // std::cout << translate * rotation << std::endl;
-    //
-    // std::cout << rotation * (translate * target) << std::endl;
-    // std::cout << rotation * (translate * up) << std::endl;
-    // std::cout << rotation * (translate * pos) << std::endl;
-    std::cout << "--------" << std::endl;
-
-    // 先平移再旋转
-    // 移动到原点
-    auto translate = matrix4f_t().translate(-pos.x, -pos.y, -pos.z);
-
-    return translate * rotation;
-}
-
 const matrix4f_t get_projection_matrix(float _eye_fov, float _aspect_ratio,
                                        float _zNear, float _zFar) {
     /// @see

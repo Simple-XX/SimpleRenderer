@@ -23,6 +23,16 @@
 
 class camera_t {
 private:
+    /// 相机默认在原点
+    const vector4f_t pos_default    = vector4f_t(0, 0, 0);
+    /// 看向屏幕内
+    const vector4f_t target_default = vector4f_t(0, 0, -1);
+    /// 上方向为屏幕向上
+    const vector4f_t up_default     = vector4f_t(0, -1, 0);
+    /// 向右为正方向
+    const vector4f_t right_default  = vector4f_t(1, 0, 0);
+    const float      aspect_default = 1;
+    const float      speed_default  = 20;
 
 public:
     /// 位置
@@ -33,6 +43,9 @@ public:
     vector4f_t up;
     /// 比例
     float      aspect;
+
+    // 相机速度
+    float      speed = 20;
 
 public:
     camera_t(void);
@@ -49,6 +62,8 @@ public:
     vector4f_t&      get_target(void);
     vector4f_t&      get_up(void);
     float            get_aspect(void);
+    void             set_default(void);
+    const matrix4f_t look_at(void);
 };
 
 extern camera_t camera;

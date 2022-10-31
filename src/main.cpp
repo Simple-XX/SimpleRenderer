@@ -17,6 +17,7 @@
 #include "thread"
 
 #include "camera.h"
+#include "config.h"
 #include "display.h"
 #include "draw3d.h"
 #include "matrix.hpp"
@@ -31,18 +32,51 @@ static constexpr const uint32_t                  HEIGHT = 1080;
 [[maybe_unused]] static constexpr const uint32_t BLUE   = 0xFF0000FF;
 [[maybe_unused]] static constexpr const uint32_t WHITE  = 0xFFFFFFFF;
 [[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
-std::vector<model_t>                             models;
+config_t                                         config;
+auto      framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
+display_t display(framebuffer);
+std::vector<model_t> models;
+
+// 投影变换矩阵
+matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio, float zNear,
+                                 float zFar) {
+    // 透视投影矩阵
+    float proj_arr[4][4] = {
+        {zNear,     0,            0,             0},
+        {    0, zNear,            0,             0},
+        {    0,     0, zNear + zFar, -zNear * zFar},
+        {    0,     0,            1,             0}
+    };
+    auto  proj            = matrix4f_t(proj_arr);
+
+    float h               = zNear * tan(eye_fov / 2) * 2;
+    float w               = h * aspect_ratio;
+    float z               = zFar - zNear;
+    // 正交投影矩阵，因为在观测投影时x0y平面视角默认是中心，所以这里的正交投影就不用平移x和y了
+    float ortho_arr[4][4] = {
+        {2 / w,     0,     0,                   0},
+        {    0, 2 / h,     0,                   0},
+        {    0,     0, 2 / z, -(zFar + zNear) / 2},
+        {    0,     0,     0,                   1}
+    };
+
+    auto ortho = matrix4f_t(ortho_arr);
+
+    return ortho * proj;
+}
 
 void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
     draw3d_t draw3d(_framebuffer);
 
-    auto     obj_path = "../../obj/cube3.obj";
-    auto     model    = model_t(obj_path);
-    camera.pos        = vector4f_t(500, 500, 0);
-    uint64_t frames   = 0;
-    uint64_t sec      = 0;
+    auto     obj_path  = "../../obj/utah-teapot/utah-teapot.obj";
+    auto     obj_path2 = "../../obj/cube3.obj";
+
+    auto     model     = model_t(obj_path);
+    auto     model2    = model_t(obj_path2);
+    camera.pos         = vector4f_t(0, 0, 0);
+    camera.target      = vector4f_t(0, 0, 0);
+    camera.up          = vector4f_t(0, 1, 0);
     while (1) {
-        auto start = us();
         draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);
         draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, WHITE);
         draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
@@ -60,24 +94,36 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
         //     x_offset += WIDTH / 2;
         // }
 
-        auto model_mat = get_model_matrix(vector4f_t(1000, 1000, 1),
-                                          vector4f_t(1, 1, 1).normalize(), 190,
-                                          vector4f_t(1000, 500, 0));
-        camera.pos     = vector4f_t(0, 0, 0);
-        camera.up      = vector4f_t(0, 0, -1);
-        camera.target  = vector4f_t(1, 1, 0);
-        // auto view_mat  = get_view_matrix(camera);
-        auto view_mat  = matrix4f_t();
-        draw3d.model(model, model_mat, view_mat, matrix4f_t());
+        // auto model_mat = get_model_matrix(vector4f_t(1000, 1000, 1),
+        //                                   vector4f_t(0, 0, 0).normalize(), 0,
+        //                                   vector4f_t(0, 0, 0));
+        auto model_mat  = get_model_matrix(vector4f_t(10, 10, 10),
+                                           vector4f_t(0, 0, 1).normalize(), 180,
+                                           vector4f_t(0, 0, 0));
+        // vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
+        auto model_mat2 = get_model_matrix(vector4f_t(1000, 1000, 1000),
+                                           vector4f_t(0, 1, 1).normalize(), 45,
+                                           vector4f_t(0, 0, 0));
+        // vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
 
-        frames++;
-        auto end = us();
-        sec      += end - start;
-        if (sec >= 1000000) {
-            // std::cout << "fps_draw: " << frames << std::endl;
-            frames = 0;
-            sec    = 0;
-        }
+        auto view_mat   = camera.look_at();
+        auto view_mat2  = camera.look_at();
+
+        // std::cout << view_mat << std::endl;
+
+        // throw(1);
+
+        // auto view_mat  = matrix4f_t();
+        // auto view_mat2 = matrix4f_t();
+
+        // auto proj_mat = get_projection_matrix(3.1415926f * 0.25f,
+        // camera.aspect,
+        //                                       1.0f, 500.0f);
+        auto proj_mat   = matrix4f_t();
+        auto proj_mat2  = matrix4f_t();
+
+        draw3d.model(model, model_mat, view_mat, proj_mat);
+        draw3d.model(model2, model_mat2, view_mat2, proj_mat2);
     }
     return;
 }
@@ -109,12 +155,9 @@ int main(int _argc, char** _argv) {
         models.push_back(model);
     }
 
-    auto        framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
-
     std::thread draw_thread = std::thread(draw, framebuffer);
     draw_thread.detach();
 
-    display_t display(framebuffer);
     display.loop();
 
     return 0;
