@@ -18,11 +18,14 @@
 
 #include "camera.h"
 #include "config.h"
+#include "default_shader.h"
 #include "display.h"
 #include "draw3d.h"
 #include "matrix.hpp"
 #include "model.h"
 
+/// @todo 使用 string_view
+/// @todo 颜色单独抽象
 /// @bug 在坐标系上可能有问题，设计的部分：法向量计算，光照方向，屏幕原点
 
 static constexpr const uint32_t                  WIDTH  = 1920;
@@ -36,6 +39,7 @@ config_t                                         config;
 auto      framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
 display_t display(framebuffer);
 std::vector<model_t> models;
+auto                 default_shader = std::make_shared<default_shader_t>();
 
 // 投影变换矩阵
 matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio, float zNear,
@@ -65,8 +69,9 @@ matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio, float zNear,
     return ortho * proj;
 }
 
-void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
-    draw3d_t draw3d(_framebuffer);
+void draw(std::shared_ptr<framebuffer_t> _framebuffer,
+          std::shared_ptr<shader_base_t> _shader) {
+    draw3d_t draw3d(_framebuffer, _shader);
 
     auto     obj_path  = "../../obj/utah-teapot/utah-teapot.obj";
     auto     obj_path2 = "../../obj/cube3.obj";
@@ -99,22 +104,18 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer) {
         //                                   vector4f_t(0, 0, 0));
         auto model_mat  = get_model_matrix(vector4f_t(10, 10, 10),
                                            vector4f_t(0, 0, 1).normalize(), 180,
-                                           vector4f_t(0, 0, 0));
+                                           vector4f_t(960, 540, 0));
         // vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
         auto model_mat2 = get_model_matrix(vector4f_t(1000, 1000, 1000),
                                            vector4f_t(0, 1, 1).normalize(), 45,
-                                           vector4f_t(0, 0, 0));
+                                           vector4f_t(960, 540, 0));
         // vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
 
-        auto view_mat   = camera.look_at();
-        auto view_mat2  = camera.look_at();
+        // auto view_mat   = camera.look_at();
+        // auto view_mat2  = camera.look_at();
 
-        // std::cout << view_mat << std::endl;
-
-        // throw(1);
-
-        // auto view_mat  = matrix4f_t();
-        // auto view_mat2 = matrix4f_t();
+        auto view_mat   = matrix4f_t();
+        auto view_mat2  = matrix4f_t();
 
         // auto proj_mat = get_projection_matrix(3.1415926f * 0.25f,
         // camera.aspect,
@@ -155,7 +156,7 @@ int main(int _argc, char** _argv) {
         models.push_back(model);
     }
 
-    std::thread draw_thread = std::thread(draw, framebuffer);
+    std::thread draw_thread = std::thread(draw, framebuffer, default_shader);
     draw_thread.detach();
 
     display.loop();

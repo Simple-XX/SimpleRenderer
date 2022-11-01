@@ -26,6 +26,7 @@
 class draw3d_t {
 private:
     std::shared_ptr<framebuffer_t> framebuffer;
+    std::shared_ptr<shader_base_t> shader;
     /// 窗口宽度
     uint32_t                       width;
     /// 窗口高度
@@ -137,7 +138,8 @@ public:
      * @brief 构造函数
      * @param  _framebuffer     另一个 framebuffer
      */
-    draw3d_t(std::shared_ptr<framebuffer_t> _framebuffer);
+    draw3d_t(std::shared_ptr<framebuffer_t> _framebuffer,
+             std::shared_ptr<shader_base_t> _shader);
 
     /**
      * @brief 析构函数
