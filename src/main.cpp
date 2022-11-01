@@ -87,44 +87,24 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
         draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
         draw3d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, WHITE);
 
-        // auto x_offset = 0;
-        // auto y_offset = 0;
-        // for (auto& i : models) {
-        //     draw3d.model(i,
-        //                  matrix4f_t()
-        //                    .rotate(vector4f_t(0, 0, 1).normalize(),
-        //                            matrix4f_t::RAD(90))
-        //                    .translate(1000, 500, 0),
-        //                  matrix4f_t(), matrix4f_t());
-        //     x_offset += WIDTH / 2;
-        // }
-
-        // auto model_mat = get_model_matrix(vector4f_t(1000, 1000, 1),
-        //                                   vector4f_t(0, 0, 0).normalize(), 0,
-        //                                   vector4f_t(0, 0, 0));
-        auto model_mat  = get_model_matrix(vector4f_t(10, 10, 10),
-                                           vector4f_t(0, 0, 1).normalize(), 180,
-                                           vector4f_t(960, 540, 0));
-        // vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
-        auto model_mat2 = get_model_matrix(vector4f_t(1000, 1000, 1000),
-                                           vector4f_t(0, 1, 1).normalize(), 45,
-                                           vector4f_t(960, 540, 0));
-        // vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
-
+        _shader->shader_data.model_matrix
+          = get_model_matrix(vector4f_t(10, 10, 10),
+                             vector4f_t(0, 0, 1).normalize(), 180,
+                             vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
         // auto view_mat   = camera.look_at();
+        _shader->shader_data.view_matrix    = matrix4f_t();
+        _shader->shader_data.project_matrix = matrix4f_t();
+        draw3d.model(model);
+
+        _shader->shader_data.model_matrix
+          = get_model_matrix(vector4f_t(1000, 1000, 1000),
+                             vector4f_t(0, 1, 1).normalize(), 45,
+                             vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
+
+        _shader->shader_data.view_matrix    = matrix4f_t();
         // auto view_mat2  = camera.look_at();
-
-        auto view_mat   = matrix4f_t();
-        auto view_mat2  = matrix4f_t();
-
-        // auto proj_mat = get_projection_matrix(3.1415926f * 0.25f,
-        // camera.aspect,
-        //                                       1.0f, 500.0f);
-        auto proj_mat   = matrix4f_t();
-        auto proj_mat2  = matrix4f_t();
-
-        draw3d.model(model, model_mat, view_mat, proj_mat);
-        draw3d.model(model2, model_mat2, view_mat2, proj_mat2);
+        _shader->shader_data.project_matrix = matrix4f_t();
+        draw3d.model(model2);
     }
     return;
 }

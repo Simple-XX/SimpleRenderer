@@ -19,7 +19,9 @@
 
 #include "shader.h"
 
-// 着色器基类
+/**
+ * @brief 默认着色器
+ */
 class default_shader_t : public shader_base_t {
 private:
     /**
@@ -80,16 +82,31 @@ private:
                       const model_t::normal_t& _normal);
 
 public:
+    /**
+     * @brief 构造函数
+     */
     default_shader_t(void);
+
+    /**
+     * @brief 析构函数
+     */
     ~default_shader_t(void);
 
-    // 顶点着色器
-    const model_t::face_t vertex(const model_t::face_t& _face) override;
+    /**
+     * @brief 顶点着色器
+     * @param  _shader_vertex_in    输入
+     * @return const shader_vertex_out_t    输出
+     */
+    const shader_vertex_out_t
+    vertex(const shader_vertex_in_t& _shader_vertex_in) override;
 
-    // 片段着色器
-    bool                  fragment(const vector4f_t&             _barycentric_coord,
-                                   const framebuffer_t::color_t& _color,
-                                   const vector4f_t&             _light_dir) override;
+    /**
+     * @brief 片段着色器
+     * @param  _shader_fragment_in  输入
+     * @return const shader_fragment_out_t  输出
+     */
+    const shader_fragment_out_t
+    fragment(const shader_fragment_in_t& _shader_fragment_in) override;
 };
 
 #endif /* _DEFAULT_SHADER_H_ */

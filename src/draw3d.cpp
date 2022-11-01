@@ -319,26 +319,22 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
     return;
 }
 
-void draw3d_t::model(const model_t& _model, const matrix4f_t& _model_mat,
-                     const matrix4f_t& _view_mat, const matrix4f_t& _proj_mat) {
-    /// @todo 法线变换
-    const std::pair<const matrix4f_t, const matrix4f_t> tran(
-      _proj_mat * _view_mat * _model_mat, _model_mat.inverse().transpose());
-    // std::cout << tran.first << std::endl;
+void draw3d_t::model(const model_t& _model) {
     if (config.draw_wireframe == true) {
         for (auto f : _model.get_face()) {
-            auto tmp = tran * f;
-            line(tmp.v0.coord.x, tmp.v0.coord.y, tmp.v1.coord.x, tmp.v1.coord.y,
-                 0xFFFFFFFF);
-            line(tmp.v1.coord.x, tmp.v1.coord.y, tmp.v2.coord.x, tmp.v2.coord.y,
-                 0xFFFFFFFF);
-            line(tmp.v2.coord.x, tmp.v2.coord.y, tmp.v0.coord.x, tmp.v0.coord.y,
-                 0xFFFFFFFF);
+            auto face = shader->vertex(shader_vertex_in_t(f)).face;
+            line(face.v0.coord.x, face.v0.coord.y, face.v1.coord.x,
+                 face.v1.coord.y, 0xFFFFFFFF);
+            line(face.v1.coord.x, face.v1.coord.y, face.v2.coord.x,
+                 face.v2.coord.y, 0xFFFFFFFF);
+            line(face.v2.coord.x, face.v2.coord.y, face.v0.coord.x,
+                 face.v0.coord.y, 0xFFFFFFFF);
         }
     }
     else {
         for (auto f : _model.get_face()) {
-            triangle(tran * f);
+            auto face = shader->vertex(shader_vertex_in_t(f)).face;
+            triangle(face);
         }
     }
 

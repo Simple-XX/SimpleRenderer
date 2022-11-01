@@ -30,23 +30,23 @@
  */
 class model_t {
 public:
-    /// 顶点坐标
+    /// @brief 顶点坐标
     typedef vector4f_t coord_t;
-    /// 法向量
+    /// @brief 法向量
     typedef vector4f_t normal_t;
-    /// 颜色
+    /// @brief 颜色
     typedef vector4f_t color_t;
-    /// 贴图
+    /// @brief 贴图
     typedef vector4f_t texcoord_t;
 
     struct material_t {
-        /// 反光度
+        /// @brief 反光度
         float      shininess;
-        /// 环境光照
+        /// @brief 环境光照
         vector4f_t ambient;
-        /// 漫反射光照
+        /// @brief 漫反射光照
         vector4f_t diffuse;
-        /// 镜面光照
+        /// @brief 镜面光照
         vector4f_t specular;
         material_t(void)  = default;
         ~material_t(void) = default;
@@ -57,13 +57,14 @@ public:
      * @todo 直接保存太浪费内存了
      */
     struct vertex_t {
-        /// 坐标
+        /// @brief 坐标
         coord_t    coord;
-        /// 法线，顶点 v 的数量与 vn 的数量一样多
+        /// @brief 法线，顶点 v 的数量与 vn 的数量一样多
         normal_t   normal;
-        /// 贴图(纹理)，范围为 0~1，顶点 v 的个数不一定与纹理坐标 vt
+        /// @brief 贴图(纹理)，范围为 0~1，顶点 v 的个数不一定与纹理坐标 vt
         /// 的个数一样多， 因为有可能很多顶点公用一个纹理坐标的像素。
         texcoord_t texcoord;
+        /// @brief
         /// 颜色，最终每个三角面的颜色，是由构成这个三角面的三个顶点进行插值计算
         /// 如果 obj 文件中没有指定则设为 1(白色)
         /// 范围 [0, 1]
@@ -119,10 +120,10 @@ public:
         vertex_t   v0;
         vertex_t   v1;
         vertex_t   v2;
-        /// 面的法向量为三个点的法向量矢量和
+        /// @brief 面的法向量为三个点的法向量矢量和
         normal_t   normal;
         // 面的颜色为三个点的颜色插值
-        // 材质信息
+        /// @brief 材质信息
         material_t material;
 
         /**

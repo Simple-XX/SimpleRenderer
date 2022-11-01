@@ -23,17 +23,22 @@
 #include "shader.h"
 #include "vector.hpp"
 
+/**
+ * @brief 绘制封装
+ */
 class draw3d_t {
 private:
-    std::shared_ptr<framebuffer_t> framebuffer;
-    std::shared_ptr<shader_base_t> shader;
-    /// 窗口宽度
-    uint32_t                       width;
-    /// 窗口高度
-    uint32_t                       height;
+    /// @brief 帧缓冲
+    std::shared_ptr<framebuffer_t>& framebuffer;
+    /// @brief 要使用的着色器
+    std::shared_ptr<shader_base_t>& shader;
+    /// @brief 窗口宽度
+    uint32_t                        width;
+    /// @brief 窗口高度
+    uint32_t                        height;
 
 public:
-    /// 光照方向
+    /// @brief 光照方向
     /// @bug 这里要注意与法线正方向配合
     vector4f_t light = vector4f_t(0, 0, 1);
 
@@ -136,7 +141,8 @@ public:
 
     /**
      * @brief 构造函数
-     * @param  _framebuffer     另一个 framebuffer
+     * @param  _framebuffer     帧缓冲
+     * @param  _shader          着色器
      */
     draw3d_t(std::shared_ptr<framebuffer_t> _framebuffer,
              std::shared_ptr<shader_base_t> _shader);
@@ -198,23 +204,8 @@ public:
     /**
      * @brief 绘制整个模型，指定变换矩阵
      * @param  _model           模型信息
-     * @param  _rotate          在默认变换的基础上进行变换的旋转矩阵，默认为 1
-     * @param  _scale           在默认变换的基础上进行变换的缩放矩阵，默认为 1
-     * @param  _translate       在默认变换的基础上进行变换的平移矩阵，默认为 1
      */
-    void model(const model_t& _model, const matrix4f_t& _rotate = matrix4f_t(),
-               const matrix4f_t& _scale     = matrix4f_t(),
-               const matrix4f_t& _translate = matrix4f_t());
-
-    // /**
-    //  * @brief 绘制整个模型，指定 mvp 矩阵
-    //  * @param  _model           模型信息
-    //  * @param  _model_mat       模型变换矩阵
-    //  * @param  _view_mat        观测变换矩阵
-    //  * @param  _proj_mat        投影变换矩阵
-    //  */
-    // void model(const model_t& _model, const matrix4f_t& _model_mat,
-    //            const matrix4f_t& _view_mat, const matrix4f_t& _proj_mat);
+    void model(const model_t& _model);
 };
 
 #endif /* _DRAW3D_H_ */

@@ -21,12 +21,12 @@
 #include "mutex"
 
 /**
- * @brief 缓冲
+ * @brief 帧缓冲
  * @todo 大小不一样的赋值处理
  */
 class framebuffer_t {
 public:
-    /// 颜色类型，格式为 ARGB32
+    /// @brief 颜色类型，格式为 ARGB32
     typedef uint32_t color_t;
 
     /**
@@ -106,7 +106,7 @@ public:
         size_t              length(void) const;
     };
 
-    /// 深度类型
+    /// @brief 深度类型
     typedef float depth_t;
 
     /**
@@ -186,19 +186,19 @@ public:
     };
 
 private:
-    /// 窗口宽度
+    /// @brief 窗口宽度
     uint32_t                width;
-    /// 窗口高度
+    /// @brief 窗口高度
     uint32_t                height;
 
-    /// 颜色缓存锁
+    /// @brief 颜色缓冲区锁
     std::mutex              color_buffer_mutex;
-    /// 颜色缓存
+    /// @brief 颜色缓冲区
     color_buffer_t<color_t> color_buffer;
 
-    /// 深度缓存锁
+    /// @brief 深度缓冲区锁
     std::mutex              depth_buffer_mutex;
-    /// 深度缓存
+    /// @brief 深度缓冲区
     depth_buffer_t<depth_t> depth_buffer;
 
 public:
@@ -234,13 +234,13 @@ public:
 
     /**
      * @brief 获取缓冲区宽度
-     * @return int32_t          缓冲区宽度
+     * @return uint32_t         缓冲区宽度
      */
     uint32_t       get_width(void) const;
 
     /**
      * @brief 获取缓冲区高度
-     * @return int32_t          缓冲区高度
+     * @return uint32_t         缓冲区高度
      */
     uint32_t       get_height(void) const;
 

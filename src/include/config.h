@@ -17,6 +17,9 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+/**
+ * @brief 配置选项封装
+ */
 class config_t {
 public:
     /// @brief 控制是否绘制线框，false 时绘制整个图像
@@ -24,6 +27,7 @@ public:
 };
 
 /// 在 main.cpp 中定义
+/// @todo 不使用全局变量
 extern config_t config;
 
 #endif /* _CONFIG_H_ */

@@ -88,21 +88,27 @@ default_shader_t::~default_shader_t(void) {
     return;
 }
 
-const model_t::face_t default_shader_t::vertex(const model_t::face_t& _face) {
+const shader_vertex_out_t
+default_shader_t::vertex(const shader_vertex_in_t& _shader_vertex_in) {
     /// @todo 处理变换
-    auto ret(_face);
+    auto face(_shader_vertex_in.face);
     // 变换坐标
-    auto mvp     = project_matrix * view_matrix * model_matrix;
-    ret.v0.coord = mvp * ret.v0.coord;
-    ret.v1.coord = mvp * ret.v1.coord;
-    ret.v2.coord = mvp * ret.v2.coord;
-    /// @todo 变换法线
+    auto mvp = shader_data.project_matrix * shader_data.view_matrix
+             * shader_data.model_matrix;
+    face.v0.coord = mvp * face.v0.coord;
+    face.v1.coord = mvp * face.v1.coord;
+    face.v2.coord = mvp * face.v2.coord;
+    /// @todo 通过矩阵变换法线
+    auto v2v0     = face.v2.coord - face.v0.coord;
+    auto v1v0     = face.v1.coord - face.v0.coord;
+    auto normal   = (v2v0 ^ v1v0).normalize();
+    face.normal   = normal;
     /// @todo 变换贴图
-    return ret;
+    return shader_vertex_out_t(face);
 }
 
-bool default_shader_t::fragment(const vector4f_t& _barycentric_coord,
-                                const framebuffer_t::color_t& _color,
-                                const vector4f_t&             _light_dir) {
-    return true;
+const shader_fragment_out_t
+default_shader_t::fragment(const shader_fragment_in_t& _shader_fragment_in) {
+    (void)_shader_fragment_in;
+    return shader_fragment_out_t();
 }

@@ -32,9 +32,9 @@
 template <class _T>
 class vector4_t {
 public:
-    /// 表示一个向量
+    /// @brief 表示一个向量
     static constexpr const _T W_VECTOR = 0;
-    /// 表示一个顶点
+    /// @brief 表示一个顶点
     static constexpr const _T W_POINT  = 1;
 
     _T                        x;
@@ -137,6 +137,8 @@ public:
     const _T            operator*(const vector4_t<_T>& _v) const;
 
     /// @brief *矩阵见 matrix.hpp
+    // operator*(const vector4_t<_U>& _v, const matrix4_t<_T>& _mat);
+    // operator*(const matrix4_t<_T>& _mat, const vector4_t<_U>& _v);
 
     /**
      * @brief *= 重载，向量数乘
@@ -148,6 +150,8 @@ public:
     vector4_t<_T>&      operator*=(const _U _s);
 
     /// @brief 行向量*=矩阵见 matrix.hpp
+    // operator*=(vector4_t<_U>& _v, const matrix4_t<_T>& _mat);
+    // operator*=(const matrix4_t<_T>& _mat, vector4_t<_U>& _v);
 
     /**
      * @brief ^ 重载，向量叉积

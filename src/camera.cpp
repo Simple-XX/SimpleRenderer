@@ -41,26 +41,6 @@ camera_t& camera_t::operator=(const camera_t& _camera) {
     return *this;
 }
 
-bool camera_t::operator==(const camera_t& _camera) const {
-    return pos == _camera.pos && target == _camera.target
-        && aspect == _camera.aspect;
-}
-
-bool camera_t::operator!=(const camera_t& _camera) const {
-    return pos != _camera.pos || target != _camera.target
-        || aspect != _camera.aspect;
-}
-
-const vector4f_t camera_t::operator*(const vector4f_t& _v) const {
-    (void)_v;
-    return vector4f_t();
-}
-
-const matrix4f_t camera_t::operator*(const matrix4f_t& _m) const {
-    (void)_m;
-    return matrix4f_t();
-}
-
 vector4f_t& camera_t::get_pos(void) {
     return pos;
 }
