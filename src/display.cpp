@@ -108,8 +108,9 @@ void display_t::show_fps(void) {
     return;
 }
 
-display_t::display_t(std::shared_ptr<framebuffer_t> _framebuffer)
-    : framebuffer(_framebuffer) {
+display_t::display_t(std::shared_ptr<framebuffer_t>& _framebuffer,
+                     std::shared_ptr<camera_t>&      _camera)
+    : framebuffer(_framebuffer), camera(_camera) {
     width  = framebuffer->get_width();
     height = framebuffer->get_height();
     // 初始化 sdl
@@ -170,31 +171,31 @@ void display_t::input_handler(void) {
                         break;
                     }
                     case SDLK_a: {
-                        camera.get_pos().x -= camera.speed;
+                        camera->get_pos().x -= camera->speed;
                         break;
                     }
                     case SDLK_d: {
-                        camera.get_pos().x += camera.speed;
+                        camera->get_pos().x += camera->speed;
                         break;
                     }
                     case SDLK_SPACE: {
-                        camera.get_pos().y -= camera.speed;
+                        camera->get_pos().y -= camera->speed;
                         break;
                     }
                     case SDLK_z: {
-                        camera.get_pos().y += camera.speed;
+                        camera->get_pos().y += camera->speed;
                         break;
                     }
                     case SDLK_LCTRL: {
-                        camera.get_pos().y -= camera.speed;
+                        camera->get_pos().y -= camera->speed;
                         break;
                     }
                     case SDLK_w: {
-                        camera.get_pos().z += camera.speed;
+                        camera->get_pos().z += camera->speed;
                         break;
                     }
                     case SDLK_s: {
-                        camera.get_pos().z -= camera.speed;
+                        camera->get_pos().z -= camera->speed;
                         break;
                     }
                     case SDLK_LSHIFT: {
@@ -212,8 +213,8 @@ void display_t::input_handler(void) {
             }
             // 鼠标移动
             case SDL_MOUSEMOTION: {
-                // camera.get_target().x += sdl_event.motion.xrel;
-                // camera.get_target().y += sdl_event.motion.yrel;
+                // camera->get_target().x += sdl_event.motion.xrel;
+                // camera->get_target().y += sdl_event.motion.yrel;
                 break;
             }
             // 鼠标点击

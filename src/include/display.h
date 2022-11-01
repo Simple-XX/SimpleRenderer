@@ -31,63 +31,65 @@
 class display_t {
 private:
     /// @brief 窗口标题
-    static constexpr const char*   WINDOW_TITLE = (char*)"SimpleRenderer";
-    /// @brief 保存要显示的 framebuffer
-    std::shared_ptr<framebuffer_t> framebuffer;
+    static constexpr const char*    WINDOW_TITLE = (char*)"SimpleRenderer";
     /// @brief sdl 窗口
-    SDL_Window*                    sdl_window;
+    SDL_Window*                     sdl_window;
     /// @brief 字体文件
-    std::string                    font_file_path = "../../wqy-zenhei.ttc";
+    std::string                     font_file_path = "../../wqy-zenhei.ttc";
     /// @brief 字体指针
-    TTF_Font*                      font;
+    TTF_Font*                       font;
     /// @brief 字体大小
-    uint8_t                        fone_size = 32;
+    uint8_t                         fone_size = 32;
     /// @brief 当前 fps
-    uint32_t                       fps       = 0;
+    uint32_t                        fps       = 0;
 
     /// @brief fps 文字
-    SDL_Surface*                   fps_surface;
+    SDL_Surface*                    fps_surface;
     /// @brief fps 内容
-    std::string                    fps_text  = "FPS: " + std::to_string(fps);
+    std::string                     fps_text  = "FPS: " + std::to_string(fps);
     /// @brief fps 颜色 绿色
-    SDL_Color                      fps_color = SDL_Color { 0, 255, 0, 255 };
+    SDL_Color                       fps_color = SDL_Color { 0, 255, 0, 255 };
 
     /// @brief 标识窗口是否需要退出
-    bool                           is_should_quit = false;
+    bool                            is_should_quit = false;
     /// @brief sdl 事件
-    SDL_Event                      sdl_event;
-    /// 窗口宽度
-    uint32_t                       width;
-    /// 窗口高度
-    uint32_t                       height;
+    SDL_Event                       sdl_event;
+    /// @brief 保存要显示的 framebuffer
+    std::shared_ptr<framebuffer_t>& framebuffer;
+    /// @brief 相机
+    std::shared_ptr<camera_t>&      camera;
+    /// @brief 窗口宽度
+    uint32_t                        width;
+    /// @brief 窗口高度
+    uint32_t                        height;
 
     /**
      * @brief 从 argb32 中获取 alpha 通道
      * @param  _color           argb32
      * @return uint8_t          alpha
      */
-    static uint8_t                 ARGB2A(const uint32_t _color);
+    static uint8_t                  ARGB2A(const uint32_t _color);
 
     /**
      * @brief 从 argb32 中获取 red 通道
      * @param  _color           argb32
      * @return uint8_t          red
      */
-    static uint8_t                 ARGB2R(const uint32_t _color);
+    static uint8_t                  ARGB2R(const uint32_t _color);
 
     /**
      * @brief 从 argb32 中获取 green 通道
      * @param  _color           argb32
      * @return uint8_t          green
      */
-    static uint8_t                 ARGB2G(const uint32_t _color);
+    static uint8_t                  ARGB2G(const uint32_t _color);
 
     /**
      * @brief 从 argb32 中获取 blue 通道
      * @param  _color           argb32
      * @return uint8_t          blue
      */
-    static uint8_t                 ARGB2B(const uint32_t _color);
+    static uint8_t                  ARGB2B(const uint32_t _color);
 
     /**
      * @brief 设置像素
@@ -137,9 +139,11 @@ public:
 
     /**
      * @brief 构造函数
-     * @param  _framebuffer     要绑定的缓冲
+     * @param  _framebuffer     要绑定的缓冲区
+     * @param  _camera     要绑定的缓冲
      */
-    display_t(std::shared_ptr<framebuffer_t> _framebuffer);
+    display_t(std::shared_ptr<framebuffer_t>& _framebuffer,
+              std::shared_ptr<camera_t>&      _camera);
 
     /**
      * @brief 析构函数

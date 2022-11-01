@@ -88,7 +88,4 @@ public:
     const matrix4f_t look_at(void);
 };
 
-/// @todo 不使用全局变量
-extern camera_t camera;
-
 #endif /* _CAMERA_H_ */

@@ -36,10 +36,11 @@ static constexpr const uint32_t                  HEIGHT = 1080;
 [[maybe_unused]] static constexpr const uint32_t WHITE  = 0xFFFFFFFF;
 [[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
 config_t                                         config;
-auto      framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
-display_t display(framebuffer);
+auto framebuffer    = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
+auto camera         = std::make_shared<camera_t>();
+auto default_shader = std::make_shared<default_shader_t>();
 std::vector<model_t> models;
-auto                 default_shader = std::make_shared<default_shader_t>();
+display_t            display(framebuffer, camera);
 
 // 投影变换矩阵
 matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio, float zNear,
@@ -78,9 +79,9 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
 
     auto     model     = model_t(obj_path);
     auto     model2    = model_t(obj_path2);
-    camera.pos         = vector4f_t(0, 0, 0);
-    camera.target      = vector4f_t(0, 0, 0);
-    camera.up          = vector4f_t(0, 1, 0);
+    camera->pos        = vector4f_t(0, 0, 0);
+    camera->target     = vector4f_t(0, 0, 0);
+    camera->up         = vector4f_t(0, 1, 0);
     while (1) {
         draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);
         draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, WHITE);

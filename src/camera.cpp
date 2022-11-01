@@ -176,5 +176,3 @@ void camera_t::set_default(void) {
     speed  = speed_default;
     return;
 }
-
-camera_t camera;
