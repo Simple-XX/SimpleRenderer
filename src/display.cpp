@@ -97,13 +97,13 @@ void display_t::apply_surface(uint32_t _x, uint32_t _y,
     return;
 }
 
-void display_t::show_fps(void) {
-    fps_text    = "FPS: " + std::to_string(fps);
-    fps_surface = TTF_RenderText_Solid(font, fps_text.c_str(), fps_color);
+void display_t::show_fps(const uint32_t _fps) {
+    auto fps_text = FPS + std::to_string(_fps);
+    fps_surface   = TTF_RenderText_Solid(font, fps_text.c_str(), fps_color);
     if (fps_surface == nullptr) {
         throw std::runtime_error(log(TTF_GetError()));
     }
-    apply_surface(4, 0, fps_surface);
+    apply_surface(FPS_POS_X, FPS_POS_Y, fps_surface);
     return;
 }
 
@@ -137,7 +137,7 @@ display_t::display_t(std::shared_ptr<framebuffer_t>& _framebuffer,
             throw std::runtime_error(log(TTF_GetError()));
         }
         // 打开字体库
-        font = TTF_OpenFont(font_file_path.c_str(), font_size);
+        font = TTF_OpenFont(font_file_path, font_size);
         if (font == nullptr) {
             TTF_Quit();
             SDL_DestroyWindow(sdl_window);
@@ -237,6 +237,7 @@ void display_t::input_handler(void) {
 void display_t::loop(void) {
     uint64_t sec    = 0;
     uint32_t frames = 0;
+    uint32_t fps    = 0;
     auto     start  = us();
     auto     end    = us();
     // 主循环
@@ -248,7 +249,7 @@ void display_t::loop(void) {
         framebuffer->clear();
         fill();
         // 显示 fps
-        show_fps();
+        show_fps(fps);
         // 刷新窗口
         try {
             auto ret = SDL_UpdateWindowSurface(sdl_window);

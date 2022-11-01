@@ -25,7 +25,6 @@
 #include "matrix.hpp"
 #include "model.h"
 
-/// @todo 使用 string_view
 /// @todo 颜色单独抽象
 /// @todo 参数传递，指针，引用等
 /// @bug 在坐标系上可能有问题，设计的部分：法向量计算，光照方向，屏幕原点

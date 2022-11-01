@@ -17,8 +17,6 @@
 #ifndef _SHADER_H_
 #define _SHADER_H_
 
-#include "string"
-
 #include "framebuffer.h"
 #include "matrix.hpp"
 #include "model.h"

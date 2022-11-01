@@ -69,7 +69,6 @@ private:
     const matrix4_t<_T>            adjoint(void) const;
 
 public:
-    std::string name;
     /**
      * @brief 构造函数，默认为单位矩阵
      */

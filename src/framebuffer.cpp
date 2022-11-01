@@ -16,7 +16,6 @@
 
 #include "cassert"
 #include "cmath"
-#include "cstring"
 #include "iostream"
 
 #include "framebuffer.h"

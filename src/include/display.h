@@ -31,23 +31,25 @@
  */
 class display_t {
 private:
+    /// @brief 字体文件
+    static constexpr const char*    font_file_path = "../../wqy-zenhei.ttc";
+    /// @brief fps 内容
+    static constexpr const char*    FPS            = "FPS: ";
+    /// @brief fps x 位置
+    static constexpr const uint32_t FPS_POS_X      = 4;
+    /// @brief fps y 位置
+    static constexpr const uint32_t FPS_POS_Y      = 0;
     /// @brief 窗口标题
-    static constexpr const char*    WINDOW_TITLE = (char*)"SimpleRenderer";
+    static constexpr const char*    WINDOW_TITLE   = (char*)"SimpleRenderer";
     /// @brief sdl 窗口
     SDL_Window*                     sdl_window;
-    /// @brief 字体文件
-    std::string                     font_file_path = "../../wqy-zenhei.ttc";
     /// @brief 字体指针
     TTF_Font*                       font;
     /// @brief 字体大小
     uint8_t                         font_size = 32;
-    /// @brief 当前 fps
-    uint32_t                        fps       = 0;
 
     /// @brief fps 文字
     SDL_Surface*                    fps_surface;
-    /// @brief fps 内容
-    std::string                     fps_text  = "FPS: " + std::to_string(fps);
     /// @brief fps 颜色 绿色
     SDL_Color                       fps_color = SDL_Color { 0, 255, 0, 255 };
 
@@ -130,9 +132,10 @@ private:
 
     /**
      * @brief 在屏幕左上角显示 fps
+     * @param  _fps             fps 值
      * @todo fps 计算方式可能有误
      */
-    void show_fps(void);
+    void show_fps(const uint32_t _fps);
 
 public:
     /**
