@@ -26,8 +26,4 @@ public:
     bool draw_wireframe = true;
 };
 
-/// 在 main.cpp 中定义
-/// @todo 不使用全局变量
-extern config_t config;
-
 #endif /* _CONFIG_H_ */

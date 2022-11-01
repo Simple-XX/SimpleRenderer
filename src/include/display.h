@@ -22,6 +22,7 @@
 #include "SDL.h"
 #include "SDL_ttf.h"
 
+#include "event_callback.h"
 #include "framebuffer.h"
 
 /**
@@ -39,7 +40,7 @@ private:
     /// @brief 字体指针
     TTF_Font*                       font;
     /// @brief 字体大小
-    uint8_t                         fone_size = 32;
+    uint8_t                         font_size = 32;
     /// @brief 当前 fps
     uint32_t                        fps       = 0;
 
@@ -58,6 +59,8 @@ private:
     std::shared_ptr<framebuffer_t>& framebuffer;
     /// @brief 相机
     std::shared_ptr<camera_t>&      camera;
+    /// @brief 事件处理
+    event_callback_t                event_callback;
     /// @brief 窗口宽度
     uint32_t                        width;
     /// @brief 窗口高度
@@ -143,7 +146,8 @@ public:
      * @param  _camera     要绑定的缓冲
      */
     display_t(std::shared_ptr<framebuffer_t>& _framebuffer,
-              std::shared_ptr<camera_t>&      _camera);
+              std::shared_ptr<camera_t>&      _camera,
+              event_callback_t                _event_callback);
 
     /**
      * @brief 析构函数

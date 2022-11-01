@@ -21,11 +21,13 @@
 #include "default_shader.h"
 #include "display.h"
 #include "draw3d.h"
+#include "event_callback.h"
 #include "matrix.hpp"
 #include "model.h"
 
 /// @todo 使用 string_view
 /// @todo 颜色单独抽象
+/// @todo 参数传递，指针，引用等
 /// @bug 在坐标系上可能有问题，设计的部分：法向量计算，光照方向，屏幕原点
 
 static constexpr const uint32_t                  WIDTH  = 1920;
@@ -36,11 +38,12 @@ static constexpr const uint32_t                  HEIGHT = 1080;
 [[maybe_unused]] static constexpr const uint32_t WHITE  = 0xFFFFFFFF;
 [[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
 config_t                                         config;
-auto framebuffer    = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
-auto camera         = std::make_shared<camera_t>();
-auto default_shader = std::make_shared<default_shader_t>();
+auto             framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
+auto             camera      = std::make_shared<camera_t>();
+auto             default_shader = std::make_shared<default_shader_t>();
+event_callback_t event_callback(config, *camera.get());
 std::vector<model_t> models;
-display_t            display(framebuffer, camera);
+display_t            display(framebuffer, camera, event_callback);
 
 // 投影变换矩阵
 matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio, float zNear,
@@ -71,8 +74,8 @@ matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio, float zNear,
 }
 
 void draw(std::shared_ptr<framebuffer_t> _framebuffer,
-          std::shared_ptr<shader_base_t> _shader) {
-    draw3d_t draw3d(_framebuffer, _shader);
+          std::shared_ptr<shader_base_t> _shader, config_t* _config) {
+    draw3d_t draw3d(_framebuffer, _shader, *_config);
 
     auto     obj_path  = "../../obj/utah-teapot/utah-teapot.obj";
     auto     obj_path2 = "../../obj/cube3.obj";
@@ -137,7 +140,8 @@ int main(int _argc, char** _argv) {
         models.push_back(model);
     }
 
-    std::thread draw_thread = std::thread(draw, framebuffer, default_shader);
+    std::thread draw_thread
+      = std::thread(draw, framebuffer, default_shader, &config);
     draw_thread.detach();
 
     display.loop();

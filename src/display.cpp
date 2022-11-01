@@ -17,7 +17,6 @@
 #include "iostream"
 
 #include "camera.h"
-#include "config.h"
 #include "display.h"
 #include "log.hpp"
 
@@ -109,8 +108,11 @@ void display_t::show_fps(void) {
 }
 
 display_t::display_t(std::shared_ptr<framebuffer_t>& _framebuffer,
-                     std::shared_ptr<camera_t>&      _camera)
-    : framebuffer(_framebuffer), camera(_camera) {
+                     std::shared_ptr<camera_t>&      _camera,
+                     event_callback_t                _event_callback)
+    : framebuffer(_framebuffer),
+      camera(_camera),
+      event_callback(_event_callback) {
     width  = framebuffer->get_width();
     height = framebuffer->get_height();
     // 初始化 sdl
@@ -135,7 +137,7 @@ display_t::display_t(std::shared_ptr<framebuffer_t>& _framebuffer,
             throw std::runtime_error(log(TTF_GetError()));
         }
         // 打开字体库
-        font = TTF_OpenFont(font_file_path.c_str(), fone_size);
+        font = TTF_OpenFont(font_file_path.c_str(), font_size);
         if (font == nullptr) {
             TTF_Quit();
             SDL_DestroyWindow(sdl_window);
@@ -171,35 +173,35 @@ void display_t::input_handler(void) {
                         break;
                     }
                     case SDLK_a: {
-                        camera->get_pos().x -= camera->speed;
+                        event_callback.key_a();
                         break;
                     }
                     case SDLK_d: {
-                        camera->get_pos().x += camera->speed;
+                        event_callback.key_d();
                         break;
                     }
                     case SDLK_SPACE: {
-                        camera->get_pos().y -= camera->speed;
+                        event_callback.key_space();
                         break;
                     }
                     case SDLK_z: {
-                        camera->get_pos().y += camera->speed;
+                        event_callback.key_z();
                         break;
                     }
                     case SDLK_LCTRL: {
-                        camera->get_pos().y -= camera->speed;
+                        event_callback.key_left_ctrl();
                         break;
                     }
                     case SDLK_w: {
-                        camera->get_pos().z += camera->speed;
+                        event_callback.key_w();
                         break;
                     }
                     case SDLK_s: {
-                        camera->get_pos().z -= camera->speed;
+                        event_callback.key_s();
                         break;
                     }
                     case SDLK_LSHIFT: {
-                        config.draw_wireframe = !config.draw_wireframe;
+                        event_callback.key_left_shift();
                         break;
                     }
                     default: {
@@ -208,13 +210,11 @@ void display_t::input_handler(void) {
                                SDL_GetKeyName(sdl_event.key.keysym.sym));
                     }
                 }
-
                 break;
             }
             // 鼠标移动
             case SDL_MOUSEMOTION: {
-                // camera->get_target().x += sdl_event.motion.xrel;
-                // camera->get_target().y += sdl_event.motion.yrel;
+                event_callback.key_mouse_motion();
                 break;
             }
             // 鼠标点击

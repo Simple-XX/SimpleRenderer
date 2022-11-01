@@ -32,6 +32,8 @@ private:
     std::shared_ptr<framebuffer_t>& framebuffer;
     /// @brief 要使用的着色器
     std::shared_ptr<shader_base_t>& shader;
+    /// @brief 配置信息
+    config_t&                       config;
     /// @brief 窗口宽度
     uint32_t                        width;
     /// @brief 窗口高度
@@ -145,7 +147,7 @@ public:
      * @param  _shader          着色器
      */
     draw3d_t(std::shared_ptr<framebuffer_t> _framebuffer,
-             std::shared_ptr<shader_base_t> _shader);
+             std::shared_ptr<shader_base_t> _shader, config_t& _config);
 
     /**
      * @brief 析构函数

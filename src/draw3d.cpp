@@ -194,8 +194,8 @@ void draw3d_t::triangle(const model_t::face_t& _face) {
 }
 
 draw3d_t::draw3d_t(std::shared_ptr<framebuffer_t> _framebuffer,
-                   std::shared_ptr<shader_base_t> _shader)
-    : framebuffer(_framebuffer), shader(_shader) {
+                   std::shared_ptr<shader_base_t> _shader, config_t& _config)
+    : framebuffer(_framebuffer), shader(_shader), config(_config) {
     width  = framebuffer->get_width();
     height = framebuffer->get_height();
     return;
