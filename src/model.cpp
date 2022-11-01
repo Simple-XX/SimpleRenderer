@@ -57,6 +57,20 @@ model_t::vertex_t& model_t::vertex_t::operator=(const vertex_t& _vertex) {
     return *this;
 }
 
+const model_t::vertex_t
+operator*(const std::pair<const matrix4f_t, const matrix4f_t>& _matrices,
+          const model_t::vertex_t&                             _vertex) {
+    auto ret(_vertex);
+    // 变换坐标
+    ret.coord = _matrices.first * _vertex.coord;
+    ret.coord = _matrices.first * _vertex.coord;
+    ret.coord = _matrices.first * _vertex.coord;
+    // 变换法线
+    /// @todo 法线变换矩阵
+    // ret.normal   = _matrices.second * _vertex.normal;
+    return ret;
+}
+
 model_t::face_t::face_t(void) {
     return;
 }
@@ -68,6 +82,21 @@ model_t::face_t::face_t(const face_t& _face)
       normal(_face.normal),
       material(_face.material) {
     return;
+}
+
+const model_t::face_t
+operator*(const std::pair<const matrix4f_t, const matrix4f_t>& _matrices,
+          const model_t::face_t&                               _face) {
+    auto ret(_face);
+    // 变换坐标
+    ret.v0     = _matrices * _face.v0;
+    ret.v1     = _matrices * _face.v1;
+    ret.v2     = _matrices * _face.v2;
+    /// @todo 法线变换矩阵
+    auto v2v0  = ret.v2.coord - ret.v0.coord;
+    auto v1v0  = ret.v1.coord - ret.v0.coord;
+    ret.normal = (v2v0 ^ v1v0).normalize();
+    return ret;
 }
 
 model_t::face_t::face_t(const model_t::vertex_t& _v0,
@@ -103,30 +132,6 @@ model_t::face_t& model_t::face_t::operator=(const face_t& _face) {
     v2       = _face.v2;
     normal   = _face.normal;
     material = _face.material;
-    return *this;
-}
-
-/// @todo 确认这里的乘法顺序
-const model_t::face_t model_t::face_t::operator*(
-  const std::pair<const matrix4f_t, const matrix4f_t>& _matrices) const {
-    face_t ret(*this);
-    // 变换坐标
-    ret.v0.coord = _matrices.first * ret.v0.coord;
-    ret.v1.coord = _matrices.first * ret.v1.coord;
-    ret.v2.coord = _matrices.first * ret.v2.coord;
-    // 变换法线
-    ret.normal   = _matrices.second * ret.normal;
-    return ret;
-}
-
-model_t::face_t& model_t::face_t::operator*=(
-  const std::pair<const matrix4f_t, const matrix4f_t>& _matrices) {
-    // 变换坐标
-    v0.coord = _matrices.first * v0.coord;
-    v1.coord = _matrices.first * v1.coord;
-    v2.coord = _matrices.first * v2.coord;
-    // 变换法线
-    normal   = _matrices.second * normal;
     return *this;
 }
 

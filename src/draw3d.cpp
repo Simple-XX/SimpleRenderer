@@ -326,7 +326,7 @@ void draw3d_t::model(const model_t& _model, const matrix4f_t& _model_mat,
     // std::cout << tran.first << std::endl;
     if (config.draw_wireframe == true) {
         for (auto f : _model.get_face()) {
-            auto tmp = f * tran;
+            auto tmp = tran * f;
             line(tmp.v0.coord.x, tmp.v0.coord.y, tmp.v1.coord.x, tmp.v1.coord.y,
                  0xFFFFFFFF);
             line(tmp.v1.coord.x, tmp.v1.coord.y, tmp.v2.coord.x, tmp.v2.coord.y,
@@ -337,7 +337,7 @@ void draw3d_t::model(const model_t& _model, const matrix4f_t& _model_mat,
     }
     else {
         for (auto f : _model.get_face()) {
-            triangle(f * tran);
+            triangle(tran * f);
         }
     }
 

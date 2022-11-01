@@ -54,6 +54,7 @@ public:
 
     /**
      * @brief obj/mtl 文件的原始数据
+     * @todo 直接保存太浪费内存了
      */
     struct vertex_t {
         /// 坐标
@@ -99,9 +100,21 @@ public:
          * @param  _vertex          另一个 vertex_t
          * @return vertex_t&        结果
          */
-        vertex_t& operator=(const vertex_t& _vertex);
+        vertex_t&             operator=(const vertex_t& _vertex);
+
+        /**
+         * @brief 顶点与矩阵进行运算，效果是对顶点进行变换
+         * @param  _matrices        变换矩阵，第一个是坐标变换，第二个是法线变换
+         * @param  vertex           要变换的 vertex_t
+         * @return const vertex_t   结果
+         * @todo 确认这里的乘法顺序
+         */
+        friend const vertex_t operator*(
+          const std::pair<const matrix4f_t, const matrix4f_t>& _matrices,
+          const vertex_t&                                      _vertex);
     };
 
+    /// @todo 直接保存太浪费内存了
     struct face_t {
         vertex_t   v0;
         vertex_t   v1;
@@ -143,23 +156,18 @@ public:
          * @param  _face            另一个 face_t
          * @return face_t&          结果
          */
-        face_t&      operator=(const face_t& _face);
+        face_t&             operator=(const face_t& _face);
 
         /**
          * @brief 模型与矩阵进行运算，效果是对模型进行变换
          * @param  _matrices        变换矩阵，第一个是坐标变换，第二个是法线变换
+         * @param  _face            要变换的 face_t
          * @return const face_t     结果
+         * @todo 确认这里的乘法顺序
          */
-        const face_t operator*(
-          const std::pair<const matrix4f_t, const matrix4f_t>& _matrices) const;
-
-        /**
-         * @brief 模型与矩阵进行运算，效果是对模型进行变换
-         * @param  _matrices        变换矩阵，第一个是坐标变换，第二个是法线变换
-         * @return face_t&          结果
-         */
-        face_t& operator*=(
-          const std::pair<const matrix4f_t, const matrix4f_t>& _matrices);
+        friend const face_t operator*(
+          const std::pair<const matrix4f_t, const matrix4f_t>& _matrices,
+          const face_t&                                        _face);
     };
 
 private:
