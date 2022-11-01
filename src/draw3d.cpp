@@ -155,7 +155,7 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
     for (auto x = int32_t(min.x); x <= max.x; x++) {
         for (auto y = int32_t(min.y); y <= max.y; y++) {
             /// @todo 这里要用裁剪替换掉
-            if (x >= width || y >= height) {
+            if ((unsigned)x >= width || (unsigned)y >= height) {
                 continue;
             }
             auto [is_inside, barycentric_coord]
@@ -234,14 +234,14 @@ void draw3d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
     for (auto x = p0_x; x <= p1_x; x++) {
         if (steep == true) {
             /// @todo 这里要用裁剪替换掉
-            if (y >= width || x >= height) {
+            if ((unsigned)y >= width || (unsigned)x >= height) {
                 continue;
             }
             framebuffer->pixel(y, x, _color);
         }
         else {
             /// @todo 这里要用裁剪替换掉
-            if (x >= width || y >= height) {
+            if ((unsigned)x >= width || (unsigned)y >= height) {
                 continue;
             }
             framebuffer->pixel(x, y, _color);
