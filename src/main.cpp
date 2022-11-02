@@ -17,6 +17,7 @@
 #include "thread"
 
 #include "camera.h"
+#include "color.h"
 #include "config.h"
 #include "default_shader.h"
 #include "display.h"
@@ -25,18 +26,12 @@
 #include "matrix.hpp"
 #include "model.h"
 
-/// @todo 颜色单独抽象
 /// @todo 参数传递，指针，引用等
 /// @bug 在坐标系上可能有问题，设计的部分：法向量计算，光照方向，屏幕原点
 
-static constexpr const uint32_t                  WIDTH  = 1920;
-static constexpr const uint32_t                  HEIGHT = 1080;
-[[maybe_unused]] static constexpr const uint32_t RED    = 0xFFFF0000;
-[[maybe_unused]] static constexpr const uint32_t GREEN  = 0xFF00FF00;
-[[maybe_unused]] static constexpr const uint32_t BLUE   = 0xFF0000FF;
-[[maybe_unused]] static constexpr const uint32_t WHITE  = 0xFFFFFFFF;
-[[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
-config_t                                         config;
+static constexpr const uint32_t WIDTH  = 1920;
+static constexpr const uint32_t HEIGHT = 1080;
+config_t                        config;
 auto             framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
 auto             camera      = std::make_shared<camera_t>();
 auto             default_shader = std::make_shared<default_shader_t>();
@@ -85,10 +80,10 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
     camera->target     = vector4f_t(0, 0, 0);
     camera->up         = vector4f_t(0, 1, 0);
     while (1) {
-        draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);
-        draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, WHITE);
-        draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
-        draw3d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, WHITE);
+        draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, color_t::WHITE);
+        draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, color_t::WHITE);
+        draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, color_t::WHITE);
+        draw3d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, color_t::WHITE);
 
         _shader->shader_data.model_matrix
           = get_model_matrix(vector4f_t(10, 10, 10),

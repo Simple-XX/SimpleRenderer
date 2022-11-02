@@ -106,11 +106,11 @@ class shader_fragment_in_t {
 public:
 
     /// @brief 重心坐标
-    vector4f_t             barycentric_coord;
+    vector4f_t barycentric_coord;
     /// @brief 颜色
-    framebuffer_t::color_t color;
+    color_t    color;
     /// @brief 光照方向
-    vector4f_t             light_dir;
+    vector4f_t light_dir;
 
     /**
      * @brief 构造函数

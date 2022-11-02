@@ -69,34 +69,6 @@ private:
     uint32_t                        height;
 
     /**
-     * @brief 从 argb32 中获取 alpha 通道
-     * @param  _color           argb32
-     * @return uint8_t          alpha
-     */
-    static uint8_t                  ARGB2A(const uint32_t _color);
-
-    /**
-     * @brief 从 argb32 中获取 red 通道
-     * @param  _color           argb32
-     * @return uint8_t          red
-     */
-    static uint8_t                  ARGB2R(const uint32_t _color);
-
-    /**
-     * @brief 从 argb32 中获取 green 通道
-     * @param  _color           argb32
-     * @return uint8_t          green
-     */
-    static uint8_t                  ARGB2G(const uint32_t _color);
-
-    /**
-     * @brief 从 argb32 中获取 blue 通道
-     * @param  _color           argb32
-     * @return uint8_t          blue
-     */
-    static uint8_t                  ARGB2B(const uint32_t _color);
-
-    /**
      * @brief 设置像素
      * @param  _surface         绘制面
      * @param  _x               横坐标

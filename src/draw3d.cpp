@@ -120,30 +120,25 @@ draw3d_t::interpolate_depth(const framebuffer_t::depth_t& _depth0,
     return z;
 }
 
-framebuffer_t::color_t
-draw3d_t::interpolate_color(const model_t::color_t&  _c0,
-                            const model_t::color_t&  _c1,
-                            const model_t::color_t&  _c2,
+const color_t
+draw3d_t::interpolate_color(const color_t& _color0, const color_t& _color1,
+                            const color_t&           _color2,
                             const vector4f_t&        _barycentric_coord,
                             const model_t::normal_t& _normal) const {
     // 光照强度
     auto intensity = _normal * light;
-    auto color_v   = model_t::color_t(
-      _c0.x * _barycentric_coord.x + _c1.x * _barycentric_coord.y
-        + _c2.x * _barycentric_coord.z,
-      _c0.y * _barycentric_coord.x + _c1.y * _barycentric_coord.y
-        + _c2.y * _barycentric_coord.z,
-      _c0.z * _barycentric_coord.x + _c1.z * _barycentric_coord.y
-        + _c2.z * _barycentric_coord.z);
-    auto color = framebuffer_t::ARGB(
-      std::numeric_limits<uint8_t>::max(),
-      static_cast<uint8_t>(std::numeric_limits<uint8_t>::max() * color_v.x
-                           * intensity),
-      static_cast<uint8_t>(std::numeric_limits<uint8_t>::max() * color_v.y
-                           * intensity),
-      static_cast<uint8_t>(std::numeric_limits<uint8_t>::max() * color_v.z
-                           * intensity));
-    return color;
+    return color_t((uint8_t)((_color0[0] * _barycentric_coord.x
+                              + _color1[0] * _barycentric_coord.y
+                              + _color2[0] * _barycentric_coord.z)
+                             * intensity),
+                   (uint8_t)((_color0[1] * _barycentric_coord.x
+                              + _color1[1] * _barycentric_coord.y
+                              + _color2[1] * _barycentric_coord.z)
+                             * intensity),
+                   (uint8_t)((_color0[2] * _barycentric_coord.x
+                              + _color1[2] * _barycentric_coord.y
+                              + _color2[2] * _barycentric_coord.z)
+                             * intensity));
 }
 
 void draw3d_t::triangle(const model_t::vertex_t& _v0,
@@ -206,7 +201,7 @@ draw3d_t::~draw3d_t(void) {
 }
 
 void draw3d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
-                    const int32_t _y1, const framebuffer_t::color_t& _color) {
+                    const int32_t _y1, const color_t& _color) {
     auto p0_x  = _x0;
     auto p0_y  = _y0;
     auto p1_x  = _x1;
@@ -258,14 +253,13 @@ void draw3d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
 }
 
 void draw3d_t::line(const vector4f_t& _p0, const vector4f_t& _p1,
-                    const framebuffer_t::color_t& _color) {
+                    const color_t& _color) {
     line(_p0.x, _p0.y, _p1.x, _p1.y, _color);
     return;
 }
 
 void draw3d_t::triangle2d(const vector4f_t& _v0, const vector4f_t& _v1,
-                          const vector4f_t&             _v2,
-                          const framebuffer_t::color_t& _color) {
+                          const vector4f_t& _v2, const color_t& _color) {
     auto min = _v0.min(_v1).min(_v2);
     auto max = _v0.max(_v1).max(_v2);
 
@@ -282,8 +276,7 @@ void draw3d_t::triangle2d(const vector4f_t& _v0, const vector4f_t& _v1,
 }
 
 void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
-                        const vector4f_t&             _v2,
-                        const framebuffer_t::color_t& _color) {
+                        const vector4f_t& _v2, const color_t& _color) {
     // 计算最小值
     auto min = _v0.min(_v1).min(_v2);
     // 计算最大值
@@ -324,11 +317,11 @@ void draw3d_t::model(const model_t& _model) {
         for (auto f : _model.get_face()) {
             auto face = shader->vertex(shader_vertex_in_t(f)).face;
             line(face.v0.coord.x, face.v0.coord.y, face.v1.coord.x,
-                 face.v1.coord.y, 0xFFFFFFFF);
+                 face.v1.coord.y, color_t(0xFFFFFFFF));
             line(face.v1.coord.x, face.v1.coord.y, face.v2.coord.x,
-                 face.v2.coord.y, 0xFFFFFFFF);
+                 face.v2.coord.y, color_t(0xFFFFFFFF));
             line(face.v2.coord.x, face.v2.coord.y, face.v0.coord.x,
-                 face.v0.coord.y, 0xFFFFFFFF);
+                 face.v0.coord.y, color_t(0xFFFFFFFF));
         }
     }
     else {

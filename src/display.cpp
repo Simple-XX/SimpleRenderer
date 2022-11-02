@@ -20,22 +20,6 @@
 #include "display.h"
 #include "log.hpp"
 
-uint8_t display_t::ARGB2A(const uint32_t _color) {
-    return (_color >> 24) & 0xFF;
-}
-
-uint8_t display_t::ARGB2R(const uint32_t _color) {
-    return (_color >> 16) & 0xFF;
-}
-
-uint8_t display_t::ARGB2G(const uint32_t _color) {
-    return (_color >> 8) & 0xFF;
-}
-
-uint8_t display_t::ARGB2B(const uint32_t _color) {
-    return (_color >> 0) & 0xFF;
-}
-
 void display_t::pixel(SDL_Surface* _surface, const uint32_t _x,
                       const uint32_t _y, const uint8_t _a, const uint8_t _r,
                       const uint8_t _g, const uint8_t _b) {
@@ -75,14 +59,12 @@ void display_t::fill(void) {
         std::cerr << e.what() << std::endl;
         return;
     }
-    uint32_t color = 0xFFFFFFFF;
     // 填充整个屏幕
     /// @todo 优化，看看能不能直接写整个 buf
     for (uint32_t i = 0; i < width; i++) {
         for (uint32_t j = 0; j < height; j++) {
-            color = framebuffer->get_color_buffer()(i, j);
-            pixel(surface, i, j, ARGB2A(color), ARGB2R(color), ARGB2G(color),
-                  ARGB2B(color));
+            auto color = framebuffer->get_color_buffer()(i, j).to_argb();
+            pixel(surface, i, j, color[0], color[1], color[2], color[3]);
         }
     }
     return;

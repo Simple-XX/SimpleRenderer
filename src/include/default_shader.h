@@ -68,17 +68,16 @@ private:
 
     /**
      * @brief 颜色插值，由重心坐标计算出对应点的颜色，同时会处理光照强度
-     * @param  _c0              第一个点的颜色
-     * @param  _c1              第二个点的颜色
-     * @param  _c2              第三个点的颜色
+     * @param  _color0          第一个点的颜色
+     * @param  _color1          第二个点的颜色
+     * @param  _color2          第三个点的颜色
      * @param  _barycentric_coord   重心坐标
      * @param  _normal          当前点的法向量
-     * @return framebuffer_t::color_t 颜色值
+     * @return const color_t    颜色值
      */
-    static framebuffer_t::color_t
-    interpolate_color(const model_t::color_t& _c0, const model_t::color_t& _c1,
-                      const model_t::color_t&  _c2,
-                      const vector4f_t&        _barycentric_coord,
+    static const color_t
+    interpolate_color(const color_t& _c0, const color_t& _c1,
+                      const color_t& _c2, const vector4f_t& _barycentric_coord,
                       const model_t::normal_t& _normal);
 
 public:

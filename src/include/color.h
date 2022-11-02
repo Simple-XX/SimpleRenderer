@@ -42,6 +42,12 @@ public:
     /// @brief 颜色深度
     static constexpr const uint8_t DEPTH = 4;
 
+    static color_t                 WHITE;
+    static color_t                 BLACK;
+    static color_t                 RED;
+    static color_t                 GREEN;
+    static color_t                 BLUE;
+
     /**
      * @brief 构造函数
      */
@@ -68,6 +74,18 @@ public:
                      const color_order_t& _color_order = COLOR_ORDER_RGBA);
 
     /**
+     * @brief 构造函数，从 [0, 1] 构建
+     * @param  _r               红色
+     * @param  _g               绿色
+     * @param  _b               蓝色
+     * @param  _a               alpha，默认为 1
+     * @param  _color_order     颜色顺序，默认为 RGBA
+     */
+    explicit color_t(const float& _r, const float& _g, const float& _b,
+                     const float&         _a           = 1.,
+                     const color_order_t& _color_order = COLOR_ORDER_RGBA);
+
+    /**
      * @brief 构造函数
      * @param  _color  另一个 color_t
      */
@@ -84,6 +102,10 @@ public:
      * @return color_t& 结果
      */
     color_t&             operator=(const color_t& _color);
+
+    const color_t        operator*(const float& _f) const;
+
+    color_t&             operator*=(const float& _f);
 
     /**
      * @brief 下标重载
@@ -105,6 +127,12 @@ public:
      * @return size_t           颜色大小
      */
     size_t               size(void) const;
+
+    /**
+     * @brief 转换为 uint32_t
+     * @return uint32_t         结果
+     */
+    uint32_t             to_uint32(void) const;
 
     /**
      * @brief 转换为 argb 顺序

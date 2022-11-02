@@ -20,24 +20,21 @@
 #include "cstdint"
 #include "mutex"
 
+#include "color.h"
+
 /**
  * @brief 帧缓冲
  * @todo 大小不一样的赋值处理
  */
 class framebuffer_t {
 public:
-    /// @brief 颜色类型，格式为 ARGB32
-    typedef uint32_t color_t;
-
     /**
      * @brief 颜色缓冲抽象
-     * @tparam _T 颜色缓冲元素类型
      */
-    template <class _T = color_t>
     class color_buffer_t {
     private:
         /// @brief 颜色缓冲数组
-        _T*      color_arr;
+        color_t* color_arr;
         /// @brief 宽度
         uint32_t width;
         /// @brief 高度
@@ -53,7 +50,7 @@ public:
          * @brief 构造函数
          * @param  _color_buffer    另一个 color_buffer_t
          */
-        color_buffer_t(const color_buffer_t<_T>& _color_buffer);
+        color_buffer_t(const color_buffer_t& _color_buffer);
 
         /**
          * @brief 构造函数
@@ -62,7 +59,7 @@ public:
          * @param  _color           要填充的颜色
          */
         color_buffer_t(const uint32_t _w, const uint32_t _h,
-                       const _T& _color = 0x00000000);
+                       const color_t& _color = color_t());
 
         /**
          * @brief 析构函数
@@ -74,36 +71,36 @@ public:
          * @param  _color_buffer    另一个 color_buffer_t
          * @return color_buffer_t<_T>&  结果
          */
-        color_buffer_t<_T>& operator=(const color_buffer_t<_T>& _color_buffer);
+        color_buffer_t& operator=(const color_buffer_t& _color_buffer);
 
         /**
          * @brief () 重载，获取第 _x 行 _y 列的数据
          * @param  _x               行
          * @param  _y               列
-         * @return _T&              数据
+         * @return color_t&         数据
          * @todo 访问限制
          */
-        _T&                 operator()(const uint32_t _x, const uint32_t _y);
+        color_t&        operator()(const uint32_t _x, const uint32_t _y);
 
         /**
          * @brief () 重载，获取第 _x 行 _y 列的数据
          * @param  _x               行
          * @param  _y               列
-         * @return const _T         只读的数据
+         * @return const color_t    只读的数据
          */
-        const _T operator()(const uint32_t _x, const uint32_t _y) const;
+        const color_t   operator()(const uint32_t _x, const uint32_t _y) const;
 
         /**
          * @brief 清空，设置为指定值，默认为 0x00000000
          * @param  _color           颜色
          */
-        void                clear(const _T& _color = 0x00000000);
+        void            clear(const color_t& _color = color_t());
 
         /**
          * @brief 获取缓冲区大小(字节数)
          * @return size_t           字节数
          */
-        size_t              length(void) const;
+        size_t          length(void) const;
     };
 
     /// @brief 深度类型
@@ -194,7 +191,7 @@ private:
     /// @brief 颜色缓冲区锁
     std::mutex              color_buffer_mutex;
     /// @brief 颜色缓冲区
-    color_buffer_t<color_t> color_buffer;
+    color_buffer_t          color_buffer;
 
     /// @brief 深度缓冲区锁
     std::mutex              depth_buffer_mutex;
@@ -249,7 +246,7 @@ public:
      * @param  _color           指定颜色
      * @param  _depth           指定深度
      */
-    void           clear(const color_t& _color = 0x00000000,
+    void           clear(const color_t& _color = color_t(),
                          const depth_t& _depth = std::numeric_limits<depth_t>::lowest());
 
     /**
@@ -265,15 +262,15 @@ public:
 
     /**
      * @brief 获取颜色缓存
-     * color_buffer_t<color_t> &颜色缓存
+     * @return color_buffer_t&  颜色缓存
      */
-    color_buffer_t<color_t>&       get_color_buffer(void);
+    color_buffer_t& get_color_buffer(void);
 
     /**
      * @brief 获取颜色缓存
-     * const color_buffer_t<color_t> &  只读的颜色缓存
+     * @return const color_buffer_t&    只读的颜色缓存
      */
-    const color_buffer_t<color_t>& get_color_buffer(void) const;
+    const color_buffer_t&          get_color_buffer(void) const;
 
     /**
      * @brief 获取深度缓存
@@ -286,17 +283,6 @@ public:
      * const depth_buffer_t<depth_t> &  只读的深度缓存
      */
     const depth_buffer_t<depth_t>& get_depth_buffer(void) const;
-
-    /**
-     * @brief 生成 argb
-     * @param  _a               alpha
-     * @param  _r               红
-     * @param  _g               绿
-     * @param  _b               蓝
-     * @return color_t          argb 颜色
-     */
-    static color_t ARGB(const uint8_t _a, const uint8_t _r, const uint8_t _g,
-                        const uint8_t _b);
 };
 
 #endif /* _FRAMEBUFFER_H_ */

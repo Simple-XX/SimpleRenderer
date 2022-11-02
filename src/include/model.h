@@ -22,6 +22,7 @@
 
 #include "tiny_obj_loader.h"
 
+#include "color.h"
 #include "matrix.hpp"
 #include "vector.hpp"
 
@@ -34,8 +35,6 @@ public:
     typedef vector4f_t coord_t;
     /// @brief 法向量
     typedef vector4f_t normal_t;
-    /// @brief 颜色
-    typedef vector4f_t color_t;
     /// @brief 贴图
     typedef vector4f_t texcoord_t;
 

@@ -35,13 +35,14 @@ model_t::vertex_t::vertex_t(const vertex_t& _vertex)
 model_t::vertex_t::vertex_t(const coord_t& _coord, const normal_t& _normal,
                             const texcoord_t& _texcoord, const color_t& _color)
     : coord(_coord), normal(_normal), texcoord(_texcoord) {
-    // 将颜色归一化
-    if (_color.x > 1 || _color.y > 1 || _color.z > 1) {
-        color = _color / std::numeric_limits<uint8_t>::max();
-    }
-    else {
-        color = _color;
-    }
+    // // 将颜色归一化
+    // if (_color.x > 1 || _color.y > 1 || _color.z > 1) {
+    //     color = _color / std::numeric_limits<uint8_t>::max();
+    // }
+    // else {
+    //     color = _color;
+    // }
+    color = _color;
     return;
 }
 
