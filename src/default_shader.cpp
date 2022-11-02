@@ -55,30 +55,21 @@ default_shader_t::interpolate_depth(const framebuffer_t::depth_t& _depth0,
 const color_t default_shader_t::interpolate_color(
   const color_t& _color0, const color_t& _color1, const color_t& _color2,
   const vector4f_t& _barycentric_coord, const model_t::normal_t& _normal) {
-    // // 光照强度
-    // // auto intensity = _normal * light;
-    // auto intensity = 0;
-    // auto color_v   = color_t(
-    //   _color0[0] * _barycentric_coord.x + _color1[0] * _barycentric_coord.y
-    //     + _color2[0] * _barycentric_coord.z,
-    //   _color0[1] * _barycentric_coord.x + _color1[1] * _barycentric_coord.y
-    //     + _color2[1] * _barycentric_coord.z,
-    //   _color0[2] * _barycentric_coord.x + _color1[2] * _barycentric_coord.y
-    //     + _color2[2] * _barycentric_coord.z);
-    // return color_t(std::numeric_limits<uint8_t>::max(),
-    //                static_cast<uint8_t>(std::numeric_limits<uint8_t>::max()
-    //                                     * color_v[0] * intensity),
-    //                static_cast<uint8_t>(std::numeric_limits<uint8_t>::max()
-    //                                     * color_v[1] * intensity),
-    //                static_cast<uint8_t>(std::numeric_limits<uint8_t>::max()
-    //                                     * color_v[2] * intensity),
-    //                color_t::COLOR_ORDER_ARGB);
-    (void)_color0;
-    (void)_color1;
-    (void)_color2;
-    (void)_barycentric_coord;
-    (void)_normal;
-    return color_t();
+    // 光照强度
+    // auto intensity = _normal * light;
+    auto intensity = 1;
+    return color_t((uint8_t)((_color0[0] * _barycentric_coord.x
+                              + _color1[0] * _barycentric_coord.y
+                              + _color2[0] * _barycentric_coord.z)
+                             * intensity),
+                   (uint8_t)((_color0[1] * _barycentric_coord.x
+                              + _color1[1] * _barycentric_coord.y
+                              + _color2[1] * _barycentric_coord.z)
+                             * intensity),
+                   (uint8_t)((_color0[2] * _barycentric_coord.x
+                              + _color1[2] * _barycentric_coord.y
+                              + _color2[2] * _barycentric_coord.z)
+                             * intensity));
 }
 
 default_shader_t::default_shader_t(void) {

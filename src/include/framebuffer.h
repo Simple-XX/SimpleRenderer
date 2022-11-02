@@ -78,7 +78,6 @@ public:
          * @param  _x               行
          * @param  _y               列
          * @return color_t&         数据
-         * @todo 访问限制
          */
         color_t&        operator()(const uint32_t _x, const uint32_t _y);
 
@@ -157,7 +156,6 @@ public:
          * @param  _x               行
          * @param  _y               列
          * @return _T&              数据
-         * @todo 访问限制
          */
         _T&                 operator()(const uint32_t _x, const uint32_t _y);
 
