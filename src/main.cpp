@@ -28,15 +28,16 @@
 
 /// @bug 在坐标系上可能有问题，设计的部分：法向量计算，光照方向，屏幕原点
 
-static constexpr const uint32_t WIDTH       = 1920;
-static constexpr const uint32_t HEIGHT      = 1080;
-auto                            framebuffer = framebuffer_t(WIDTH, HEIGHT);
-auto                            config      = config_t();
-auto                            shader      = default_shader_t();
-auto                            camera      = camera_t();
-auto       event_callback                   = event_callback_t(config, camera);
-auto       display = display_t(framebuffer, camera, event_callback);
-auto       models  = std::vector<model_t>();
+static constexpr const uint32_t WIDTH  = 1920;
+static constexpr const uint32_t HEIGHT = 1080;
+auto framebuffer    = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
+auto config         = std::make_shared<config_t>();
+auto shader         = std::make_shared<default_shader_t>();
+auto camera         = std::make_shared<camera_t>();
+auto event_callback = std::make_shared<event_callback_t>(*config, *camera);
+auto display
+  = std::make_shared<display_t>(*framebuffer, *camera, *event_callback);
+auto       models = std::vector<model_t>();
 
 // 投影变换矩阵
 matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio, float zNear,
@@ -66,8 +67,9 @@ matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio, float zNear,
     return ortho * proj;
 }
 
-void draw(framebuffer_t* _framebuffer, shader_base_t* _shader,
-          config_t* _config) {
+void draw(std::shared_ptr<framebuffer_t> _framebuffer,
+          std::shared_ptr<shader_base_t> _shader,
+          std::shared_ptr<config_t>      _config) {
     draw3d_t draw3d(*_framebuffer, *_shader, *_config);
 
     auto     obj_path  = "../../obj/utah-teapot/utah-teapot.obj";
@@ -75,9 +77,9 @@ void draw(framebuffer_t* _framebuffer, shader_base_t* _shader,
 
     auto     model     = model_t(obj_path);
     auto     model2    = model_t(obj_path2);
-    camera.pos         = vector4f_t(0, 0, 0);
-    camera.target      = vector4f_t(0, 0, 0);
-    camera.up          = vector4f_t(0, 1, 0);
+    camera->pos        = vector4f_t(0, 0, 0);
+    camera->target     = vector4f_t(0, 0, 0);
+    camera->up         = vector4f_t(0, 1, 0);
     while (1) {
         // 右对角线
         draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, color_t::WHITE);
@@ -137,10 +139,10 @@ int main(int _argc, char** _argv) {
         models.push_back(model);
     }
 
-    std::thread draw_thread = std::thread(draw, &framebuffer, &shader, &config);
+    std::thread draw_thread = std::thread(draw, framebuffer, shader, config);
     draw_thread.detach();
 
-    display.loop();
+    display->loop();
 
     return 0;
 }

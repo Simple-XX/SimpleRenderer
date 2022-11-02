@@ -24,8 +24,9 @@
 static constexpr const uint32_t WIDTH  = 1920;
 static constexpr const uint32_t HEIGHT = 1080;
 
-void line(framebuffer_t* _framebuffer, shader_base_t* _shader,
-          config_t* _config) {
+void line(std::shared_ptr<framebuffer_t> _framebuffer,
+          std::shared_ptr<shader_base_t> _shader,
+          std::shared_ptr<config_t>      _config) {
     draw3d_t draw3d(*_framebuffer, *_shader, *_config);
 
     auto     obj_path  = "../../obj/utah-teapot/utah-teapot.obj";
@@ -75,23 +76,25 @@ void line(framebuffer_t* _framebuffer, shader_base_t* _shader,
 }
 
 TEST(draw3d_t, line) {
-    auto        framebuffer    = framebuffer_t(WIDTH, HEIGHT);
-    auto        config         = config_t();
-    auto        shader         = default_shader_t();
-    auto        camera         = camera_t();
-    auto        event_callback = event_callback_t(config, camera);
-    auto        display        = display_t(framebuffer, camera, event_callback);
+    auto framebuffer    = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
+    auto config         = std::make_shared<config_t>();
+    auto shader         = std::make_shared<default_shader_t>();
+    auto camera         = std::make_shared<camera_t>();
+    auto event_callback = std::make_shared<event_callback_t>(*config, *camera);
+    auto display
+      = std::make_shared<display_t>(*framebuffer, *camera, *event_callback);
 
-    std::thread draw_thread = std::thread(line, &framebuffer, &shader, &config);
+    std::thread draw_thread = std::thread(line, framebuffer, shader, config);
     draw_thread.detach();
 
-    display.loop();
+    display->loop();
 
     return;
 }
 
-void obj(framebuffer_t* _framebuffer, shader_base_t* _shader,
-         config_t* _config) {
+void obj(std::shared_ptr<framebuffer_t> _framebuffer,
+         std::shared_ptr<shader_base_t> _shader,
+         std::shared_ptr<config_t>      _config) {
     draw3d_t draw3d(*_framebuffer, *_shader, *_config);
 
     auto     obj_path  = "../../obj/utah-teapot/utah-teapot.obj";
@@ -130,17 +133,18 @@ void obj(framebuffer_t* _framebuffer, shader_base_t* _shader,
 }
 
 TEST(draw3d_t, obj) {
-    auto        framebuffer    = framebuffer_t(WIDTH, HEIGHT);
-    auto        config         = config_t();
-    auto        shader         = default_shader_t();
-    auto        camera         = camera_t();
-    auto        event_callback = event_callback_t(config, camera);
-    auto        display        = display_t(framebuffer, camera, event_callback);
+    auto framebuffer    = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
+    auto config         = std::make_shared<config_t>();
+    auto shader         = std::make_shared<default_shader_t>();
+    auto camera         = std::make_shared<camera_t>();
+    auto event_callback = std::make_shared<event_callback_t>(*config, *camera);
+    auto display
+      = std::make_shared<display_t>(*framebuffer, *camera, *event_callback);
 
-    std::thread draw_thread = std::thread(obj, &framebuffer, &shader, &config);
+    std::thread draw_thread = std::thread(obj, framebuffer, shader, config);
     draw_thread.detach();
 
-    display.loop();
+    display->loop();
 
     return;
 }
