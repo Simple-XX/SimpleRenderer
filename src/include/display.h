@@ -36,82 +36,68 @@ private:
     /// @brief fps 内容
     static constexpr const char*    FPS            = "FPS: ";
     /// @brief fps x 位置
-    static constexpr const uint32_t FPS_POS_X      = 4;
+    static constexpr const uint32_t FPS_POS_X      = 0;
     /// @brief fps y 位置
     static constexpr const uint32_t FPS_POS_Y      = 0;
-    /// @brief 窗口标题
-    static constexpr const char*    WINDOW_TITLE   = (char*)"SimpleRenderer";
-    /// @brief sdl 窗口
-    SDL_Window*                     sdl_window;
-    /// @brief sdl 渲染器
-    SDL_Renderer*                   sdl_renderer;
-    /// @brief sdl 纹理
-    SDL_Texture*                    sdl_texture;
-    /// @brief 字体指针
-    TTF_Font*                       font;
-    /// @brief 字体大小
-    uint8_t                         font_size = 32;
+    /// @brief fps x 长度
+    static constexpr const uint32_t FPS_SIZE_X     = 160;
+    /// @brief fps y 高度
+    static constexpr const uint32_t FPS_SIZE_Y     = 90;
+    /// @brief fps 位置
+    static constexpr const SDL_Rect FPS_RECT       = {
+        FPS_POS_X,
+        FPS_POS_Y,
+        FPS_SIZE_X,
+        FPS_SIZE_Y,
+    };
 
-    /// @brief fps 文字
-    SDL_Surface*                    fps_surface;
+    /// @brief 窗口标题
+    static constexpr const char* WINDOW_TITLE = (char*)"SimpleRenderer";
+    /// @brief sdl 窗口
+    SDL_Window*                  sdl_window;
+    /// @brief sdl 渲染器
+    SDL_Renderer*                sdl_renderer;
+    /// @brief sdl 纹理
+    SDL_Texture*                 sdl_texture;
+    /// @brief 字体指针
+    TTF_Font*                    font;
+    /// @brief 字体大小
+    uint8_t                      font_size      = 32;
+
     /// @brief fps 颜色 绿色
-    SDL_Color                       fps_color = SDL_Color { 0, 255, 0, 255 };
+    SDL_Color                    fps_color      = SDL_Color { 0, 255, 0, 255 };
 
     /// @brief 标识窗口是否需要退出
-    bool                            is_should_quit = false;
+    bool                         is_should_quit = false;
     /// @brief sdl 事件
-    SDL_Event                       sdl_event;
+    SDL_Event                    sdl_event;
     /// @brief 保存要显示的 framebuffer
-    framebuffer_t&                  framebuffer;
+    framebuffer_t&               framebuffer;
     /// @brief 相机
-    camera_t&                       camera;
+    camera_t&                    camera;
     /// @brief 事件处理
-    event_callback_t&               event_callback;
+    event_callback_t&            event_callback;
     /// @brief 窗口宽度
-    uint32_t                        width;
+    uint32_t                     width;
     /// @brief 窗口高度
-    uint32_t                        height;
-
-    /**
-     * @brief 设置像素
-     * @param  _surface         绘制面
-     * @param  _x               横坐标
-     * @param  _y               纵坐标
-     * @param  _a               alpha
-     * @param  _r               红色
-     * @param  _g               绿色
-     * @param  _b               蓝色
-     * @note (0, 0) 为屏幕左上角
-     * @note alpha 通道无效
-     */
-    void pixel(SDL_Surface* _surface, const uint32_t _x, const uint32_t _y,
-               const uint8_t _a, const uint8_t _r, const uint8_t _g,
-               const uint8_t _b);
+    uint32_t                     height;
 
     /**
      * @brief 处理输入
      */
-    void input_handler(void);
+    void                         input_handler(void);
 
     /**
      * @brief 将 framebuffer 中的数据绘制到屏幕上
      */
-    void fill(void);
-
-    /**
-     * @brief 将 _src 绘制到当前窗口 _x, _y 处
-     * @param  _x               横坐标
-     * @param  _y               纵坐标
-     * @param  _src             要绘制的内容
-     */
-    void apply_surface(uint32_t _x, uint32_t _y, SDL_Surface* _src) const;
+    void                         fill(void);
 
     /**
      * @brief 在屏幕左上角显示 fps
      * @param  _fps             fps 值
      * @todo fps 计算方式可能有误
      */
-    void show_fps(const uint32_t _fps);
+    void                         show_fps(const uint32_t _fps);
 
 public:
     /**

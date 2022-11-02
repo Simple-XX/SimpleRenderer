@@ -105,6 +105,10 @@ private:
          * @return size_t           字节数
          */
         size_t          length(void) const;
+
+        uint32_t*       get_arr(void) {
+            return (uint32_t*)color_arr;
+        }
     };
 
     /**

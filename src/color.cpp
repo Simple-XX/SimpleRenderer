@@ -19,51 +19,46 @@
 #include "color.h"
 #include "log.hpp"
 
-color_t::color_t(void) : color_data(0), color_order(COLOR_ORDER_ARGB) {
+color_t::color_t(void) {
+    color_data[0] = 0;
+    color_data[1] = 0;
+    color_data[2] = 0;
+    color_data[3] = std::numeric_limits<uint8_t>::max();
     return;
 }
 
-color_t::color_t(const uint32_t _data, const color_order_t& _color_order)
-    : color_data(_data), color_order(_color_order) {
-    if ((_color_order != COLOR_ORDER_ARGB)
-        && (_color_order != COLOR_ORDER_RGBA)) {
-        throw std::invalid_argument(log("invalid _color_order"));
-    }
+color_t::color_t(const uint32_t _data) {
+    auto data_ptr = (uint8_t*)&_data;
+    color_data[0] = data_ptr[0];
+    color_data[1] = data_ptr[1];
+    color_data[2] = data_ptr[2];
+    color_data[3] = data_ptr[3];
     return;
 }
 
-color_t::color_t(const uint8_t _a, const uint8_t _r, const uint8_t _g,
-                 const uint8_t _b, const color_order_t& _color_order)
-    : color_order(_color_order) {
-    if ((_color_order != COLOR_ORDER_ARGB)
-        && (_color_order != COLOR_ORDER_RGBA)) {
-        throw std::invalid_argument(log("invalid _color_order"));
-    }
-    auto color_data_ptr = (uint8_t*)&color_data;
-    color_data_ptr[0]   = _a;
-    color_data_ptr[1]   = _r;
-    color_data_ptr[2]   = _g;
-    color_data_ptr[3]   = _b;
+color_t::color_t(const uint8_t _r, const uint8_t _g, const uint8_t _b,
+                 const uint8_t _a) {
+    color_data[0] = _r;
+    color_data[1] = _g;
+    color_data[2] = _b;
+    color_data[3] = _a;
     return;
 }
 
-color_t::color_t(const uint8_t& _a, const float& _r, const float& _g,
-                 const float& _b, const color_order_t& _color_order)
-    : color_order(_color_order) {
-    if ((_color_order != COLOR_ORDER_ARGB)
-        && (_color_order != COLOR_ORDER_RGBA)) {
-        throw std::invalid_argument(log("invalid _color_order"));
-    }
-    auto color_data_ptr = (uint8_t*)&color_data;
-    color_data_ptr[0]   = _a;
-    color_data_ptr[1]   = uint8_t(_r * std::numeric_limits<uint8_t>::max());
-    color_data_ptr[2]   = uint8_t(_g * std::numeric_limits<uint8_t>::max());
-    color_data_ptr[3]   = uint8_t(_b * std::numeric_limits<uint8_t>::max());
+color_t::color_t(const float& _r, const float& _g, const float& _b,
+                 const uint8_t _a) {
+    color_data[0] = uint8_t(_r * std::numeric_limits<uint8_t>::max());
+    color_data[1] = uint8_t(_g * std::numeric_limits<uint8_t>::max());
+    color_data[2] = uint8_t(_b * std::numeric_limits<uint8_t>::max());
+    color_data[3] = _a;
     return;
 }
 
-color_t::color_t(const color_t& _color)
-    : color_data(_color.color_data), color_order(_color.color_order) {
+color_t::color_t(const color_t& _color) {
+    color_data[0] = _color.color_data[0];
+    color_data[1] = _color.color_data[1];
+    color_data[2] = _color.color_data[2];
+    color_data[3] = _color.color_data[3];
     return;
 }
 
@@ -75,44 +70,42 @@ color_t& color_t::operator=(const color_t& _color) {
     if (this == &_color) {
         throw std::runtime_error(log("this == &_color"));
     }
-    color_data  = _color.color_data;
-    color_order = _color.color_order;
+    color_data[0] = _color.color_data[0];
+    color_data[1] = _color.color_data[1];
+    color_data[2] = _color.color_data[2];
+    color_data[3] = _color.color_data[3];
     return *this;
 }
 
 const color_t color_t::operator*(const float& _f) const {
-    auto    color_data_ptr = (uint8_t*)&color_data;
-    uint8_t new_0          = color_data_ptr[0] * _f;
-    uint8_t new_1          = color_data_ptr[1] * _f;
-    uint8_t new_2          = color_data_ptr[2] * _f;
-    uint8_t new_3          = color_data_ptr[3] * _f;
-    return color_t(new_0, new_1, new_2, new_3, color_order);
+    uint8_t r = color_data[0] * _f;
+    uint8_t g = color_data[1] * _f;
+    uint8_t b = color_data[2] * _f;
+    uint8_t a = color_data[3] * _f;
+    return color_t(r, g, b, a);
 }
 
 const color_t color_t::operator*(const vector4f_t& _vector) const {
-    auto    color_data_ptr = (uint8_t*)&color_data;
-    uint8_t new_0          = color_data_ptr[0] * _vector.x;
-    uint8_t new_1          = color_data_ptr[1] * _vector.y;
-    uint8_t new_2          = color_data_ptr[2] * _vector.z;
-    uint8_t new_3          = color_data_ptr[3] * _vector.w;
-    return color_t(new_0, new_1, new_2, new_3, color_order);
+    uint8_t r = color_data[0] * _vector.x;
+    uint8_t g = color_data[1] * _vector.y;
+    uint8_t b = color_data[2] * _vector.z;
+    uint8_t a = color_data[3] * _vector.w;
+    return color_t(r, g, b, a);
 }
 
 color_t& color_t::operator*=(const float& _f) {
-    auto color_data_ptr = (uint8_t*)&color_data;
-    color_data_ptr[0]   *= _f;
-    color_data_ptr[1]   *= _f;
-    color_data_ptr[2]   *= _f;
-    color_data_ptr[3]   *= _f;
+    color_data[0] *= _f;
+    color_data[1] *= _f;
+    color_data[2] *= _f;
+    color_data[3] *= _f;
     return *this;
 }
 
 color_t& color_t::operator*=(const vector4f_t& _vector) {
-    auto color_data_ptr = (uint8_t*)&color_data;
-    color_data_ptr[0]   *= _vector.x;
-    color_data_ptr[1]   *= _vector.y;
-    color_data_ptr[2]   *= _vector.z;
-    color_data_ptr[3]   *= _vector.w;
+    color_data[0] *= _vector.x;
+    color_data[1] *= _vector.y;
+    color_data[2] *= _vector.z;
+    color_data[3] *= _vector.w;
     return *this;
 }
 
@@ -120,16 +113,14 @@ uint8_t& color_t::operator[](const uint8_t _idx) {
     if (_idx > DEPTH) {
         throw std::invalid_argument(log("_idx > DEPTH"));
     }
-    auto color_data_ptr = (uint8_t*)&color_data;
-    return color_data_ptr[_idx];
+    return color_data[_idx];
 }
 
 uint8_t color_t::operator[](const uint8_t _idx) const {
     if (_idx > DEPTH) {
         throw std::invalid_argument(log("_idx > DEPTH"));
     }
-    auto color_data_ptr = (uint8_t*)&color_data;
-    return color_data_ptr[_idx];
+    return color_data[_idx];
 }
 
 size_t color_t::size(void) {
@@ -137,37 +128,15 @@ size_t color_t::size(void) {
 }
 
 uint32_t color_t::to_uint32(void) const {
-    return color_data;
-}
-
-const color_t color_t::to_argb(void) const {
-    if (color_order == COLOR_ORDER_ARGB) {
-        return color_t(color_data, COLOR_ORDER_ARGB);
-    }
-    else {
-        auto color_data_ptr = (uint8_t*)&color_data;
-        return color_t(color_data_ptr[3], color_data_ptr[0], color_data_ptr[1],
-                       color_data_ptr[2], COLOR_ORDER_ARGB);
-    }
-}
-
-const color_t color_t::to_rgba(void) const {
-    if (color_order == COLOR_ORDER_RGBA) {
-        return color_t(color_data, COLOR_ORDER_RGBA);
-    }
-    else {
-        auto color_data_ptr = (uint8_t*)&color_data;
-        return color_t(color_data_ptr[1], color_data_ptr[2], color_data_ptr[3],
-                       color_data_ptr[0], COLOR_ORDER_RGBA);
-    }
+    return *(uint32_t*)color_data;
 }
 
 const uint8_t* color_t::to_arr(void) const {
-    return (uint8_t*)&color_data;
+    return color_data;
 }
 
-color_t color_t::WHITE = color_t(0xFF, (uint8_t)0xFF, 0xFF, 0xFF);
-color_t color_t::BLACK = color_t(0xFF, (uint8_t)0x00, 0x00, 0x00);
-color_t color_t::RED   = color_t(0xFF, (uint8_t)0xFF, 0x00, 0x00);
-color_t color_t::GREEN = color_t(0xFF, (uint8_t)0x00, 0xFF, 0x00);
-color_t color_t::BLUE  = color_t(0xFF, (uint8_t)0x00, 0x00, 0xFF);
+color_t color_t::WHITE = color_t((uint8_t)0xFF, 0xFF, 0xFF);
+color_t color_t::BLACK = color_t((uint8_t)0x00, 0x00, 0x00);
+color_t color_t::RED   = color_t((uint8_t)0xFF, 0x00, 0x00);
+color_t color_t::GREEN = color_t((uint8_t)0x00, 0xFF, 0x00);
+color_t color_t::BLUE  = color_t((uint8_t)0x00, 0x00, 0xFF);

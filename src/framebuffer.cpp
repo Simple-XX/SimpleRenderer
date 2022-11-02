@@ -53,6 +53,7 @@ framebuffer_t::color_buffer_t::~color_buffer_t(void) {
     height = 0;
     if (color_arr != nullptr) {
         delete[] color_arr;
+        color_arr = nullptr;
     }
     return;
 }
@@ -64,6 +65,7 @@ framebuffer_t::color_buffer_t::operator=(const color_buffer_t& _color_buffer) {
         height = _color_buffer.height;
         if (color_arr != nullptr) {
             delete[] color_arr;
+            color_arr = nullptr;
         }
         try {
             color_arr = new color_t[width * height];
@@ -107,7 +109,7 @@ void framebuffer_t::color_buffer_t::clear(const color_t& _color) {
 }
 
 size_t framebuffer_t::color_buffer_t::length(void) const {
-    return width * height * sizeof(color_t);
+    return width * height * color_t::size();
 }
 
 template <class _T>

@@ -217,8 +217,7 @@ model_t::model_t(const std::string& _obj_path, const std::string& _mtl_path) {
 
                 // 顶点颜色，如果 obj 文件中没有指定则设为 1(白色)，范围 [0, 1]
                 color
-                  = color_t(0xFF,
-                            attrib.colors[3 * size_t(idx.vertex_index) + 0],
+                  = color_t(attrib.colors[3 * size_t(idx.vertex_index) + 0],
                             attrib.colors[3 * size_t(idx.vertex_index) + 1],
                             attrib.colors[3 * size_t(idx.vertex_index) + 2]);
                 vertexes[v] = vertex_t(coord, normal, texcoord, color);
