@@ -29,9 +29,6 @@ void line(std::shared_ptr<framebuffer_t> _framebuffer,
           std::shared_ptr<config_t>      _config) {
     draw3d_t draw3d(*_framebuffer, *_shader, *_config);
 
-    auto     obj_path  = "../../obj/utah-teapot/utah-teapot.obj";
-    auto     obj_path2 = "../../obj/cube3.obj";
-
     while (1) {
         // 右对角线
         draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, color_t::WHITE);

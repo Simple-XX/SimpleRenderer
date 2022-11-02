@@ -92,14 +92,14 @@ LookAt(const vector4f_t& Eye, const vector4f_t& Center, const vector4f_t& Up) {
         {0, 0, 0,      1}
     };
 
-    float tmp[4][4] = {
-        {x.x, x.y, x.z,   x.x * -Eye.x + x.y * -Eye.y + x.z * -Eye.z},
-        {y.x, y.y, y.z, (y.x * -Eye.x + -Eye.y + y.z * -Eye.z) * y.y},
-        {z.x, z.y, z.z, (z.x * -Eye.x + z.y * -Eye.y + -Eye.z) * z.z},
-        {  0,   0,   0,                                            1},
-    };
-
+    // float tmp[4][4] = {
+    //     {x.x, x.y, x.z,   x.x * -Eye.x + x.y * -Eye.y + x.z * -Eye.z},
+    //     {y.x, y.y, y.z, (y.x * -Eye.x + -Eye.y + y.z * -Eye.z) * y.y},
+    //     {z.x, z.y, z.z, (z.x * -Eye.x + z.y * -Eye.y + -Eye.z) * z.z},
+    //     {  0,   0,   0,                                            1},
+    // };
     // return matrix4f_t(tmp);
+
     return matrix4f_t(Minv) * matrix4f_t(Tr);
 
     float m2[4][4] = {
