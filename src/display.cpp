@@ -63,7 +63,7 @@ void display_t::fill(void) {
     /// @todo 优化，看看能不能直接写整个 buf
     for (uint32_t i = 0; i < width; i++) {
         for (uint32_t j = 0; j < height; j++) {
-            auto color = framebuffer->get_color_buffer()(i, j).to_argb();
+            auto color = framebuffer.get_color_buffer()(i, j).to_argb();
             pixel(surface, i, j, color[0], color[1], color[2], color[3]);
         }
     }
@@ -89,14 +89,13 @@ void display_t::show_fps(const uint32_t _fps) {
     return;
 }
 
-display_t::display_t(std::shared_ptr<framebuffer_t>& _framebuffer,
-                     std::shared_ptr<camera_t>&      _camera,
-                     event_callback_t                _event_callback)
+display_t::display_t(framebuffer_t& _framebuffer, camera_t& _camera,
+                     event_callback_t& _event_callback)
     : framebuffer(_framebuffer),
       camera(_camera),
       event_callback(_event_callback) {
-    width  = framebuffer->get_width();
-    height = framebuffer->get_height();
+    width  = framebuffer.get_width();
+    height = framebuffer.get_height();
     // 初始化 sdl
     try {
         auto ret = SDL_Init(SDL_INIT_VIDEO);
@@ -228,7 +227,7 @@ void display_t::loop(void) {
         // 处理输入
         input_handler();
         // 填充窗口
-        framebuffer->clear();
+        framebuffer.clear();
         fill();
         // 显示 fps
         show_fps(fps);

@@ -58,11 +58,11 @@ private:
     /// @brief sdl 事件
     SDL_Event                       sdl_event;
     /// @brief 保存要显示的 framebuffer
-    std::shared_ptr<framebuffer_t>& framebuffer;
+    framebuffer_t&                  framebuffer;
     /// @brief 相机
-    std::shared_ptr<camera_t>&      camera;
+    camera_t&                       camera;
     /// @brief 事件处理
-    event_callback_t                event_callback;
+    event_callback_t&               event_callback;
     /// @brief 窗口宽度
     uint32_t                        width;
     /// @brief 窗口高度
@@ -118,11 +118,11 @@ public:
     /**
      * @brief 构造函数
      * @param  _framebuffer     要绑定的缓冲区
-     * @param  _camera     要绑定的缓冲
+     * @param  _camera          要绑定的相机
+     * @param  _event_callback  事件处理
      */
-    display_t(std::shared_ptr<framebuffer_t>& _framebuffer,
-              std::shared_ptr<camera_t>&      _camera,
-              event_callback_t                _event_callback);
+    display_t(framebuffer_t& _framebuffer, camera_t& _camera,
+              event_callback_t& _event_callback);
 
     /**
      * @brief 析构函数

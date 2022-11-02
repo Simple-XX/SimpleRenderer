@@ -164,7 +164,7 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
             auto z = interpolate_depth(_v0.coord.z, _v1.coord.z, _v2.coord.z,
                                        barycentric_coord);
             // 深度在已有颜色之上
-            if (z < (framebuffer->get_depth_buffer()(x, y))) {
+            if (z < (framebuffer.get_depth_buffer()(x, y))) {
                 continue;
             }
             // 光照方向为正，不绘制背面
@@ -177,7 +177,7 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
             auto color = interpolate_color(_v0.color, _v1.color, _v2.color,
                                            barycentric_coord, _normal);
             // 填充像素
-            framebuffer->pixel(x, y, color, z);
+            framebuffer.pixel(x, y, color, z);
         }
     }
     return;
@@ -188,11 +188,11 @@ void draw3d_t::triangle(const model_t::face_t& _face) {
     return;
 }
 
-draw3d_t::draw3d_t(std::shared_ptr<framebuffer_t> _framebuffer,
-                   std::shared_ptr<shader_base_t> _shader, config_t& _config)
+draw3d_t::draw3d_t(framebuffer_t& _framebuffer, shader_base_t& _shader,
+                   config_t& _config)
     : framebuffer(_framebuffer), shader(_shader), config(_config) {
-    width  = framebuffer->get_width();
-    height = framebuffer->get_height();
+    width  = framebuffer.get_width();
+    height = framebuffer.get_height();
     return;
 }
 
@@ -233,14 +233,14 @@ void draw3d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
             if ((unsigned)y >= width || (unsigned)x >= height) {
                 continue;
             }
-            framebuffer->pixel(y, x, _color);
+            framebuffer.pixel(y, x, _color);
         }
         else {
             /// @todo 这里要用裁剪替换掉
             if ((unsigned)x >= width || (unsigned)y >= height) {
                 continue;
             }
-            framebuffer->pixel(x, y, _color);
+            framebuffer.pixel(x, y, _color);
         }
         de += std::abs(dy2);
         if (de >= dx2) {
@@ -268,7 +268,7 @@ void draw3d_t::triangle2d(const vector4f_t& _v0, const vector4f_t& _v1,
             auto [is_inside, _]
               = get_barycentric_coord(_v0, _v1, _v2, vector4f_t(x, y));
             if (is_inside) {
-                framebuffer->pixel(x, y, _color);
+                framebuffer.pixel(x, y, _color);
             }
         }
     }
@@ -293,7 +293,7 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
             z      += _v1.z * barycentric_coord.y;
             z      += _v2.z * barycentric_coord.z;
             // 深度在已有像素之上
-            if (z >= (framebuffer->get_depth_buffer()(x, y))) {
+            if (z >= (framebuffer.get_depth_buffer()(x, y))) {
                 // 在内部
                 if (is_inside) {
                     // 计算面的法向量
@@ -303,7 +303,7 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
                     normal         = normal.normalize();
                     auto intensity = normal * vector4f_t(0, 0, -1);
                     if (intensity > 0) {
-                        framebuffer->pixel(x, y, _color * intensity, z);
+                        framebuffer.pixel(x, y, _color * intensity, z);
                     }
                 }
             }
@@ -315,7 +315,7 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
 void draw3d_t::model(const model_t& _model) {
     if (config.draw_wireframe == true) {
         for (auto f : _model.get_face()) {
-            auto face = shader->vertex(shader_vertex_in_t(f)).face;
+            auto face = shader.vertex(shader_vertex_in_t(f)).face;
             line(face.v0.coord.x, face.v0.coord.y, face.v1.coord.x,
                  face.v1.coord.y, color_t(0xFFFFFFFF));
             line(face.v1.coord.x, face.v1.coord.y, face.v2.coord.x,
@@ -326,7 +326,7 @@ void draw3d_t::model(const model_t& _model) {
     }
     else {
         for (auto f : _model.get_face()) {
-            auto face = shader->vertex(shader_vertex_in_t(f)).face;
+            auto face = shader.vertex(shader_vertex_in_t(f)).face;
             triangle(face);
         }
     }

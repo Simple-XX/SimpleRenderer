@@ -30,15 +30,15 @@
 class draw3d_t {
 private:
     /// @brief 帧缓冲
-    std::shared_ptr<framebuffer_t>& framebuffer;
+    framebuffer_t& framebuffer;
     /// @brief 要使用的着色器
-    std::shared_ptr<shader_base_t>& shader;
+    shader_base_t& shader;
     /// @brief 配置信息
-    config_t&                       config;
+    config_t&      config;
     /// @brief 窗口宽度
-    uint32_t                        width;
+    uint32_t       width;
     /// @brief 窗口高度
-    uint32_t                        height;
+    uint32_t       height;
 
 public:
     /// @brief 光照方向
@@ -145,9 +145,10 @@ public:
      * @brief 构造函数
      * @param  _framebuffer     帧缓冲
      * @param  _shader          着色器
+     * @param  _config          配置信息
      */
-    draw3d_t(std::shared_ptr<framebuffer_t> _framebuffer,
-             std::shared_ptr<shader_base_t> _shader, config_t& _config);
+    draw3d_t(framebuffer_t& _framebuffer, shader_base_t& _shader,
+             config_t& _config);
 
     /**
      * @brief 析构函数
