@@ -28,6 +28,11 @@
  */
 class framebuffer_t {
 public:
+    /// @brief 深度类型
+    typedef float depth_t;
+
+private:
+
     /**
      * @brief 颜色缓冲抽象
      */
@@ -101,9 +106,6 @@ public:
          */
         size_t          length(void) const;
     };
-
-    /// @brief 深度类型
-    typedef float depth_t;
 
     /**
      * @brief 深度缓冲抽象
@@ -180,7 +182,6 @@ public:
         size_t   length(void) const;
     };
 
-private:
     /// @brief 窗口宽度
     uint32_t                width;
     /// @brief 窗口高度
