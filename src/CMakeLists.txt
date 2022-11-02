@@ -38,7 +38,8 @@ set(SimpleRender_src
         camera.cpp
         shader.cpp
         default_shader.cpp
-        event_callback.cpp)
+        event_callback.cpp
+        color.cpp)
 
 # 生成可执行文件
 add_executable(SimpleRender
