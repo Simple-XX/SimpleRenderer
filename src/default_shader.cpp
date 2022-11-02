@@ -16,60 +16,20 @@
 
 #include "default_shader.h"
 
-const std::pair<bool, const vector4f_t>
-default_shader_t::get_barycentric_coord(const vector4f_t& _p0,
-                                        const vector4f_t& _p1,
-                                        const vector4f_t& _p2,
-                                        const vector4f_t& _p) {
-    auto ab   = _p1 - _p0;
-    auto ac   = _p2 - _p0;
-    auto ap   = _p - _p0;
-
-    auto deno = (ab.x * ac.y - ab.y * ac.x);
-    if (deno == 0) {
-        return std::pair<bool, const vector4f_t>(false, vector4f_t());
-    }
-
-    auto s       = (ac.y * ap.x - ac.x * ap.y) / deno;
-    auto t       = (ab.x * ap.y - ab.y * ap.x) / deno;
-    auto weights = vector4f_t(1 - s - t, s, t);
-
-    auto res     = ((weights.x <= 1) && (weights.x >= 0))
-            && ((weights.y <= 1) && (weights.y >= 0))
-            && ((weights.z <= 1) && (weights.z >= 0));
-
-    return std::pair<bool, const vector4f_t>(res, weights);
-}
-
-framebuffer_t::depth_t
-default_shader_t::interpolate_depth(const framebuffer_t::depth_t& _depth0,
-                                    const framebuffer_t::depth_t& _depth1,
-                                    const framebuffer_t::depth_t& _depth2,
+const color_t
+default_shader_t::interpolate_color(const color_t&    _color0,
+                                    const color_t&    _color1,
+                                    const color_t&    _color2,
                                     const vector4f_t& _barycentric_coord) {
-    auto z = _depth0 * _barycentric_coord.x;
-    z      += _depth1 * _barycentric_coord.y;
-    z      += _depth2 * _barycentric_coord.z;
-    return z;
-}
-
-const color_t default_shader_t::interpolate_color(
-  const color_t& _color0, const color_t& _color1, const color_t& _color2,
-  const vector4f_t& _barycentric_coord, const model_t::normal_t& _normal) {
-    // 光照强度
-    // auto intensity = _normal * light;
-    auto intensity = 1;
-    return color_t((uint8_t)((_color0[0] * _barycentric_coord.x
-                              + _color1[0] * _barycentric_coord.y
-                              + _color2[0] * _barycentric_coord.z)
-                             * intensity),
-                   (uint8_t)((_color0[1] * _barycentric_coord.x
-                              + _color1[1] * _barycentric_coord.y
-                              + _color2[1] * _barycentric_coord.z)
-                             * intensity),
-                   (uint8_t)((_color0[2] * _barycentric_coord.x
-                              + _color1[2] * _barycentric_coord.y
-                              + _color2[2] * _barycentric_coord.z)
-                             * intensity));
+    return color_t((uint8_t)(_color0[0] * _barycentric_coord.x
+                             + _color1[0] * _barycentric_coord.y
+                             + _color2[0] * _barycentric_coord.z),
+                   (uint8_t)(_color0[1] * _barycentric_coord.x
+                             + _color1[1] * _barycentric_coord.y
+                             + _color2[1] * _barycentric_coord.z),
+                   (uint8_t)(_color0[2] * _barycentric_coord.x
+                             + _color1[2] * _barycentric_coord.y
+                             + _color2[2] * _barycentric_coord.z));
 }
 
 default_shader_t::default_shader_t(void) {
@@ -101,6 +61,17 @@ default_shader_t::vertex(const shader_vertex_in_t& _shader_vertex_in) {
 
 const shader_fragment_out_t
 default_shader_t::fragment(const shader_fragment_in_t& _shader_fragment_in) {
-    (void)_shader_fragment_in;
-    return shader_fragment_out_t();
+    auto intensity = (_shader_fragment_in.normal * _shader_fragment_in.light);
+    auto is_need_draw = true;
+    // 光照方向为正，不绘制背面
+    if (intensity <= 0) {
+        is_need_draw = false;
+        return shader_fragment_out_t(is_need_draw, color_t());
+    }
+    auto color = interpolate_color(_shader_fragment_in.color0,
+                                   _shader_fragment_in.color1,
+                                   _shader_fragment_in.color2,
+                                   _shader_fragment_in.barycentric_coord)
+               * intensity;
+    return shader_fragment_out_t(is_need_draw, color);
 }

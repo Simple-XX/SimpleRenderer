@@ -76,11 +76,26 @@ shader_fragment_in_t::shader_fragment_in_t(void) {
     return;
 }
 
+shader_fragment_in_t::shader_fragment_in_t(const vector4f_t& _barycentric_coord,
+                                           const vector4f_t& _normal,
+                                           const vector4f_t& _light,
+                                           const color_t&    _color0,
+                                           const color_t&    _color1,
+                                           const color_t&    _color2)
+    : barycentric_coord(_barycentric_coord),
+      normal(_normal),
+      light(_light),
+      color0(_color0),
+      color1(_color1),
+      color2(_color2) {
+    return;
+}
+
 shader_fragment_in_t::shader_fragment_in_t(
   const shader_fragment_in_t& _shader_fragment_in) {
     barycentric_coord = _shader_fragment_in.barycentric_coord;
-    color             = _shader_fragment_in.color;
-    light_dir         = _shader_fragment_in.light_dir;
+    normal            = _shader_fragment_in.normal;
+    light             = _shader_fragment_in.light;
     return;
 }
 
@@ -94,12 +109,19 @@ shader_fragment_in_t& shader_fragment_in_t::operator=(
         throw std::runtime_error(log("this == &_shader_fragment_in"));
     }
     barycentric_coord = _shader_fragment_in.barycentric_coord;
-    color             = _shader_fragment_in.color;
-    light_dir         = _shader_fragment_in.light_dir;
+    normal            = _shader_fragment_in.normal;
+    light             = _shader_fragment_in.light;
     return *this;
 }
 
 shader_fragment_out_t::shader_fragment_out_t(void) {
+    return;
+}
+
+shader_fragment_out_t::shader_fragment_out_t(const bool&    _is_need_draw,
+                                             const color_t& _color) {
+    is_need_draw = _is_need_draw;
+    color        = _color;
     return;
 }
 

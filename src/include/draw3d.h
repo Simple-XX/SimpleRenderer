@@ -18,6 +18,7 @@
 #define _DRAW3D_H_
 
 #include "color.h"
+#include "config.h"
 #include "framebuffer.h"
 #include "matrix.hpp"
 #include "model.h"
@@ -104,20 +105,6 @@ public:
                       const vector4f_t&             _barycentric_coord) const;
 
     /**
-     * @brief 颜色插值，由重心坐标计算出对应点的颜色，同时会处理光照强度
-     * @param  _color0          第一个点的颜色
-     * @param  _color1          第二个点的颜色
-     * @param  _color2          第三个点的颜色
-     * @param  _barycentric_coord   重心坐标
-     * @param  _normal          当前点的法向量
-     * @return const color_t    颜色值
-     */
-    const color_t
-    interpolate_color(const color_t& _c0, const color_t& _c1,
-                      const color_t& _c2, const vector4f_t& _barycentric_coord,
-                      const model_t::normal_t& _normal) const;
-
-    /**
      * @brief 填充三角形，传入的顶点包含更多信息
      * @param  _v0              第一个顶点
      * @param  _v1              第二个顶点
@@ -168,26 +155,6 @@ public:
               const int32_t _y1, const color_t& _color);
 
     /**
-     * @brief 直线重载
-     * @param  _p0              第一个点
-     * @param  _p1              第二个点
-     * @param  _color           颜色
-     */
-    void
-    line(const vector4f_t& _p0, const vector4f_t& _p1, const color_t& _color);
-
-    /**
-     * @brief 填充三角形
-     * @param  _v0              第一个顶点
-     * @param  _v1              第二个顶点
-     * @param  _v2              第三个顶点
-     * @param  _color           填充的颜色
-     * @todo 多线程支持
-     */
-    void triangle2d(const vector4f_t& _v0, const vector4f_t& _v1,
-                    const vector4f_t& _v2, const color_t& _color);
-
-    /**
      * @brief 填充三角形
      * @param  _v0              第一个顶点
      * @param  _v1              第二个顶点
@@ -197,11 +164,6 @@ public:
      */
     void triangle(const vector4f_t& _v0, const vector4f_t& _v1,
                   const vector4f_t& _v2, const color_t& _color);
-
-    // 指定着色器绘制三角形
-    void triangle(const vector4f_t& _v0, const vector4f_t& _v1,
-                  const vector4f_t& _v2, const color_t& _color,
-                  const shader_base_t& _shader);
 
     /**
      * @brief 绘制整个模型，指定变换矩阵

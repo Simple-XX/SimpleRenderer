@@ -104,24 +104,42 @@ public:
  */
 class shader_fragment_in_t {
 public:
-
     /// @brief 重心坐标
     vector4f_t barycentric_coord;
-    /// @brief 颜色
-    color_t    color;
+    /// @brief 法线方向
+    vector4f_t normal;
     /// @brief 光照方向
-    vector4f_t light_dir;
+    vector4f_t light;
+
+    color_t    color0;
+    color_t    color1;
+    color_t    color2;
 
     /**
      * @brief 构造函数
      */
     shader_fragment_in_t(void);
+
+    /**
+     * @brief 构造函数
+     * @param  _barycentric_coord   重心坐标
+     * @param  _normal              法线方向
+     * @param  _light               光照方向
+     */
+    explicit shader_fragment_in_t(const vector4f_t& _barycentric_coord,
+                                  const vector4f_t& _normal,
+                                  const vector4f_t& _light,
+                                  const color_t&    _color0,
+                                  const color_t&    _color1,
+                                  const color_t&    _color2);
+
     /**
      * @brief 构造函数
      * @param  _shader_fragment_in  另一个 shader_fragment_in_t
      */
     explicit shader_fragment_in_t(
       const shader_fragment_in_t& _shader_fragment_in);
+
     /**
      * @brief 析构函数
      */
@@ -142,12 +160,23 @@ public:
 class shader_fragment_out_t {
 public:
     /// @brief 是否需要绘制
-    bool is_need_draw;
+    bool    is_need_draw;
+
+    /// @brief 颜色
+    color_t color;
 
     /**
      * @brief 构造函数
      */
     shader_fragment_out_t(void);
+
+    /**
+     * @brief 构造函数
+     * @param  _is_need_draw        是否需要绘制
+     * @param  _color               颜色
+     */
+    explicit shader_fragment_out_t(const bool&    _is_need_draw,
+                                   const color_t& _color);
 
     /**
      * @brief 构造函数

@@ -91,12 +91,30 @@ const color_t color_t::operator*(const float& _f) const {
     return color_t(new_0, new_1, new_2, new_3, color_order);
 }
 
+const color_t color_t::operator*(const vector4f_t& _vector) const {
+    auto    color_data_ptr = (uint8_t*)&color_data;
+    uint8_t new_0          = color_data_ptr[0] * _vector.x;
+    uint8_t new_1          = color_data_ptr[1] * _vector.y;
+    uint8_t new_2          = color_data_ptr[2] * _vector.z;
+    uint8_t new_3          = color_data_ptr[3] * _vector.w;
+    return color_t(new_0, new_1, new_2, new_3, color_order);
+}
+
 color_t& color_t::operator*=(const float& _f) {
     auto color_data_ptr = (uint8_t*)&color_data;
     color_data_ptr[0]   *= _f;
     color_data_ptr[1]   *= _f;
     color_data_ptr[2]   *= _f;
     color_data_ptr[3]   *= _f;
+    return *this;
+}
+
+color_t& color_t::operator*=(const vector4f_t& _vector) {
+    auto color_data_ptr = (uint8_t*)&color_data;
+    color_data_ptr[0]   *= _vector.x;
+    color_data_ptr[1]   *= _vector.y;
+    color_data_ptr[2]   *= _vector.z;
+    color_data_ptr[3]   *= _vector.w;
     return *this;
 }
 

@@ -16,7 +16,6 @@
 
 #include "cmath"
 
-#include "config.h"
 #include "draw3d.h"
 
 const std::pair<bool, const vector4f_t>
@@ -120,27 +119,6 @@ draw3d_t::interpolate_depth(const framebuffer_t::depth_t& _depth0,
     return z;
 }
 
-const color_t
-draw3d_t::interpolate_color(const color_t& _color0, const color_t& _color1,
-                            const color_t&           _color2,
-                            const vector4f_t&        _barycentric_coord,
-                            const model_t::normal_t& _normal) const {
-    // 光照强度
-    auto intensity = _normal * light;
-    return color_t((uint8_t)((_color0[0] * _barycentric_coord.x
-                              + _color1[0] * _barycentric_coord.y
-                              + _color2[0] * _barycentric_coord.z)
-                             * intensity),
-                   (uint8_t)((_color0[1] * _barycentric_coord.x
-                              + _color1[1] * _barycentric_coord.y
-                              + _color2[1] * _barycentric_coord.z)
-                             * intensity),
-                   (uint8_t)((_color0[2] * _barycentric_coord.x
-                              + _color1[2] * _barycentric_coord.y
-                              + _color2[2] * _barycentric_coord.z)
-                             * intensity));
-}
-
 void draw3d_t::triangle(const model_t::vertex_t& _v0,
                         const model_t::vertex_t& _v1,
                         const model_t::vertex_t& _v2,
@@ -167,15 +145,15 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
             if (z < (framebuffer.get_depth_buffer()(x, y))) {
                 continue;
             }
-            // 光照方向为正，不绘制背面
-            auto intensity = _normal * light;
-            if (intensity <= 0) {
+            // 计算颜色，颜色为三个点的颜色的重心坐标插值
+            auto shader_fragment_out
+              = shader.fragment(shader_fragment_in_t(barycentric_coord, _normal,
+                                                     light, _v0.color,
+                                                     _v1.color, _v2.color));
+            if (shader_fragment_out.is_need_draw == false) {
                 continue;
             }
-
-            // 计算颜色，颜色为三个点的颜色的重心坐标插值
-            auto color = interpolate_color(_v0.color, _v1.color, _v2.color,
-                                           barycentric_coord, _normal);
+            auto color = color_t(shader_fragment_out.color);
             // 填充像素
             framebuffer.pixel(x, y, color, z);
         }
@@ -252,14 +230,8 @@ void draw3d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
     return;
 }
 
-void draw3d_t::line(const vector4f_t& _p0, const vector4f_t& _p1,
-                    const color_t& _color) {
-    line(_p0.x, _p0.y, _p1.x, _p1.y, _color);
-    return;
-}
-
-void draw3d_t::triangle2d(const vector4f_t& _v0, const vector4f_t& _v1,
-                          const vector4f_t& _v2, const color_t& _color) {
+void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
+                        const vector4f_t& _v2, const color_t& _color) {
     auto min = _v0.min(_v1).min(_v2);
     auto max = _v0.max(_v1).max(_v2);
 
@@ -269,43 +241,6 @@ void draw3d_t::triangle2d(const vector4f_t& _v0, const vector4f_t& _v1,
               = get_barycentric_coord(_v0, _v1, _v2, vector4f_t(x, y));
             if (is_inside) {
                 framebuffer.pixel(x, y, _color);
-            }
-        }
-    }
-    return;
-}
-
-void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
-                        const vector4f_t& _v2, const color_t& _color) {
-    // 计算最小值
-    auto min = _v0.min(_v1).min(_v2);
-    // 计算最大值
-    auto max = _v0.max(_v1).max(_v2);
-    // 遍历区域中的每个点 p
-    for (auto x = int32_t(min.x); x <= max.x; x++) {
-        for (auto y = int32_t(min.y); y <= max.y; y++) {
-            // 判断点 p 是否在三角形内
-            auto [is_inside, barycentric_coord]
-              = get_barycentric_coord(_v0, _v1, _v2, vector4f_t(x, y, 0));
-            // 计算深度，深度为三个点的 z 值矢量和
-            auto z = 0.;
-            z      += _v0.z * barycentric_coord.x;
-            z      += _v1.z * barycentric_coord.y;
-            z      += _v2.z * barycentric_coord.z;
-            // 深度在已有像素之上
-            if (z >= (framebuffer.get_depth_buffer()(x, y))) {
-                // 在内部
-                if (is_inside) {
-                    // 计算面的法向量
-                    auto v2v0      = _v2 - _v0;
-                    auto v1v0      = _v1 - _v0;
-                    auto normal    = v2v0 ^ v1v0;
-                    normal         = normal.normalize();
-                    auto intensity = normal * vector4f_t(0, 0, -1);
-                    if (intensity > 0) {
-                        framebuffer.pixel(x, y, _color * intensity, z);
-                    }
-                }
             }
         }
     }

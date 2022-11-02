@@ -20,6 +20,8 @@
 #include "cstdint"
 #include "iostream"
 
+#include "vector.hpp"
+
 /**
  * @brief 32 位颜色
  */
@@ -105,7 +107,11 @@ public:
 
     const color_t        operator*(const float& _f) const;
 
+    const color_t        operator*(const vector4f_t& _vector4f) const;
+
     color_t&             operator*=(const float& _f);
+
+    color_t&             operator*=(const vector4f_t& _vector4f);
 
     /**
      * @brief 下标重载

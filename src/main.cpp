@@ -28,15 +28,15 @@
 
 /// @bug 在坐标系上可能有问题，设计的部分：法向量计算，光照方向，屏幕原点
 
-static constexpr const uint32_t WIDTH          = 1920;
-static constexpr const uint32_t HEIGHT         = 1080;
-auto                            config         = config_t();
-auto                            framebuffer    = framebuffer_t(WIDTH, HEIGHT);
-auto                            camera         = camera_t();
-auto                            default_shader = default_shader_t();
-auto       event_callback = event_callback_t(config, camera);
-auto       models         = std::vector<model_t>();
-auto       display        = display_t(framebuffer, camera, event_callback);
+static constexpr const uint32_t WIDTH       = 1920;
+static constexpr const uint32_t HEIGHT      = 1080;
+auto                            config      = config_t();
+auto                            framebuffer = framebuffer_t(WIDTH, HEIGHT);
+auto                            camera      = camera_t();
+auto                            shader      = default_shader_t();
+auto       event_callback                   = event_callback_t(config, camera);
+auto       models                           = std::vector<model_t>();
+auto       display = display_t(framebuffer, camera, event_callback);
 
 // 投影变换矩阵
 matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio, float zNear,
@@ -133,8 +133,7 @@ int main(int _argc, char** _argv) {
         models.push_back(model);
     }
 
-    std::thread draw_thread
-      = std::thread(draw, &framebuffer, &default_shader, &config);
+    std::thread draw_thread = std::thread(draw, &framebuffer, &shader, &config);
     draw_thread.detach();
 
     display.loop();
