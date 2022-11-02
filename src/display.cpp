@@ -44,6 +44,7 @@ void display_t::pixel(SDL_Surface* _surface, const uint32_t _x,
     // 计算像素位置
     auto p = (uint8_t*)_surface->pixels + _y * _surface->pitch + _x * bpp;
     // 写入
+    /// @todo 性能瓶颈
     *(uint32_t*)p = SDL_MapRGBA(_surface->format, _r, _g, _b, _a);
     SDL_UnlockSurface(_surface);
     return;
@@ -63,10 +64,25 @@ void display_t::fill(void) {
     /// @todo 优化，看看能不能直接写整个 buf
     for (uint32_t i = 0; i < width; i++) {
         for (uint32_t j = 0; j < height; j++) {
-            auto color = framebuffer.get_color_buffer()(i, j).to_argb();
+            /// @todo 性能瓶颈
+            auto color = color_t(framebuffer.get_color_buffer()(i, j));
+            // auto color = framebuffer.get_color_buffer()(i, j).to_argb();
+            /// @todo 性能瓶颈
             pixel(surface, i, j, color[0], color[1], color[2], color[3]);
         }
     }
+    // auto color_argb = framebuffer.get_color_buffer();
+    // auto res        = SDL_UpdateTexture(sdl_texture, nullptr, color_argb,
+    //                                     width * color_t::size());
+    // if (res == -1) {
+    //     throw std::runtime_error(log(SDL_GetError()));
+    // }
+    //
+    // res = SDL_RenderCopy(sdl_renderer, sdl_texture, nullptr, nullptr);
+    // if (res == -1) {
+    //     throw std::runtime_error(log(SDL_GetError()));
+    // }
+
     return;
 }
 
@@ -111,8 +127,30 @@ display_t::display_t(framebuffer_t& _framebuffer, camera_t& _camera,
             throw std::runtime_error(log(SDL_GetError()));
         }
 
+        // sdl_renderer = SDL_CreateRenderer(sdl_window, -1,
+        //                                   SDL_RENDERER_ACCELERATED
+        //                                     | SDL_RENDERER_PRESENTVSYNC);
+        // if (sdl_renderer == nullptr) {
+        //     SDL_DestroyWindow(sdl_window);
+        //     SDL_Quit();
+        //     throw std::runtime_error(log(SDL_GetError()));
+        // }
+        //
+        // sdl_texture
+        //   = SDL_CreateTexture(sdl_renderer,
+        //                       SDL_GetWindowPixelFormat(sdl_window),
+        //                       SDL_TEXTUREACCESS_STREAMING, width, height);
+        // if (sdl_renderer == nullptr) {
+        //     SDL_DestroyRenderer(sdl_renderer);
+        //     SDL_DestroyWindow(sdl_window);
+        //     SDL_Quit();
+        //     throw std::runtime_error(log(SDL_GetError()));
+        // }
+
         // 文字显示
         if (TTF_Init() != 0) {
+            // SDL_DestroyTexture(sdl_texture);
+            // SDL_DestroyRenderer(sdl_renderer);
             SDL_DestroyWindow(sdl_window);
             SDL_Quit();
             throw std::runtime_error(log(TTF_GetError()));
@@ -121,6 +159,8 @@ display_t::display_t(framebuffer_t& _framebuffer, camera_t& _camera,
         font = TTF_OpenFont(font_file_path, font_size);
         if (font == nullptr) {
             TTF_Quit();
+            // SDL_DestroyTexture(sdl_texture);
+            // SDL_DestroyRenderer(sdl_renderer);
             SDL_DestroyWindow(sdl_window);
             SDL_Quit();
             throw std::runtime_error(log(TTF_GetError()));
@@ -137,6 +177,8 @@ display_t::~display_t(void) {
     // 回收资源
     TTF_CloseFont(font);
     TTF_Quit();
+    // SDL_DestroyTexture(sdl_texture);
+    // SDL_DestroyRenderer(sdl_renderer);
     SDL_DestroyWindow(sdl_window);
     SDL_Quit();
 }
@@ -232,6 +274,7 @@ void display_t::loop(void) {
         // 显示 fps
         show_fps(fps);
         // 刷新窗口
+        // SDL_RenderPresent(sdl_renderer);
         try {
             auto ret = SDL_UpdateWindowSurface(sdl_window);
             if (ret != 0) {

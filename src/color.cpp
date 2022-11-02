@@ -19,48 +19,46 @@
 #include "color.h"
 #include "log.hpp"
 
-color_t::color_t(void) : color_data(0), color_order(COLOR_ORDER_RGBA) {
+color_t::color_t(void) : color_data(0), color_order(COLOR_ORDER_ARGB) {
     return;
 }
 
 color_t::color_t(const uint32_t _data, const color_order_t& _color_order)
     : color_data(_data), color_order(_color_order) {
-    if ((_color_order != COLOR_ORDER_RGBA)
-        && (_color_order != COLOR_ORDER_ARGB)) {
+    if ((_color_order != COLOR_ORDER_ARGB)
+        && (_color_order != COLOR_ORDER_RGBA)) {
         throw std::invalid_argument(log("invalid _color_order"));
     }
     return;
 }
 
-color_t::color_t(const uint8_t _r, const uint8_t _g, const uint8_t _b,
-                 const uint8_t _a, const color_order_t& _color_order)
+color_t::color_t(const uint8_t _a, const uint8_t _r, const uint8_t _g,
+                 const uint8_t _b, const color_order_t& _color_order)
     : color_order(_color_order) {
-    if ((_color_order != COLOR_ORDER_RGBA)
-        && (_color_order != COLOR_ORDER_ARGB)) {
+    if ((_color_order != COLOR_ORDER_ARGB)
+        && (_color_order != COLOR_ORDER_RGBA)) {
         throw std::invalid_argument(log("invalid _color_order"));
     }
-    // std::cout<<"color_t uint8_t"<<std::endl;
     auto color_data_ptr = (uint8_t*)&color_data;
-    color_data_ptr[0]   = _r;
-    color_data_ptr[1]   = _g;
-    color_data_ptr[2]   = _b;
-    color_data_ptr[3]   = _a;
+    color_data_ptr[0]   = _a;
+    color_data_ptr[1]   = _r;
+    color_data_ptr[2]   = _g;
+    color_data_ptr[3]   = _b;
     return;
 }
 
-color_t::color_t(const float& _r, const float& _g, const float& _b,
-                 const float& _a, const color_order_t& _color_order)
+color_t::color_t(const uint8_t& _a, const float& _r, const float& _g,
+                 const float& _b, const color_order_t& _color_order)
     : color_order(_color_order) {
-    if ((_color_order != COLOR_ORDER_RGBA)
-        && (_color_order != COLOR_ORDER_ARGB)) {
+    if ((_color_order != COLOR_ORDER_ARGB)
+        && (_color_order != COLOR_ORDER_RGBA)) {
         throw std::invalid_argument(log("invalid _color_order"));
     }
-    // std::cout<<"color_t float"<<std::endl;
     auto color_data_ptr = (uint8_t*)&color_data;
-    color_data_ptr[0]   = _r * std::numeric_limits<uint8_t>::max();
-    color_data_ptr[1]   = _g * std::numeric_limits<uint8_t>::max();
-    color_data_ptr[2]   = _b * std::numeric_limits<uint8_t>::max();
-    color_data_ptr[3]   = _a * std::numeric_limits<uint8_t>::max();
+    color_data_ptr[0]   = _a;
+    color_data_ptr[1]   = uint8_t(_r * std::numeric_limits<uint8_t>::max());
+    color_data_ptr[2]   = uint8_t(_g * std::numeric_limits<uint8_t>::max());
+    color_data_ptr[3]   = uint8_t(_b * std::numeric_limits<uint8_t>::max());
     return;
 }
 
@@ -134,7 +132,7 @@ uint8_t color_t::operator[](const uint8_t _idx) const {
     return color_data_ptr[_idx];
 }
 
-size_t color_t::size(void) const {
+size_t color_t::size(void) {
     return DEPTH;
 }
 
@@ -168,8 +166,8 @@ const uint8_t* color_t::to_arr(void) const {
     return (uint8_t*)&color_data;
 }
 
-color_t color_t::WHITE = color_t((uint8_t)0xFF, 0xFF, 0xFF);
-color_t color_t::BLACK = color_t((uint8_t)0x00, 0x00, 0x00);
-color_t color_t::RED   = color_t((uint8_t)0xFF, 0x00, 0x00);
-color_t color_t::GREEN = color_t((uint8_t)0x00, 0xFF, 0x00);
-color_t color_t::BLUE  = color_t((uint8_t)0x00, 0x00, 0xFF);
+color_t color_t::WHITE = color_t(0xFF, (uint8_t)0xFF, 0xFF, 0xFF);
+color_t color_t::BLACK = color_t(0xFF, (uint8_t)0x00, 0x00, 0x00);
+color_t color_t::RED   = color_t(0xFF, (uint8_t)0xFF, 0x00, 0x00);
+color_t color_t::GREEN = color_t(0xFF, (uint8_t)0x00, 0xFF, 0x00);
+color_t color_t::BLUE  = color_t(0xFF, (uint8_t)0x00, 0x00, 0xFF);

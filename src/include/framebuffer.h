@@ -95,7 +95,7 @@ private:
         const color_t   operator()(const uint32_t _x, const uint32_t _y) const;
 
         /**
-         * @brief 清空，设置为指定值，默认为 0x00000000
+         * @brief 清空，设置为指定值
          * @param  _color           颜色
          */
         void            clear(const color_t& _color = color_t());

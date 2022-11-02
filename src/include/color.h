@@ -29,8 +29,8 @@ class color_t {
 public:
     /// @brief 颜色顺序
     enum color_order_t : uint8_t {
-        COLOR_ORDER_RGBA = 1,
         COLOR_ORDER_ARGB = 0,
+        COLOR_ORDER_RGBA = 1,
     };
 
 private:
@@ -58,34 +58,34 @@ public:
     /**
      * @brief 构造函数
      * @param  _data            颜色数据
-     * @param  _color_order     颜色顺序，默认为 RGBA
+     * @param  _color_order     颜色顺序，默认为 ARGB
      */
     explicit color_t(const uint32_t       _data,
-                     const color_order_t& _color_order = COLOR_ORDER_RGBA);
+                     const color_order_t& _color_order = COLOR_ORDER_ARGB);
 
     /**
      * @brief 构造函数
+     * @param  _a               alpha
      * @param  _r               红色
      * @param  _g               绿色
      * @param  _b               蓝色
-     * @param  _a               alpha，默认为 0xFF
      * @param  _color_order     颜色顺序，默认为 RGBA
      */
-    explicit color_t(const uint8_t _r, const uint8_t _g, const uint8_t _b,
-                     const uint8_t        _a           = 0xFF,
-                     const color_order_t& _color_order = COLOR_ORDER_RGBA);
+    explicit color_t(const uint8_t _a, const uint8_t _r, const uint8_t _g,
+                     const uint8_t        _b,
+                     const color_order_t& _color_order = COLOR_ORDER_ARGB);
 
     /**
      * @brief 构造函数，从 [0, 1] 构建
+     * @param  _a               alpha
      * @param  _r               红色
      * @param  _g               绿色
      * @param  _b               蓝色
-     * @param  _a               alpha，默认为 1
-     * @param  _color_order     颜色顺序，默认为 RGBA
+     * @param  _color_order     颜色顺序，默认为 ARGB
      */
-    explicit color_t(const float& _r, const float& _g, const float& _b,
-                     const float&         _a           = 1.,
-                     const color_order_t& _color_order = COLOR_ORDER_RGBA);
+    explicit color_t(const uint8_t& _a, const float& _r, const float& _g,
+                     const float&         _b,
+                     const color_order_t& _color_order = COLOR_ORDER_ARGB);
 
     /**
      * @brief 构造函数
@@ -132,7 +132,7 @@ public:
      * @param  _idx             索引
      * @return size_t           颜色大小
      */
-    size_t               size(void) const;
+    static size_t        size(void);
 
     /**
      * @brief 转换为 uint32_t

@@ -43,6 +43,10 @@ private:
     static constexpr const char*    WINDOW_TITLE   = (char*)"SimpleRenderer";
     /// @brief sdl 窗口
     SDL_Window*                     sdl_window;
+    /// @brief sdl 渲染器
+    SDL_Renderer*                   sdl_renderer;
+    /// @brief sdl 纹理
+    SDL_Texture*                    sdl_texture;
     /// @brief 字体指针
     TTF_Font*                       font;
     /// @brief 字体大小

@@ -21,15 +21,16 @@ default_shader_t::interpolate_color(const color_t&    _color0,
                                     const color_t&    _color1,
                                     const color_t&    _color2,
                                     const vector4f_t& _barycentric_coord) {
-    return color_t((uint8_t)(_color0[0] * _barycentric_coord.x
-                             + _color1[0] * _barycentric_coord.y
-                             + _color2[0] * _barycentric_coord.z),
+    return color_t((uint8_t)0xFF,
                    (uint8_t)(_color0[1] * _barycentric_coord.x
                              + _color1[1] * _barycentric_coord.y
                              + _color2[1] * _barycentric_coord.z),
                    (uint8_t)(_color0[2] * _barycentric_coord.x
                              + _color1[2] * _barycentric_coord.y
-                             + _color2[2] * _barycentric_coord.z));
+                             + _color2[2] * _barycentric_coord.z),
+                   (uint8_t)(_color0[3] * _barycentric_coord.x
+                             + _color1[3] * _barycentric_coord.y
+                             + _color2[3] * _barycentric_coord.z));
 }
 
 default_shader_t::default_shader_t(void) {
