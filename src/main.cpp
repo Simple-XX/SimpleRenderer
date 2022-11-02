@@ -30,13 +30,13 @@
 
 static constexpr const uint32_t WIDTH       = 1920;
 static constexpr const uint32_t HEIGHT      = 1080;
-auto                            config      = config_t();
 auto                            framebuffer = framebuffer_t(WIDTH, HEIGHT);
-auto                            camera      = camera_t();
+auto                            config      = config_t();
 auto                            shader      = default_shader_t();
+auto                            camera      = camera_t();
 auto       event_callback                   = event_callback_t(config, camera);
-auto       models                           = std::vector<model_t>();
 auto       display = display_t(framebuffer, camera, event_callback);
+auto       models  = std::vector<model_t>();
 
 // 投影变换矩阵
 matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio, float zNear,
@@ -79,9 +79,13 @@ void draw(framebuffer_t* _framebuffer, shader_base_t* _shader,
     camera.target      = vector4f_t(0, 0, 0);
     camera.up          = vector4f_t(0, 1, 0);
     while (1) {
+        // 右对角线
         draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, color_t::WHITE);
+        // 左对角线
         draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, color_t::WHITE);
+        // 水平平分线
         draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, color_t::WHITE);
+        // 垂直平分线
         draw3d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, color_t::WHITE);
 
         _shader->shader_data.model_matrix

@@ -19,12 +19,14 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 find_package(SDL2 REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 
 # Set include dir
 include_directories(
         ${SimpleRender_SOURCE_DIR}/src/include
         ${SimpleRender_SOURCE_DIR}/src/3rd
-        ${SDL2_INCLUDE_DIRS})
+        ${SDL2_INCLUDE_DIRS}
+        ${SDL2_ttf_INCLUDE_DIRS})
 
 set(test_src
         vector_test.cpp
@@ -37,7 +39,9 @@ set(test_src
         ${SimpleRender_SOURCE_DIR}/src/framebuffer.cpp
         ${SimpleRender_SOURCE_DIR}/src/camera.cpp
         ${SimpleRender_SOURCE_DIR}/src/shader.cpp
-        ${SimpleRender_SOURCE_DIR}/src/color.cpp)
+        ${SimpleRender_SOURCE_DIR}/src/default_shader.cpp
+        ${SimpleRender_SOURCE_DIR}/src/color.cpp
+        ${SimpleRender_SOURCE_DIR}/src/event_callback.cpp)
 
 enable_testing()
 
@@ -48,7 +52,10 @@ add_executable(test
 target_link_libraries(test
         gtest_main
         ${glog_LIBRARIES}
-        ${SDL2_LIBRARIES})
+        ${SDL2_LIBRARIES}
+        # @todo 这里变量没有值，临时写一个
+        -L/opt/homebrew/Cellar/sdl2_ttf/2.20.1/lib
+        -L/opt/homebrew/lib -lSDL2_ttf -lSDL2)
 
 include(GoogleTest)
 gtest_discover_tests(test)

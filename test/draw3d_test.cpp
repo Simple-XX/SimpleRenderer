@@ -17,130 +17,129 @@
 #include "gtest/gtest.h"
 
 #include "camera.h"
+#include "default_shader.h"
 #include "display.h"
 #include "draw3d.h"
-#include "vector.hpp"
 
-static constexpr const uint32_t                  WIDTH  = 1920;
-static constexpr const uint32_t                  HEIGHT = 1080;
-[[maybe_unused]] static constexpr const uint32_t RED    = 0xFFFF0000;
-[[maybe_unused]] static constexpr const uint32_t GREEN  = 0xFF00FF00;
-[[maybe_unused]] static constexpr const uint32_t BLUE   = 0xFF0000FF;
-[[maybe_unused]] static constexpr const uint32_t WHITE  = 0xFFFFFFFF;
-[[maybe_unused]] static constexpr const uint32_t BLACK  = 0xFF000000;
+static constexpr const uint32_t WIDTH  = 1920;
+static constexpr const uint32_t HEIGHT = 1080;
+
+void line(framebuffer_t* _framebuffer, shader_base_t* _shader,
+          config_t* _config) {
+    draw3d_t draw3d(*_framebuffer, *_shader, *_config);
+
+    auto     obj_path  = "../../obj/utah-teapot/utah-teapot.obj";
+    auto     obj_path2 = "../../obj/cube3.obj";
+
+    while (1) {
+        // 右对角线
+        draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, color_t::WHITE);
+        // 左对角线
+        draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, color_t::WHITE);
+        // 水平平分线
+        draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, color_t::WHITE);
+        // 垂直平分线
+        draw3d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, color_t::WHITE);
+
+        // 红色三角形
+        vector4f_t v0(80, 80);
+        vector4f_t v1(100, 100);
+        vector4f_t v2(50, 110);
+        draw3d.triangle(v0, v1, v2, color_t::RED);
+
+        // 绿色三角形
+        vector4f_t v3(80, 200);
+        vector4f_t v4(100, 300);
+        vector4f_t v5(50, 400);
+        draw3d.triangle(v3, v4, v5, color_t::GREEN);
+
+        // 红白绿线
+        vector4f_t line1(100, 200, 300);
+        auto       mmm = matrix4f_t().translate(1000, 500, 0);
+        line1          = mmm * line1;
+        draw3d.line(0, 0, line1.x, line1.y, color_t::RED);
+        mmm = matrix4f_t()
+                .translate(1000, 500, 0)
+                .rotate(vector4f_t(0, 0, 1), -15);
+        line1 = vector4f_t(100, 200, 300);
+        line1 = mmm * line1;
+        draw3d.line(0, 0, line1.x, line1.y, color_t::WHITE);
+        mmm = matrix4f_t()
+                .translate(1000, 500, 0)
+                .rotate(vector4f_t(0, 0, 1), 15);
+        line1 = vector4f_t(100, 200, 300);
+        line1 = mmm * line1;
+        draw3d.line(0, 0, line1.x, line1.y, color_t::GREEN);
+    }
+    return;
+}
 
 TEST(draw3d_t, line) {
-    auto     framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
-    draw3d_t draw3d(framebuffer);
+    auto        framebuffer    = framebuffer_t(WIDTH, HEIGHT);
+    auto        config         = config_t();
+    auto        shader         = default_shader_t();
+    auto        camera         = camera_t();
+    auto        event_callback = event_callback_t(config, camera);
+    auto        display        = display_t(framebuffer, camera, event_callback);
 
-    // 右对角线
-    draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, WHITE);
-    // 左对角线
-    draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, WHITE);
-    // 水平平分线
-    draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, WHITE);
-    // 垂直平分线
-    draw3d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, WHITE);
+    std::thread draw_thread = std::thread(line, &framebuffer, &shader, &config);
+    draw_thread.detach();
 
-    // 红色三角形
-    vector4f_t v0(80, 80);
-    vector4f_t v1(100, 100);
-    vector4f_t v2(50, 110);
-    draw3d.triangle2d(v0, v1, v2, RED);
-
-    // 绿色三角形
-    vector4f_t v3(80, 200);
-    vector4f_t v4(100, 300);
-    vector4f_t v5(50, 400);
-    draw3d.triangle2d(v3, v4, v5, GREEN);
-
-    // 红白绿线
-    vector4f_t line1(100, 200, 300);
-    auto       mmm = matrix4f_t().translate(1000, 500, 0);
-    line1          = mmm * line1;
-    draw3d.line(0, 0, line1.x, line1.y, RED);
-    mmm = matrix4f_t().translate(1000, 500, 0).rotate(vector4f_t(0, 0, 1), -15);
-    line1 = vector4f_t(100, 200, 300);
-    line1 = mmm * line1;
-    draw3d.line(0, 0, line1.x, line1.y, WHITE);
-    mmm = matrix4f_t().translate(1000, 500, 0).rotate(vector4f_t(0, 0, 1), 15);
-    line1 = vector4f_t(100, 200, 300);
-    line1 = mmm * line1;
-    draw3d.line(0, 0, line1.x, line1.y, GREEN);
-
-    // display_t display(framebuffer);
-    // display.loop();
+    display.loop();
 
     return;
 }
 
-const matrix4f_t get_projection_matrix(float _eye_fov, float _aspect_ratio,
-                                       float _zNear, float _zFar) {
-    /// @see
-    /// https://www.yuque.com/sugelameiyoudi-jadcc/okgm7e/1ee187f999897025b219d35c36826359
-    matrix4f_t projection  = matrix4f_t();
+void obj(framebuffer_t* _framebuffer, shader_base_t* _shader,
+         config_t* _config) {
+    draw3d_t draw3d(*_framebuffer, *_shader, *_config);
 
-    float      arr_m[4][4] = {
-        {_zNear,      0,              0,               0},
-        {     0, _zNear,              0,               0},
-        {     0,      0, _zNear + _zFar, -_zNear * _zFar},
-        {     0,      0,              1,               0}
-    };
-    matrix4f_t m(arr_m);
+    auto     obj_path  = "../../obj/utah-teapot/utah-teapot.obj";
+    auto     obj_path2 = "../../obj/cube3.obj";
 
-    float      halve       = _eye_fov / 2 * M_PI / 180;
-    float      top         = std::tan(halve) * _zNear;
-    float      bottom      = -top;
-    float      right       = top * _aspect_ratio;
-    float      left        = -right;
+    auto     model     = model_t(obj_path);
+    auto     model2    = model_t(obj_path2);
+    while (1) {
+        // 右对角线
+        draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, color_t::WHITE);
+        // 左对角线
+        draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, color_t::WHITE);
+        // 水平平分线
+        draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, color_t::WHITE);
+        // 垂直平分线
+        draw3d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, color_t::WHITE);
 
-    float      arr_n[4][4] = {
-        {2 / (right - left),                  0,                    0, 0},
-        {                 0, 2 / (top - bottom),                    0, 0},
-        {                 0,                  0, 2 / (_zNear - _zFar), 0},
-        {                 0,                  0,                    0, 1}
-    };
-    matrix4f_t n(arr_n);
+        _shader->shader_data.model_matrix
+          = get_model_matrix(vector4f_t(10, 10, 10),
+                             vector4f_t(0, 0, 1).normalize(), 180,
+                             vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
+        _shader->shader_data.view_matrix    = matrix4f_t();
+        _shader->shader_data.project_matrix = matrix4f_t();
+        draw3d.model(model);
 
-    float      arr_p[4][4] = {
-        {1, 0, 0,   -(right + left) / 2},
-        {0, 1, 0,   -(top + bottom) / 2},
-        {0, 0, 1, -(_zFar + _zNear) / 2},
-        {0, 0, 0,                     1}
-    };
-    matrix4f_t p(arr_p);
+        _shader->shader_data.model_matrix
+          = get_model_matrix(vector4f_t(1000, 1000, 1000),
+                             vector4f_t(0, 1, 1).normalize(), 45,
+                             vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
 
-    projection = n * p * m;
-
-    return matrix4f_t(projection);
+        _shader->shader_data.view_matrix    = matrix4f_t();
+        _shader->shader_data.project_matrix = matrix4f_t();
+        draw3d.model(model2);
+    }
+    return;
 }
 
 TEST(draw3d_t, obj) {
-    auto     framebuffer = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
-    draw3d_t draw3d(framebuffer);
+    auto        framebuffer    = framebuffer_t(WIDTH, HEIGHT);
+    auto        config         = config_t();
+    auto        shader         = default_shader_t();
+    auto        camera         = camera_t();
+    auto        event_callback = event_callback_t(config, camera);
+    auto        display        = display_t(framebuffer, camera, event_callback);
 
-    // 茶壶
-    auto     obj_path = "../../obj/utah-teapot/utah-teapot.obj";
-    model_t  model(obj_path);
-    auto     model_mat
-      = get_model_matrix(vector4f_t(10, 10, 1), vector4f_t(1, 1, 1).normalize(),
-                         190, vector4f_t(500, 500, 0));
-    camera.pos    = vector4f_t(900, 0, 0);
-    camera.up     = vector4f_t(0, 0, -1);
-    camera.target = vector4f_t(1, 1, 0);
-    auto view_mat = get_view_matrix(camera);
+    std::thread draw_thread = std::thread(obj, &framebuffer, &shader, &config);
+    draw_thread.detach();
 
-    draw3d.model(model, model_mat, view_mat, matrix4f_t());
-
-    // 颜色正方体
-    obj_path  = "../../obj/cube3.obj";
-    model     = model_t(obj_path);
-    model_mat = get_model_matrix(vector4f_t(1000, 1000, 1),
-                                 vector4f_t(1, 1, 1).normalize(), 190,
-                                 vector4f_t(1000, 500, 0));
-    // draw3d.model(model, model_mat, view_mat, matrix4f_t());
-
-    display_t display(framebuffer);
     display.loop();
 
     return;

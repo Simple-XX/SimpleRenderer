@@ -18,7 +18,6 @@
 
 #include "color.h"
 
-/// @todo 没有运行
 TEST(color_t, rgba) {
     color_t rgba((uint8_t)1, 2, 3, 40, color_t::COLOR_ORDER_RGBA);
     EXPECT_EQ(rgba[0], 1);
@@ -50,10 +49,10 @@ TEST(color_t, rgba) {
 TEST(color_t, argb) {
     color_t argb((uint8_t)40, 1, 2, 3, color_t::COLOR_ORDER_ARGB);
 
-    EXPECT_EQ(argb[0], 1);
-    EXPECT_EQ(argb[1], 2);
-    EXPECT_EQ(argb[2], 3);
-    EXPECT_EQ(argb[3], 40);
+    EXPECT_EQ(argb[0], 40);
+    EXPECT_EQ(argb[1], 1);
+    EXPECT_EQ(argb[2], 2);
+    EXPECT_EQ(argb[3], 3);
 
     auto argb2rgba = argb.to_rgba();
     EXPECT_EQ(argb2rgba[0], 1);
