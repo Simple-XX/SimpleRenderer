@@ -68,7 +68,7 @@ private:
      * @brief 伴随矩阵
      * @return const matrix4_t<_T>  结果
      */
-    const matrix4_t<_T>            adjoint(void) const;
+    const matrix4_t<_T> adjoint(void) const;
 
 public:
     /**
