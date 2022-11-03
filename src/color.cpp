@@ -123,8 +123,8 @@ uint8_t color_t::operator[](const uint8_t _idx) const {
     return color_data[_idx];
 }
 
-size_t color_t::size(void) {
-    return DEPTH;
+size_t color_t::bpp(void) {
+    return BPP;
 }
 
 uint32_t color_t::to_uint32(void) const {

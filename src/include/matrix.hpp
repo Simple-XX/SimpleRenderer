@@ -17,6 +17,7 @@
 #ifndef _MATRIX4_HPP_
 #define _MATRIX4_HPP_
 
+#include "array"
 #include "cfloat"
 #include "cstring"
 #include "iomanip"
@@ -36,7 +37,7 @@ private:
     /// @brief  阶数
     static constexpr const uint8_t ORDER = 4;
     /// @brief 矩阵元素
-    _T                             mat[ORDER][ORDER];
+    std::array<_T, ORDER * ORDER>  mat_arr;
 
     /**
      * @brief 是否有非数值
@@ -162,16 +163,29 @@ public:
         if (std::isnan(_v)) {
             throw std::invalid_argument(log("std::isnan(_v)"));
         }
-        if (_mat.HasNaNs()) {
-            throw std::invalid_argument(log("_mat.HasNaNs()"));
-        }
 
-        _T tmp[ORDER][ORDER] = { { 0 } };
-        for (uint8_t i = 0; i < ORDER; i++) {
-            for (uint8_t j = 0; j < ORDER; j++) {
-                tmp[i][j] = _mat[i][j] * _v;
-            }
-        }
+        _T tmp[ORDER * ORDER] = { 0 };
+
+        tmp[0]                = _mat.mat_arr[0] * _v;
+        tmp[1]                = _mat.mat_arr[1] * _v;
+        tmp[2]                = _mat.mat_arr[2] * _v;
+        tmp[3]                = _mat.mat_arr[3] * _v;
+
+        tmp[4]                = _mat.mat_arr[4] * _v;
+        tmp[5]                = _mat.mat_arr[5] * _v;
+        tmp[6]                = _mat.mat_arr[6] * _v;
+        tmp[7]                = _mat.mat_arr[7] * _v;
+
+        tmp[8]                = _mat.mat_arr[8] * _v;
+        tmp[9]                = _mat.mat_arr[9] * _v;
+        tmp[10]               = _mat.mat_arr[10] * _v;
+        tmp[11]               = _mat.mat_arr[11] * _v;
+
+        tmp[12]               = _mat.mat_arr[12] * _v;
+        tmp[13]               = _mat.mat_arr[13] * _v;
+        tmp[14]               = _mat.mat_arr[14] * _v;
+        tmp[15]               = _mat.mat_arr[15] * _v;
+
         return matrix4_t<_T>(tmp);
     }
 
@@ -188,16 +202,29 @@ public:
         if (std::isnan(_v)) {
             throw std::invalid_argument(log("std::isnan(_v)"));
         }
-        if (_mat.HasNaNs()) {
-            throw std::invalid_argument(log("_mat.HasNaNs()"));
-        }
 
-        _T tmp[ORDER][ORDER] = { { 0 } };
-        for (uint8_t i = 0; i < ORDER; i++) {
-            for (uint8_t j = 0; j < ORDER; j++) {
-                tmp[i][j] = _v * _mat[i][j];
-            }
-        }
+        _T tmp[ORDER * ORDER] = { 0 };
+
+        tmp[0]                = _v * _mat.mat_arr[0];
+        tmp[1]                = _v * _mat.mat_arr[1];
+        tmp[2]                = _v * _mat.mat_arr[2];
+        tmp[3]                = _v * _mat.mat_arr[3];
+
+        tmp[4]                = _v * _mat.mat_arr[4];
+        tmp[5]                = _v * _mat.mat_arr[5];
+        tmp[6]                = _v * _mat.mat_arr[6];
+        tmp[7]                = _v * _mat.mat_arr[7];
+
+        tmp[8]                = _v * _mat.mat_arr[8];
+        tmp[9]                = _v * _mat.mat_arr[9];
+        tmp[10]               = _v * _mat.mat_arr[10];
+        tmp[11]               = _v * _mat.mat_arr[11];
+
+        tmp[12]               = _v * _mat.mat_arr[12];
+        tmp[13]               = _v * _mat.mat_arr[13];
+        tmp[14]               = _v * _mat.mat_arr[14];
+        tmp[15]               = _v * _mat.mat_arr[15];
+
         return matrix4_t<_T>(tmp);
     }
 
@@ -211,21 +238,14 @@ public:
     template <class _U>
     friend const vector4_t<_U>
     operator*(const vector4_t<_U>& _v, const matrix4_t<_T>& _mat) {
-        if (_v.HasNaNs()) {
-            throw std::invalid_argument(log("_v.HasNaNs()"));
-        }
-        if (_mat.HasNaNs()) {
-            throw std::invalid_argument(log("_mat.HasNaNs()"));
-        }
-
-        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[1][0] + _v.z * _mat[2][0]
-                   + _v.w * _mat[3][0];
-        auto new_y = _v.x * _mat[0][1] + _v.y * _mat[1][1] + _v.z * _mat[2][1]
-                   + _v.w * _mat[3][1];
-        auto new_z = _v.x * _mat[0][2] + _v.y * _mat[1][2] + _v.z * _mat[2][2]
-                   + _v.w * _mat[3][2];
-        auto new_w = _v.x * _mat[0][3] + _v.y * _mat[1][3] + _v.z * _mat[2][3]
-                   + _v.w * _mat[3][3];
+        auto new_x = _v.x * _mat.mat_arr[0] + _v.y * _mat.mat_arr[4]
+                   + _v.z * _mat.mat_arr[8] + _v.w * _mat.mat_arr[12];
+        auto new_y = _v.x * _mat.mat_arr[1] + _v.y * _mat.mat_arr[5]
+                   + _v.z * _mat.mat_arr[9] + _v.w * _mat.mat_arr[13];
+        auto new_z = _v.x * _mat.mat_arr[2] + _v.y * _mat.mat_arr[6]
+                   + _v.z * _mat.mat_arr[10] + _v.w * _mat.mat_arr[14];
+        auto new_w = _v.x * _mat.mat_arr[3] + _v.y * _mat.mat_arr[7]
+                   + _v.z * _mat.mat_arr[11] + _v.w * _mat.mat_arr[15];
         return vector4_t<_U>(new_x, new_y, new_z, new_w);
     }
 
@@ -239,20 +259,14 @@ public:
     template <class _U>
     friend const vector4_t<_U>
     operator*(const matrix4_t<_T>& _mat, const vector4_t<_U>& _v) {
-        if (_mat.HasNaNs()) {
-            throw std::invalid_argument(log("_mat.HasNaNs()"));
-        }
-        if (_v.HasNaNs()) {
-            throw std::invalid_argument(log("_v.HasNaNs()"));
-        }
-        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[0][1] + _v.z * _mat[0][2]
-                   + _v.w * _mat[0][3];
-        auto new_y = _v.x * _mat[1][0] + _v.y * _mat[1][1] + _v.z * _mat[1][2]
-                   + _v.w * _mat[1][3];
-        auto new_z = _v.x * _mat[2][0] + _v.y * _mat[2][1] + _v.z * _mat[2][2]
-                   + _v.w * _mat[2][3];
-        auto new_w = _v.x * _mat[3][0] + _v.y * _mat[3][1] + _v.z * _mat[3][2]
-                   + _v.w * _mat[3][3];
+        auto new_x = _v.x * _mat.mat_arr[0] + _v.y * _mat.mat_arr[1]
+                   + _v.z * _mat.mat_arr[2] + _v.w * _mat.mat_arr[3];
+        auto new_y = _v.x * _mat.mat_arr[4] + _v.y * _mat.mat_arr[5]
+                   + _v.z * _mat.mat_arr[6] + _v.w * _mat.mat_arr[7];
+        auto new_z = _v.x * _mat.mat_arr[8] + _v.y * _mat.mat_arr[9]
+                   + _v.z * _mat.mat_arr[10] + _v.w * _mat.mat_arr[11];
+        auto new_w = _v.x * _mat.mat_arr[12] + _v.y * _mat.mat_arr[13]
+                   + _v.z * _mat.mat_arr[14] + _v.w * _mat.mat_arr[15];
         return vector4_t<_U>(new_x, new_y, new_z, new_w);
     }
 
@@ -280,20 +294,15 @@ public:
     template <class _U>
     friend vector4_t<_U>&
     operator*=(vector4_t<_U>& _v, const matrix4_t<_T>& _mat) {
-        if (_v.HasNaNs()) {
-            throw std::invalid_argument(log("_v.HasNaNs()"));
-        }
-        if (_mat.HasNaNs()) {
-            throw std::invalid_argument(log("_mat.HasNaNs()"));
-        }
-        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[1][0] + _v.z * _mat[2][0]
-                   + _v.w * _mat[3][0];
-        auto new_y = _v.x * _mat[0][1] + _v.y * _mat[1][1] + _v.z * _mat[2][1]
-                   + _v.w * _mat[3][1];
-        auto new_z = _v.x * _mat[0][2] + _v.y * _mat[1][2] + _v.z * _mat[2][2]
-                   + _v.w * _mat[3][2];
-        auto new_w = _v.x * _mat[0][3] + _v.y * _mat[1][3] + _v.z * _mat[2][3]
-                   + _v.w * _mat[3][3];
+        auto new_x = _v.x * _mat.mat_arr[0] + _v.y * _mat.mat_arr[4]
+                   + _v.z * _mat.mat_arr[8] + _v.w * _mat.mat_arr[12];
+        auto new_y = _v.x * _mat.mat_arr[1] + _v.y * _mat.mat_arr[5]
+                   + _v.z * _mat.mat_arr[9] + _v.w * _mat.mat_arr[13];
+        auto new_z = _v.x * _mat.mat_arr[2] + _v.y * _mat.mat_arr[6]
+                   + _v.z * _mat.mat_arr[10] + _v.w * _mat.mat_arr[14];
+        auto new_w = _v.x * _mat.mat_arr[3] + _v.y * _mat.mat_arr[7]
+                   + _v.z * _mat.mat_arr[11] + _v.w * _mat.mat_arr[15];
+
         _v.x = new_x;
         _v.y = new_y;
         _v.z = new_z;
@@ -311,17 +320,15 @@ public:
     template <class _U>
     friend vector4_t<_U>&
     operator*=(const matrix4_t<_T>& _mat, vector4_t<_U>& _v) {
-        if (_v.HasNaNs()) {
-            throw std::invalid_argument(log("_v.HasNaNs()"));
-        }
-        auto new_x = _v.x * _mat[0][0] + _v.y * _mat[0][1] + _v.z * _mat[0][2]
-                   + _v.w * _mat[0][3];
-        auto new_y = _v.x * _mat[1][0] + _v.y * _mat[1][1] + _v.z * _mat[1][2]
-                   + _v.w * _mat[1][3];
-        auto new_z = _v.x * _mat[2][0] + _v.y * _mat[2][1] + _v.z * _mat[2][2]
-                   + _v.w * _mat[2][3];
-        auto new_w = _v.x * _mat[3][0] + _v.y * _mat[3][1] + _v.z * _mat[3][2]
-                   + _v.w * _mat[3][3];
+        auto new_x = _v.x * _mat.mat_arr[0] + _v.y * _mat.mat_arr[1]
+                   + _v.z * _mat.mat_arr[2] + _v.w * _mat.mat_arr[3];
+        auto new_y = _v.x * _mat.mat_arr[4] + _v.y * _mat.mat_arr[5]
+                   + _v.z * _mat.mat_arr[6] + _v.w * _mat.mat_arr[7];
+        auto new_z = _v.x * _mat.mat_arr[8] + _v.y * _mat.mat_arr[9]
+                   + _v.z * _mat.mat_arr[10] + _v.w * _mat.mat_arr[11];
+        auto new_w = _v.x * _mat.mat_arr[12] + _v.y * _mat.mat_arr[13]
+                   + _v.z * _mat.mat_arr[14] + _v.w * _mat.mat_arr[15];
+
         _v.x = new_x;
         _v.y = new_y;
         _v.z = new_z;
@@ -342,14 +349,14 @@ public:
      * @return _T*              行指针
      * @note    注意不要越界访问
      */
-    _T*                 operator[](const uint8_t _idx);
+    _T                  operator[](const uint8_t _idx);
 
     /**
      * @brief 下标重载
      * @param  _idx             行
      * @return const _T*        行指针
      */
-    const _T*           operator[](const uint8_t _idx) const;
+    const _T            operator[](const uint8_t _idx) const;
 
     /**
      * @brief 矩阵转置
@@ -448,7 +455,8 @@ public:
                 _os << " ";
             }
             for (uint8_t j = 0; j < matrix4_t<_T>::ORDER; j++) {
-                _os << std::setw(10) << std::setprecision(20) << _mat[i][j];
+                _os << std::setw(10) << std::setprecision(20)
+                    << _mat.mat_arr[i * ORDER + j];
                 if (j != matrix4_t<_T>::ORDER - 1) {
                     _os << " ";
                 }
@@ -465,13 +473,12 @@ public:
 
 template <class _T>
 bool matrix4_t<_T>::HasNaNs(void) const {
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            if (std::isnan(mat[i][j]) == true) {
-                return true;
-            }
+    for (const auto& i : mat_arr) {
+        if (std::isnan(i) == true) {
+            return true;
         }
     }
+
     return false;
 }
 
@@ -479,7 +486,7 @@ template <class _T>
 _T matrix4_t<_T>::determ(const uint8_t _order) const {
     // 递归返回条件
     if (_order == 1) {
-        return mat[0][0];
+        return mat_arr[0];
     }
 
     _T  res  = 0;
@@ -487,10 +494,11 @@ _T matrix4_t<_T>::determ(const uint8_t _order) const {
     int sign = 1;
     // 计算 mat[0][i] 的代数余子式
     for (uint8_t i = 0; i < _order; i++) {
-        res  += sign * mat[0][i] * cofactor(0, i, _order).determ(_order - 1);
+        res  += sign * mat_arr[i] * cofactor(0, i, _order).determ(_order - 1);
         // 符号取反
         sign = -sign;
     }
+
     return res;
 }
 
@@ -498,13 +506,13 @@ template <class _T>
 const matrix4_t<_T>
 matrix4_t<_T>::cofactor(const uint8_t _row, const uint8_t _col,
                         const uint8_t _order) const {
-    _T   tmp[ORDER][ORDER] = { { 0 } };
-    auto row_idx           = 0;
-    auto col_idx           = 0;
+    _T   tmp[ORDER * ORDER] = { 0 };
+    auto row_idx            = 0;
+    auto col_idx            = 0;
     for (uint8_t i = 0; i < _order; i++) {
         for (uint8_t j = 0; j < _order; j++) {
             if (i != _row && j != _col) {
-                tmp[row_idx][col_idx++] = mat[i][j];
+                tmp[row_idx * ORDER + col_idx++] = mat_arr[i * ORDER + j];
                 // 换行
                 if (col_idx == _order - 1) {
                     col_idx = 0;
@@ -513,31 +521,47 @@ matrix4_t<_T>::cofactor(const uint8_t _row, const uint8_t _col,
             }
         }
     }
+
     return matrix4_t<_T>(tmp);
 }
 
 template <class _T>
 const matrix4_t<_T> matrix4_t<_T>::adjoint(void) const {
-    _T  tmp[ORDER][ORDER] = { { 0 } };
-    // 当前正负
-    int sign              = 1;
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            // 判断当前符号，行列索引之和为偶数时为正
-            sign      = ((i + j) % 2 == 0) ? 1 : -1;
-            // 计算代数余子式矩阵并转置
-            tmp[j][i] = (sign) * (cofactor(i, j, ORDER).determ(ORDER - 1));
-        }
-    }
+    _T tmp[ORDER * ORDER] = { 0 };
+
+    // 计算代数余子式矩阵并转置
+    // 行列索引之和为奇数时为负
+    tmp[0]                = cofactor(0, 0, 4).determ(3);
+    tmp[1]                = -cofactor(1, 0, 4).determ(3);
+    tmp[2]                = cofactor(2, 0, 4).determ(3);
+    tmp[3]                = -cofactor(3, 0, 4).determ(3);
+
+    tmp[4]                = -cofactor(0, 1, 4).determ(3);
+    tmp[5]                = cofactor(1, 1, 4).determ(3);
+    tmp[6]                = -cofactor(2, 1, 4).determ(3);
+    tmp[7]                = cofactor(3, 1, 4).determ(3);
+
+    tmp[8]                = cofactor(0, 2, 4).determ(3);
+    tmp[9]                = -cofactor(1, 2, 4).determ(3);
+    tmp[10]               = cofactor(2, 2, 4).determ(3);
+    tmp[11]               = -cofactor(3, 2, 4).determ(3);
+
+    tmp[12]               = -cofactor(0, 3, 4).determ(3);
+    tmp[13]               = cofactor(1, 3, 4).determ(3);
+    tmp[14]               = -cofactor(2, 3, 4).determ(3);
+    tmp[15]               = cofactor(3, 3, 4).determ(3);
+
     return matrix4_t<_T>(tmp);
 }
 
 template <class _T>
 matrix4_t<_T>::matrix4_t(void) {
-    memset(mat, 0, ORDER * ORDER * sizeof(_T));
-    for (uint8_t i = 0; i < ORDER; i++) {
-        mat[i][i] = 1;
-    }
+    mat_arr.fill(0);
+    mat_arr[0]  = 1;
+    mat_arr[5]  = 1;
+    mat_arr[10] = 1;
+    mat_arr[15] = 1;
+
     return;
 }
 
@@ -546,7 +570,7 @@ matrix4_t<_T>::matrix4_t(const matrix4_t<_T>& _mat) {
     if (_mat.HasNaNs()) {
         throw std::invalid_argument(log("_mat.HasNaNs()"));
     }
-    memcpy(mat, _mat.mat, ORDER * ORDER * sizeof(_T));
+    mat_arr = _mat.mat_arr;
     return;
 }
 
@@ -560,7 +584,27 @@ matrix4_t<_T>::matrix4_t(const _T* const _arr) {
             throw std::invalid_argument(log("std::isnan(_arr[i])"));
         }
     }
-    memcpy(mat, _arr, ORDER * ORDER * sizeof(_T));
+
+    mat_arr[0]  = _arr[0];
+    mat_arr[1]  = _arr[1];
+    mat_arr[2]  = _arr[2];
+    mat_arr[3]  = _arr[3];
+
+    mat_arr[4]  = _arr[4];
+    mat_arr[5]  = _arr[5];
+    mat_arr[6]  = _arr[6];
+    mat_arr[7]  = _arr[7];
+
+    mat_arr[8]  = _arr[8];
+    mat_arr[9]  = _arr[9];
+    mat_arr[10] = _arr[10];
+    mat_arr[11] = _arr[11];
+
+    mat_arr[12] = _arr[12];
+    mat_arr[13] = _arr[13];
+    mat_arr[14] = _arr[14];
+    mat_arr[15] = _arr[15];
+
     return;
 }
 
@@ -576,20 +620,37 @@ matrix4_t<_T>::matrix4_t(const _T _arr[ORDER][ORDER]) {
             }
         }
     }
-    memcpy(mat, _arr, ORDER * ORDER * sizeof(_T));
+
+    mat_arr[0]  = _arr[0][0];
+    mat_arr[1]  = _arr[0][1];
+    mat_arr[2]  = _arr[0][2];
+    mat_arr[3]  = _arr[0][3];
+
+    mat_arr[4]  = _arr[1][0];
+    mat_arr[5]  = _arr[1][1];
+    mat_arr[6]  = _arr[1][2];
+    mat_arr[7]  = _arr[1][3];
+
+    mat_arr[8]  = _arr[2][0];
+    mat_arr[9]  = _arr[2][1];
+    mat_arr[10] = _arr[2][2];
+    mat_arr[11] = _arr[2][3];
+
+    mat_arr[12] = _arr[3][0];
+    mat_arr[13] = _arr[3][1];
+    mat_arr[14] = _arr[3][2];
+    mat_arr[15] = _arr[3][3];
+
     return;
 }
 
 template <class _T>
 matrix4_t<_T>::matrix4_t(const vector4_t<_T>& _v) {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
-    memset(mat, 0, ORDER * ORDER * sizeof(_T));
-    mat[0][0] = _v.x;
-    mat[1][1] = _v.y;
-    mat[2][2] = _v.z;
-    mat[3][3] = _v.w;
+    mat_arr.fill(0);
+    mat_arr[0]  = _v.x;
+    mat_arr[5]  = _v.y;
+    mat_arr[10] = _v.z;
+    mat_arr[15] = _v.w;
     return;
 }
 
@@ -601,175 +662,281 @@ matrix4_t<_T>& matrix4_t<_T>::operator=(const matrix4_t<_T>& _mat) {
     if (this == &_mat) {
         throw std::runtime_error(log("this == &_mat"));
     }
-    memcpy(mat, _mat.mat, ORDER * ORDER * sizeof(_T));
+    mat_arr = _mat.mat_arr;
     return *this;
 }
 
 template <class _T>
 bool matrix4_t<_T>::operator==(const matrix4_t<_T>& _mat) const {
-    if (_mat.HasNaNs()) {
-        throw std::invalid_argument(log("_mat.HasNaNs()"));
-    }
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            if (std::abs(mat[i][j] - _mat[i][j])
-                > std::numeric_limits<_T>::epsilon()) {
-                return false;
-            }
-        }
-    }
-    return true;
+    return mat_arr == _mat.mat_arr;
 }
 
 template <class _T>
 bool matrix4_t<_T>::operator!=(const matrix4_t<_T>& _mat) const {
-    if (_mat.HasNaNs()) {
-        throw std::invalid_argument(log("_mat.HasNaNs()"));
-    }
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            if (std::abs(mat[i][j] - _mat[i][j])
-                > std::numeric_limits<_T>::epsilon()) {
-                return true;
-            }
-        }
-    }
-    return false;
+    return mat_arr != _mat.mat_arr;
 }
 
 template <class _T>
 const matrix4_t<_T> matrix4_t<_T>::operator+(const matrix4_t<_T>& _mat) const {
-    if (_mat.HasNaNs()) {
-        throw std::invalid_argument(log("_mat.HasNaNs()"));
-    }
-    _T tmp[ORDER][ORDER] = { { 0 } };
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            tmp[i][j] = mat[i][j] + _mat[i][j];
-        }
-    }
+    _T tmp[ORDER * ORDER] = { 0 };
+
+    tmp[0]                = mat_arr[0] + _mat.mat_arr[0];
+    tmp[1]                = mat_arr[1] + _mat.mat_arr[1];
+    tmp[2]                = mat_arr[2] + _mat.mat_arr[2];
+    tmp[3]                = mat_arr[3] + _mat.mat_arr[3];
+
+    tmp[4]                = mat_arr[4] + _mat.mat_arr[4];
+    tmp[5]                = mat_arr[5] + _mat.mat_arr[5];
+    tmp[6]                = mat_arr[6] + _mat.mat_arr[6];
+    tmp[7]                = mat_arr[7] + _mat.mat_arr[7];
+
+    tmp[8]                = mat_arr[8] + _mat.mat_arr[8];
+    tmp[9]                = mat_arr[9] + _mat.mat_arr[9];
+    tmp[10]               = mat_arr[10] + _mat.mat_arr[10];
+    tmp[11]               = mat_arr[11] + _mat.mat_arr[11];
+
+    tmp[12]               = mat_arr[12] + _mat.mat_arr[12];
+    tmp[13]               = mat_arr[13] + _mat.mat_arr[13];
+    tmp[14]               = mat_arr[14] + _mat.mat_arr[14];
+    tmp[15]               = mat_arr[15] + _mat.mat_arr[15];
+
     return matrix4_t<_T>(tmp);
 }
 
 template <class _T>
 matrix4_t<_T>& matrix4_t<_T>::operator+=(const matrix4_t<_T>& _mat) {
-    if (_mat.HasNaNs()) {
-        throw std::invalid_argument(log("_mat.HasNaNs()"));
-    }
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            mat[i][j] += _mat[i][j];
-        }
-    }
+    mat_arr[0]  += _mat.mat_arr[0];
+    mat_arr[1]  += _mat.mat_arr[1];
+    mat_arr[2]  += _mat.mat_arr[2];
+    mat_arr[3]  += _mat.mat_arr[3];
+
+    mat_arr[4]  += _mat.mat_arr[4];
+    mat_arr[5]  += _mat.mat_arr[5];
+    mat_arr[6]  += _mat.mat_arr[6];
+    mat_arr[7]  += _mat.mat_arr[7];
+
+    mat_arr[8]  += _mat.mat_arr[8];
+    mat_arr[9]  += _mat.mat_arr[9];
+    mat_arr[10] += _mat.mat_arr[10];
+    mat_arr[11] += _mat.mat_arr[11];
+
+    mat_arr[12] += _mat.mat_arr[12];
+    mat_arr[13] += _mat.mat_arr[13];
+    mat_arr[14] += _mat.mat_arr[14];
+    mat_arr[15] += _mat.mat_arr[15];
+
     return *this;
 }
 
 template <class _T>
 const matrix4_t<_T> matrix4_t<_T>::operator-(const matrix4_t<_T>& _mat) const {
-    if (_mat.HasNaNs()) {
-        throw std::invalid_argument(log("_mat.HasNaNs()"));
-    }
-    _T tmp[ORDER][ORDER] = { { 0 } };
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            tmp[i][j] = mat[i][j] - _mat[i][j];
-        }
-    }
+    _T tmp[ORDER * ORDER] = { 0 };
+
+    tmp[0]                = mat_arr[0] - _mat.mat_arr[0];
+    tmp[1]                = mat_arr[1] - _mat.mat_arr[1];
+    tmp[2]                = mat_arr[2] - _mat.mat_arr[2];
+    tmp[3]                = mat_arr[3] - _mat.mat_arr[3];
+
+    tmp[4]                = mat_arr[4] - _mat.mat_arr[4];
+    tmp[5]                = mat_arr[5] - _mat.mat_arr[5];
+    tmp[6]                = mat_arr[6] - _mat.mat_arr[6];
+    tmp[7]                = mat_arr[7] - _mat.mat_arr[7];
+
+    tmp[8]                = mat_arr[8] - _mat.mat_arr[8];
+    tmp[9]                = mat_arr[9] - _mat.mat_arr[9];
+    tmp[10]               = mat_arr[10] - _mat.mat_arr[10];
+    tmp[11]               = mat_arr[11] - _mat.mat_arr[11];
+
+    tmp[12]               = mat_arr[12] - _mat.mat_arr[12];
+    tmp[13]               = mat_arr[13] - _mat.mat_arr[13];
+    tmp[14]               = mat_arr[14] - _mat.mat_arr[14];
+    tmp[15]               = mat_arr[15] - _mat.mat_arr[15];
+
     return matrix4_t<_T>(tmp);
 }
 
 template <class _T>
 matrix4_t<_T>& matrix4_t<_T>::operator-=(const matrix4_t<_T>& _mat) {
-    if (_mat.HasNaNs()) {
-        throw std::invalid_argument(log("_mat.HasNaNs()"));
-    }
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            mat[i][j] -= _mat[i][j];
-        }
-    }
+    mat_arr[0]  -= _mat.mat_arr[0];
+    mat_arr[1]  -= _mat.mat_arr[1];
+    mat_arr[2]  -= _mat.mat_arr[2];
+    mat_arr[3]  -= _mat.mat_arr[3];
+
+    mat_arr[4]  -= _mat.mat_arr[4];
+    mat_arr[5]  -= _mat.mat_arr[5];
+    mat_arr[6]  -= _mat.mat_arr[6];
+    mat_arr[7]  -= _mat.mat_arr[7];
+
+    mat_arr[8]  -= _mat.mat_arr[8];
+    mat_arr[9]  -= _mat.mat_arr[9];
+    mat_arr[10] -= _mat.mat_arr[10];
+    mat_arr[11] -= _mat.mat_arr[11];
+
+    mat_arr[12] -= _mat.mat_arr[12];
+    mat_arr[13] -= _mat.mat_arr[13];
+    mat_arr[14] -= _mat.mat_arr[14];
+    mat_arr[15] -= _mat.mat_arr[15];
+
     return *this;
 }
 
 template <class _T>
 const matrix4_t<_T> matrix4_t<_T>::operator*(const matrix4_t<_T>& _mat) const {
-    if (_mat.HasNaNs()) {
-        throw std::invalid_argument(log("_mat.HasNaNs()"));
-    }
+    _T tmp[ORDER * ORDER] = { 0 };
+    tmp[0] = mat_arr[0] * _mat.mat_arr[0] + mat_arr[1] * _mat.mat_arr[4]
+           + mat_arr[2] * _mat.mat_arr[8] + mat_arr[3] * _mat.mat_arr[12];
+    tmp[1] = mat_arr[0] * _mat.mat_arr[1] + mat_arr[1] * _mat.mat_arr[5]
+           + mat_arr[2] * _mat.mat_arr[9] + mat_arr[3] * _mat.mat_arr[13];
+    tmp[2] = mat_arr[0] * _mat.mat_arr[2] + mat_arr[1] * _mat.mat_arr[6]
+           + mat_arr[2] * _mat.mat_arr[10] + mat_arr[3] * _mat.mat_arr[14];
+    tmp[3] = mat_arr[0] * _mat.mat_arr[3] + mat_arr[1] * _mat.mat_arr[7]
+           + mat_arr[2] * _mat.mat_arr[11] + mat_arr[3] * _mat.mat_arr[15];
 
-    _T tmp[ORDER][ORDER] = { { 0 } };
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            for (uint8_t k = 0; k < ORDER; k++) {
-                tmp[i][j] += mat[i][k] * _mat[k][j];
-            }
-        }
-    }
+    tmp[4] = mat_arr[4] * _mat.mat_arr[0] + mat_arr[5] * _mat.mat_arr[4]
+           + mat_arr[6] * _mat.mat_arr[8] + mat_arr[7] * _mat.mat_arr[12];
+    tmp[5] = mat_arr[4] * _mat.mat_arr[1] + mat_arr[5] * _mat.mat_arr[5]
+           + mat_arr[6] * _mat.mat_arr[9] + mat_arr[7] * _mat.mat_arr[13];
+    tmp[6] = mat_arr[4] * _mat.mat_arr[2] + mat_arr[5] * _mat.mat_arr[6]
+           + mat_arr[6] * _mat.mat_arr[10] + mat_arr[7] * _mat.mat_arr[14];
+    tmp[7] = mat_arr[4] * _mat.mat_arr[3] + mat_arr[5] * _mat.mat_arr[7]
+           + mat_arr[6] * _mat.mat_arr[11] + mat_arr[7] * _mat.mat_arr[15];
+
+    tmp[8] = mat_arr[8] * _mat.mat_arr[0] + mat_arr[9] * _mat.mat_arr[4]
+           + mat_arr[10] * _mat.mat_arr[8] + mat_arr[11] * _mat.mat_arr[12];
+    tmp[9] = mat_arr[8] * _mat.mat_arr[1] + mat_arr[9] * _mat.mat_arr[5]
+           + mat_arr[10] * _mat.mat_arr[9] + mat_arr[11] * _mat.mat_arr[13];
+    tmp[10] = mat_arr[8] * _mat.mat_arr[2] + mat_arr[9] * _mat.mat_arr[6]
+            + mat_arr[10] * _mat.mat_arr[10] + mat_arr[11] * _mat.mat_arr[14];
+    tmp[11] = mat_arr[8] * _mat.mat_arr[3] + mat_arr[9] * _mat.mat_arr[7]
+            + mat_arr[10] * _mat.mat_arr[11] + mat_arr[11] * _mat.mat_arr[15];
+
+    tmp[12] = mat_arr[12] * _mat.mat_arr[0] + mat_arr[13] * _mat.mat_arr[4]
+            + mat_arr[14] * _mat.mat_arr[8] + mat_arr[15] * _mat.mat_arr[12];
+    tmp[13] = mat_arr[12] * _mat.mat_arr[1] + mat_arr[13] * _mat.mat_arr[5]
+            + mat_arr[14] * _mat.mat_arr[9] + mat_arr[15] * _mat.mat_arr[13];
+    tmp[14] = mat_arr[12] * _mat.mat_arr[2] + mat_arr[13] * _mat.mat_arr[6]
+            + mat_arr[14] * _mat.mat_arr[10] + mat_arr[15] * _mat.mat_arr[14];
+    tmp[15] = mat_arr[12] * _mat.mat_arr[3] + mat_arr[13] * _mat.mat_arr[7]
+            + mat_arr[14] * _mat.mat_arr[11] + mat_arr[15] * _mat.mat_arr[15];
+
     return matrix4_t<_T>(tmp);
 }
 
 template <class _T>
 matrix4_t<_T>& matrix4_t<_T>::operator*=(const _T& _v) {
-    if (std::isnan(_v)) {
-        throw std::invalid_argument(log("std::isnan(_v)"));
+    for (uint8_t i = 0; i < ORDER * ORDER; i++) {
+        mat_arr[i] *= _v;
     }
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            mat[i][j] *= _v;
-        }
-    }
+
     return *this;
 }
 
 template <class _T>
 matrix4_t<_T>& matrix4_t<_T>::operator*=(const matrix4_t<_T>& _mat) {
-    if (_mat.HasNaNs()) {
-        throw std::invalid_argument(log("_mat.HasNaNs()"));
-    }
-    _T tmp[ORDER][ORDER] = { { 0 } };
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            for (uint8_t k = 0; k < ORDER; k++) {
-                tmp[i][j] += mat[i][k] * _mat[k][j];
-            }
-        }
-    }
-    memcpy(mat, tmp, ORDER * ORDER * sizeof(_T));
+    _T tmp[ORDER * ORDER] = { 0 };
+    tmp[0] = mat_arr[0] * _mat.mat_arr[0] + mat_arr[1] * _mat.mat_arr[4]
+           + mat_arr[2] * _mat.mat_arr[8] + mat_arr[3] * _mat.mat_arr[12];
+    tmp[1] = mat_arr[0] * _mat.mat_arr[1] + mat_arr[1] * _mat.mat_arr[5]
+           + mat_arr[2] * _mat.mat_arr[9] + mat_arr[3] * _mat.mat_arr[13];
+    tmp[2] = mat_arr[0] * _mat.mat_arr[2] + mat_arr[1] * _mat.mat_arr[6]
+           + mat_arr[2] * _mat.mat_arr[10] + mat_arr[3] * _mat.mat_arr[14];
+    tmp[3] = mat_arr[0] * _mat.mat_arr[3] + mat_arr[1] * _mat.mat_arr[7]
+           + mat_arr[2] * _mat.mat_arr[11] + mat_arr[3] * _mat.mat_arr[15];
+
+    tmp[4] = mat_arr[4] * _mat.mat_arr[0] + mat_arr[5] * _mat.mat_arr[4]
+           + mat_arr[6] * _mat.mat_arr[8] + mat_arr[7] * _mat.mat_arr[12];
+    tmp[5] = mat_arr[4] * _mat.mat_arr[1] + mat_arr[5] * _mat.mat_arr[5]
+           + mat_arr[6] * _mat.mat_arr[9] + mat_arr[7] * _mat.mat_arr[13];
+    tmp[6] = mat_arr[4] * _mat.mat_arr[2] + mat_arr[5] * _mat.mat_arr[6]
+           + mat_arr[6] * _mat.mat_arr[10] + mat_arr[7] * _mat.mat_arr[14];
+    tmp[7] = mat_arr[4] * _mat.mat_arr[3] + mat_arr[5] * _mat.mat_arr[7]
+           + mat_arr[6] * _mat.mat_arr[11] + mat_arr[7] * _mat.mat_arr[15];
+
+    tmp[8] = mat_arr[8] * _mat.mat_arr[0] + mat_arr[9] * _mat.mat_arr[4]
+           + mat_arr[10] * _mat.mat_arr[8] + mat_arr[11] * _mat.mat_arr[12];
+    tmp[9] = mat_arr[8] * _mat.mat_arr[1] + mat_arr[9] * _mat.mat_arr[5]
+           + mat_arr[10] * _mat.mat_arr[9] + mat_arr[11] * _mat.mat_arr[13];
+    tmp[10] = mat_arr[8] * _mat.mat_arr[2] + mat_arr[9] * _mat.mat_arr[6]
+            + mat_arr[10] * _mat.mat_arr[10] + mat_arr[11] * _mat.mat_arr[14];
+    tmp[11] = mat_arr[8] * _mat.mat_arr[3] + mat_arr[9] * _mat.mat_arr[7]
+            + mat_arr[10] * _mat.mat_arr[11] + mat_arr[11] * _mat.mat_arr[15];
+
+    tmp[12] = mat_arr[12] * _mat.mat_arr[0] + mat_arr[13] * _mat.mat_arr[4]
+            + mat_arr[14] * _mat.mat_arr[8] + mat_arr[15] * _mat.mat_arr[12];
+    tmp[13] = mat_arr[12] * _mat.mat_arr[1] + mat_arr[13] * _mat.mat_arr[5]
+            + mat_arr[14] * _mat.mat_arr[9] + mat_arr[15] * _mat.mat_arr[13];
+    tmp[14] = mat_arr[12] * _mat.mat_arr[2] + mat_arr[13] * _mat.mat_arr[6]
+            + mat_arr[14] * _mat.mat_arr[10] + mat_arr[15] * _mat.mat_arr[14];
+    tmp[15] = mat_arr[12] * _mat.mat_arr[3] + mat_arr[13] * _mat.mat_arr[7]
+            + mat_arr[14] * _mat.mat_arr[11] + mat_arr[15] * _mat.mat_arr[15];
+
+    mat_arr[0]  = tmp[0];
+    mat_arr[1]  = tmp[1];
+    mat_arr[2]  = tmp[2];
+    mat_arr[3]  = tmp[3];
+
+    mat_arr[4]  = tmp[4];
+    mat_arr[5]  = tmp[5];
+    mat_arr[6]  = tmp[6];
+    mat_arr[7]  = tmp[7];
+
+    mat_arr[8]  = tmp[8];
+    mat_arr[9]  = tmp[9];
+    mat_arr[10] = tmp[10];
+    mat_arr[11] = tmp[11];
+
+    mat_arr[12] = tmp[12];
+    mat_arr[13] = tmp[13];
+    mat_arr[14] = tmp[14];
+    mat_arr[15] = tmp[15];
+
     return *this;
 }
 
 template <class _T>
-_T* matrix4_t<_T>::operator[](const uint8_t _idx) {
+_T matrix4_t<_T>::operator[](const uint8_t _idx) {
     if (_idx > ORDER) {
         throw std::invalid_argument(log("_idx > ORDER"));
     }
-    return mat[_idx];
+    return mat_arr[_idx];
 }
 
 template <class _T>
-const _T* matrix4_t<_T>::operator[](const uint8_t _idx) const {
+const _T matrix4_t<_T>::operator[](const uint8_t _idx) const {
     if (_idx > ORDER) {
         throw std::invalid_argument(log("_idx > ORDER"));
     }
-    return mat[_idx];
+    return mat_arr[_idx];
 }
 
 template <class _T>
 const matrix4_t<_T> matrix4_t<_T>::transpose(void) const {
-    _T tmp[ORDER][ORDER] = { { 0 } };
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            tmp[j][i] = mat[i][j];
-        }
-    }
+    _T tmp[ORDER * ORDER] = { 0 };
+    tmp[0]                = mat_arr[0];
+    tmp[1]                = mat_arr[4];
+    tmp[2]                = mat_arr[8];
+    tmp[3]                = mat_arr[12];
+
+    tmp[4]                = mat_arr[1];
+    tmp[5]                = mat_arr[5];
+    tmp[6]                = mat_arr[9];
+    tmp[7]                = mat_arr[13];
+
+    tmp[8]                = mat_arr[2];
+    tmp[9]                = mat_arr[6];
+    tmp[10]               = mat_arr[10];
+    tmp[11]               = mat_arr[14];
+
+    tmp[12]               = mat_arr[3];
+    tmp[13]               = mat_arr[7];
+    tmp[14]               = mat_arr[11];
+    tmp[15]               = mat_arr[15];
+
     return matrix4_t<_T>(tmp);
 }
 
 template <class _T>
 const matrix4_t<_T> matrix4_t<_T>::inverse(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
     // 计算行列式
     _T det = determ(ORDER);
     if (std::abs(det) <= std::numeric_limits<_T>::epsilon()) {
@@ -778,11 +945,8 @@ const matrix4_t<_T> matrix4_t<_T>::inverse(void) const {
               "matrix, can't find its inverse"));
     }
 
-    // 计算伴随矩阵
-    auto adj = adjoint();
-
-    // 逆矩阵=伴随矩阵/行列式
-    auto tmp = adj * (1 / det);
+    // 逆矩阵 = 伴随矩阵 / 行列式
+    auto tmp = adjoint() * (1 / det);
 
     return matrix4_t<_T>(tmp);
 }
@@ -792,12 +956,30 @@ const matrix4_t<_T> matrix4_t<_T>::scale(const _T& _scale) const {
     if (std::isnan(_scale)) {
         throw std::invalid_argument(log("std::isnan(_scale)"));
     }
-    matrix4_t<_T> tmp;
-    tmp.mat[0][0] = _scale;
-    tmp.mat[1][1] = _scale;
-    tmp.mat[2][2] = _scale;
-    tmp.mat[3][3] = 1;
-    return tmp * *this;
+
+    _T tmp[ORDER * ORDER] = { 0 };
+
+    tmp[0]                = _scale * mat_arr[0];
+    tmp[1]                = _scale * mat_arr[1];
+    tmp[2]                = _scale * mat_arr[2];
+    tmp[3]                = _scale * mat_arr[3];
+
+    tmp[4]                = _scale * mat_arr[4];
+    tmp[5]                = _scale * mat_arr[5];
+    tmp[6]                = _scale * mat_arr[6];
+    tmp[7]                = _scale * mat_arr[7];
+
+    tmp[8]                = _scale * mat_arr[8];
+    tmp[9]                = _scale * mat_arr[9];
+    tmp[10]               = _scale * mat_arr[10];
+    tmp[11]               = _scale * mat_arr[11];
+
+    tmp[12]               = mat_arr[12];
+    tmp[13]               = mat_arr[13];
+    tmp[14]               = mat_arr[14];
+    tmp[15]               = mat_arr[15];
+
+    return matrix4_t<_T>(tmp);
 }
 
 template <class _T>
@@ -807,21 +989,38 @@ matrix4_t<_T>::scale(const _T& _x, const _T& _y, const _T& _z) const {
         throw std::invalid_argument(
           log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
     }
-    matrix4_t<_T> tmp;
-    tmp.mat[0][0] = _x;
-    tmp.mat[1][1] = _y;
-    tmp.mat[2][2] = _z;
-    tmp.mat[3][3] = 1;
-    return tmp * *this;
+
+    _T tmp[ORDER * ORDER] = { 0 };
+
+    tmp[0]                = _x * mat_arr[0];
+    tmp[1]                = _x * mat_arr[1];
+    tmp[2]                = _x * mat_arr[2];
+    tmp[3]                = _x * mat_arr[3];
+
+    tmp[4]                = _y * mat_arr[4];
+    tmp[5]                = _y * mat_arr[5];
+    tmp[6]                = _y * mat_arr[6];
+    tmp[7]                = _y * mat_arr[7];
+
+    tmp[8]                = _z * mat_arr[8];
+    tmp[9]                = _z * mat_arr[9];
+    tmp[10]               = _z * mat_arr[10];
+    tmp[11]               = _z * mat_arr[11];
+
+    tmp[12]               = mat_arr[12];
+    tmp[13]               = mat_arr[13];
+    tmp[14]               = mat_arr[14];
+    tmp[15]               = mat_arr[15];
+
+    return matrix4_t<_T>(tmp);
 }
 
+/// @todo 精度问题
 template <class _T>
 const matrix4_t<_T>
 matrix4_t<_T>::rotate(const vector4_t<_T>& _axis, const float& _angle) const {
-    if (_axis.HasNaNs() || std::isnan(_angle)) {
-        throw std::invalid_argument(
-          log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)|| "
-              "std::isnan(_angle)"));
+    if (std::isnan(_angle)) {
+        throw std::invalid_argument(log("std::isnan(_angle)"));
     }
 
     // 角度转弧度
@@ -869,11 +1068,12 @@ matrix4_t<_T>::rotate(const vector4_t<_T>& _axis, const float& _angle) const {
     auto          sN  = matrix4_t<_T>(sN_arr);
 
     matrix4_t<_T> res = cI + rrt + sN;
-    res[3][3]         = 1;
+    res.mat_arr[15]   = 1;
 
     return res * *this;
 }
 
+/// @todo 精度问题
 template <class _T>
 const matrix4_t<_T> matrix4_t<_T>::rotate_from_to(const vector4f_t& _from,
                                                   const vector4f_t& _to) const {
@@ -892,34 +1092,34 @@ const matrix4_t<_T> matrix4_t<_T>::rotate_from_to(const vector4f_t& _from,
 
     auto vt(v * (1 - ca));
 
-    _T   M[16] = { 0 };
+    _T   tmp[ORDER * ORDER] = { 0 };
 
-    M[0]       = vt.x * v.x + ca;
-    M[5]       = vt.y * v.y + ca;
-    M[10]      = vt.z * v.z + ca;
+    tmp[0]                  = vt.x * v.x + ca;
+    tmp[5]                  = vt.y * v.y + ca;
+    tmp[10]                 = vt.z * v.z + ca;
 
-    vt.x       *= v.y;
-    vt.z       *= v.x;
-    vt.y       *= v.z;
+    vt.x                    *= v.y;
+    vt.z                    *= v.x;
+    vt.y                    *= v.z;
 
-    M[1]       = vt.x + vs.z;
-    M[2]       = vt.z - vs.y;
-    M[3]       = 0;
+    tmp[1]                  = vt.x + vs.z;
+    tmp[2]                  = vt.z - vs.y;
+    tmp[3]                  = 0;
 
-    M[4]       = vt.x - vs.z;
-    M[6]       = vt.y + vs.x;
-    M[7]       = 0;
+    tmp[4]                  = vt.x - vs.z;
+    tmp[6]                  = vt.y + vs.x;
+    tmp[7]                  = 0;
 
-    M[8]       = vt.z + vs.y;
-    M[9]       = vt.y - vs.x;
-    M[11]      = 0;
+    tmp[8]                  = vt.z + vs.y;
+    tmp[9]                  = vt.y - vs.x;
+    tmp[11]                 = 0;
 
-    M[12]      = 0;
-    M[13]      = 0;
-    M[14]      = 0;
-    M[15]      = 1;
+    tmp[12]                 = 0;
+    tmp[13]                 = 0;
+    tmp[14]                 = 0;
+    tmp[15]                 = 1;
 
-    return matrix4_t<_T>(M);
+    return matrix4_t<_T>(tmp);
 }
 
 template <class _T>
@@ -929,12 +1129,30 @@ matrix4_t<_T>::translate(const _T& _x, const _T& _y, const _T& _z) const {
         throw std::invalid_argument(
           log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
     }
-    matrix4_t<_T> tmp;
-    tmp.mat[0][3] = _x;
-    tmp.mat[1][3] = _y;
-    tmp.mat[2][3] = _z;
-    tmp.mat[3][3] = 1;
-    return tmp * *this;
+
+    _T tmp[ORDER * ORDER] = { 0 };
+
+    tmp[0]                = mat_arr[0] + _x * mat_arr[12];
+    tmp[1]                = mat_arr[1] + _x * mat_arr[13];
+    tmp[2]                = mat_arr[2] + _x * mat_arr[14];
+    tmp[3]                = mat_arr[3] + _x * mat_arr[15];
+
+    tmp[4]                = mat_arr[4] + _y * mat_arr[12];
+    tmp[5]                = mat_arr[5] + _y * mat_arr[13];
+    tmp[6]                = mat_arr[6] + _y * mat_arr[14];
+    tmp[7]                = mat_arr[7] + _y * mat_arr[15];
+
+    tmp[8]                = mat_arr[8] + _z * mat_arr[12];
+    tmp[9]                = mat_arr[9] + _z * mat_arr[13];
+    tmp[10]               = mat_arr[10] + _z * mat_arr[14];
+    tmp[11]               = mat_arr[11] + _z * mat_arr[15];
+
+    tmp[12]               = mat_arr[12];
+    tmp[13]               = mat_arr[13];
+    tmp[14]               = mat_arr[14];
+    tmp[15]               = mat_arr[15];
+
+    return matrix4_t<_T>(tmp);
 }
 
 template <class _T>

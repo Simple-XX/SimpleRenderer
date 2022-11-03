@@ -158,6 +158,8 @@ TEST(matrix_t, rotate) {
     };
     matrix4f_t res_mat1(res_arr1);
     EXPECT_EQ((res_mat1 == mat1), true);
+    // std::cout << mat1 << std::endl;
+    // std::cout << res_mat1 << std::endl;
     auto vec1     = vector4f_t(1, 2, 3, 4);
     /// @todo 精度问题
     auto res_vec1 = vector4f_t(1, -0.7071068, 3.53553390593274, 4);
@@ -173,6 +175,8 @@ TEST(matrix_t, rotate) {
     };
     matrix4f_t res_mat2(res_arr2);
     EXPECT_EQ((res_mat2 == mat2), true);
+    // std::cout << mat2 << std::endl;
+    // std::cout << res_mat2  << std::endl;
     auto vec2     = vector4f_t(1, 2, 3, 4);
     /// @todo 精度问题
     auto res_vec2 = vector4f_t(2.8284272, 2, 1.4142134, 4);
@@ -188,6 +192,8 @@ TEST(matrix_t, rotate) {
     };
     matrix4f_t res_mat3(res_arr3);
     EXPECT_EQ((res_mat3 == mat3), true);
+    // std::cout << mat3 << std::endl;
+    // std::cout << res_mat3 << std::endl;
     auto vec3     = vector4f_t(1, 2, 3, 4);
     auto res_vec3 = vector4f_t(-0.707106781186547, 2.12132034355964, 3, 4);
     EXPECT_EQ((res_vec3 == (mat3 * vec3)), true);
@@ -265,6 +271,8 @@ TEST(matrix_t, rotate) {
     };
     matrix4f_t res_mat8(res_arr8);
     EXPECT_EQ((res_mat8 == mat8), true);
+    // std::cout << mat8 << std::endl;
+    // std::cout << res_mat8  << std::endl;
     auto vec8     = vector4f_t(1, 2, 3, 4);
     /// @todo 精度问题
     auto res_vec8 = vector4f_t(2.7266762, 0.85951554, 2.4138073, 4);
@@ -280,6 +288,8 @@ TEST(matrix_t, rotate) {
     };
     matrix4f_t res_mat9(res_arr9);
     EXPECT_EQ((res_mat9 == mat9), true);
+    // std::cout << mat9 << std::endl;
+    // std::cout << res_mat9 << std::endl;
     auto vec9 = vector4f_t(1, 2, 3, 4);
     auto res_vec9
       = vector4f_t(1.18350341907227, 1.70114150927732, 3.11535507165041, 4);
@@ -299,6 +309,8 @@ TEST(matrix_t, rotate) {
     /// @todo 精度问题
     auto res_vec10 = vector4f_t(2.4138073, 0.8595156, 2.7266764, 4);
     EXPECT_EQ((res_vec10 == (mat10 * vec10)), true);
+    // std::cout << mat10 << std::endl;
+    // std::cout << res_mat10 << std::endl;
 
     auto mat11 = matrix4f_t().rotate(
       vector4f_t(5, 10, 4, vector4f_t::W_VECTOR).normalize(), 34);
@@ -310,6 +322,8 @@ TEST(matrix_t, rotate) {
     };
     matrix4f_t res_mat11(res_arr11);
     EXPECT_EQ((res_mat11 == mat11), true);
+    // std::cout << mat11 << std::endl;
+    // std::cout << res_mat11 << std::endl;
     auto vec11 = vector4f_t(1, 2, 3, 4);
     /// @todo 精度问题
     auto res_vec11
@@ -559,6 +573,8 @@ TEST(matrix_t, rotate_from_to) {
     };
     matrix4f_t res_mat(res_arr);
     EXPECT_EQ((res_mat == mat), true);
+    // std::cout << mat << std::endl;
+    // std::cout << res_mat << std::endl;
     auto res_vec = vector4f_t(-2, 1, 0, 0);
     EXPECT_EQ((res_vec == mat * vec), true);
 

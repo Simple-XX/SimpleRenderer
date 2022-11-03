@@ -40,6 +40,7 @@ default_shader_t::~default_shader_t(void) {
     return;
 }
 
+/// @todo 巨大性能开销
 const shader_vertex_out_t
 default_shader_t::vertex(const shader_vertex_in_t& _shader_vertex_in) {
     /// @todo 处理变换

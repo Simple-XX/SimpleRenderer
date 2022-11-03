@@ -18,6 +18,7 @@
 
 #include "draw3d.h"
 
+/// @todo 巨大性能开销
 const std::pair<bool, const vector4f_t>
 draw3d_t::get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
                                 const vector4f_t& _p2, const vector4f_t& _p) {
@@ -250,6 +251,7 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
 void draw3d_t::model(const model_t& _model) {
     if (config.draw_wireframe == true) {
         for (auto f : _model.get_face()) {
+            /// @todo 巨大性能开销
             auto face = shader.vertex(shader_vertex_in_t(f)).face;
             line(face.v0.coord.x, face.v0.coord.y, face.v1.coord.x,
                  face.v1.coord.y, color_t::WHITE);
@@ -261,6 +263,7 @@ void draw3d_t::model(const model_t& _model) {
     }
     else {
         for (auto f : _model.get_face()) {
+            /// @todo 巨大性能开销
             auto face = shader.vertex(shader_vertex_in_t(f)).face;
             triangle(face);
         }

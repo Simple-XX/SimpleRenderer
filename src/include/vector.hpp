@@ -31,6 +31,14 @@
  */
 template <class _T>
 class vector4_t {
+private:
+    /**
+     * @brief 是否有非数值
+     * @return true             有
+     * @return false            无
+     */
+    bool HasNaNs(void) const;
+
 public:
     /// @brief 表示一个向量
     static constexpr const _T W_VECTOR = 0;
@@ -194,13 +202,6 @@ public:
     _T                  operator[](const uint32_t _idx);
 
     /**
-     * @brief 是否有非数值
-     * @return true             有
-     * @return false            无
-     */
-    bool                HasNaNs(void) const;
-
-    /**
      * @brief 长度的平方
      * @return const _T         结果
      * @note w 不参与运算
@@ -257,6 +258,11 @@ public:
 };
 
 template <class _T>
+bool vector4_t<_T>::HasNaNs(void) const {
+    return std::isnan(x) || std::isnan(y) || std::isnan(z) || std::isnan(w);
+}
+
+template <class _T>
 vector4_t<_T>::vector4_t(void) {
     x = 0;
     y = 0;
@@ -300,10 +306,6 @@ vector4_t<_T>& vector4_t<_T>::operator=(const vector4_t<_T>& _v) {
 
 template <class _T>
 bool vector4_t<_T>::operator==(const vector4_t<_T>& _v) const {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
-
     if (std::abs(x - _v.x) > std::numeric_limits<_T>::epsilon()) {
         return false;
     }
@@ -325,10 +327,6 @@ bool vector4_t<_T>::operator==(const vector4_t<_T>& _v) const {
 
 template <class _T>
 bool vector4_t<_T>::operator!=(const vector4_t<_T>& _v) const {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
-
     if (std::abs(x - _v.x) > std::numeric_limits<_T>::epsilon()) {
         return true;
     }
@@ -350,17 +348,11 @@ bool vector4_t<_T>::operator!=(const vector4_t<_T>& _v) const {
 
 template <class _T>
 const vector4_t<_T> vector4_t<_T>::operator+(const vector4_t<_T>& _v) const {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
     return vector4_t(x + _v.x, y + _v.y, z + _v.z, w + _v.w);
 }
 
 template <class _T>
 vector4_t<_T>& vector4_t<_T>::operator+=(const vector4_t<_T>& _v) {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
     x += _v.x;
     y += _v.y;
     z += _v.z;
@@ -370,25 +362,16 @@ vector4_t<_T>& vector4_t<_T>::operator+=(const vector4_t<_T>& _v) {
 
 template <class _T>
 const vector4_t<_T> vector4_t<_T>::operator-(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
     return vector4_t<_T>(-x, -y, -z, -w);
 }
 
 template <class _T>
 const vector4_t<_T> vector4_t<_T>::operator-(const vector4_t<_T>& _v) const {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
     return vector4_t(x - _v.x, y - _v.y, z - _v.z, w - _v.w);
 }
 
 template <class _T>
 vector4_t<_T>& vector4_t<_T>::operator-=(const vector4_t<_T>& _v) {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
     x -= _v.x;
     y -= _v.y;
     z -= _v.z;
@@ -399,26 +382,17 @@ vector4_t<_T>& vector4_t<_T>::operator-=(const vector4_t<_T>& _v) {
 template <class _T>
 template <class _U>
 const vector4_t<_T> vector4_t<_T>::operator*(const _U _s) const {
-    if (std::isnan(_s)) {
-        throw std::invalid_argument(log("std::isnan(_s)"));
-    }
     return vector4_t<_T>(x * _s, y * _s, z * _s, w * _s);
 }
 
 template <class _T>
 const _T vector4_t<_T>::operator*(const vector4_t<_T>& _v) const {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
     return x * _v.x + y * _v.y + z * _v.z + w * _v.w;
 }
 
 template <class _T>
 template <class _U>
 vector4_t<_T>& vector4_t<_T>::operator*=(const _U _s) {
-    if (std::isnan(_s)) {
-        throw std::invalid_argument(log("std::isnan(_s)"));
-    }
     x *= _s;
     y *= _s;
     z *= _s;
@@ -428,9 +402,6 @@ vector4_t<_T>& vector4_t<_T>::operator*=(const _U _s) {
 
 template <class _T>
 const vector4_t<_T> vector4_t<_T>::operator^(const vector4_t<_T>& _v) const {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
     return vector4_t<_T>((y * _v.z) - (z * _v.y), (z * _v.x) - (x * _v.z),
                          (x * _v.y) - (y * _v.x), W_VECTOR);
 }
@@ -498,39 +469,22 @@ _T vector4_t<_T>::operator[](const uint32_t _idx) {
 }
 
 template <class _T>
-bool vector4_t<_T>::HasNaNs(void) const {
-    return std::isnan(x) || std::isnan(y) || std::isnan(z) || std::isnan(w);
-}
-
-template <class _T>
 const _T vector4_t<_T>::length_squared(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
     return x * x + y * y + z * z + w * w;
 }
 
 template <class _T>
 const _T vector4_t<_T>::length(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
     return std::sqrt(length_squared());
 }
 
 template <class _T>
 const vector4_t<_T> vector4_t<_T>::abs(const vector4_t<_T>& _v) {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
     return vector4_t<_T>(std::abs(_v.x), std::abs(_v.y), std::abs(_v.z));
 }
 
 template <class _T>
 const vector4_t<_T> vector4_t<_T>::normalize(void) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
     if (length() == 0) {
         return vector4_t<_T>();
     }
@@ -540,18 +494,12 @@ const vector4_t<_T> vector4_t<_T>::normalize(void) const {
 
 template <class _T>
 const vector4_t<_T> vector4_t<_T>::min(const vector4_t<_T>& _v) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
     return vector4_t<_T>(std::min(x, _v.x), std::min(y, _v.y),
                          std::min(z, _v.z));
 }
 
 template <class _T>
 const vector4_t<_T> vector4_t<_T>::max(const vector4_t<_T>& _v) const {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
     return vector4_t<_T>(std::max(x, _v.x), std::max(y, _v.y),
                          std::max(z, _v.z));
 }

@@ -16,6 +16,7 @@
 
 #include "cassert"
 #include "cmath"
+#include "cstring"
 #include "iostream"
 
 #include "framebuffer.h"
@@ -109,7 +110,7 @@ void framebuffer_t::color_buffer_t::clear(const color_t& _color) {
 }
 
 size_t framebuffer_t::color_buffer_t::length(void) const {
-    return width * height * color_t::size();
+    return width * height * color_t::bpp();
 }
 
 template <class _T>

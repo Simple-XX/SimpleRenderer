@@ -24,15 +24,18 @@
 
 /**
  * @brief 32 位颜色 RGBA
+ * @note 不要进行会影响内存的修改
  */
 class color_t {
-public:
+private:
     /// @brief 颜色深度
     static constexpr const uint8_t DEPTH = 4;
 
-public:
+    /// @brief 每像素字节数
+    static constexpr const size_t  BPP   = sizeof(uint8_t) * DEPTH;
+
     /// @brief 颜色数据，rgba
-    uint8_t color_data[DEPTH];
+    uint8_t                        color_data[DEPTH];
 
 public:
     static color_t WHITE;
@@ -121,11 +124,10 @@ public:
     uint8_t              operator[](const uint8_t _idx) const;
 
     /**
-     * @brief 获取颜色大小
-     * @param  _idx             索引
-     * @return size_t           颜色大小
+     * @brief 获取每像素大小
+     * @return size_t           像素大小，单位为字节
      */
-    static size_t        size(void);
+    static size_t        bpp(void);
 
     /**
      * @brief 转换为 uint32_t

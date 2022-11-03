@@ -35,7 +35,7 @@ void display_t::fill(void) {
     // 更新 texture
     res = SDL_UpdateTexture(sdl_texture, nullptr,
                             framebuffer.get_color_buffer().get_arr(),
-                            width * color_t::size());
+                            width * color_t::bpp());
     if (res != 0) {
         throw std::runtime_error(log(SDL_GetError()));
     }
@@ -239,10 +239,13 @@ void display_t::loop(void) {
         start = us();
         // 处理输入
         input_handler();
-        // 填充窗口
+        // 清屏
+        /// @todo 巨大性能开销
         framebuffer.clear();
+        // 填充窗口
         fill();
         // 显示 fps
+        /// @todo 巨大性能开销
         show_fps(fps);
         // 刷新窗口
         SDL_RenderPresent(sdl_renderer);

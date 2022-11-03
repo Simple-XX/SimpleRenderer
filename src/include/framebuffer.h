@@ -29,6 +29,7 @@
 class framebuffer_t {
 public:
     /// @brief 深度类型
+    /// @note 不要进行会影响内存的修改
     typedef float depth_t;
 
 private:
