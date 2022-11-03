@@ -252,10 +252,16 @@ public:
 
     friend std::ostream&
     operator<<(std::ostream& _os, const vector4_t<_T>& _v) {
-        _os << "[ " << _v.x << ", " << _v.y << ", " << _v.z << ", " << _v.w
-            << " ]";
-        return _os;
-    }
+                            _os.setf(std::ios::right);
+                            _os.precision(16);
+
+                            _os << "[ " << _v.x << ", " << _v.y << ", " << _v.z
+                                << ", " << _v.w << " ]";
+
+                            _os.unsetf(std::ios::right);
+                            _os.precision(6);
+                            return _os;
+                        }
 };
 
 template <class _T>

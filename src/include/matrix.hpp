@@ -449,21 +449,32 @@ public:
 
     friend std::ostream&
     operator<<(std::ostream& _os, const matrix4_t<_T>& _mat) {
-        _os << "[";
-        for (uint8_t i = 0; i < matrix4_t<_T>::ORDER; i++) {
-            if (i != 0) {
-                _os << "\n";
-                _os << " ";
-            }
-            for (uint8_t j = 0; j < matrix4_t<_T>::ORDER; j++) {
-                _os << std::setw(10) << std::setprecision(20)
-                    << _mat.mat_arr[i * ORDER + j];
-                if (j != matrix4_t<_T>::ORDER - 1) {
-                    _os << " ";
-                }
-            }
-        }
-        _os << std::setw(4) << "]";
+        _os.setf(std::ios::right);
+        _os.precision(16);
+
+        _os << "{\n";
+
+        _os << std::setw(4) << "{" << std::setw(25) << _mat.mat_arr[0] << ", "
+            << _mat.mat_arr[1] << ", " << _mat.mat_arr[2] << ", "
+            << _mat.mat_arr[3] << "},\n";
+
+        _os << std::setw(4) << "{" << std::setw(25) << _mat.mat_arr[4] << ", "
+            << _mat.mat_arr[5] << ", " << _mat.mat_arr[6] << ", "
+            << _mat.mat_arr[7] << "},\n";
+
+        _os << std::setw(4) << "{" << std::setw(25) << _mat.mat_arr[8] << ", "
+            << _mat.mat_arr[9] << ", " << _mat.mat_arr[10] << ", "
+            << _mat.mat_arr[11] << "},\n";
+
+        _os << std::setw(4) << "{" << std::setw(25) << _mat.mat_arr[12] << ", "
+            << _mat.mat_arr[13] << ", " << _mat.mat_arr[14] << ", "
+            << _mat.mat_arr[15] << "}\n";
+
+        _os << "}";
+
+        _os.unsetf(std::ios::right);
+        _os.precision(6);
+
         return _os;
     }
 
