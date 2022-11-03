@@ -30,6 +30,7 @@
  * @note w 为 0 时表示向量，w 为 1 时表示点
  */
 template <class _T>
+    requires std::is_same<_T, float>::value
 class vector4_t {
 private:
     /**

@@ -143,10 +143,10 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
             auto z = interpolate_depth(_v0.coord.z, _v1.coord.z, _v2.coord.z,
                                        barycentric_coord);
             // 深度在已有颜色之上
-            if (z < (framebuffer.get_depth_buffer()(x, y))) {
+            if (z < framebuffer.get_depth_buffer(x, y)) {
                 continue;
             }
-            // 计算颜色，颜色为三个点的颜色的重心坐标插值
+            // 计算颜色，颜色为通过 shader 片段着色器计算
             auto shader_fragment_out
               = shader.fragment(shader_fragment_in_t(barycentric_coord, _normal,
                                                      light, _v0.color,

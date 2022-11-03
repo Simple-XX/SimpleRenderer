@@ -33,7 +33,6 @@ public:
     typedef float depth_t;
 
 private:
-
     /**
      * @brief 颜色缓冲抽象
      */
@@ -107,20 +106,20 @@ private:
          */
         size_t          length(void) const;
 
-        uint32_t*       get_arr(void) {
-            return (uint32_t*)color_arr;
-        }
+        /**
+         * @brief 转换为数组
+         * @return const color_t*   数组
+         */
+        const color_t*  to_arr(void);
     };
 
     /**
      * @brief 深度缓冲抽象
-     * @tparam _T 深度缓冲元素类型
      */
-    template <class _T = depth_t>
     class depth_buffer_t {
     private:
         /// @brief 深度缓冲数组
-        _T*      depth_arr;
+        depth_t* depth_arr;
         /// @brief 宽度
         uint32_t width;
         /// @brief 高度
@@ -136,7 +135,7 @@ private:
          * @brief 构造函数
          * @param  _depth_buffer    另一个 depth_buffer_t
          */
-        depth_buffer_t(const depth_buffer_t<_T>& _depth_buffer);
+        depth_buffer_t(const depth_buffer_t& _depth_buffer);
 
         /**
          * @brief 构造函数
@@ -145,7 +144,8 @@ private:
          * @param  _depth           要填充的深度
          */
         depth_buffer_t(const uint32_t _w, const uint32_t _h,
-                       const _T& _depth = std::numeric_limits<_T>::lowest());
+                       const depth_t& _depth
+                       = std::numeric_limits<depth_t>::lowest());
 
         /**
          * @brief 析构函数
@@ -156,51 +156,53 @@ private:
          * @param  _depth_buffer    另一个 depth_buffer_t
          * @return depth_buffer_t<_T>&  结果
          */
-        depth_buffer_t<_T>& operator=(const depth_buffer_t<_T>& _depth_buffer);
+        depth_buffer_t& operator=(const depth_buffer_t& _depth_buffer);
 
         /**
          * @brief () 重载，获取第 _x 行 _y 列的数据
          * @param  _x               行
          * @param  _y               列
-         * @return _T&              数据
+         * @return depth_t&         数据
          */
-        _T&                 operator()(const uint32_t _x, const uint32_t _y);
+        depth_t&        operator()(const uint32_t _x, const uint32_t _y);
 
         /**
          * @brief () 重载，获取第 _x 行 _y 列的数据
          * @param  _x               行
          * @param  _y               列
-         * @return const _T         只读的数据
+         * @return depth_t          只读的数据
          */
-        const _T operator()(const uint32_t _x, const uint32_t _y) const;
+        depth_t         operator()(const uint32_t _x, const uint32_t _y) const;
 
         /**
-         * @brief 清空，设置为指定值，默认为 std::numeric_limits<_T>::lowest()
+         * @brief 清空，设置为指定值，默认为
+         * std::numeric_limits<depth_t>::lowest()
          * @param  _depth           值
          */
-        void     clear(const _T& _depth = std::numeric_limits<_T>::lowest());
+        void
+        clear(const depth_t& _depth = std::numeric_limits<depth_t>::lowest());
 
         /**
          * @brief 获取缓冲区大小(字节数)
          * @return size_t           字节数
          */
-        size_t   length(void) const;
+        size_t length(void) const;
     };
 
     /// @brief 窗口宽度
-    uint32_t                width;
+    uint32_t       width;
     /// @brief 窗口高度
-    uint32_t                height;
+    uint32_t       height;
 
     /// @brief 颜色缓冲区锁
-    std::mutex              color_buffer_mutex;
+    std::mutex     color_buffer_mutex;
     /// @brief 颜色缓冲区
-    color_buffer_t          color_buffer;
+    color_buffer_t color_buffer;
 
     /// @brief 深度缓冲区锁
-    std::mutex              depth_buffer_mutex;
+    std::mutex     depth_buffer_mutex;
     /// @brief 深度缓冲区
-    depth_buffer_t<depth_t> depth_buffer;
+    depth_buffer_t depth_buffer;
 
 public:
     /**
@@ -274,19 +276,31 @@ public:
      * @brief 获取颜色缓存
      * @return const color_buffer_t&    只读的颜色缓存
      */
-    const color_buffer_t&          get_color_buffer(void) const;
+    const color_buffer_t& get_color_buffer(void) const;
 
     /**
      * @brief 获取深度缓存
-     * depth_buffer_t<depth_t> &深度缓存
+     * @return depth_buffer_t&  深度缓存
      */
-    depth_buffer_t<depth_t>&       get_depth_buffer(void);
+    depth_buffer_t&       get_depth_buffer(void);
+
+    /**
+     * @brief 获取深度值
+     * @return depth_t&         深度值
+     */
+    depth_t& get_depth_buffer(const uint32_t _x, const uint32_t _y);
 
     /**
      * @brief 获取深度缓存
-     * const depth_buffer_t<depth_t> &  只读的深度缓存
+     * const depth_buffer_t&    只读的深度缓存
      */
-    const depth_buffer_t<depth_t>& get_depth_buffer(void) const;
+    const depth_buffer_t& get_depth_buffer(void) const;
+
+    /**
+     * @brief 获取深度值
+     * @return depth_t          深度值
+     */
+    depth_t get_depth_buffer(const uint32_t _x, const uint32_t _y) const;
 };
 
 #endif /* _FRAMEBUFFER_H_ */

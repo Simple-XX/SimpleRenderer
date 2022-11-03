@@ -33,8 +33,9 @@ private:
      * @return const color_t    颜色值
      */
     static const color_t
-    interpolate_color(const color_t& _c0, const color_t& _c1,
-                      const color_t& _c2, const vector4f_t& _barycentric_coord);
+    interpolate_color(const color_t& _color0, const color_t& _color1,
+                      const color_t&    _color2,
+                      const vector4f_t& _barycentric_coord);
 
 public:
     /**

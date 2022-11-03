@@ -32,6 +32,7 @@
  * @tparam _T 矩阵元素类型
  */
 template <class _T>
+    requires std::is_same<_T, float>::value
 class matrix4_t {
 private:
     /// @brief  阶数

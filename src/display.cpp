@@ -34,7 +34,7 @@ void display_t::fill(void) {
 
     // 更新 texture
     res = SDL_UpdateTexture(sdl_texture, nullptr,
-                            framebuffer.get_color_buffer().get_arr(),
+                            framebuffer.get_color_buffer().to_arr(),
                             width * color_t::bpp());
     if (res != 0) {
         throw std::runtime_error(log(SDL_GetError()));

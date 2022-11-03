@@ -113,12 +113,15 @@ size_t framebuffer_t::color_buffer_t::length(void) const {
     return width * height * color_t::bpp();
 }
 
-template <class _T>
-framebuffer_t::depth_buffer_t<_T>::depth_buffer_t(
-  const depth_buffer_t<_T>& _depth_buffer)
+const color_t* framebuffer_t::color_buffer_t::to_arr(void) {
+    return color_arr;
+}
+
+framebuffer_t::depth_buffer_t::depth_buffer_t(
+  const depth_buffer_t& _depth_buffer)
     : width(_depth_buffer.width), height(_depth_buffer.height) {
     try {
-        depth_arr = new _T[width * height];
+        depth_arr = new depth_t[width * height];
     } catch (const std::bad_alloc& e) {
         std::cerr << log(e.what()) << std::endl;
     }
@@ -128,13 +131,12 @@ framebuffer_t::depth_buffer_t<_T>::depth_buffer_t(
     return;
 }
 
-template <class _T>
-framebuffer_t::depth_buffer_t<_T>::depth_buffer_t(const uint32_t _w,
-                                                  const uint32_t _h,
-                                                  const _T&      _depth)
+framebuffer_t::depth_buffer_t::depth_buffer_t(const uint32_t _w,
+                                              const uint32_t _h,
+                                              const depth_t& _depth)
     : width(_w), height(_h) {
     try {
-        depth_arr = new _T[width * height];
+        depth_arr = new depth_t[width * height];
     } catch (const std::bad_alloc& e) {
         std::cerr << log(e.what()) << std::endl;
     }
@@ -142,8 +144,7 @@ framebuffer_t::depth_buffer_t<_T>::depth_buffer_t(const uint32_t _w,
     return;
 }
 
-template <class _T>
-framebuffer_t::depth_buffer_t<_T>::~depth_buffer_t(void) {
+framebuffer_t::depth_buffer_t::~depth_buffer_t(void) {
     width  = 0;
     height = 0;
     if (depth_arr != nullptr) {
@@ -152,9 +153,8 @@ framebuffer_t::depth_buffer_t<_T>::~depth_buffer_t(void) {
     return;
 }
 
-template <class _T>
-framebuffer_t::depth_buffer_t<_T>& framebuffer_t::depth_buffer_t<_T>::operator=(
-  const depth_buffer_t<_T>& _depth_buffer) {
+framebuffer_t::depth_buffer_t&
+framebuffer_t::depth_buffer_t::operator=(const depth_buffer_t& _depth_buffer) {
     if (width != _depth_buffer.width || height != _depth_buffer.height) {
         width  = _depth_buffer.width;
         height = _depth_buffer.height;
@@ -162,20 +162,21 @@ framebuffer_t::depth_buffer_t<_T>& framebuffer_t::depth_buffer_t<_T>::operator=(
             delete[] depth_arr;
         }
         try {
-            depth_arr = new _T[width * height];
+            depth_arr = new depth_t[width * height];
         } catch (const std::bad_alloc& e) {
             std::cerr << log(e.what()) << std::endl;
         }
     }
     std::copy(_depth_buffer.depth_arr,
-              _depth_buffer.depth_arr + width * height * sizeof(_T), depth_arr);
+              _depth_buffer.depth_arr + width * height * sizeof(depth_t),
+              depth_arr);
 
     return *this;
 }
 
-template <class _T>
-_T& framebuffer_t::depth_buffer_t<_T>::operator()(const uint32_t _x,
-                                                  const uint32_t _y) {
+framebuffer_t::depth_t&
+framebuffer_t::depth_buffer_t::operator()(const uint32_t _x,
+                                          const uint32_t _y) {
     if (_x >= width) {
         throw std::invalid_argument(log("_x >= width"));
     }
@@ -185,10 +186,9 @@ _T& framebuffer_t::depth_buffer_t<_T>::operator()(const uint32_t _x,
     return depth_arr[_y * width + _x];
 }
 
-template <class _T>
-const _T
-framebuffer_t::depth_buffer_t<_T>::operator()(const uint32_t _x,
-                                              const uint32_t _y) const {
+framebuffer_t::depth_t
+framebuffer_t::depth_buffer_t::operator()(const uint32_t _x,
+                                          const uint32_t _y) const {
     if (_x >= width) {
         throw std::invalid_argument(log("_x >= width"));
     }
@@ -198,8 +198,7 @@ framebuffer_t::depth_buffer_t<_T>::operator()(const uint32_t _x,
     return depth_arr[_y * width + _x];
 }
 
-template <class _T>
-void framebuffer_t::depth_buffer_t<_T>::clear(const _T& _depth) {
+void framebuffer_t::depth_buffer_t::clear(const depth_t& _depth) {
     if (std::isnan(_depth)) {
         throw(log("std::isnan(_depth)"));
     }
@@ -207,16 +206,15 @@ void framebuffer_t::depth_buffer_t<_T>::clear(const _T& _depth) {
     return;
 }
 
-template <class _T>
-size_t framebuffer_t::depth_buffer_t<_T>::length(void) const {
-    return width * height * sizeof(_T);
+size_t framebuffer_t::depth_buffer_t::length(void) const {
+    return width * height * sizeof(depth_t);
 }
 
 framebuffer_t::framebuffer_t(const uint32_t _width, const uint32_t _height)
     : width(_width),
       height(_height),
       color_buffer(color_buffer_t(_width, _height)),
-      depth_buffer(depth_buffer_t<depth_t>(_width, _height)) {
+      depth_buffer(depth_buffer_t(_width, _height)) {
     return;
 }
 
@@ -296,12 +294,21 @@ framebuffer_t::get_color_buffer(void) const {
     return color_buffer;
 }
 
-framebuffer_t::depth_buffer_t<framebuffer_t::depth_t>&
-framebuffer_t::get_depth_buffer(void) {
+framebuffer_t::depth_buffer_t& framebuffer_t::get_depth_buffer(void) {
     return depth_buffer;
 }
 
-const framebuffer_t::depth_buffer_t<framebuffer_t::depth_t>&
+framebuffer_t::depth_t&
+framebuffer_t::get_depth_buffer(const uint32_t _x, const uint32_t _y) {
+    return depth_buffer(_x, _y);
+}
+
+const framebuffer_t::depth_buffer_t&
 framebuffer_t::get_depth_buffer(void) const {
     return depth_buffer;
+}
+
+framebuffer_t::depth_t
+framebuffer_t::get_depth_buffer(const uint32_t _x, const uint32_t _y) const {
+    return depth_buffer(_x, _y);
 }
