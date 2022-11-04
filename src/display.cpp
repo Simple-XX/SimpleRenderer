@@ -224,12 +224,15 @@ void display_t::loop(void) {
     auto     start  = us();
     auto     end    = us();
     // 主循环
+    /// @todo 等待绘制完成后再更新画面，或者在 draw3d 中使用两个 framebuffer
+    ///     交替使用
     while (is_should_quit == false) {
         start = us();
         // 处理输入
         input_handler();
         // 清屏
         /// @todo 巨大性能开销
+        // std::cout << framebuffer.b << std::endl;
         framebuffer.clear();
         // 填充窗口
         fill();
