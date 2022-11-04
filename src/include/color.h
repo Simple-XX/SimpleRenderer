@@ -17,6 +17,7 @@
 #ifndef _COLOR_H_
 #define _COLOR_H_
 
+#include "array"
 #include "cstdint"
 #include "iostream"
 
@@ -35,7 +36,10 @@ private:
     static constexpr const size_t  BPP   = sizeof(uint8_t) * DEPTH;
 
     /// @brief 颜色数据，rgba
-    uint8_t                        color_data[DEPTH];
+    uint8_t                        channel_r;
+    uint8_t                        channel_g;
+    uint8_t                        channel_b;
+    uint8_t                        channel_a;
 
 public:
     static color_t WHITE;
@@ -135,16 +139,11 @@ public:
      */
     uint32_t             to_uint32(void) const;
 
-    /**
-     * @brief 转换为指针
-     * @return const uint8_t*   结果
-     */
-    const uint8_t*       to_arr(void) const;
-
     friend std::ostream& operator<<(std::ostream& _os, const color_t& _color) {
         _os << std::hex;
-        _os << "RGBA[ 0x" << +_color[0] << ", 0x" << +_color[1] << ", 0x"
-            << +_color[2] << ", 0x" << +_color[3] << " ]";
+        _os << "RGBA[ 0x" << +_color.channel_r << ", 0x" << +_color.channel_g
+            << ", 0x" << +_color.channel_b << ", 0x" << +_color.channel_a
+            << " ]";
         _os << std::dec;
 
         return _os;
