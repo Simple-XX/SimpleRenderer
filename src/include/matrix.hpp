@@ -28,12 +28,18 @@
 #include "vector.hpp"
 
 /**
+ * @brief 矩阵元素类型约束
+ * @tparam _T 元素类型
+ */
+template <class _T>
+concept matrix_element_concept_t = std::is_same<_T, float>::value;
+
+/**
  * @brief 四阶矩阵
  * @tparam _T 矩阵元素类型
  * @note 没有做数值合法检查
  */
-template <class _T>
-    requires std::is_same<_T, float>::value
+template <matrix_element_concept_t _T>
 class matrix4_t {
 private:
     /// @brief  阶数
@@ -469,7 +475,7 @@ public:
     /// @see https://zhuanlan.zhihu.com/p/377573738
 };
 
-template <class _T>
+template <matrix_element_concept_t _T>
 _T matrix4_t<_T>::determ(const uint8_t _order) const {
     // 递归返回条件
     if (_order == 1) {
@@ -489,7 +495,7 @@ _T matrix4_t<_T>::determ(const uint8_t _order) const {
     return res;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 const matrix4_t<_T>
 matrix4_t<_T>::cofactor(const uint8_t _row, const uint8_t _col,
                         const uint8_t _order) const {
@@ -512,7 +518,7 @@ matrix4_t<_T>::cofactor(const uint8_t _row, const uint8_t _col,
     return matrix4_t<_T>(tmp);
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::adjoint(void) const {
     _T tmp[ORDER * ORDER] = { 0 };
 
@@ -541,7 +547,7 @@ const matrix4_t<_T> matrix4_t<_T>::adjoint(void) const {
     return matrix4_t<_T>(tmp);
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 matrix4_t<_T>::matrix4_t(void) {
     mat_arr.fill(0);
     mat_arr[0]  = 1;
@@ -552,13 +558,13 @@ matrix4_t<_T>::matrix4_t(void) {
     return;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 matrix4_t<_T>::matrix4_t(const matrix4_t<_T>& _mat) {
     mat_arr = _mat.mat_arr;
     return;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 matrix4_t<_T>::matrix4_t(const _T* const _arr) {
     if (_arr == nullptr) {
         throw std::invalid_argument(log("_arr == nullptr"));
@@ -587,7 +593,7 @@ matrix4_t<_T>::matrix4_t(const _T* const _arr) {
     return;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 matrix4_t<_T>::matrix4_t(const _T _arr[ORDER][ORDER]) {
     if (_arr == nullptr) {
         throw std::invalid_argument(log("_arr == nullptr"));
@@ -616,7 +622,7 @@ matrix4_t<_T>::matrix4_t(const _T _arr[ORDER][ORDER]) {
     return;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 matrix4_t<_T>::matrix4_t(const vector4_t<_T>& _v) {
     mat_arr.fill(0);
     mat_arr[0]  = _v.x;
@@ -626,7 +632,7 @@ matrix4_t<_T>::matrix4_t(const vector4_t<_T>& _v) {
     return;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 matrix4_t<_T>& matrix4_t<_T>::operator=(const matrix4_t<_T>& _mat) {
     if (this == &_mat) {
         throw std::runtime_error(log("this == &_mat"));
@@ -635,17 +641,17 @@ matrix4_t<_T>& matrix4_t<_T>::operator=(const matrix4_t<_T>& _mat) {
     return *this;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 bool matrix4_t<_T>::operator==(const matrix4_t<_T>& _mat) const {
     return mat_arr == _mat.mat_arr;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 bool matrix4_t<_T>::operator!=(const matrix4_t<_T>& _mat) const {
     return mat_arr != _mat.mat_arr;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::operator+(const matrix4_t<_T>& _mat) const {
     _T tmp[ORDER * ORDER] = { 0 };
 
@@ -672,7 +678,7 @@ const matrix4_t<_T> matrix4_t<_T>::operator+(const matrix4_t<_T>& _mat) const {
     return matrix4_t<_T>(tmp);
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 matrix4_t<_T>& matrix4_t<_T>::operator+=(const matrix4_t<_T>& _mat) {
     mat_arr[0]  += _mat.mat_arr[0];
     mat_arr[1]  += _mat.mat_arr[1];
@@ -697,7 +703,7 @@ matrix4_t<_T>& matrix4_t<_T>::operator+=(const matrix4_t<_T>& _mat) {
     return *this;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::operator-(const matrix4_t<_T>& _mat) const {
     _T tmp[ORDER * ORDER] = { 0 };
 
@@ -724,7 +730,7 @@ const matrix4_t<_T> matrix4_t<_T>::operator-(const matrix4_t<_T>& _mat) const {
     return matrix4_t<_T>(tmp);
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 matrix4_t<_T>& matrix4_t<_T>::operator-=(const matrix4_t<_T>& _mat) {
     mat_arr[0]  -= _mat.mat_arr[0];
     mat_arr[1]  -= _mat.mat_arr[1];
@@ -749,7 +755,7 @@ matrix4_t<_T>& matrix4_t<_T>::operator-=(const matrix4_t<_T>& _mat) {
     return *this;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::operator*(const matrix4_t<_T>& _mat) const {
     _T tmp[ORDER * ORDER] = { 0 };
     tmp[0] = mat_arr[0] * _mat.mat_arr[0] + mat_arr[1] * _mat.mat_arr[4]
@@ -791,7 +797,7 @@ const matrix4_t<_T> matrix4_t<_T>::operator*(const matrix4_t<_T>& _mat) const {
     return matrix4_t<_T>(tmp);
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 matrix4_t<_T>& matrix4_t<_T>::operator*=(const _T& _v) {
     for (uint8_t i = 0; i < ORDER * ORDER; i++) {
         mat_arr[i] *= _v;
@@ -800,7 +806,7 @@ matrix4_t<_T>& matrix4_t<_T>::operator*=(const _T& _v) {
     return *this;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 matrix4_t<_T>& matrix4_t<_T>::operator*=(const matrix4_t<_T>& _mat) {
     _T tmp[ORDER * ORDER] = { 0 };
     tmp[0] = mat_arr[0] * _mat.mat_arr[0] + mat_arr[1] * _mat.mat_arr[4]
@@ -862,7 +868,7 @@ matrix4_t<_T>& matrix4_t<_T>::operator*=(const matrix4_t<_T>& _mat) {
     return *this;
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 _T matrix4_t<_T>::operator[](const uint8_t _idx) {
     if (_idx > ORDER) {
         throw std::invalid_argument(log("_idx > ORDER"));
@@ -870,7 +876,7 @@ _T matrix4_t<_T>::operator[](const uint8_t _idx) {
     return mat_arr[_idx];
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 const _T matrix4_t<_T>::operator[](const uint8_t _idx) const {
     if (_idx > ORDER) {
         throw std::invalid_argument(log("_idx > ORDER"));
@@ -878,7 +884,7 @@ const _T matrix4_t<_T>::operator[](const uint8_t _idx) const {
     return mat_arr[_idx];
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::transpose(void) const {
     _T tmp[ORDER * ORDER] = { 0 };
     tmp[0]                = mat_arr[0];
@@ -904,7 +910,7 @@ const matrix4_t<_T> matrix4_t<_T>::transpose(void) const {
     return matrix4_t<_T>(tmp);
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::inverse(void) const {
     // 计算行列式
     _T det = determ(ORDER);
@@ -920,7 +926,7 @@ const matrix4_t<_T> matrix4_t<_T>::inverse(void) const {
     return matrix4_t<_T>(tmp);
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::scale(const _T& _scale) const {
     _T tmp[ORDER * ORDER] = { 0 };
 
@@ -947,7 +953,7 @@ const matrix4_t<_T> matrix4_t<_T>::scale(const _T& _scale) const {
     return matrix4_t<_T>(tmp);
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 const matrix4_t<_T>
 matrix4_t<_T>::scale(const _T& _x, const _T& _y, const _T& _z) const {
     _T tmp[ORDER * ORDER] = { 0 };
@@ -976,7 +982,7 @@ matrix4_t<_T>::scale(const _T& _x, const _T& _y, const _T& _z) const {
 }
 
 /// @todo 精度问题
-template <class _T>
+template <matrix_element_concept_t _T>
 const matrix4_t<_T>
 matrix4_t<_T>::rotate(const vector4_t<_T>& _axis, const float& _angle) const {
     // 角度转弧度
@@ -1030,7 +1036,7 @@ matrix4_t<_T>::rotate(const vector4_t<_T>& _axis, const float& _angle) const {
 }
 
 /// @todo 精度问题
-template <class _T>
+template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::rotate_from_to(const vector4f_t& _from,
                                                   const vector4f_t& _to) const {
     auto f = _from.normalize();
@@ -1078,7 +1084,7 @@ const matrix4_t<_T> matrix4_t<_T>::rotate_from_to(const vector4f_t& _from,
     return matrix4_t<_T>(tmp);
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 const matrix4_t<_T>
 matrix4_t<_T>::translate(const _T& _x, const _T& _y, const _T& _z) const {
     _T tmp[ORDER * ORDER] = { 0 };
@@ -1106,12 +1112,12 @@ matrix4_t<_T>::translate(const _T& _x, const _T& _y, const _T& _z) const {
     return matrix4_t<_T>(tmp);
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 float matrix4_t<_T>::RAD(const float _deg) {
     return ((M_PI / 180) * (_deg));
 }
 
-template <class _T>
+template <matrix_element_concept_t _T>
 float matrix4_t<_T>::DEG(const float _rad) {
     return ((180 / M_PI) * (_rad));
 }

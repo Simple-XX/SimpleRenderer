@@ -25,13 +25,19 @@
 #include "log.hpp"
 
 /**
+ * @brief 向量元素类型约束
+ * @tparam _T 元素类型
+ */
+template <class _T>
+concept vector_element_concept_t = std::is_same<_T, float>::value;
+
+/**
  * @brief 4 维向量，默认为列向量
  * @tparam _T                类型
  * @note w 为 0 时表示向量，w 为 1 时表示点
  * @note 没有做数值合法检查
  */
-template <class _T>
-    requires std::is_same<_T, float>::value
+template <vector_element_concept_t _T>
 class vector4_t {
 public:
     /// @brief 表示一个向量
@@ -128,7 +134,7 @@ public:
      * @param  _s              数
      * @return const vector4_t<_T>  结果
      */
-    template <class _U>
+    template <vector_element_concept_t _U>
     const vector4_t<_T> operator*(const _U _s) const;
 
     /**
@@ -148,7 +154,7 @@ public:
      * @param  _s              数
      * @return vector4_t<_T>&    结果
      */
-    template <class _U>
+    template <vector_element_concept_t _U>
     vector4_t<_T>&      operator*=(const _U _s);
 
     /// @brief 行向量*=矩阵见 matrix.hpp
@@ -169,7 +175,7 @@ public:
      * @param  _f              数
      * @return vector4_t<_T>     结果
      */
-    template <class _U>
+    template <vector_element_concept_t _U>
     const vector4_t<_T> operator/(const _U _f) const;
 
     /**
@@ -178,7 +184,7 @@ public:
      * @param  _f              数
      * @return vector4_t<_T>&    结果
      */
-    template <class _U>
+    template <vector_element_concept_t _U>
     vector4_t<_T>&      operator/=(const _U _f);
 
     /**
@@ -257,7 +263,7 @@ public:
                         }
 };
 
-template <class _T>
+template <vector_element_concept_t _T>
 vector4_t<_T>::vector4_t(void) {
     x = 0;
     y = 0;
@@ -266,13 +272,13 @@ vector4_t<_T>::vector4_t(void) {
     return;
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 vector4_t<_T>::vector4_t(const _T& _x, const _T& _y, const _T& _z, const _T& _w)
     : x(_x), y(_y), z(_z), w(_w) {
     return;
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 vector4_t<_T>::vector4_t(const vector4_t<_T>& _v) {
     x = _v.x;
     y = _v.y;
@@ -281,7 +287,7 @@ vector4_t<_T>::vector4_t(const vector4_t<_T>& _v) {
     return;
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 vector4_t<_T>& vector4_t<_T>::operator=(const vector4_t<_T>& _v) {
     x = _v.x;
     y = _v.y;
@@ -290,7 +296,7 @@ vector4_t<_T>& vector4_t<_T>::operator=(const vector4_t<_T>& _v) {
     return *this;
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 bool vector4_t<_T>::operator==(const vector4_t<_T>& _v) const {
     if (std::abs(x - _v.x) > std::numeric_limits<_T>::epsilon()) {
         return false;
@@ -311,7 +317,7 @@ bool vector4_t<_T>::operator==(const vector4_t<_T>& _v) const {
     return true;
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 bool vector4_t<_T>::operator!=(const vector4_t<_T>& _v) const {
     if (std::abs(x - _v.x) > std::numeric_limits<_T>::epsilon()) {
         return true;
@@ -332,12 +338,12 @@ bool vector4_t<_T>::operator!=(const vector4_t<_T>& _v) const {
     return false;
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 const vector4_t<_T> vector4_t<_T>::operator+(const vector4_t<_T>& _v) const {
     return vector4_t(x + _v.x, y + _v.y, z + _v.z, w + _v.w);
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 vector4_t<_T>& vector4_t<_T>::operator+=(const vector4_t<_T>& _v) {
     x += _v.x;
     y += _v.y;
@@ -346,17 +352,17 @@ vector4_t<_T>& vector4_t<_T>::operator+=(const vector4_t<_T>& _v) {
     return *this;
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 const vector4_t<_T> vector4_t<_T>::operator-(void) const {
     return vector4_t<_T>(-x, -y, -z, -w);
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 const vector4_t<_T> vector4_t<_T>::operator-(const vector4_t<_T>& _v) const {
     return vector4_t(x - _v.x, y - _v.y, z - _v.z, w - _v.w);
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 vector4_t<_T>& vector4_t<_T>::operator-=(const vector4_t<_T>& _v) {
     x -= _v.x;
     y -= _v.y;
@@ -365,19 +371,19 @@ vector4_t<_T>& vector4_t<_T>::operator-=(const vector4_t<_T>& _v) {
     return *this;
 }
 
-template <class _T>
-template <class _U>
+template <vector_element_concept_t _T>
+template <vector_element_concept_t _U>
 const vector4_t<_T> vector4_t<_T>::operator*(const _U _s) const {
     return vector4_t<_T>(x * _s, y * _s, z * _s, w * _s);
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 const _T vector4_t<_T>::operator*(const vector4_t<_T>& _v) const {
     return x * _v.x + y * _v.y + z * _v.z + w * _v.w;
 }
 
-template <class _T>
-template <class _U>
+template <vector_element_concept_t _T>
+template <vector_element_concept_t _U>
 vector4_t<_T>& vector4_t<_T>::operator*=(const _U _s) {
     x *= _s;
     y *= _s;
@@ -386,14 +392,14 @@ vector4_t<_T>& vector4_t<_T>::operator*=(const _U _s) {
     return *this;
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 const vector4_t<_T> vector4_t<_T>::operator^(const vector4_t<_T>& _v) const {
     return vector4_t<_T>((y * _v.z) - (z * _v.y), (z * _v.x) - (x * _v.z),
                          (x * _v.y) - (y * _v.x), W_VECTOR);
 }
 
-template <class _T>
-template <class _U>
+template <vector_element_concept_t _T>
+template <vector_element_concept_t _U>
 const vector4_t<_T> vector4_t<_T>::operator/(const _U _f) const {
     if (_f == 0) {
         throw std::invalid_argument(log("_f == 0"));
@@ -402,8 +408,8 @@ const vector4_t<_T> vector4_t<_T>::operator/(const _U _f) const {
     return vector4_t<_T>(x * inv, y * inv, z * inv, w * inv);
 }
 
-template <class _T>
-template <class _U>
+template <vector_element_concept_t _T>
+template <vector_element_concept_t _U>
 vector4_t<_T>& vector4_t<_T>::operator/=(const _U _f) {
     if (_f == 0) {
         throw std::invalid_argument(log("_f == 0"));
@@ -416,7 +422,7 @@ vector4_t<_T>& vector4_t<_T>::operator/=(const _U _f) {
     return *this;
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 const _T vector4_t<_T>::operator[](const uint32_t _idx) const {
     if (_idx > 3) {
         throw std::invalid_argument(log("_idx > 3"));
@@ -435,7 +441,7 @@ const _T vector4_t<_T>::operator[](const uint32_t _idx) const {
     }
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 _T vector4_t<_T>::operator[](const uint32_t _idx) {
     if (_idx > 3) {
         throw std::invalid_argument(log("_idx > 3"));
@@ -454,22 +460,22 @@ _T vector4_t<_T>::operator[](const uint32_t _idx) {
     }
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 const _T vector4_t<_T>::length_squared(void) const {
     return x * x + y * y + z * z + w * w;
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 const _T vector4_t<_T>::length(void) const {
     return std::sqrt(length_squared());
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 const vector4_t<_T> vector4_t<_T>::abs(const vector4_t<_T>& _v) {
     return vector4_t<_T>(std::abs(_v.x), std::abs(_v.y), std::abs(_v.z));
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 const vector4_t<_T> vector4_t<_T>::normalize(void) const {
     if (length() == 0) {
         return vector4_t<_T>();
@@ -478,13 +484,13 @@ const vector4_t<_T> vector4_t<_T>::normalize(void) const {
                          w / length());
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 const vector4_t<_T> vector4_t<_T>::min(const vector4_t<_T>& _v) const {
     return vector4_t<_T>(std::min(x, _v.x), std::min(y, _v.y),
                          std::min(z, _v.z));
 }
 
-template <class _T>
+template <vector_element_concept_t _T>
 const vector4_t<_T> vector4_t<_T>::max(const vector4_t<_T>& _v) const {
     return vector4_t<_T>(std::max(x, _v.x), std::max(y, _v.y),
                          std::max(z, _v.z));

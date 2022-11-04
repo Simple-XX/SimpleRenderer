@@ -271,7 +271,7 @@ public:
      * @brief 获取颜色缓存
      * @return color_buffer_t&  颜色缓存
      */
-    color_buffer_t& get_color_buffer(void);
+    color_buffer_t&       get_color_buffer(void);
 
     /**
      * @brief 获取颜色缓存
