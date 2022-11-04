@@ -21,21 +21,10 @@
 #include "log.hpp"
 
 void display_t::fill(void) {
-    // 设置清屏颜色
-    auto res = SDL_SetRenderDrawColor(sdl_renderer, 0, 0, 0, 255);
-    if (res != 0) {
-        throw std::runtime_error(log(SDL_GetError()));
-    }
-    // 清屏
-    res = SDL_RenderClear(sdl_renderer);
-    if (res != 0) {
-        throw std::runtime_error(log(SDL_GetError()));
-    }
-
     // 更新 texture
-    res = SDL_UpdateTexture(sdl_texture, nullptr,
-                            framebuffer.get_color_buffer().to_arr(),
-                            width * color_t::bpp());
+    auto res = SDL_UpdateTexture(sdl_texture, nullptr,
+                                 framebuffer.get_color_buffer().to_arr(),
+                                 width * color_t::bpp());
     if (res != 0) {
         throw std::runtime_error(log(SDL_GetError()));
     }
