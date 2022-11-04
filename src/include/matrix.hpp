@@ -45,7 +45,7 @@ private:
     /// @brief  阶数
     static constexpr const uint8_t ORDER = 4;
     /// @brief 矩阵元素
-    std::array<_T, ORDER * ORDER>  mat_arr;
+    std::array<_T, ORDER * ORDER>  elems;
 
     /**
      * @brief 递归求 n 阶行列式的值
@@ -163,25 +163,25 @@ public:
     operator*(const _U& _v, const matrix4_t<_T>& _mat) {
         _T tmp[ORDER * ORDER] = { 0 };
 
-        tmp[0]                = _mat.mat_arr[0] * _v;
-        tmp[1]                = _mat.mat_arr[1] * _v;
-        tmp[2]                = _mat.mat_arr[2] * _v;
-        tmp[3]                = _mat.mat_arr[3] * _v;
+        tmp[0]                = _mat.elems[0] * _v;
+        tmp[1]                = _mat.elems[1] * _v;
+        tmp[2]                = _mat.elems[2] * _v;
+        tmp[3]                = _mat.elems[3] * _v;
 
-        tmp[4]                = _mat.mat_arr[4] * _v;
-        tmp[5]                = _mat.mat_arr[5] * _v;
-        tmp[6]                = _mat.mat_arr[6] * _v;
-        tmp[7]                = _mat.mat_arr[7] * _v;
+        tmp[4]                = _mat.elems[4] * _v;
+        tmp[5]                = _mat.elems[5] * _v;
+        tmp[6]                = _mat.elems[6] * _v;
+        tmp[7]                = _mat.elems[7] * _v;
 
-        tmp[8]                = _mat.mat_arr[8] * _v;
-        tmp[9]                = _mat.mat_arr[9] * _v;
-        tmp[10]               = _mat.mat_arr[10] * _v;
-        tmp[11]               = _mat.mat_arr[11] * _v;
+        tmp[8]                = _mat.elems[8] * _v;
+        tmp[9]                = _mat.elems[9] * _v;
+        tmp[10]               = _mat.elems[10] * _v;
+        tmp[11]               = _mat.elems[11] * _v;
 
-        tmp[12]               = _mat.mat_arr[12] * _v;
-        tmp[13]               = _mat.mat_arr[13] * _v;
-        tmp[14]               = _mat.mat_arr[14] * _v;
-        tmp[15]               = _mat.mat_arr[15] * _v;
+        tmp[12]               = _mat.elems[12] * _v;
+        tmp[13]               = _mat.elems[13] * _v;
+        tmp[14]               = _mat.elems[14] * _v;
+        tmp[15]               = _mat.elems[15] * _v;
 
         return matrix4_t<_T>(tmp);
     }
@@ -198,25 +198,25 @@ public:
     operator*(const matrix4_t<_T>& _mat, const _U& _v) {
         _T tmp[ORDER * ORDER] = { 0 };
 
-        tmp[0]                = _v * _mat.mat_arr[0];
-        tmp[1]                = _v * _mat.mat_arr[1];
-        tmp[2]                = _v * _mat.mat_arr[2];
-        tmp[3]                = _v * _mat.mat_arr[3];
+        tmp[0]                = _v * _mat.elems[0];
+        tmp[1]                = _v * _mat.elems[1];
+        tmp[2]                = _v * _mat.elems[2];
+        tmp[3]                = _v * _mat.elems[3];
 
-        tmp[4]                = _v * _mat.mat_arr[4];
-        tmp[5]                = _v * _mat.mat_arr[5];
-        tmp[6]                = _v * _mat.mat_arr[6];
-        tmp[7]                = _v * _mat.mat_arr[7];
+        tmp[4]                = _v * _mat.elems[4];
+        tmp[5]                = _v * _mat.elems[5];
+        tmp[6]                = _v * _mat.elems[6];
+        tmp[7]                = _v * _mat.elems[7];
 
-        tmp[8]                = _v * _mat.mat_arr[8];
-        tmp[9]                = _v * _mat.mat_arr[9];
-        tmp[10]               = _v * _mat.mat_arr[10];
-        tmp[11]               = _v * _mat.mat_arr[11];
+        tmp[8]                = _v * _mat.elems[8];
+        tmp[9]                = _v * _mat.elems[9];
+        tmp[10]               = _v * _mat.elems[10];
+        tmp[11]               = _v * _mat.elems[11];
 
-        tmp[12]               = _v * _mat.mat_arr[12];
-        tmp[13]               = _v * _mat.mat_arr[13];
-        tmp[14]               = _v * _mat.mat_arr[14];
-        tmp[15]               = _v * _mat.mat_arr[15];
+        tmp[12]               = _v * _mat.elems[12];
+        tmp[13]               = _v * _mat.elems[13];
+        tmp[14]               = _v * _mat.elems[14];
+        tmp[15]               = _v * _mat.elems[15];
 
         return matrix4_t<_T>(tmp);
     }
@@ -231,14 +231,14 @@ public:
     template <class _U>
     friend const vector4_t<_U>
     operator*(const vector4_t<_U>& _v, const matrix4_t<_T>& _mat) {
-        auto new_x = _v.x * _mat.mat_arr[0] + _v.y * _mat.mat_arr[4]
-                   + _v.z * _mat.mat_arr[8] + _v.w * _mat.mat_arr[12];
-        auto new_y = _v.x * _mat.mat_arr[1] + _v.y * _mat.mat_arr[5]
-                   + _v.z * _mat.mat_arr[9] + _v.w * _mat.mat_arr[13];
-        auto new_z = _v.x * _mat.mat_arr[2] + _v.y * _mat.mat_arr[6]
-                   + _v.z * _mat.mat_arr[10] + _v.w * _mat.mat_arr[14];
-        auto new_w = _v.x * _mat.mat_arr[3] + _v.y * _mat.mat_arr[7]
-                   + _v.z * _mat.mat_arr[11] + _v.w * _mat.mat_arr[15];
+        auto new_x = _v.x * _mat.elems[0] + _v.y * _mat.elems[4]
+                   + _v.z * _mat.elems[8] + _v.w * _mat.elems[12];
+        auto new_y = _v.x * _mat.elems[1] + _v.y * _mat.elems[5]
+                   + _v.z * _mat.elems[9] + _v.w * _mat.elems[13];
+        auto new_z = _v.x * _mat.elems[2] + _v.y * _mat.elems[6]
+                   + _v.z * _mat.elems[10] + _v.w * _mat.elems[14];
+        auto new_w = _v.x * _mat.elems[3] + _v.y * _mat.elems[7]
+                   + _v.z * _mat.elems[11] + _v.w * _mat.elems[15];
         return vector4_t<_U>(new_x, new_y, new_z, new_w);
     }
 
@@ -252,14 +252,14 @@ public:
     template <class _U>
     friend const vector4_t<_U>
     operator*(const matrix4_t<_T>& _mat, const vector4_t<_U>& _v) {
-        auto new_x = _v.x * _mat.mat_arr[0] + _v.y * _mat.mat_arr[1]
-                   + _v.z * _mat.mat_arr[2] + _v.w * _mat.mat_arr[3];
-        auto new_y = _v.x * _mat.mat_arr[4] + _v.y * _mat.mat_arr[5]
-                   + _v.z * _mat.mat_arr[6] + _v.w * _mat.mat_arr[7];
-        auto new_z = _v.x * _mat.mat_arr[8] + _v.y * _mat.mat_arr[9]
-                   + _v.z * _mat.mat_arr[10] + _v.w * _mat.mat_arr[11];
-        auto new_w = _v.x * _mat.mat_arr[12] + _v.y * _mat.mat_arr[13]
-                   + _v.z * _mat.mat_arr[14] + _v.w * _mat.mat_arr[15];
+        auto new_x = _v.x * _mat.elems[0] + _v.y * _mat.elems[1]
+                   + _v.z * _mat.elems[2] + _v.w * _mat.elems[3];
+        auto new_y = _v.x * _mat.elems[4] + _v.y * _mat.elems[5]
+                   + _v.z * _mat.elems[6] + _v.w * _mat.elems[7];
+        auto new_z = _v.x * _mat.elems[8] + _v.y * _mat.elems[9]
+                   + _v.z * _mat.elems[10] + _v.w * _mat.elems[11];
+        auto new_w = _v.x * _mat.elems[12] + _v.y * _mat.elems[13]
+                   + _v.z * _mat.elems[14] + _v.w * _mat.elems[15];
         return vector4_t<_U>(new_x, new_y, new_z, new_w);
     }
 
@@ -287,14 +287,14 @@ public:
     template <class _U>
     friend vector4_t<_U>&
     operator*=(vector4_t<_U>& _v, const matrix4_t<_T>& _mat) {
-        auto new_x = _v.x * _mat.mat_arr[0] + _v.y * _mat.mat_arr[4]
-                   + _v.z * _mat.mat_arr[8] + _v.w * _mat.mat_arr[12];
-        auto new_y = _v.x * _mat.mat_arr[1] + _v.y * _mat.mat_arr[5]
-                   + _v.z * _mat.mat_arr[9] + _v.w * _mat.mat_arr[13];
-        auto new_z = _v.x * _mat.mat_arr[2] + _v.y * _mat.mat_arr[6]
-                   + _v.z * _mat.mat_arr[10] + _v.w * _mat.mat_arr[14];
-        auto new_w = _v.x * _mat.mat_arr[3] + _v.y * _mat.mat_arr[7]
-                   + _v.z * _mat.mat_arr[11] + _v.w * _mat.mat_arr[15];
+        auto new_x = _v.x * _mat.elems[0] + _v.y * _mat.elems[4]
+                   + _v.z * _mat.elems[8] + _v.w * _mat.elems[12];
+        auto new_y = _v.x * _mat.elems[1] + _v.y * _mat.elems[5]
+                   + _v.z * _mat.elems[9] + _v.w * _mat.elems[13];
+        auto new_z = _v.x * _mat.elems[2] + _v.y * _mat.elems[6]
+                   + _v.z * _mat.elems[10] + _v.w * _mat.elems[14];
+        auto new_w = _v.x * _mat.elems[3] + _v.y * _mat.elems[7]
+                   + _v.z * _mat.elems[11] + _v.w * _mat.elems[15];
 
         _v.x = new_x;
         _v.y = new_y;
@@ -313,14 +313,14 @@ public:
     template <class _U>
     friend vector4_t<_U>&
     operator*=(const matrix4_t<_T>& _mat, vector4_t<_U>& _v) {
-        auto new_x = _v.x * _mat.mat_arr[0] + _v.y * _mat.mat_arr[1]
-                   + _v.z * _mat.mat_arr[2] + _v.w * _mat.mat_arr[3];
-        auto new_y = _v.x * _mat.mat_arr[4] + _v.y * _mat.mat_arr[5]
-                   + _v.z * _mat.mat_arr[6] + _v.w * _mat.mat_arr[7];
-        auto new_z = _v.x * _mat.mat_arr[8] + _v.y * _mat.mat_arr[9]
-                   + _v.z * _mat.mat_arr[10] + _v.w * _mat.mat_arr[11];
-        auto new_w = _v.x * _mat.mat_arr[12] + _v.y * _mat.mat_arr[13]
-                   + _v.z * _mat.mat_arr[14] + _v.w * _mat.mat_arr[15];
+        auto new_x = _v.x * _mat.elems[0] + _v.y * _mat.elems[1]
+                   + _v.z * _mat.elems[2] + _v.w * _mat.elems[3];
+        auto new_y = _v.x * _mat.elems[4] + _v.y * _mat.elems[5]
+                   + _v.z * _mat.elems[6] + _v.w * _mat.elems[7];
+        auto new_z = _v.x * _mat.elems[8] + _v.y * _mat.elems[9]
+                   + _v.z * _mat.elems[10] + _v.w * _mat.elems[11];
+        auto new_w = _v.x * _mat.elems[12] + _v.y * _mat.elems[13]
+                   + _v.z * _mat.elems[14] + _v.w * _mat.elems[15];
 
         _v.x = new_x;
         _v.y = new_y;
@@ -446,21 +446,21 @@ public:
 
         _os << "{\n";
 
-        _os << std::setw(4) << "{" << std::setw(25) << _mat.mat_arr[0] << ", "
-            << _mat.mat_arr[1] << ", " << _mat.mat_arr[2] << ", "
-            << _mat.mat_arr[3] << "},\n";
+        _os << std::setw(4) << "{" << std::setw(25) << _mat.elems[0] << ", "
+            << _mat.elems[1] << ", " << _mat.elems[2] << ", " << _mat.elems[3]
+            << "},\n";
 
-        _os << std::setw(4) << "{" << std::setw(25) << _mat.mat_arr[4] << ", "
-            << _mat.mat_arr[5] << ", " << _mat.mat_arr[6] << ", "
-            << _mat.mat_arr[7] << "},\n";
+        _os << std::setw(4) << "{" << std::setw(25) << _mat.elems[4] << ", "
+            << _mat.elems[5] << ", " << _mat.elems[6] << ", " << _mat.elems[7]
+            << "},\n";
 
-        _os << std::setw(4) << "{" << std::setw(25) << _mat.mat_arr[8] << ", "
-            << _mat.mat_arr[9] << ", " << _mat.mat_arr[10] << ", "
-            << _mat.mat_arr[11] << "},\n";
+        _os << std::setw(4) << "{" << std::setw(25) << _mat.elems[8] << ", "
+            << _mat.elems[9] << ", " << _mat.elems[10] << ", " << _mat.elems[11]
+            << "},\n";
 
-        _os << std::setw(4) << "{" << std::setw(25) << _mat.mat_arr[12] << ", "
-            << _mat.mat_arr[13] << ", " << _mat.mat_arr[14] << ", "
-            << _mat.mat_arr[15] << "}\n";
+        _os << std::setw(4) << "{" << std::setw(25) << _mat.elems[12] << ", "
+            << _mat.elems[13] << ", " << _mat.elems[14] << ", "
+            << _mat.elems[15] << "}\n";
 
         _os << "}";
 
@@ -479,15 +479,15 @@ template <matrix_element_concept_t _T>
 _T matrix4_t<_T>::determ(const uint8_t _order) const {
     // 递归返回条件
     if (_order == 1) {
-        return mat_arr[0];
+        return elems[0];
     }
 
     _T  res  = 0;
     // 当前正负
     int sign = 1;
     // 计算 mat[0][i] 的代数余子式
-    for (uint8_t i = 0; i < _order; i++) {
-        res  += sign * mat_arr[i] * cofactor(0, i, _order).determ(_order - 1);
+    for (auto i = 0; i < _order; i++) {
+        res  += sign * elems[i] * cofactor(0, i, _order).determ(_order - 1);
         // 符号取反
         sign = -sign;
     }
@@ -502,10 +502,10 @@ matrix4_t<_T>::cofactor(const uint8_t _row, const uint8_t _col,
     _T   tmp[ORDER * ORDER] = { 0 };
     auto row_idx            = 0;
     auto col_idx            = 0;
-    for (uint8_t i = 0; i < _order; i++) {
-        for (uint8_t j = 0; j < _order; j++) {
+    for (auto i = 0; i < _order; i++) {
+        for (auto j = 0; j < _order; j++) {
             if (i != _row && j != _col) {
-                tmp[row_idx * ORDER + col_idx++] = mat_arr[i * ORDER + j];
+                tmp[row_idx * ORDER + col_idx++] = elems[i * ORDER + j];
                 // 换行
                 if (col_idx == _order - 1) {
                     col_idx = 0;
@@ -549,18 +549,18 @@ const matrix4_t<_T> matrix4_t<_T>::adjoint(void) const {
 
 template <matrix_element_concept_t _T>
 matrix4_t<_T>::matrix4_t(void) {
-    mat_arr.fill(0);
-    mat_arr[0]  = 1;
-    mat_arr[5]  = 1;
-    mat_arr[10] = 1;
-    mat_arr[15] = 1;
+    elems.fill(0);
+    elems[0]  = 1;
+    elems[5]  = 1;
+    elems[10] = 1;
+    elems[15] = 1;
 
     return;
 }
 
 template <matrix_element_concept_t _T>
 matrix4_t<_T>::matrix4_t(const matrix4_t<_T>& _mat) {
-    mat_arr = _mat.mat_arr;
+    elems = _mat.elems;
     return;
 }
 
@@ -570,25 +570,25 @@ matrix4_t<_T>::matrix4_t(const _T* const _arr) {
         throw std::invalid_argument(log("_arr == nullptr"));
     }
 
-    mat_arr[0]  = _arr[0];
-    mat_arr[1]  = _arr[1];
-    mat_arr[2]  = _arr[2];
-    mat_arr[3]  = _arr[3];
+    elems[0]  = _arr[0];
+    elems[1]  = _arr[1];
+    elems[2]  = _arr[2];
+    elems[3]  = _arr[3];
 
-    mat_arr[4]  = _arr[4];
-    mat_arr[5]  = _arr[5];
-    mat_arr[6]  = _arr[6];
-    mat_arr[7]  = _arr[7];
+    elems[4]  = _arr[4];
+    elems[5]  = _arr[5];
+    elems[6]  = _arr[6];
+    elems[7]  = _arr[7];
 
-    mat_arr[8]  = _arr[8];
-    mat_arr[9]  = _arr[9];
-    mat_arr[10] = _arr[10];
-    mat_arr[11] = _arr[11];
+    elems[8]  = _arr[8];
+    elems[9]  = _arr[9];
+    elems[10] = _arr[10];
+    elems[11] = _arr[11];
 
-    mat_arr[12] = _arr[12];
-    mat_arr[13] = _arr[13];
-    mat_arr[14] = _arr[14];
-    mat_arr[15] = _arr[15];
+    elems[12] = _arr[12];
+    elems[13] = _arr[13];
+    elems[14] = _arr[14];
+    elems[15] = _arr[15];
 
     return;
 }
@@ -599,36 +599,36 @@ matrix4_t<_T>::matrix4_t(const _T _arr[ORDER][ORDER]) {
         throw std::invalid_argument(log("_arr == nullptr"));
     }
 
-    mat_arr[0]  = _arr[0][0];
-    mat_arr[1]  = _arr[0][1];
-    mat_arr[2]  = _arr[0][2];
-    mat_arr[3]  = _arr[0][3];
+    elems[0]  = _arr[0][0];
+    elems[1]  = _arr[0][1];
+    elems[2]  = _arr[0][2];
+    elems[3]  = _arr[0][3];
 
-    mat_arr[4]  = _arr[1][0];
-    mat_arr[5]  = _arr[1][1];
-    mat_arr[6]  = _arr[1][2];
-    mat_arr[7]  = _arr[1][3];
+    elems[4]  = _arr[1][0];
+    elems[5]  = _arr[1][1];
+    elems[6]  = _arr[1][2];
+    elems[7]  = _arr[1][3];
 
-    mat_arr[8]  = _arr[2][0];
-    mat_arr[9]  = _arr[2][1];
-    mat_arr[10] = _arr[2][2];
-    mat_arr[11] = _arr[2][3];
+    elems[8]  = _arr[2][0];
+    elems[9]  = _arr[2][1];
+    elems[10] = _arr[2][2];
+    elems[11] = _arr[2][3];
 
-    mat_arr[12] = _arr[3][0];
-    mat_arr[13] = _arr[3][1];
-    mat_arr[14] = _arr[3][2];
-    mat_arr[15] = _arr[3][3];
+    elems[12] = _arr[3][0];
+    elems[13] = _arr[3][1];
+    elems[14] = _arr[3][2];
+    elems[15] = _arr[3][3];
 
     return;
 }
 
 template <matrix_element_concept_t _T>
 matrix4_t<_T>::matrix4_t(const vector4_t<_T>& _v) {
-    mat_arr.fill(0);
-    mat_arr[0]  = _v.x;
-    mat_arr[5]  = _v.y;
-    mat_arr[10] = _v.z;
-    mat_arr[15] = _v.w;
+    elems.fill(0);
+    elems[0]  = _v.x;
+    elems[5]  = _v.y;
+    elems[10] = _v.z;
+    elems[15] = _v.w;
     return;
 }
 
@@ -637,68 +637,68 @@ matrix4_t<_T>& matrix4_t<_T>::operator=(const matrix4_t<_T>& _mat) {
     if (this == &_mat) {
         throw std::runtime_error(log("this == &_mat"));
     }
-    mat_arr = _mat.mat_arr;
+    elems = _mat.elems;
     return *this;
 }
 
 template <matrix_element_concept_t _T>
 bool matrix4_t<_T>::operator==(const matrix4_t<_T>& _mat) const {
-    return mat_arr == _mat.mat_arr;
+    return elems == _mat.elems;
 }
 
 template <matrix_element_concept_t _T>
 bool matrix4_t<_T>::operator!=(const matrix4_t<_T>& _mat) const {
-    return mat_arr != _mat.mat_arr;
+    return elems != _mat.elems;
 }
 
 template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::operator+(const matrix4_t<_T>& _mat) const {
     _T tmp[ORDER * ORDER] = { 0 };
 
-    tmp[0]                = mat_arr[0] + _mat.mat_arr[0];
-    tmp[1]                = mat_arr[1] + _mat.mat_arr[1];
-    tmp[2]                = mat_arr[2] + _mat.mat_arr[2];
-    tmp[3]                = mat_arr[3] + _mat.mat_arr[3];
+    tmp[0]                = elems[0] + _mat.elems[0];
+    tmp[1]                = elems[1] + _mat.elems[1];
+    tmp[2]                = elems[2] + _mat.elems[2];
+    tmp[3]                = elems[3] + _mat.elems[3];
 
-    tmp[4]                = mat_arr[4] + _mat.mat_arr[4];
-    tmp[5]                = mat_arr[5] + _mat.mat_arr[5];
-    tmp[6]                = mat_arr[6] + _mat.mat_arr[6];
-    tmp[7]                = mat_arr[7] + _mat.mat_arr[7];
+    tmp[4]                = elems[4] + _mat.elems[4];
+    tmp[5]                = elems[5] + _mat.elems[5];
+    tmp[6]                = elems[6] + _mat.elems[6];
+    tmp[7]                = elems[7] + _mat.elems[7];
 
-    tmp[8]                = mat_arr[8] + _mat.mat_arr[8];
-    tmp[9]                = mat_arr[9] + _mat.mat_arr[9];
-    tmp[10]               = mat_arr[10] + _mat.mat_arr[10];
-    tmp[11]               = mat_arr[11] + _mat.mat_arr[11];
+    tmp[8]                = elems[8] + _mat.elems[8];
+    tmp[9]                = elems[9] + _mat.elems[9];
+    tmp[10]               = elems[10] + _mat.elems[10];
+    tmp[11]               = elems[11] + _mat.elems[11];
 
-    tmp[12]               = mat_arr[12] + _mat.mat_arr[12];
-    tmp[13]               = mat_arr[13] + _mat.mat_arr[13];
-    tmp[14]               = mat_arr[14] + _mat.mat_arr[14];
-    tmp[15]               = mat_arr[15] + _mat.mat_arr[15];
+    tmp[12]               = elems[12] + _mat.elems[12];
+    tmp[13]               = elems[13] + _mat.elems[13];
+    tmp[14]               = elems[14] + _mat.elems[14];
+    tmp[15]               = elems[15] + _mat.elems[15];
 
     return matrix4_t<_T>(tmp);
 }
 
 template <matrix_element_concept_t _T>
 matrix4_t<_T>& matrix4_t<_T>::operator+=(const matrix4_t<_T>& _mat) {
-    mat_arr[0]  += _mat.mat_arr[0];
-    mat_arr[1]  += _mat.mat_arr[1];
-    mat_arr[2]  += _mat.mat_arr[2];
-    mat_arr[3]  += _mat.mat_arr[3];
+    elems[0]  += _mat.elems[0];
+    elems[1]  += _mat.elems[1];
+    elems[2]  += _mat.elems[2];
+    elems[3]  += _mat.elems[3];
 
-    mat_arr[4]  += _mat.mat_arr[4];
-    mat_arr[5]  += _mat.mat_arr[5];
-    mat_arr[6]  += _mat.mat_arr[6];
-    mat_arr[7]  += _mat.mat_arr[7];
+    elems[4]  += _mat.elems[4];
+    elems[5]  += _mat.elems[5];
+    elems[6]  += _mat.elems[6];
+    elems[7]  += _mat.elems[7];
 
-    mat_arr[8]  += _mat.mat_arr[8];
-    mat_arr[9]  += _mat.mat_arr[9];
-    mat_arr[10] += _mat.mat_arr[10];
-    mat_arr[11] += _mat.mat_arr[11];
+    elems[8]  += _mat.elems[8];
+    elems[9]  += _mat.elems[9];
+    elems[10] += _mat.elems[10];
+    elems[11] += _mat.elems[11];
 
-    mat_arr[12] += _mat.mat_arr[12];
-    mat_arr[13] += _mat.mat_arr[13];
-    mat_arr[14] += _mat.mat_arr[14];
-    mat_arr[15] += _mat.mat_arr[15];
+    elems[12] += _mat.elems[12];
+    elems[13] += _mat.elems[13];
+    elems[14] += _mat.elems[14];
+    elems[15] += _mat.elems[15];
 
     return *this;
 }
@@ -707,50 +707,50 @@ template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::operator-(const matrix4_t<_T>& _mat) const {
     _T tmp[ORDER * ORDER] = { 0 };
 
-    tmp[0]                = mat_arr[0] - _mat.mat_arr[0];
-    tmp[1]                = mat_arr[1] - _mat.mat_arr[1];
-    tmp[2]                = mat_arr[2] - _mat.mat_arr[2];
-    tmp[3]                = mat_arr[3] - _mat.mat_arr[3];
+    tmp[0]                = elems[0] - _mat.elems[0];
+    tmp[1]                = elems[1] - _mat.elems[1];
+    tmp[2]                = elems[2] - _mat.elems[2];
+    tmp[3]                = elems[3] - _mat.elems[3];
 
-    tmp[4]                = mat_arr[4] - _mat.mat_arr[4];
-    tmp[5]                = mat_arr[5] - _mat.mat_arr[5];
-    tmp[6]                = mat_arr[6] - _mat.mat_arr[6];
-    tmp[7]                = mat_arr[7] - _mat.mat_arr[7];
+    tmp[4]                = elems[4] - _mat.elems[4];
+    tmp[5]                = elems[5] - _mat.elems[5];
+    tmp[6]                = elems[6] - _mat.elems[6];
+    tmp[7]                = elems[7] - _mat.elems[7];
 
-    tmp[8]                = mat_arr[8] - _mat.mat_arr[8];
-    tmp[9]                = mat_arr[9] - _mat.mat_arr[9];
-    tmp[10]               = mat_arr[10] - _mat.mat_arr[10];
-    tmp[11]               = mat_arr[11] - _mat.mat_arr[11];
+    tmp[8]                = elems[8] - _mat.elems[8];
+    tmp[9]                = elems[9] - _mat.elems[9];
+    tmp[10]               = elems[10] - _mat.elems[10];
+    tmp[11]               = elems[11] - _mat.elems[11];
 
-    tmp[12]               = mat_arr[12] - _mat.mat_arr[12];
-    tmp[13]               = mat_arr[13] - _mat.mat_arr[13];
-    tmp[14]               = mat_arr[14] - _mat.mat_arr[14];
-    tmp[15]               = mat_arr[15] - _mat.mat_arr[15];
+    tmp[12]               = elems[12] - _mat.elems[12];
+    tmp[13]               = elems[13] - _mat.elems[13];
+    tmp[14]               = elems[14] - _mat.elems[14];
+    tmp[15]               = elems[15] - _mat.elems[15];
 
     return matrix4_t<_T>(tmp);
 }
 
 template <matrix_element_concept_t _T>
 matrix4_t<_T>& matrix4_t<_T>::operator-=(const matrix4_t<_T>& _mat) {
-    mat_arr[0]  -= _mat.mat_arr[0];
-    mat_arr[1]  -= _mat.mat_arr[1];
-    mat_arr[2]  -= _mat.mat_arr[2];
-    mat_arr[3]  -= _mat.mat_arr[3];
+    elems[0]  -= _mat.elems[0];
+    elems[1]  -= _mat.elems[1];
+    elems[2]  -= _mat.elems[2];
+    elems[3]  -= _mat.elems[3];
 
-    mat_arr[4]  -= _mat.mat_arr[4];
-    mat_arr[5]  -= _mat.mat_arr[5];
-    mat_arr[6]  -= _mat.mat_arr[6];
-    mat_arr[7]  -= _mat.mat_arr[7];
+    elems[4]  -= _mat.elems[4];
+    elems[5]  -= _mat.elems[5];
+    elems[6]  -= _mat.elems[6];
+    elems[7]  -= _mat.elems[7];
 
-    mat_arr[8]  -= _mat.mat_arr[8];
-    mat_arr[9]  -= _mat.mat_arr[9];
-    mat_arr[10] -= _mat.mat_arr[10];
-    mat_arr[11] -= _mat.mat_arr[11];
+    elems[8]  -= _mat.elems[8];
+    elems[9]  -= _mat.elems[9];
+    elems[10] -= _mat.elems[10];
+    elems[11] -= _mat.elems[11];
 
-    mat_arr[12] -= _mat.mat_arr[12];
-    mat_arr[13] -= _mat.mat_arr[13];
-    mat_arr[14] -= _mat.mat_arr[14];
-    mat_arr[15] -= _mat.mat_arr[15];
+    elems[12] -= _mat.elems[12];
+    elems[13] -= _mat.elems[13];
+    elems[14] -= _mat.elems[14];
+    elems[15] -= _mat.elems[15];
 
     return *this;
 }
@@ -758,49 +758,49 @@ matrix4_t<_T>& matrix4_t<_T>::operator-=(const matrix4_t<_T>& _mat) {
 template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::operator*(const matrix4_t<_T>& _mat) const {
     _T tmp[ORDER * ORDER] = { 0 };
-    tmp[0] = mat_arr[0] * _mat.mat_arr[0] + mat_arr[1] * _mat.mat_arr[4]
-           + mat_arr[2] * _mat.mat_arr[8] + mat_arr[3] * _mat.mat_arr[12];
-    tmp[1] = mat_arr[0] * _mat.mat_arr[1] + mat_arr[1] * _mat.mat_arr[5]
-           + mat_arr[2] * _mat.mat_arr[9] + mat_arr[3] * _mat.mat_arr[13];
-    tmp[2] = mat_arr[0] * _mat.mat_arr[2] + mat_arr[1] * _mat.mat_arr[6]
-           + mat_arr[2] * _mat.mat_arr[10] + mat_arr[3] * _mat.mat_arr[14];
-    tmp[3] = mat_arr[0] * _mat.mat_arr[3] + mat_arr[1] * _mat.mat_arr[7]
-           + mat_arr[2] * _mat.mat_arr[11] + mat_arr[3] * _mat.mat_arr[15];
+    tmp[0]                = elems[0] * _mat.elems[0] + elems[1] * _mat.elems[4]
+           + elems[2] * _mat.elems[8] + elems[3] * _mat.elems[12];
+    tmp[1] = elems[0] * _mat.elems[1] + elems[1] * _mat.elems[5]
+           + elems[2] * _mat.elems[9] + elems[3] * _mat.elems[13];
+    tmp[2] = elems[0] * _mat.elems[2] + elems[1] * _mat.elems[6]
+           + elems[2] * _mat.elems[10] + elems[3] * _mat.elems[14];
+    tmp[3] = elems[0] * _mat.elems[3] + elems[1] * _mat.elems[7]
+           + elems[2] * _mat.elems[11] + elems[3] * _mat.elems[15];
 
-    tmp[4] = mat_arr[4] * _mat.mat_arr[0] + mat_arr[5] * _mat.mat_arr[4]
-           + mat_arr[6] * _mat.mat_arr[8] + mat_arr[7] * _mat.mat_arr[12];
-    tmp[5] = mat_arr[4] * _mat.mat_arr[1] + mat_arr[5] * _mat.mat_arr[5]
-           + mat_arr[6] * _mat.mat_arr[9] + mat_arr[7] * _mat.mat_arr[13];
-    tmp[6] = mat_arr[4] * _mat.mat_arr[2] + mat_arr[5] * _mat.mat_arr[6]
-           + mat_arr[6] * _mat.mat_arr[10] + mat_arr[7] * _mat.mat_arr[14];
-    tmp[7] = mat_arr[4] * _mat.mat_arr[3] + mat_arr[5] * _mat.mat_arr[7]
-           + mat_arr[6] * _mat.mat_arr[11] + mat_arr[7] * _mat.mat_arr[15];
+    tmp[4] = elems[4] * _mat.elems[0] + elems[5] * _mat.elems[4]
+           + elems[6] * _mat.elems[8] + elems[7] * _mat.elems[12];
+    tmp[5] = elems[4] * _mat.elems[1] + elems[5] * _mat.elems[5]
+           + elems[6] * _mat.elems[9] + elems[7] * _mat.elems[13];
+    tmp[6] = elems[4] * _mat.elems[2] + elems[5] * _mat.elems[6]
+           + elems[6] * _mat.elems[10] + elems[7] * _mat.elems[14];
+    tmp[7] = elems[4] * _mat.elems[3] + elems[5] * _mat.elems[7]
+           + elems[6] * _mat.elems[11] + elems[7] * _mat.elems[15];
 
-    tmp[8] = mat_arr[8] * _mat.mat_arr[0] + mat_arr[9] * _mat.mat_arr[4]
-           + mat_arr[10] * _mat.mat_arr[8] + mat_arr[11] * _mat.mat_arr[12];
-    tmp[9] = mat_arr[8] * _mat.mat_arr[1] + mat_arr[9] * _mat.mat_arr[5]
-           + mat_arr[10] * _mat.mat_arr[9] + mat_arr[11] * _mat.mat_arr[13];
-    tmp[10] = mat_arr[8] * _mat.mat_arr[2] + mat_arr[9] * _mat.mat_arr[6]
-            + mat_arr[10] * _mat.mat_arr[10] + mat_arr[11] * _mat.mat_arr[14];
-    tmp[11] = mat_arr[8] * _mat.mat_arr[3] + mat_arr[9] * _mat.mat_arr[7]
-            + mat_arr[10] * _mat.mat_arr[11] + mat_arr[11] * _mat.mat_arr[15];
+    tmp[8] = elems[8] * _mat.elems[0] + elems[9] * _mat.elems[4]
+           + elems[10] * _mat.elems[8] + elems[11] * _mat.elems[12];
+    tmp[9] = elems[8] * _mat.elems[1] + elems[9] * _mat.elems[5]
+           + elems[10] * _mat.elems[9] + elems[11] * _mat.elems[13];
+    tmp[10] = elems[8] * _mat.elems[2] + elems[9] * _mat.elems[6]
+            + elems[10] * _mat.elems[10] + elems[11] * _mat.elems[14];
+    tmp[11] = elems[8] * _mat.elems[3] + elems[9] * _mat.elems[7]
+            + elems[10] * _mat.elems[11] + elems[11] * _mat.elems[15];
 
-    tmp[12] = mat_arr[12] * _mat.mat_arr[0] + mat_arr[13] * _mat.mat_arr[4]
-            + mat_arr[14] * _mat.mat_arr[8] + mat_arr[15] * _mat.mat_arr[12];
-    tmp[13] = mat_arr[12] * _mat.mat_arr[1] + mat_arr[13] * _mat.mat_arr[5]
-            + mat_arr[14] * _mat.mat_arr[9] + mat_arr[15] * _mat.mat_arr[13];
-    tmp[14] = mat_arr[12] * _mat.mat_arr[2] + mat_arr[13] * _mat.mat_arr[6]
-            + mat_arr[14] * _mat.mat_arr[10] + mat_arr[15] * _mat.mat_arr[14];
-    tmp[15] = mat_arr[12] * _mat.mat_arr[3] + mat_arr[13] * _mat.mat_arr[7]
-            + mat_arr[14] * _mat.mat_arr[11] + mat_arr[15] * _mat.mat_arr[15];
+    tmp[12] = elems[12] * _mat.elems[0] + elems[13] * _mat.elems[4]
+            + elems[14] * _mat.elems[8] + elems[15] * _mat.elems[12];
+    tmp[13] = elems[12] * _mat.elems[1] + elems[13] * _mat.elems[5]
+            + elems[14] * _mat.elems[9] + elems[15] * _mat.elems[13];
+    tmp[14] = elems[12] * _mat.elems[2] + elems[13] * _mat.elems[6]
+            + elems[14] * _mat.elems[10] + elems[15] * _mat.elems[14];
+    tmp[15] = elems[12] * _mat.elems[3] + elems[13] * _mat.elems[7]
+            + elems[14] * _mat.elems[11] + elems[15] * _mat.elems[15];
 
     return matrix4_t<_T>(tmp);
 }
 
 template <matrix_element_concept_t _T>
 matrix4_t<_T>& matrix4_t<_T>::operator*=(const _T& _v) {
-    for (uint8_t i = 0; i < ORDER * ORDER; i++) {
-        mat_arr[i] *= _v;
+    for (auto& i : elems) {
+        i *= _v;
     }
 
     return *this;
@@ -809,61 +809,61 @@ matrix4_t<_T>& matrix4_t<_T>::operator*=(const _T& _v) {
 template <matrix_element_concept_t _T>
 matrix4_t<_T>& matrix4_t<_T>::operator*=(const matrix4_t<_T>& _mat) {
     _T tmp[ORDER * ORDER] = { 0 };
-    tmp[0] = mat_arr[0] * _mat.mat_arr[0] + mat_arr[1] * _mat.mat_arr[4]
-           + mat_arr[2] * _mat.mat_arr[8] + mat_arr[3] * _mat.mat_arr[12];
-    tmp[1] = mat_arr[0] * _mat.mat_arr[1] + mat_arr[1] * _mat.mat_arr[5]
-           + mat_arr[2] * _mat.mat_arr[9] + mat_arr[3] * _mat.mat_arr[13];
-    tmp[2] = mat_arr[0] * _mat.mat_arr[2] + mat_arr[1] * _mat.mat_arr[6]
-           + mat_arr[2] * _mat.mat_arr[10] + mat_arr[3] * _mat.mat_arr[14];
-    tmp[3] = mat_arr[0] * _mat.mat_arr[3] + mat_arr[1] * _mat.mat_arr[7]
-           + mat_arr[2] * _mat.mat_arr[11] + mat_arr[3] * _mat.mat_arr[15];
+    tmp[0]                = elems[0] * _mat.elems[0] + elems[1] * _mat.elems[4]
+           + elems[2] * _mat.elems[8] + elems[3] * _mat.elems[12];
+    tmp[1] = elems[0] * _mat.elems[1] + elems[1] * _mat.elems[5]
+           + elems[2] * _mat.elems[9] + elems[3] * _mat.elems[13];
+    tmp[2] = elems[0] * _mat.elems[2] + elems[1] * _mat.elems[6]
+           + elems[2] * _mat.elems[10] + elems[3] * _mat.elems[14];
+    tmp[3] = elems[0] * _mat.elems[3] + elems[1] * _mat.elems[7]
+           + elems[2] * _mat.elems[11] + elems[3] * _mat.elems[15];
 
-    tmp[4] = mat_arr[4] * _mat.mat_arr[0] + mat_arr[5] * _mat.mat_arr[4]
-           + mat_arr[6] * _mat.mat_arr[8] + mat_arr[7] * _mat.mat_arr[12];
-    tmp[5] = mat_arr[4] * _mat.mat_arr[1] + mat_arr[5] * _mat.mat_arr[5]
-           + mat_arr[6] * _mat.mat_arr[9] + mat_arr[7] * _mat.mat_arr[13];
-    tmp[6] = mat_arr[4] * _mat.mat_arr[2] + mat_arr[5] * _mat.mat_arr[6]
-           + mat_arr[6] * _mat.mat_arr[10] + mat_arr[7] * _mat.mat_arr[14];
-    tmp[7] = mat_arr[4] * _mat.mat_arr[3] + mat_arr[5] * _mat.mat_arr[7]
-           + mat_arr[6] * _mat.mat_arr[11] + mat_arr[7] * _mat.mat_arr[15];
+    tmp[4] = elems[4] * _mat.elems[0] + elems[5] * _mat.elems[4]
+           + elems[6] * _mat.elems[8] + elems[7] * _mat.elems[12];
+    tmp[5] = elems[4] * _mat.elems[1] + elems[5] * _mat.elems[5]
+           + elems[6] * _mat.elems[9] + elems[7] * _mat.elems[13];
+    tmp[6] = elems[4] * _mat.elems[2] + elems[5] * _mat.elems[6]
+           + elems[6] * _mat.elems[10] + elems[7] * _mat.elems[14];
+    tmp[7] = elems[4] * _mat.elems[3] + elems[5] * _mat.elems[7]
+           + elems[6] * _mat.elems[11] + elems[7] * _mat.elems[15];
 
-    tmp[8] = mat_arr[8] * _mat.mat_arr[0] + mat_arr[9] * _mat.mat_arr[4]
-           + mat_arr[10] * _mat.mat_arr[8] + mat_arr[11] * _mat.mat_arr[12];
-    tmp[9] = mat_arr[8] * _mat.mat_arr[1] + mat_arr[9] * _mat.mat_arr[5]
-           + mat_arr[10] * _mat.mat_arr[9] + mat_arr[11] * _mat.mat_arr[13];
-    tmp[10] = mat_arr[8] * _mat.mat_arr[2] + mat_arr[9] * _mat.mat_arr[6]
-            + mat_arr[10] * _mat.mat_arr[10] + mat_arr[11] * _mat.mat_arr[14];
-    tmp[11] = mat_arr[8] * _mat.mat_arr[3] + mat_arr[9] * _mat.mat_arr[7]
-            + mat_arr[10] * _mat.mat_arr[11] + mat_arr[11] * _mat.mat_arr[15];
+    tmp[8] = elems[8] * _mat.elems[0] + elems[9] * _mat.elems[4]
+           + elems[10] * _mat.elems[8] + elems[11] * _mat.elems[12];
+    tmp[9] = elems[8] * _mat.elems[1] + elems[9] * _mat.elems[5]
+           + elems[10] * _mat.elems[9] + elems[11] * _mat.elems[13];
+    tmp[10] = elems[8] * _mat.elems[2] + elems[9] * _mat.elems[6]
+            + elems[10] * _mat.elems[10] + elems[11] * _mat.elems[14];
+    tmp[11] = elems[8] * _mat.elems[3] + elems[9] * _mat.elems[7]
+            + elems[10] * _mat.elems[11] + elems[11] * _mat.elems[15];
 
-    tmp[12] = mat_arr[12] * _mat.mat_arr[0] + mat_arr[13] * _mat.mat_arr[4]
-            + mat_arr[14] * _mat.mat_arr[8] + mat_arr[15] * _mat.mat_arr[12];
-    tmp[13] = mat_arr[12] * _mat.mat_arr[1] + mat_arr[13] * _mat.mat_arr[5]
-            + mat_arr[14] * _mat.mat_arr[9] + mat_arr[15] * _mat.mat_arr[13];
-    tmp[14] = mat_arr[12] * _mat.mat_arr[2] + mat_arr[13] * _mat.mat_arr[6]
-            + mat_arr[14] * _mat.mat_arr[10] + mat_arr[15] * _mat.mat_arr[14];
-    tmp[15] = mat_arr[12] * _mat.mat_arr[3] + mat_arr[13] * _mat.mat_arr[7]
-            + mat_arr[14] * _mat.mat_arr[11] + mat_arr[15] * _mat.mat_arr[15];
+    tmp[12] = elems[12] * _mat.elems[0] + elems[13] * _mat.elems[4]
+            + elems[14] * _mat.elems[8] + elems[15] * _mat.elems[12];
+    tmp[13] = elems[12] * _mat.elems[1] + elems[13] * _mat.elems[5]
+            + elems[14] * _mat.elems[9] + elems[15] * _mat.elems[13];
+    tmp[14] = elems[12] * _mat.elems[2] + elems[13] * _mat.elems[6]
+            + elems[14] * _mat.elems[10] + elems[15] * _mat.elems[14];
+    tmp[15] = elems[12] * _mat.elems[3] + elems[13] * _mat.elems[7]
+            + elems[14] * _mat.elems[11] + elems[15] * _mat.elems[15];
 
-    mat_arr[0]  = tmp[0];
-    mat_arr[1]  = tmp[1];
-    mat_arr[2]  = tmp[2];
-    mat_arr[3]  = tmp[3];
+    elems[0]  = tmp[0];
+    elems[1]  = tmp[1];
+    elems[2]  = tmp[2];
+    elems[3]  = tmp[3];
 
-    mat_arr[4]  = tmp[4];
-    mat_arr[5]  = tmp[5];
-    mat_arr[6]  = tmp[6];
-    mat_arr[7]  = tmp[7];
+    elems[4]  = tmp[4];
+    elems[5]  = tmp[5];
+    elems[6]  = tmp[6];
+    elems[7]  = tmp[7];
 
-    mat_arr[8]  = tmp[8];
-    mat_arr[9]  = tmp[9];
-    mat_arr[10] = tmp[10];
-    mat_arr[11] = tmp[11];
+    elems[8]  = tmp[8];
+    elems[9]  = tmp[9];
+    elems[10] = tmp[10];
+    elems[11] = tmp[11];
 
-    mat_arr[12] = tmp[12];
-    mat_arr[13] = tmp[13];
-    mat_arr[14] = tmp[14];
-    mat_arr[15] = tmp[15];
+    elems[12] = tmp[12];
+    elems[13] = tmp[13];
+    elems[14] = tmp[14];
+    elems[15] = tmp[15];
 
     return *this;
 }
@@ -873,7 +873,7 @@ _T matrix4_t<_T>::operator[](const uint8_t _idx) {
     if (_idx > ORDER) {
         throw std::invalid_argument(log("_idx > ORDER"));
     }
-    return mat_arr[_idx];
+    return elems[_idx];
 }
 
 template <matrix_element_concept_t _T>
@@ -881,31 +881,31 @@ const _T matrix4_t<_T>::operator[](const uint8_t _idx) const {
     if (_idx > ORDER) {
         throw std::invalid_argument(log("_idx > ORDER"));
     }
-    return mat_arr[_idx];
+    return elems[_idx];
 }
 
 template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::transpose(void) const {
     _T tmp[ORDER * ORDER] = { 0 };
-    tmp[0]                = mat_arr[0];
-    tmp[1]                = mat_arr[4];
-    tmp[2]                = mat_arr[8];
-    tmp[3]                = mat_arr[12];
+    tmp[0]                = elems[0];
+    tmp[1]                = elems[4];
+    tmp[2]                = elems[8];
+    tmp[3]                = elems[12];
 
-    tmp[4]                = mat_arr[1];
-    tmp[5]                = mat_arr[5];
-    tmp[6]                = mat_arr[9];
-    tmp[7]                = mat_arr[13];
+    tmp[4]                = elems[1];
+    tmp[5]                = elems[5];
+    tmp[6]                = elems[9];
+    tmp[7]                = elems[13];
 
-    tmp[8]                = mat_arr[2];
-    tmp[9]                = mat_arr[6];
-    tmp[10]               = mat_arr[10];
-    tmp[11]               = mat_arr[14];
+    tmp[8]                = elems[2];
+    tmp[9]                = elems[6];
+    tmp[10]               = elems[10];
+    tmp[11]               = elems[14];
 
-    tmp[12]               = mat_arr[3];
-    tmp[13]               = mat_arr[7];
-    tmp[14]               = mat_arr[11];
-    tmp[15]               = mat_arr[15];
+    tmp[12]               = elems[3];
+    tmp[13]               = elems[7];
+    tmp[14]               = elems[11];
+    tmp[15]               = elems[15];
 
     return matrix4_t<_T>(tmp);
 }
@@ -930,25 +930,25 @@ template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::scale(const _T& _scale) const {
     _T tmp[ORDER * ORDER] = { 0 };
 
-    tmp[0]                = _scale * mat_arr[0];
-    tmp[1]                = _scale * mat_arr[1];
-    tmp[2]                = _scale * mat_arr[2];
-    tmp[3]                = _scale * mat_arr[3];
+    tmp[0]                = _scale * elems[0];
+    tmp[1]                = _scale * elems[1];
+    tmp[2]                = _scale * elems[2];
+    tmp[3]                = _scale * elems[3];
 
-    tmp[4]                = _scale * mat_arr[4];
-    tmp[5]                = _scale * mat_arr[5];
-    tmp[6]                = _scale * mat_arr[6];
-    tmp[7]                = _scale * mat_arr[7];
+    tmp[4]                = _scale * elems[4];
+    tmp[5]                = _scale * elems[5];
+    tmp[6]                = _scale * elems[6];
+    tmp[7]                = _scale * elems[7];
 
-    tmp[8]                = _scale * mat_arr[8];
-    tmp[9]                = _scale * mat_arr[9];
-    tmp[10]               = _scale * mat_arr[10];
-    tmp[11]               = _scale * mat_arr[11];
+    tmp[8]                = _scale * elems[8];
+    tmp[9]                = _scale * elems[9];
+    tmp[10]               = _scale * elems[10];
+    tmp[11]               = _scale * elems[11];
 
-    tmp[12]               = mat_arr[12];
-    tmp[13]               = mat_arr[13];
-    tmp[14]               = mat_arr[14];
-    tmp[15]               = mat_arr[15];
+    tmp[12]               = elems[12];
+    tmp[13]               = elems[13];
+    tmp[14]               = elems[14];
+    tmp[15]               = elems[15];
 
     return matrix4_t<_T>(tmp);
 }
@@ -958,25 +958,25 @@ const matrix4_t<_T>
 matrix4_t<_T>::scale(const _T& _x, const _T& _y, const _T& _z) const {
     _T tmp[ORDER * ORDER] = { 0 };
 
-    tmp[0]                = _x * mat_arr[0];
-    tmp[1]                = _x * mat_arr[1];
-    tmp[2]                = _x * mat_arr[2];
-    tmp[3]                = _x * mat_arr[3];
+    tmp[0]                = _x * elems[0];
+    tmp[1]                = _x * elems[1];
+    tmp[2]                = _x * elems[2];
+    tmp[3]                = _x * elems[3];
 
-    tmp[4]                = _y * mat_arr[4];
-    tmp[5]                = _y * mat_arr[5];
-    tmp[6]                = _y * mat_arr[6];
-    tmp[7]                = _y * mat_arr[7];
+    tmp[4]                = _y * elems[4];
+    tmp[5]                = _y * elems[5];
+    tmp[6]                = _y * elems[6];
+    tmp[7]                = _y * elems[7];
 
-    tmp[8]                = _z * mat_arr[8];
-    tmp[9]                = _z * mat_arr[9];
-    tmp[10]               = _z * mat_arr[10];
-    tmp[11]               = _z * mat_arr[11];
+    tmp[8]                = _z * elems[8];
+    tmp[9]                = _z * elems[9];
+    tmp[10]               = _z * elems[10];
+    tmp[11]               = _z * elems[11];
 
-    tmp[12]               = mat_arr[12];
-    tmp[13]               = mat_arr[13];
-    tmp[14]               = mat_arr[14];
-    tmp[15]               = mat_arr[15];
+    tmp[12]               = elems[12];
+    tmp[13]               = elems[13];
+    tmp[14]               = elems[14];
+    tmp[15]               = elems[15];
 
     return matrix4_t<_T>(tmp);
 }
@@ -1030,7 +1030,7 @@ matrix4_t<_T>::rotate(const vector4_t<_T>& _axis, const float& _angle) const {
     auto          sN  = matrix4_t<_T>(sN_arr);
 
     matrix4_t<_T> res = cI + rrt + sN;
-    res.mat_arr[15]   = 1;
+    res.elems[15]     = 1;
 
     return res * *this;
 }
@@ -1089,25 +1089,25 @@ const matrix4_t<_T>
 matrix4_t<_T>::translate(const _T& _x, const _T& _y, const _T& _z) const {
     _T tmp[ORDER * ORDER] = { 0 };
 
-    tmp[0]                = mat_arr[0] + _x * mat_arr[12];
-    tmp[1]                = mat_arr[1] + _x * mat_arr[13];
-    tmp[2]                = mat_arr[2] + _x * mat_arr[14];
-    tmp[3]                = mat_arr[3] + _x * mat_arr[15];
+    tmp[0]                = elems[0] + _x * elems[12];
+    tmp[1]                = elems[1] + _x * elems[13];
+    tmp[2]                = elems[2] + _x * elems[14];
+    tmp[3]                = elems[3] + _x * elems[15];
 
-    tmp[4]                = mat_arr[4] + _y * mat_arr[12];
-    tmp[5]                = mat_arr[5] + _y * mat_arr[13];
-    tmp[6]                = mat_arr[6] + _y * mat_arr[14];
-    tmp[7]                = mat_arr[7] + _y * mat_arr[15];
+    tmp[4]                = elems[4] + _y * elems[12];
+    tmp[5]                = elems[5] + _y * elems[13];
+    tmp[6]                = elems[6] + _y * elems[14];
+    tmp[7]                = elems[7] + _y * elems[15];
 
-    tmp[8]                = mat_arr[8] + _z * mat_arr[12];
-    tmp[9]                = mat_arr[9] + _z * mat_arr[13];
-    tmp[10]               = mat_arr[10] + _z * mat_arr[14];
-    tmp[11]               = mat_arr[11] + _z * mat_arr[15];
+    tmp[8]                = elems[8] + _z * elems[12];
+    tmp[9]                = elems[9] + _z * elems[13];
+    tmp[10]               = elems[10] + _z * elems[14];
+    tmp[11]               = elems[11] + _z * elems[15];
 
-    tmp[12]               = mat_arr[12];
-    tmp[13]               = mat_arr[13];
-    tmp[14]               = mat_arr[14];
-    tmp[15]               = mat_arr[15];
+    tmp[12]               = elems[12];
+    tmp[13]               = elems[13];
+    tmp[14]               = elems[14];
+    tmp[15]               = elems[15];
 
     return matrix4_t<_T>(tmp);
 }
