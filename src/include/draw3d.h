@@ -27,6 +27,7 @@
 
 /**
  * @brief 绘制封装
+ * @todo 双缓冲区
  */
 class draw3d_t {
 private:

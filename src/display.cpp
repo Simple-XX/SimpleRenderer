@@ -95,25 +95,18 @@ void display_t::input_handler(void) {
 }
 
 void display_t::fill(void) {
-    // 等待 draw3d 线程绘制完成
-    while (framebuffer.is_should_draw == true) {
-        // 更新 texture
-        auto res = SDL_UpdateTexture(sdl_texture, nullptr,
-                                     framebuffer.get_color_buffer().to_arr(),
-                                     width * color_t::bpp());
-        if (res != 0) {
-            throw std::runtime_error(log(SDL_GetError()));
-        }
+    // 更新 texture
+    auto res = SDL_UpdateTexture(sdl_texture, nullptr,
+                                 framebuffer.get_color_buffer().to_arr(),
+                                 width * color_t::bpp());
+    if (res != 0) {
+        throw std::runtime_error(log(SDL_GetError()));
+    }
 
-        // 复制到渲染器
-        res = SDL_RenderCopy(sdl_renderer, sdl_texture, nullptr, nullptr);
-        if (res != 0) {
-            throw std::runtime_error(log(SDL_GetError()));
-        }
-        // 清屏
-        framebuffer.clear();
-        // 更新缓冲区标识，表示当前缓存已绘制
-        framebuffer.is_should_draw = false;
+    // 复制到渲染器
+    res = SDL_RenderCopy(sdl_renderer, sdl_texture, nullptr, nullptr);
+    if (res != 0) {
+        throw std::runtime_error(log(SDL_GetError()));
     }
 
     return;
@@ -231,16 +224,20 @@ void display_t::loop(void) {
     auto     start  = us();
     auto     end    = us();
     // 主循环
-    /// @todo 问题在于 draw3d 还没画完这边就 clear fill 了，所以现象为画面在闪烁
-    ///  解决：等待绘制完成后再更新画面，或者在 draw3d 中使用两个 framebuffer
-    ///  交替使用
     while (is_should_quit == false) {
         start = us();
         // 处理输入
         input_handler();
         // 填充窗口
         /// @todo 巨大性能开销
-        fill();
+        // 等待 draw3d 绘制完成
+        while (framebuffer.is_should_draw == true) {
+            fill();
+            // 清空缓冲区
+            framebuffer.clear();
+            // 更新缓冲区标识，表示当前缓存已绘制
+            framebuffer.is_should_draw = false;
+        }
         // 显示 fps
         /// @todo 巨大性能开销
         show_fps(fps);

@@ -53,6 +53,10 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
     camera->target     = vector4f_t(0, 0, 0);
     camera->up         = vector4f_t(0, 1, 0);
     while (1) {
+        // 等待之前的缓冲区数据绘制完成
+        if (_framebuffer->is_should_draw == true) {
+            continue;
+        }
         // 右对角线
         draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, color_t::WHITE);
         // 左对角线
@@ -69,7 +73,7 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
         // auto view_mat   = camera.look_at();
         _shader->shader_data.view_matrix    = matrix4f_t();
         _shader->shader_data.project_matrix = matrix4f_t();
-        // draw3d.model(model);
+        draw3d.model(model);
 
         _shader->shader_data.model_matrix
           = get_model_matrix(vector4f_t(1000, 1000, 1000),
