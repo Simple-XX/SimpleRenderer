@@ -30,6 +30,7 @@
 /**
  * @brief 四阶矩阵
  * @tparam _T 矩阵元素类型
+ * @note 没有做数值合法检查
  */
 template <class _T>
     requires std::is_same<_T, float>::value
@@ -39,13 +40,6 @@ private:
     static constexpr const uint8_t ORDER = 4;
     /// @brief 矩阵元素
     std::array<_T, ORDER * ORDER>  mat_arr;
-
-    /**
-     * @brief 是否有非数值
-     * @return true             有
-     * @return false            无
-     */
-    bool                           HasNaNs(void) const;
 
     /**
      * @brief 递归求 n 阶行列式的值
@@ -161,10 +155,6 @@ public:
     template <class _U>
     friend const matrix4_t<_T>
     operator*(const _U& _v, const matrix4_t<_T>& _mat) {
-        if (std::isnan(_v)) {
-            throw std::invalid_argument(log("std::isnan(_v)"));
-        }
-
         _T tmp[ORDER * ORDER] = { 0 };
 
         tmp[0]                = _mat.mat_arr[0] * _v;
@@ -200,10 +190,6 @@ public:
     template <class _U>
     friend const matrix4_t<_T>
     operator*(const matrix4_t<_T>& _mat, const _U& _v) {
-        if (std::isnan(_v)) {
-            throw std::invalid_argument(log("std::isnan(_v)"));
-        }
-
         _T tmp[ORDER * ORDER] = { 0 };
 
         tmp[0]                = _v * _mat.mat_arr[0];
@@ -484,17 +470,6 @@ public:
 };
 
 template <class _T>
-bool matrix4_t<_T>::HasNaNs(void) const {
-    for (const auto& i : mat_arr) {
-        if (std::isnan(i) == true) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-template <class _T>
 _T matrix4_t<_T>::determ(const uint8_t _order) const {
     // 递归返回条件
     if (_order == 1) {
@@ -579,9 +554,6 @@ matrix4_t<_T>::matrix4_t(void) {
 
 template <class _T>
 matrix4_t<_T>::matrix4_t(const matrix4_t<_T>& _mat) {
-    if (_mat.HasNaNs()) {
-        throw std::invalid_argument(log("_mat.HasNaNs()"));
-    }
     mat_arr = _mat.mat_arr;
     return;
 }
@@ -590,11 +562,6 @@ template <class _T>
 matrix4_t<_T>::matrix4_t(const _T* const _arr) {
     if (_arr == nullptr) {
         throw std::invalid_argument(log("_arr == nullptr"));
-    }
-    for (auto i = 0; i < ORDER * ORDER; i++) {
-        if (std::isnan(_arr[i])) {
-            throw std::invalid_argument(log("std::isnan(_arr[i])"));
-        }
     }
 
     mat_arr[0]  = _arr[0];
@@ -624,13 +591,6 @@ template <class _T>
 matrix4_t<_T>::matrix4_t(const _T _arr[ORDER][ORDER]) {
     if (_arr == nullptr) {
         throw std::invalid_argument(log("_arr == nullptr"));
-    }
-    for (uint8_t i = 0; i < ORDER; i++) {
-        for (uint8_t j = 0; j < ORDER; j++) {
-            if (std::isnan(_arr[i][j])) {
-                throw std::invalid_argument(log("std::isnan(_arr[i][j])"));
-            }
-        }
     }
 
     mat_arr[0]  = _arr[0][0];
@@ -668,9 +628,6 @@ matrix4_t<_T>::matrix4_t(const vector4_t<_T>& _v) {
 
 template <class _T>
 matrix4_t<_T>& matrix4_t<_T>::operator=(const matrix4_t<_T>& _mat) {
-    if (_mat.HasNaNs()) {
-        throw std::invalid_argument(log("_mat.HasNaNs()"));
-    }
     if (this == &_mat) {
         throw std::runtime_error(log("this == &_mat"));
     }
@@ -965,10 +922,6 @@ const matrix4_t<_T> matrix4_t<_T>::inverse(void) const {
 
 template <class _T>
 const matrix4_t<_T> matrix4_t<_T>::scale(const _T& _scale) const {
-    if (std::isnan(_scale)) {
-        throw std::invalid_argument(log("std::isnan(_scale)"));
-    }
-
     _T tmp[ORDER * ORDER] = { 0 };
 
     tmp[0]                = _scale * mat_arr[0];
@@ -997,11 +950,6 @@ const matrix4_t<_T> matrix4_t<_T>::scale(const _T& _scale) const {
 template <class _T>
 const matrix4_t<_T>
 matrix4_t<_T>::scale(const _T& _x, const _T& _y, const _T& _z) const {
-    if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)) {
-        throw std::invalid_argument(
-          log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
-    }
-
     _T tmp[ORDER * ORDER] = { 0 };
 
     tmp[0]                = _x * mat_arr[0];
@@ -1031,10 +979,6 @@ matrix4_t<_T>::scale(const _T& _x, const _T& _y, const _T& _z) const {
 template <class _T>
 const matrix4_t<_T>
 matrix4_t<_T>::rotate(const vector4_t<_T>& _axis, const float& _angle) const {
-    if (std::isnan(_angle)) {
-        throw std::invalid_argument(log("std::isnan(_angle)"));
-    }
-
     // 角度转弧度
     auto rad          = RAD(_angle);
 
@@ -1137,11 +1081,6 @@ const matrix4_t<_T> matrix4_t<_T>::rotate_from_to(const vector4f_t& _from,
 template <class _T>
 const matrix4_t<_T>
 matrix4_t<_T>::translate(const _T& _x, const _T& _y, const _T& _z) const {
-    if (std::isnan(_x) || std::isnan(_y) || std::isnan(_z)) {
-        throw std::invalid_argument(
-          log("std::isnan(_x) || std::isnan(_y) || std::isnan(_z)"));
-    }
-
     _T tmp[ORDER * ORDER] = { 0 };
 
     tmp[0]                = mat_arr[0] + _x * mat_arr[12];
@@ -1169,17 +1108,11 @@ matrix4_t<_T>::translate(const _T& _x, const _T& _y, const _T& _z) const {
 
 template <class _T>
 float matrix4_t<_T>::RAD(const float _deg) {
-    if (std::isnan(_deg)) {
-        throw std::invalid_argument(log("std::isnan(_deg)"));
-    }
     return ((M_PI / 180) * (_deg));
 }
 
 template <class _T>
 float matrix4_t<_T>::DEG(const float _rad) {
-    if (std::isnan(_rad)) {
-        throw std::invalid_argument(log("std::isnan(_rad)"));
-    }
     return ((180 / M_PI) * (_rad));
 }
 

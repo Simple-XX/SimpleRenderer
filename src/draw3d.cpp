@@ -27,19 +27,25 @@ draw3d_t::get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
     auto ap   = _p - _p0;
 
     auto deno = (ab.x * ac.y - ab.y * ac.x);
-    if (deno == 0) {
+    if (std::abs(deno) < std::numeric_limits<decltype(deno)>::epsilon()) {
         return std::pair<bool, const vector4f_t>(false, vector4f_t());
     }
 
-    auto s       = (ac.y * ap.x - ac.x * ap.y) / deno;
-    auto t       = (ab.x * ap.y - ab.y * ap.x) / deno;
-    auto weights = vector4f_t(1 - s - t, s, t);
+    auto s = (ac.y * ap.x - ac.x * ap.y) / deno;
+    if ((s > 1) || (s < 0)) {
+        return std::pair<bool, const vector4f_t>(false, vector4f_t());
+    }
 
-    auto res     = ((weights.x <= 1) && (weights.x >= 0))
-            && ((weights.y <= 1) && (weights.y >= 0))
-            && ((weights.z <= 1) && (weights.z >= 0));
+    auto t = (ab.x * ap.y - ab.y * ap.x) / deno;
+    if ((t > 1) || (t < 0)) {
+        return std::pair<bool, const vector4f_t>(false, vector4f_t());
+    }
 
-    return std::pair<bool, const vector4f_t>(res, weights);
+    if ((1 - s - t > 1) || (1 - s - t < 0)) {
+        return std::pair<bool, const vector4f_t>(false, vector4f_t());
+    }
+
+    return std::pair<bool, const vector4f_t>(true, vector4f_t(1 - s - t, s, t));
 }
 
 const std::pair<const matrix4f_t, const matrix4f_t>

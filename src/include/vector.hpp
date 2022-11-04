@@ -28,18 +28,11 @@
  * @brief 4 维向量，默认为列向量
  * @tparam _T                类型
  * @note w 为 0 时表示向量，w 为 1 时表示点
+ * @note 没有做数值合法检查
  */
 template <class _T>
     requires std::is_same<_T, float>::value
 class vector4_t {
-private:
-    /**
-     * @brief 是否有非数值
-     * @return true             有
-     * @return false            无
-     */
-    bool HasNaNs(void) const;
-
 public:
     /// @brief 表示一个向量
     static constexpr const _T W_VECTOR = 0;
@@ -265,11 +258,6 @@ public:
 };
 
 template <class _T>
-bool vector4_t<_T>::HasNaNs(void) const {
-    return std::isnan(x) || std::isnan(y) || std::isnan(z) || std::isnan(w);
-}
-
-template <class _T>
 vector4_t<_T>::vector4_t(void) {
     x = 0;
     y = 0;
@@ -281,17 +269,11 @@ vector4_t<_T>::vector4_t(void) {
 template <class _T>
 vector4_t<_T>::vector4_t(const _T& _x, const _T& _y, const _T& _z, const _T& _w)
     : x(_x), y(_y), z(_z), w(_w) {
-    if (HasNaNs()) {
-        throw std::invalid_argument(log("HasNaNs()"));
-    }
     return;
 }
 
 template <class _T>
 vector4_t<_T>::vector4_t(const vector4_t<_T>& _v) {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
     x = _v.x;
     y = _v.y;
     z = _v.z;
@@ -301,9 +283,6 @@ vector4_t<_T>::vector4_t(const vector4_t<_T>& _v) {
 
 template <class _T>
 vector4_t<_T>& vector4_t<_T>::operator=(const vector4_t<_T>& _v) {
-    if (_v.HasNaNs()) {
-        throw std::invalid_argument(log("_v.HasNaNs()"));
-    }
     x = _v.x;
     y = _v.y;
     z = _v.z;

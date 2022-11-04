@@ -19,6 +19,7 @@
 
 #include "cstdint"
 #include "mutex"
+#include <array>
 
 #include "color.h"
 
