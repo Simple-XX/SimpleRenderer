@@ -17,32 +17,60 @@
 #ifndef _LOG_HPP_
 #define _LOG_HPP_
 
+#include "chrono"
 #include "ctime"
 #include "source_location"
 #include "sstream"
 #include "string"
 #include "sys/time.h"
 
-/// 微秒到秒
+/// @brief 微秒到秒
 static constexpr const uint32_t US2S = 1000000;
+
+/**
+ * @brief 获取当前时间戳，精确到纳秒
+ * @return const std::string    时间戳
+ */
+static const std::string        get_time_stamp(void) {
+    auto now        = std::chrono::system_clock::now();
+    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    auto now_tm     = std::localtime(&now_time_t);
+
+    char buffer[128];
+    strftime(buffer, sizeof(buffer), "%F %T", now_tm);
+
+    std::ostringstream ss;
+    ss.fill('0');
+
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                now.time_since_epoch())
+            % 1000;
+    auto cs = std::chrono::duration_cast<std::chrono::microseconds>(
+                now.time_since_epoch())
+            % 1000000;
+    auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                now.time_since_epoch())
+            % 1000000000;
+    ss << buffer << ":" << ms.count() << ":" << cs.count() % 1000 << ":"
+       << ns.count() % 1000;
+
+    return ss.str();
+}
 
 /**
  * @brief 构造日志字符串
  * @param  _msg             日志信息
  * @param  _location        位置
  * @return const std::string    日志信息，包括时间位置与信息
- * @todo    精确到毫秒
  */
 inline const std::string
 log(const std::string_view&     _msg,
     const std::source_location& _location = std::source_location::current()) {
-    auto              tm         = time(0);
-    auto              local_time = localtime(&tm);
     std::stringstream res;
-    res << "[" << local_time->tm_hour << ":" << local_time->tm_min << ":"
-        << local_time->tm_sec << "] " << _msg << ", file \'"
-        << _location.file_name() << "\', line " << _location.line()
-        << ", function \'" << _location.function_name() << "\'.";
+    res << "[" << get_time_stamp() << "] " << _msg << ", function \'"
+        << _location.function_name() << "\'"
+        << ", file \'" << _location.file_name() << "\', line "
+        << _location.line();
     return res.str();
 }
 
