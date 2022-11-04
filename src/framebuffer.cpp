@@ -215,6 +215,7 @@ framebuffer_t::framebuffer_t(const uint32_t _width, const uint32_t _height)
       height(_height),
       color_buffer(color_buffer_t(_width, _height)),
       depth_buffer(depth_buffer_t(_width, _height)) {
+    std::atomic_init(&is_should_draw, true);
     return;
 }
 

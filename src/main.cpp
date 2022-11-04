@@ -80,6 +80,9 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
         // auto view_mat2  = camera.look_at();
         _shader->shader_data.project_matrix = matrix4f_t();
         draw3d.model(model2);
+
+        // 更新缓冲区标识，表示当前缓冲区数据还没有绘制
+        _framebuffer->is_should_draw = true;
     }
     return;
 }
