@@ -20,6 +20,80 @@
 #include "display.h"
 #include "log.hpp"
 
+void display_t::input_handler(void) {
+    // 捕获事件
+    while (SDL_PollEvent(&sdl_event)) {
+        switch (sdl_event.type) {
+            // 键盘事件
+            case SDL_KEYDOWN: {
+                switch (sdl_event.key.keysym.sym) {
+                    case SDLK_ESCAPE: {
+                        // 如果是 esc 键则将 is_should_quit 置位
+                        is_should_quit = true;
+                        break;
+                    }
+                    case SDLK_a: {
+                        event_callback.key_a();
+                        break;
+                    }
+                    case SDLK_d: {
+                        event_callback.key_d();
+                        break;
+                    }
+                    case SDLK_SPACE: {
+                        event_callback.key_space();
+                        break;
+                    }
+                    case SDLK_z: {
+                        event_callback.key_z();
+                        break;
+                    }
+                    case SDLK_LCTRL: {
+                        event_callback.key_left_ctrl();
+                        break;
+                    }
+                    case SDLK_w: {
+                        event_callback.key_w();
+                        break;
+                    }
+                    case SDLK_s: {
+                        event_callback.key_s();
+                        break;
+                    }
+                    case SDLK_LSHIFT: {
+                        event_callback.key_left_shift();
+                        break;
+                    }
+                    default: {
+                        // 输出按键名
+                        printf("key %s down！\n",
+                               SDL_GetKeyName(sdl_event.key.keysym.sym));
+                    }
+                }
+                break;
+            }
+            // 鼠标移动
+            case SDL_MOUSEMOTION: {
+                event_callback.key_mouse_motion();
+                break;
+            }
+            // 鼠标点击
+            case SDL_MOUSEBUTTONDOWN: {
+                break;
+            }
+            // 鼠标滚轮
+            case SDL_MOUSEWHEEL: {
+                break;
+            }
+            case SDL_QUIT: {
+                is_should_quit = true;
+                break;
+            }
+        }
+    }
+    return;
+}
+
 void display_t::fill(void) {
     // 更新 texture
     auto res = SDL_UpdateTexture(sdl_texture, nullptr,
@@ -141,80 +215,6 @@ display_t::~display_t(void) {
     SDL_DestroyRenderer(sdl_renderer);
     SDL_DestroyWindow(sdl_window);
     SDL_Quit();
-}
-
-void display_t::input_handler(void) {
-    // 捕获事件
-    while (SDL_PollEvent(&sdl_event)) {
-        switch (sdl_event.type) {
-            // 键盘事件
-            case SDL_KEYDOWN: {
-                switch (sdl_event.key.keysym.sym) {
-                    case SDLK_ESCAPE: {
-                        // 如果是 esc 键则将 is_should_quit 置位
-                        is_should_quit = true;
-                        break;
-                    }
-                    case SDLK_a: {
-                        event_callback.key_a();
-                        break;
-                    }
-                    case SDLK_d: {
-                        event_callback.key_d();
-                        break;
-                    }
-                    case SDLK_SPACE: {
-                        event_callback.key_space();
-                        break;
-                    }
-                    case SDLK_z: {
-                        event_callback.key_z();
-                        break;
-                    }
-                    case SDLK_LCTRL: {
-                        event_callback.key_left_ctrl();
-                        break;
-                    }
-                    case SDLK_w: {
-                        event_callback.key_w();
-                        break;
-                    }
-                    case SDLK_s: {
-                        event_callback.key_s();
-                        break;
-                    }
-                    case SDLK_LSHIFT: {
-                        event_callback.key_left_shift();
-                        break;
-                    }
-                    default: {
-                        // 输出按键名
-                        printf("key %s down！\n",
-                               SDL_GetKeyName(sdl_event.key.keysym.sym));
-                    }
-                }
-                break;
-            }
-            // 鼠标移动
-            case SDL_MOUSEMOTION: {
-                event_callback.key_mouse_motion();
-                break;
-            }
-            // 鼠标点击
-            case SDL_MOUSEBUTTONDOWN: {
-                break;
-            }
-            // 鼠标滚轮
-            case SDL_MOUSEWHEEL: {
-                break;
-            }
-            case SDL_QUIT: {
-                is_should_quit = true;
-                break;
-            }
-        }
-    }
-    return;
 }
 
 void display_t::loop(void) {
