@@ -17,13 +17,18 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+#include "omp.h"
+
 /**
  * @brief 配置选项封装
  */
 class config_t {
 public:
     /// @brief 控制是否绘制线框，false 时绘制整个图像
-    bool draw_wireframe = true;
+    bool    draw_wireframe = true;
+
+    /// @brief 本机处理器数量，用于 omp
+    uint8_t procs          = omp_get_num_procs();
 };
 
 #endif /* _CONFIG_H_ */

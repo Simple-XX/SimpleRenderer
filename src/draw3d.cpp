@@ -126,8 +126,9 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
                         const model_t::normal_t& _normal) {
     auto min = _v0.coord.min(_v1.coord).min(_v2.coord);
     auto max = _v0.coord.max(_v1.coord).max(_v2.coord);
-    for (auto x = int32_t(min.x); x <= max.x; x++) {
-        for (auto y = int32_t(min.y); y <= max.y; y++) {
+#pragma omp parallel for num_threads(config.procs) collapse(2)
+    for (auto x = int32_t(min.x); x <= int32_t(max.x); x++) {
+        for (auto y = int32_t(min.y); y <= int32_t(max.y); y++) {
             /// @todo 这里要用裁剪替换掉
             if ((unsigned)x >= width || (unsigned)y >= height) {
                 continue;
@@ -250,6 +251,7 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
 
 void draw3d_t::model(const model_t& _model) {
     if (config.draw_wireframe == true) {
+#pragma omp parallel for num_threads(config.procs)
         for (auto f : _model.get_face()) {
             /// @todo 巨大性能开销
             auto face = shader.vertex(shader_vertex_in_t(f)).face;
@@ -262,12 +264,12 @@ void draw3d_t::model(const model_t& _model) {
         }
     }
     else {
+#pragma omp parallel for num_threads(config.procs)
         for (auto f : _model.get_face()) {
             /// @todo 巨大性能开销
             auto face = shader.vertex(shader_vertex_in_t(f)).face;
             triangle(face);
         }
     }
-
     return;
 }
