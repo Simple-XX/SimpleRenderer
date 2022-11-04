@@ -37,35 +37,7 @@ auto camera         = std::make_shared<camera_t>();
 auto event_callback = std::make_shared<event_callback_t>(*config, *camera);
 auto display
   = std::make_shared<display_t>(*framebuffer, *camera, *event_callback);
-auto       models = std::vector<model_t>();
-
-// 投影变换矩阵
-matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio, float zNear,
-                                 float zFar) {
-    // 透视投影矩阵
-    float proj_arr[4][4] = {
-        {zNear,     0,            0,             0},
-        {    0, zNear,            0,             0},
-        {    0,     0, zNear + zFar, -zNear * zFar},
-        {    0,     0,            1,             0}
-    };
-    auto  proj            = matrix4f_t(proj_arr);
-
-    float h               = zNear * tan(eye_fov / 2) * 2;
-    float w               = h * aspect_ratio;
-    float z               = zFar - zNear;
-    // 正交投影矩阵，因为在观测投影时x0y平面视角默认是中心，所以这里的正交投影就不用平移x和y了
-    float ortho_arr[4][4] = {
-        {2 / w,     0,     0,                   0},
-        {    0, 2 / h,     0,                   0},
-        {    0,     0, 2 / z, -(zFar + zNear) / 2},
-        {    0,     0,     0,                   1}
-    };
-
-    auto ortho = matrix4f_t(ortho_arr);
-
-    return ortho * proj;
-}
+auto models = std::vector<model_t>();
 
 void draw(std::shared_ptr<framebuffer_t> _framebuffer,
           std::shared_ptr<shader_base_t> _shader,
@@ -97,7 +69,7 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
         // auto view_mat   = camera.look_at();
         _shader->shader_data.view_matrix    = matrix4f_t();
         _shader->shader_data.project_matrix = matrix4f_t();
-        draw3d.model(model);
+        // draw3d.model(model);
 
         _shader->shader_data.model_matrix
           = get_model_matrix(vector4f_t(1000, 1000, 1000),
