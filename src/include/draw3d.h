@@ -43,9 +43,8 @@ private:
     uint32_t       height;
 
 public:
-    /// @brief 光照方向
-    /// @bug 这里要注意与法线正方向配合
-    vector4f_t light = vector4f_t(0, 0, 1);
+    /// @brief 光照方向，左手系，x 向右，y 向下，z 正方向为屏幕由内向外
+    vector4f_t light = vector4f_t(0, 0, -1);
 
     /**
      * @brief 计算重心坐标
