@@ -59,7 +59,7 @@ TEST(vector4f_t, sub) {
 TEST(vector4f_t, mult) {
     auto vec1 = vector4f_t(1, 2, 3, 4);
     auto res  = vector4f_t(2, 4, 6, 8);
-    EXPECT_EQ((res == (vec1 * 2)), true);
+    EXPECT_EQ((res == (vec1 * 2.f)), true);
 
     auto vec2 = vector4f_t(5, 6, 7, 8);
     EXPECT_EQ((70 == (vec1 * vec2)), true);
@@ -73,7 +73,7 @@ TEST(vector4f_t, mult) {
 TEST(vector4f_t, div) {
     auto vec1 = vector4f_t(1, 2, 3, 4);
     auto res  = vector4f_t(2, 4, 6, 8);
-    EXPECT_EQ((res == (vec1 * 2)), true);
+    EXPECT_EQ((res == (vec1 * 2.f)), true);
 
     auto vec2 = vector4f_t(5, 6, 7, 8);
     EXPECT_EQ((70 == (vec1 * vec2)), true);
