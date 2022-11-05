@@ -383,10 +383,53 @@ public:
     const matrix4_t<_T> scale(const _T& _x, const _T& _y, const _T& _z) const;
 
     /**
-     * @brief 旋转矩阵，Rodriguez 方法，左手系，x 向右，y 向下，z 向屏幕外
+     * @brief 绕 x 轴旋转，返回当前矩阵与旋转矩阵相乘的结果 rotate_x_mat* *this
+     * @param  _angle           要旋转的角度
+     * @note 左手系，x 向右，y 向下，z 向屏幕外
+     * @see http://www.songho.ca/opengl/gl_anglestoaxes.html
+     *  {
+     *      {1, 0, 0, 0},
+     *      {0, c, -s, 0},
+     *      {0, s, c, 0},
+     *      {0, 0, 0, 1}
+     *  }
+     */
+    const matrix4_t<_T> rotate_x(const float& _angle);
+
+    /**
+     * @brief 绕 y 轴旋转，返回当前矩阵与旋转矩阵相乘的结果 rotate_y_mat* *this
+     * @param  _angle           要旋转的角度
+     * @note 左手系，x 向右，y 向下，z 向屏幕外
+     * @see http://www.songho.ca/opengl/gl_anglestoaxes.html
+     *  {
+     *      {c, 0, s, 0},
+     *      {0, 1, 0, 0},
+     *      {-s, 0, c, 0},
+     *      {0, 0, 0, 1}
+     *  }
+     */
+    const matrix4_t<_T> rotate_y(const float& _angle);
+
+    /**
+     * @brief 绕 z 轴旋转，返回当前矩阵与旋转矩阵相乘的结果 rotate_z_mat* *this
+     * @param  _angle           要旋转的角度
+     * @note 左手系，x 向右，y 向下，z 向屏幕外
+     * @see http://www.songho.ca/opengl/gl_anglestoaxes.html
+     *  {
+     *      {c, -s, 0, 0},
+     *      {s, c, 0, 0},
+     *      {0, 0, 1, 0},
+     *      {0, 0, 0, 1}
+     *  }
+     */
+    const matrix4_t<_T> rotate_z(const float& _angle);
+
+    /**
+     * @brief 旋转矩阵，Rodriguez 方法
      * @param  _axis            旋转轴，起点为原点，单位向量
      * @param  _angle           要旋转的角度
      * @return const matrix4_t<_T>   构造好的旋转矩阵
+     * @note 左手系，x 向右，y 向下，z 向屏幕外
      * @note 旋转的是顶点，逆时针为正方向
      * @note 旋转轴如无特殊需要应使用单位向量
      * @see https://zhuanlan.zhihu.com/p/401806150
@@ -414,15 +457,21 @@ public:
     rotate_from_to(const vector4f_t& _from, const vector4f_t& _to) const;
 
     /**
-     * @brief 平移矩阵
+     * @brief 平移矩阵，返回当前矩阵与平移矩阵相乘的结果 translate_mat* *this
      * @param  _x               x 方向变换
      * @param  _y               y 方向变换
      * @param  _z               z 方向变换
      * @return const matrix4_t<_T>   构造好的平移矩阵
      * @note 先旋转再平移
      * @note 平移的是顶点
+     * @see http://www.songho.ca/opengl/gl_transform.html#modelview
+     *   {
+     *      {1, 0, 0, _x},
+     *      {0, 1, 0, _y},
+     *      {0, 0, 1, _z},
+     *      {0, 0, 0, 1}
+     *   }
      */
-
     const matrix4_t<_T>
                  translate(const _T& _x, const _T& _y, const _T& _z) const;
     /**
@@ -758,6 +807,7 @@ matrix4_t<_T>& matrix4_t<_T>::operator-=(const matrix4_t<_T>& _mat) {
 template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::operator*(const matrix4_t<_T>& _mat) const {
     _T tmp[ORDER * ORDER] = { 0 };
+
     tmp[0]                = elems[0] * _mat.elems[0] + elems[1] * _mat.elems[4]
            + elems[2] * _mat.elems[8] + elems[3] * _mat.elems[12];
     tmp[1] = elems[0] * _mat.elems[1] + elems[1] * _mat.elems[5]
@@ -979,6 +1029,57 @@ matrix4_t<_T>::scale(const _T& _x, const _T& _y, const _T& _z) const {
     tmp[15]               = elems[15];
 
     return matrix4_t<_T>(tmp);
+}
+
+/// @todo 修改为直接返回
+template <matrix_element_concept_t _T>
+const matrix4_t<_T> matrix4_t<_T>::rotate_x(const float& _angle) {
+    // 角度转弧度
+    auto rad    = RAD(_angle);
+
+    auto c      = cos(rad);
+    auto s      = sin(rad);
+    auto m      = matrix4_t<_T>();
+    m.elems[5]  = c;
+    m.elems[6]  = -s;
+    m.elems[9]  = s;
+    m.elems[10] = c;
+
+    return m * *this;
+}
+
+/// @todo 修改为直接返回
+template <matrix_element_concept_t _T>
+const matrix4_t<_T> matrix4_t<_T>::rotate_y(const float& _angle) {
+    // 角度转弧度
+    auto rad    = RAD(_angle);
+
+    auto c      = cos(rad);
+    auto s      = sin(rad);
+    auto m      = matrix4_t<_T>();
+    m.elems[0]  = c;
+    m.elems[2]  = s;
+    m.elems[8]  = -s;
+    m.elems[10] = c;
+
+    return m * *this;
+}
+
+/// @todo 修改为直接返回
+template <matrix_element_concept_t _T>
+const matrix4_t<_T> matrix4_t<_T>::rotate_z(const float& _angle) {
+    // 角度转弧度
+    auto rad   = RAD(_angle);
+
+    auto c     = cos(rad);
+    auto s     = sin(rad);
+    auto m     = matrix4_t<_T>();
+    m.elems[0] = c;
+    m.elems[1] = -s;
+    m.elems[4] = s;
+    m.elems[5] = c;
+
+    return m * *this;
 }
 
 /// @todo 精度问题
