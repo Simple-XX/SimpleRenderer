@@ -25,11 +25,5 @@ TEST(color_t, rgba) {
     EXPECT_EQ(rgba[2], 3);
     EXPECT_EQ(rgba[3], 40);
 
-    auto rgba2arr = rgba.to_arr();
-    EXPECT_EQ(rgba2arr[0], 1);
-    EXPECT_EQ(rgba2arr[1], 2);
-    EXPECT_EQ(rgba2arr[2], 3);
-    EXPECT_EQ(rgba2arr[3], 40);
-
     return;
 }
