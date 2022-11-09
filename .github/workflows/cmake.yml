@@ -20,6 +20,9 @@ jobs:
       shell: bash
       run: |
         brew install gcc
+        brew install sdl2
+        brew install sdl2_ttf
+        brew install libomp
 
     - name: Make build dir
       shell: bash
