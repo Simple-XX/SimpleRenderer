@@ -47,16 +47,22 @@ default_shader_t::vertex(const shader_vertex_in_t& _shader_vertex_in) {
     /// @todo 处理变换
     auto face(_shader_vertex_in.face);
     // 变换坐标
-    auto mvp = shader_data.project_matrix * shader_data.view_matrix
+    /// @todo 这里的问题在于在 m 矩阵中做了 t 操作，然后再应用 v 矩阵时，会在 t
+    /// 的基础上 r
+    auto aaa = matrix4f_t().translate(-960, -540, 0);
+    auto bbb = matrix4f_t().translate(960, 540, 0);
+    auto mvp = shader_data.project_matrix * bbb * shader_data.view_matrix * aaa
              * shader_data.model_matrix;
+    // auto mvp = shader_data.project_matrix * shader_data.view_matrix
+    //          * shader_data.model_matrix;
+
     face.v0.coord = mvp * face.v0.coord;
     face.v1.coord = mvp * face.v1.coord;
     face.v2.coord = mvp * face.v2.coord;
     /// @todo 通过矩阵变换法线
     auto v2v0     = face.v2.coord - face.v0.coord;
     auto v1v0     = face.v1.coord - face.v0.coord;
-    auto normal   = (v2v0 ^ v1v0).normalize();
-    face.normal   = normal;
+    face.normal   = (v2v0 ^ v1v0).normalize();
     /// @todo 变换贴图
     return shader_vertex_out_t(face);
 }

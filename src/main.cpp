@@ -33,7 +33,7 @@ static constexpr const uint32_t HEIGHT = 1080;
 auto framebuffer    = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
 auto config         = std::make_shared<config_t>();
 auto shader         = std::make_shared<default_shader_t>();
-auto camera         = std::make_shared<camera_t>();
+auto camera         = std::make_shared<surround_camera_t>();
 auto event_callback = std::make_shared<event_callback_t>(*config, *camera);
 auto display
   = std::make_shared<display_t>(*framebuffer, *camera, *event_callback);
@@ -49,9 +49,6 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
 
     auto     model     = model_t(obj_path);
     auto     model2    = model_t(obj_path2);
-    camera->pos        = vector4f_t(0, 0, 0);
-    camera->target     = vector4f_t(0, 0, 0);
-    camera->up         = vector4f_t(0, 1, 0);
     while (1) {
         // 等待之前的缓冲区数据绘制完成
         if (_framebuffer->is_should_draw == true) {
@@ -70,8 +67,7 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
           = get_model_matrix(vector4f_t(10, 10, 10),
                              vector4f_t(0, 0, 1).normalize(), 180,
                              vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
-        // auto view_mat   = camera.look_at();
-        _shader->shader_data.view_matrix    = matrix4f_t();
+        _shader->shader_data.view_matrix    = camera->look_at();
         _shader->shader_data.project_matrix = matrix4f_t();
         draw3d.model(model);
 
@@ -79,9 +75,7 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
           = get_model_matrix(vector4f_t(1000, 1000, 1000),
                              vector4f_t(0, 1, 1).normalize(), 45,
                              vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
-
-        _shader->shader_data.view_matrix    = matrix4f_t();
-        // auto view_mat2  = camera.look_at();
+        _shader->shader_data.view_matrix    = camera->look_at();
         _shader->shader_data.project_matrix = matrix4f_t();
         draw3d.model(model2);
 
@@ -122,6 +116,19 @@ int main(int _argc, char** _argv) {
     draw_thread.detach();
 
     display->loop();
+
+    auto vector = vector4f_t(100, 100, 0, 1);
+
+    auto m      = get_model_matrix(vector4f_t(10, 10, 10),
+                                   vector4f_t(0, 0, 1).normalize(), 180,
+                                   vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
+    auto v      = camera->look_at();
+    std::cout << m << std::endl;
+    std::cout << m * vector << std::endl;
+    std::cout << v << std::endl;
+    std::cout << v * vector << std::endl;
+    std::cout << v * m << std::endl;
+    std::cout << v * m * vector << std::endl;
 
     return 0;
 }

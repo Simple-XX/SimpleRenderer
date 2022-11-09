@@ -76,7 +76,7 @@ TEST(draw3d_t, line) {
     auto framebuffer    = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
     auto config         = std::make_shared<config_t>();
     auto shader         = std::make_shared<default_shader_t>();
-    auto camera         = std::make_shared<camera_t>();
+    auto camera         = std::make_shared<surround_camera_t>();
     auto event_callback = std::make_shared<event_callback_t>(*config, *camera);
     auto display
       = std::make_shared<display_t>(*framebuffer, *camera, *event_callback);
@@ -133,7 +133,7 @@ TEST(draw3d_t, obj) {
     auto framebuffer    = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
     auto config         = std::make_shared<config_t>();
     auto shader         = std::make_shared<default_shader_t>();
-    auto camera         = std::make_shared<camera_t>();
+    auto camera         = std::make_shared<surround_camera_t>();
     auto event_callback = std::make_shared<event_callback_t>(*config, *camera);
     auto display
       = std::make_shared<display_t>(*framebuffer, *camera, *event_callback);

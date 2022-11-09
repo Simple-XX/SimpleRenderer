@@ -74,7 +74,7 @@ private:
     /// @brief 保存要显示的 framebuffer
     framebuffer_t&               framebuffer;
     /// @brief 相机
-    camera_t&                    camera;
+    surround_camera_t&                    camera;
     /// @brief 事件处理
     event_callback_t&            event_callback;
     /// @brief 窗口宽度
@@ -111,7 +111,7 @@ public:
      * @param  _camera          要绑定的相机
      * @param  _event_callback  事件处理
      */
-    display_t(framebuffer_t& _framebuffer, camera_t& _camera,
+    display_t(framebuffer_t& _framebuffer, surround_camera_t& _camera,
               event_callback_t& _event_callback);
 
     /**

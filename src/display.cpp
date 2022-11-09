@@ -48,6 +48,10 @@ void display_t::input_handler(void) {
                         event_callback.key_z();
                         break;
                     }
+                    case SDLK_r: {
+                        event_callback.key_r();
+                        break;
+                    }
                     case SDLK_LCTRL: {
                         event_callback.key_left_ctrl();
                         break;
@@ -58,6 +62,14 @@ void display_t::input_handler(void) {
                     }
                     case SDLK_s: {
                         event_callback.key_s();
+                        break;
+                    }
+                    case SDLK_q: {
+                        event_callback.key_q();
+                        break;
+                    }
+                    case SDLK_e: {
+                        event_callback.key_e();
                         break;
                     }
                     case SDLK_LSHIFT: {
@@ -74,7 +86,8 @@ void display_t::input_handler(void) {
             }
             // 鼠标移动
             case SDL_MOUSEMOTION: {
-                event_callback.key_mouse_motion();
+                event_callback.mouse_motion(sdl_event.motion.xrel,
+                                            sdl_event.motion.yrel);
                 break;
             }
             // 鼠标点击
@@ -137,7 +150,7 @@ void display_t::show_fps(const uint32_t _fps) {
     return;
 }
 
-display_t::display_t(framebuffer_t& _framebuffer, camera_t& _camera,
+display_t::display_t(framebuffer_t& _framebuffer, surround_camera_t& _camera,
                      event_callback_t& _event_callback)
     : framebuffer(_framebuffer),
       camera(_camera),
@@ -227,6 +240,7 @@ void display_t::loop(void) {
     while (is_should_quit == false) {
         start = us();
         // 处理输入
+        /// @todo 移动速度在不同帧率下一致
         input_handler();
         // 填充窗口
         /// @todo 巨大性能开销

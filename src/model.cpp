@@ -101,16 +101,14 @@ model_t::face_t::face_t(const model_t::vertex_t& _v0,
     // 如果 obj 内包含法向量，直接使用即可
     if (_v0.normal.length() != 0 && _v1.normal.length() != 0
         && _v2.normal.length() != 0) {
-        normal = (_v0.normal + _v1.normal + _v2.normal);
-        normal = normal.normalize();
+        normal = (_v0.normal + _v1.normal + _v2.normal).normalize();
     }
     // 手动计算
     else {
         // 两条相临边的叉积
-        auto v2v0   = _v2.coord - _v0.coord;
-        auto v1v0   = _v1.coord - _v0.coord;
-        auto normal = v2v0 ^ v1v0;
-        normal      = normal.normalize();
+        auto v2v0 = _v2.coord - _v0.coord;
+        auto v1v0 = _v1.coord - _v0.coord;
+        normal    = (v2v0 ^ v1v0).normalize();
     }
     return;
 }

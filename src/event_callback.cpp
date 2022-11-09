@@ -16,7 +16,8 @@
 
 #include "event_callback.h"
 
-event_callback_t::event_callback_t(config_t& _config, camera_t& _camera)
+event_callback_t::event_callback_t(config_t&          _config,
+                                   surround_camera_t& _camera)
     : config(_config), camera(_camera) {
     return;
 }
@@ -26,37 +27,53 @@ event_callback_t::~event_callback_t(void) {
 }
 
 void event_callback_t::key_a(void) {
-    camera.get_pos().x -= camera.speed;
+    camera.update_pos_x(false);
     return;
 }
 
 void event_callback_t::key_d(void) {
-    camera.get_pos().x += camera.speed;
+    camera.update_pos_x(true);
     return;
 }
 
 void event_callback_t::key_w(void) {
-    camera.get_pos().z += camera.speed;
+    camera.update_pos_z(true);
     return;
 }
 
 void event_callback_t::key_s(void) {
-    camera.get_pos().z -= camera.speed;
+    camera.update_pos_z(false);
     return;
 }
 
 void event_callback_t::key_z(void) {
-    camera.get_pos().y += camera.speed;
+    camera.update_pos_y(true);
+    return;
+}
+
+void event_callback_t::key_r(void) {
+    camera.set_default();
+    return;
+}
+
+void event_callback_t::key_q(void) {
+    /// @todo 完善
+    // camera.update_up_x();
+    return;
+}
+
+void event_callback_t::key_e(void) {
+    /// @todo 完善
+    // camera.update_up_y();
     return;
 }
 
 void event_callback_t::key_space(void) {
-    camera.get_pos().y -= camera.speed;
+    camera.update_pos_y(false);
     return;
 }
 
 void event_callback_t::key_left_ctrl(void) {
-    camera.get_pos().y -= camera.speed;
     return;
 }
 
@@ -65,8 +82,7 @@ void event_callback_t::key_left_shift(void) {
     return;
 }
 
-void event_callback_t::key_mouse_motion(void) {
-    // camera.get_target().x += sdl_event.motion.xrel;
-    // camera.get_target().y += sdl_event.motion.yrel;
+void event_callback_t::mouse_motion(const int32_t _x, const int32_t _y) {
+    camera.update_target(_x, _y);
     return;
 }

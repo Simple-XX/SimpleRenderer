@@ -22,12 +22,12 @@
 
 class event_callback_t {
 private:
-    config_t& config;
-    camera_t& camera;
+    config_t&          config;
+    surround_camera_t& camera;
 
 public:
     event_callback_t(void) = delete;
-    event_callback_t(config_t& _config, camera_t& _camera);
+    event_callback_t(config_t& _config, surround_camera_t& _camera);
     ~event_callback_t(void);
 
     void key_a(void);
@@ -35,10 +35,13 @@ public:
     void key_w(void);
     void key_s(void);
     void key_z(void);
+    void key_r(void);
+    void key_q(void);
+    void key_e(void);
     void key_space(void);
     void key_left_ctrl(void);
     void key_left_shift(void);
-    void key_mouse_motion(void);
+    void mouse_motion(const int32_t _x, const int32_t _y);
 };
 
 #endif /* _EVENT_CALLBACK_H_ */
