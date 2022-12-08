@@ -28,9 +28,8 @@
 
 /// @bug 在坐标系上可能有问题，设计的部分：法向量计算，光照方向，屏幕原点
 
-static constexpr const uint32_t WIDTH  = 1920;
-static constexpr const uint32_t HEIGHT = 1080;
-auto framebuffer    = std::make_shared<framebuffer_t>(WIDTH, HEIGHT);
+auto framebuffer
+  = std::make_shared<framebuffer_t>(config_t::WIDTH, config_t::HEIGHT);
 auto config         = std::make_shared<config_t>();
 auto shader         = std::make_shared<default_shader_t>();
 auto camera         = std::make_shared<surround_camera_t>();
@@ -55,18 +54,23 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
             continue;
         }
         // 右对角线
-        draw3d.line(0, HEIGHT - 1, WIDTH - 1, 0, color_t::WHITE);
+        draw3d.line(0, config_t::HEIGHT - 1, config_t::WIDTH - 1, 0,
+                    color_t::WHITE);
         // 左对角线
-        draw3d.line(WIDTH - 1, HEIGHT - 1, 0, 0, color_t::WHITE);
+        draw3d.line(config_t::WIDTH - 1, config_t::HEIGHT - 1, 0, 0,
+                    color_t::WHITE);
         // 水平平分线
-        draw3d.line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, color_t::WHITE);
+        draw3d.line(config_t::WIDTH - 1, config_t::HEIGHT / 2, 0,
+                    config_t::HEIGHT / 2, color_t::WHITE);
         // 垂直平分线
-        draw3d.line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, color_t::WHITE);
+        draw3d.line(config_t::WIDTH / 2, 0, config_t::WIDTH / 2,
+                    config_t::HEIGHT - 1, color_t::WHITE);
 
         _shader->shader_data.model_matrix
           = get_model_matrix(vector4f_t(10, 10, 10),
                              vector4f_t(0, 0, 1).normalize(), 180,
-                             vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
+                             vector4f_t(config_t::WIDTH / 2,
+                                        config_t::HEIGHT / 2, 0));
         _shader->shader_data.view_matrix    = camera->look_at();
         _shader->shader_data.project_matrix = matrix4f_t();
         draw3d.model(model);
@@ -74,7 +78,8 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
         _shader->shader_data.model_matrix
           = get_model_matrix(vector4f_t(1000, 1000, 1000),
                              vector4f_t(0, 1, 1).normalize(), 45,
-                             vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
+                             vector4f_t(config_t::WIDTH / 2,
+                                        config_t::HEIGHT / 2, 0));
         _shader->shader_data.view_matrix    = camera->look_at();
         _shader->shader_data.project_matrix = matrix4f_t();
         draw3d.model(model2);
@@ -121,7 +126,8 @@ int main(int _argc, char** _argv) {
 
     auto m      = get_model_matrix(vector4f_t(10, 10, 10),
                                    vector4f_t(0, 0, 1).normalize(), 180,
-                                   vector4f_t(WIDTH / 2, HEIGHT / 2, 0));
+                                   vector4f_t(config_t::WIDTH / 2,
+                                              config_t::HEIGHT / 2, 0));
     auto v      = camera->look_at();
     std::cout << m << std::endl;
     std::cout << m * vector << std::endl;

@@ -29,6 +29,9 @@ public:
 
     /// @brief 本机处理器数量，用于 omp
     uint8_t procs          = omp_get_num_procs();
+
+    static constexpr const uint32_t WIDTH  = 1920;
+    static constexpr const uint32_t HEIGHT = 1080;
 };
 
 #endif /* _CONFIG_H_ */
