@@ -32,19 +32,20 @@
 class display_t {
 private:
     /// @brief 字体文件
-    static constexpr const char*    font_file_path = "../../wqy-zenhei.ttc";
+    static constexpr const char* font_file_path
+      = "../../src/3rd/wqy-zenhei/wqy-zenhei.ttc";
     /// @brief fps 内容
-    static constexpr const char*    FPS            = "FPS: ";
+    static constexpr const char*    FPS        = "FPS: ";
     /// @brief fps x 位置
-    static constexpr const uint32_t FPS_POS_X      = 0;
+    static constexpr const uint32_t FPS_POS_X  = 0;
     /// @brief fps y 位置
-    static constexpr const uint32_t FPS_POS_Y      = 0;
+    static constexpr const uint32_t FPS_POS_Y  = 0;
     /// @brief fps x 长度
-    static constexpr const uint32_t FPS_SIZE_X     = 160;
+    static constexpr const uint32_t FPS_SIZE_X = 160;
     /// @brief fps y 高度
-    static constexpr const uint32_t FPS_SIZE_Y     = 90;
+    static constexpr const uint32_t FPS_SIZE_Y = 90;
     /// @brief fps 位置
-    static constexpr const SDL_Rect FPS_RECT       = {
+    static constexpr const SDL_Rect FPS_RECT   = {
         FPS_POS_X,
         FPS_POS_Y,
         FPS_SIZE_X,
@@ -74,7 +75,7 @@ private:
     /// @brief 保存要显示的 framebuffer
     framebuffer_t&               framebuffer;
     /// @brief 相机
-    surround_camera_t&                    camera;
+    surround_camera_t&           camera;
     /// @brief 事件处理
     event_callback_t&            event_callback;
     /// @brief 窗口宽度

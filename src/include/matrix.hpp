@@ -42,10 +42,12 @@ concept matrix_element_concept_t = std::is_same<_T, float>::value;
 template <matrix_element_concept_t _T>
 class matrix4_t {
 private:
-    /// @brief  阶数
+    /// @brief 阶数
     static constexpr const uint8_t ORDER = 4;
+    /// @brief 元素个数
+    static constexpr const uint8_t ELEMS = 16;
     /// @brief 矩阵元素
-    std::array<_T, ORDER * ORDER>  elems;
+    std::array<_T, ELEMS>          elems;
 
     /**
      * @brief 递归求 n 阶行列式的值
@@ -161,27 +163,27 @@ public:
     template <class _U>
     friend const matrix4_t<_T>
     operator*(const _U& _v, const matrix4_t<_T>& _mat) {
-        _T tmp[ORDER * ORDER] = { 0 };
+        _T tmp[ELEMS] = { 0 };
 
-        tmp[0]                = _mat.elems[0] * _v;
-        tmp[1]                = _mat.elems[1] * _v;
-        tmp[2]                = _mat.elems[2] * _v;
-        tmp[3]                = _mat.elems[3] * _v;
+        tmp[0]        = _mat.elems[0] * _v;
+        tmp[1]        = _mat.elems[1] * _v;
+        tmp[2]        = _mat.elems[2] * _v;
+        tmp[3]        = _mat.elems[3] * _v;
 
-        tmp[4]                = _mat.elems[4] * _v;
-        tmp[5]                = _mat.elems[5] * _v;
-        tmp[6]                = _mat.elems[6] * _v;
-        tmp[7]                = _mat.elems[7] * _v;
+        tmp[4]        = _mat.elems[4] * _v;
+        tmp[5]        = _mat.elems[5] * _v;
+        tmp[6]        = _mat.elems[6] * _v;
+        tmp[7]        = _mat.elems[7] * _v;
 
-        tmp[8]                = _mat.elems[8] * _v;
-        tmp[9]                = _mat.elems[9] * _v;
-        tmp[10]               = _mat.elems[10] * _v;
-        tmp[11]               = _mat.elems[11] * _v;
+        tmp[8]        = _mat.elems[8] * _v;
+        tmp[9]        = _mat.elems[9] * _v;
+        tmp[10]       = _mat.elems[10] * _v;
+        tmp[11]       = _mat.elems[11] * _v;
 
-        tmp[12]               = _mat.elems[12] * _v;
-        tmp[13]               = _mat.elems[13] * _v;
-        tmp[14]               = _mat.elems[14] * _v;
-        tmp[15]               = _mat.elems[15] * _v;
+        tmp[12]       = _mat.elems[12] * _v;
+        tmp[13]       = _mat.elems[13] * _v;
+        tmp[14]       = _mat.elems[14] * _v;
+        tmp[15]       = _mat.elems[15] * _v;
 
         return matrix4_t<_T>(tmp);
     }
@@ -196,27 +198,27 @@ public:
     template <class _U>
     friend const matrix4_t<_T>
     operator*(const matrix4_t<_T>& _mat, const _U& _v) {
-        _T tmp[ORDER * ORDER] = { 0 };
+        _T tmp[ELEMS] = { 0 };
 
-        tmp[0]                = _v * _mat.elems[0];
-        tmp[1]                = _v * _mat.elems[1];
-        tmp[2]                = _v * _mat.elems[2];
-        tmp[3]                = _v * _mat.elems[3];
+        tmp[0]        = _v * _mat.elems[0];
+        tmp[1]        = _v * _mat.elems[1];
+        tmp[2]        = _v * _mat.elems[2];
+        tmp[3]        = _v * _mat.elems[3];
 
-        tmp[4]                = _v * _mat.elems[4];
-        tmp[5]                = _v * _mat.elems[5];
-        tmp[6]                = _v * _mat.elems[6];
-        tmp[7]                = _v * _mat.elems[7];
+        tmp[4]        = _v * _mat.elems[4];
+        tmp[5]        = _v * _mat.elems[5];
+        tmp[6]        = _v * _mat.elems[6];
+        tmp[7]        = _v * _mat.elems[7];
 
-        tmp[8]                = _v * _mat.elems[8];
-        tmp[9]                = _v * _mat.elems[9];
-        tmp[10]               = _v * _mat.elems[10];
-        tmp[11]               = _v * _mat.elems[11];
+        tmp[8]        = _v * _mat.elems[8];
+        tmp[9]        = _v * _mat.elems[9];
+        tmp[10]       = _v * _mat.elems[10];
+        tmp[11]       = _v * _mat.elems[11];
 
-        tmp[12]               = _v * _mat.elems[12];
-        tmp[13]               = _v * _mat.elems[13];
-        tmp[14]               = _v * _mat.elems[14];
-        tmp[15]               = _v * _mat.elems[15];
+        tmp[12]       = _v * _mat.elems[12];
+        tmp[13]       = _v * _mat.elems[13];
+        tmp[14]       = _v * _mat.elems[14];
+        tmp[15]       = _v * _mat.elems[15];
 
         return matrix4_t<_T>(tmp);
     }
@@ -548,9 +550,9 @@ template <matrix_element_concept_t _T>
 const matrix4_t<_T>
 matrix4_t<_T>::cofactor(const uint8_t _row, const uint8_t _col,
                         const uint8_t _order) const {
-    _T   tmp[ORDER * ORDER] = { 0 };
-    auto row_idx            = 0;
-    auto col_idx            = 0;
+    _T   tmp[ELEMS] = { 0 };
+    auto row_idx    = 0;
+    auto col_idx    = 0;
     for (auto i = 0; i < _order; i++) {
         for (auto j = 0; j < _order; j++) {
             if (i != _row && j != _col) {
@@ -569,29 +571,29 @@ matrix4_t<_T>::cofactor(const uint8_t _row, const uint8_t _col,
 
 template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::adjoint(void) const {
-    _T tmp[ORDER * ORDER] = { 0 };
+    _T tmp[ELEMS] = { 0 };
 
     // 计算代数余子式矩阵并转置
     // 行列索引之和为奇数时为负
-    tmp[0]                = cofactor(0, 0, 4).determ(3);
-    tmp[1]                = -cofactor(1, 0, 4).determ(3);
-    tmp[2]                = cofactor(2, 0, 4).determ(3);
-    tmp[3]                = -cofactor(3, 0, 4).determ(3);
+    tmp[0]        = cofactor(0, 0, 4).determ(3);
+    tmp[1]        = -cofactor(1, 0, 4).determ(3);
+    tmp[2]        = cofactor(2, 0, 4).determ(3);
+    tmp[3]        = -cofactor(3, 0, 4).determ(3);
 
-    tmp[4]                = -cofactor(0, 1, 4).determ(3);
-    tmp[5]                = cofactor(1, 1, 4).determ(3);
-    tmp[6]                = -cofactor(2, 1, 4).determ(3);
-    tmp[7]                = cofactor(3, 1, 4).determ(3);
+    tmp[4]        = -cofactor(0, 1, 4).determ(3);
+    tmp[5]        = cofactor(1, 1, 4).determ(3);
+    tmp[6]        = -cofactor(2, 1, 4).determ(3);
+    tmp[7]        = cofactor(3, 1, 4).determ(3);
 
-    tmp[8]                = cofactor(0, 2, 4).determ(3);
-    tmp[9]                = -cofactor(1, 2, 4).determ(3);
-    tmp[10]               = cofactor(2, 2, 4).determ(3);
-    tmp[11]               = -cofactor(3, 2, 4).determ(3);
+    tmp[8]        = cofactor(0, 2, 4).determ(3);
+    tmp[9]        = -cofactor(1, 2, 4).determ(3);
+    tmp[10]       = cofactor(2, 2, 4).determ(3);
+    tmp[11]       = -cofactor(3, 2, 4).determ(3);
 
-    tmp[12]               = -cofactor(0, 3, 4).determ(3);
-    tmp[13]               = cofactor(1, 3, 4).determ(3);
-    tmp[14]               = -cofactor(2, 3, 4).determ(3);
-    tmp[15]               = cofactor(3, 3, 4).determ(3);
+    tmp[12]       = -cofactor(0, 3, 4).determ(3);
+    tmp[13]       = cofactor(1, 3, 4).determ(3);
+    tmp[14]       = -cofactor(2, 3, 4).determ(3);
+    tmp[15]       = cofactor(3, 3, 4).determ(3);
 
     return matrix4_t<_T>(tmp);
 }
@@ -702,27 +704,27 @@ bool matrix4_t<_T>::operator!=(const matrix4_t<_T>& _mat) const {
 
 template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::operator+(const matrix4_t<_T>& _mat) const {
-    _T tmp[ORDER * ORDER] = { 0 };
+    _T tmp[ELEMS] = { 0 };
 
-    tmp[0]                = elems[0] + _mat.elems[0];
-    tmp[1]                = elems[1] + _mat.elems[1];
-    tmp[2]                = elems[2] + _mat.elems[2];
-    tmp[3]                = elems[3] + _mat.elems[3];
+    tmp[0]        = elems[0] + _mat.elems[0];
+    tmp[1]        = elems[1] + _mat.elems[1];
+    tmp[2]        = elems[2] + _mat.elems[2];
+    tmp[3]        = elems[3] + _mat.elems[3];
 
-    tmp[4]                = elems[4] + _mat.elems[4];
-    tmp[5]                = elems[5] + _mat.elems[5];
-    tmp[6]                = elems[6] + _mat.elems[6];
-    tmp[7]                = elems[7] + _mat.elems[7];
+    tmp[4]        = elems[4] + _mat.elems[4];
+    tmp[5]        = elems[5] + _mat.elems[5];
+    tmp[6]        = elems[6] + _mat.elems[6];
+    tmp[7]        = elems[7] + _mat.elems[7];
 
-    tmp[8]                = elems[8] + _mat.elems[8];
-    tmp[9]                = elems[9] + _mat.elems[9];
-    tmp[10]               = elems[10] + _mat.elems[10];
-    tmp[11]               = elems[11] + _mat.elems[11];
+    tmp[8]        = elems[8] + _mat.elems[8];
+    tmp[9]        = elems[9] + _mat.elems[9];
+    tmp[10]       = elems[10] + _mat.elems[10];
+    tmp[11]       = elems[11] + _mat.elems[11];
 
-    tmp[12]               = elems[12] + _mat.elems[12];
-    tmp[13]               = elems[13] + _mat.elems[13];
-    tmp[14]               = elems[14] + _mat.elems[14];
-    tmp[15]               = elems[15] + _mat.elems[15];
+    tmp[12]       = elems[12] + _mat.elems[12];
+    tmp[13]       = elems[13] + _mat.elems[13];
+    tmp[14]       = elems[14] + _mat.elems[14];
+    tmp[15]       = elems[15] + _mat.elems[15];
 
     return matrix4_t<_T>(tmp);
 }
@@ -754,27 +756,27 @@ matrix4_t<_T>& matrix4_t<_T>::operator+=(const matrix4_t<_T>& _mat) {
 
 template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::operator-(const matrix4_t<_T>& _mat) const {
-    _T tmp[ORDER * ORDER] = { 0 };
+    _T tmp[ELEMS] = { 0 };
 
-    tmp[0]                = elems[0] - _mat.elems[0];
-    tmp[1]                = elems[1] - _mat.elems[1];
-    tmp[2]                = elems[2] - _mat.elems[2];
-    tmp[3]                = elems[3] - _mat.elems[3];
+    tmp[0]        = elems[0] - _mat.elems[0];
+    tmp[1]        = elems[1] - _mat.elems[1];
+    tmp[2]        = elems[2] - _mat.elems[2];
+    tmp[3]        = elems[3] - _mat.elems[3];
 
-    tmp[4]                = elems[4] - _mat.elems[4];
-    tmp[5]                = elems[5] - _mat.elems[5];
-    tmp[6]                = elems[6] - _mat.elems[6];
-    tmp[7]                = elems[7] - _mat.elems[7];
+    tmp[4]        = elems[4] - _mat.elems[4];
+    tmp[5]        = elems[5] - _mat.elems[5];
+    tmp[6]        = elems[6] - _mat.elems[6];
+    tmp[7]        = elems[7] - _mat.elems[7];
 
-    tmp[8]                = elems[8] - _mat.elems[8];
-    tmp[9]                = elems[9] - _mat.elems[9];
-    tmp[10]               = elems[10] - _mat.elems[10];
-    tmp[11]               = elems[11] - _mat.elems[11];
+    tmp[8]        = elems[8] - _mat.elems[8];
+    tmp[9]        = elems[9] - _mat.elems[9];
+    tmp[10]       = elems[10] - _mat.elems[10];
+    tmp[11]       = elems[11] - _mat.elems[11];
 
-    tmp[12]               = elems[12] - _mat.elems[12];
-    tmp[13]               = elems[13] - _mat.elems[13];
-    tmp[14]               = elems[14] - _mat.elems[14];
-    tmp[15]               = elems[15] - _mat.elems[15];
+    tmp[12]       = elems[12] - _mat.elems[12];
+    tmp[13]       = elems[13] - _mat.elems[13];
+    tmp[14]       = elems[14] - _mat.elems[14];
+    tmp[15]       = elems[15] - _mat.elems[15];
 
     return matrix4_t<_T>(tmp);
 }
@@ -806,9 +808,9 @@ matrix4_t<_T>& matrix4_t<_T>::operator-=(const matrix4_t<_T>& _mat) {
 
 template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::operator*(const matrix4_t<_T>& _mat) const {
-    _T tmp[ORDER * ORDER] = { 0 };
+    _T tmp[ELEMS] = { 0 };
 
-    tmp[0]                = elems[0] * _mat.elems[0] + elems[1] * _mat.elems[4]
+    tmp[0]        = elems[0] * _mat.elems[0] + elems[1] * _mat.elems[4]
            + elems[2] * _mat.elems[8] + elems[3] * _mat.elems[12];
     tmp[1] = elems[0] * _mat.elems[1] + elems[1] * _mat.elems[5]
            + elems[2] * _mat.elems[9] + elems[3] * _mat.elems[13];
@@ -858,8 +860,8 @@ matrix4_t<_T>& matrix4_t<_T>::operator*=(const _T& _v) {
 
 template <matrix_element_concept_t _T>
 matrix4_t<_T>& matrix4_t<_T>::operator*=(const matrix4_t<_T>& _mat) {
-    _T tmp[ORDER * ORDER] = { 0 };
-    tmp[0]                = elems[0] * _mat.elems[0] + elems[1] * _mat.elems[4]
+    _T tmp[ELEMS] = { 0 };
+    tmp[0]        = elems[0] * _mat.elems[0] + elems[1] * _mat.elems[4]
            + elems[2] * _mat.elems[8] + elems[3] * _mat.elems[12];
     tmp[1] = elems[0] * _mat.elems[1] + elems[1] * _mat.elems[5]
            + elems[2] * _mat.elems[9] + elems[3] * _mat.elems[13];
@@ -936,26 +938,26 @@ const _T matrix4_t<_T>::operator[](const uint8_t _idx) const {
 
 template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::transpose(void) const {
-    _T tmp[ORDER * ORDER] = { 0 };
-    tmp[0]                = elems[0];
-    tmp[1]                = elems[4];
-    tmp[2]                = elems[8];
-    tmp[3]                = elems[12];
+    _T tmp[ELEMS] = { 0 };
+    tmp[0]        = elems[0];
+    tmp[1]        = elems[4];
+    tmp[2]        = elems[8];
+    tmp[3]        = elems[12];
 
-    tmp[4]                = elems[1];
-    tmp[5]                = elems[5];
-    tmp[6]                = elems[9];
-    tmp[7]                = elems[13];
+    tmp[4]        = elems[1];
+    tmp[5]        = elems[5];
+    tmp[6]        = elems[9];
+    tmp[7]        = elems[13];
 
-    tmp[8]                = elems[2];
-    tmp[9]                = elems[6];
-    tmp[10]               = elems[10];
-    tmp[11]               = elems[14];
+    tmp[8]        = elems[2];
+    tmp[9]        = elems[6];
+    tmp[10]       = elems[10];
+    tmp[11]       = elems[14];
 
-    tmp[12]               = elems[3];
-    tmp[13]               = elems[7];
-    tmp[14]               = elems[11];
-    tmp[15]               = elems[15];
+    tmp[12]       = elems[3];
+    tmp[13]       = elems[7];
+    tmp[14]       = elems[11];
+    tmp[15]       = elems[15];
 
     return matrix4_t<_T>(tmp);
 }
@@ -978,27 +980,27 @@ const matrix4_t<_T> matrix4_t<_T>::inverse(void) const {
 
 template <matrix_element_concept_t _T>
 const matrix4_t<_T> matrix4_t<_T>::scale(const _T& _scale) const {
-    _T tmp[ORDER * ORDER] = { 0 };
+    _T tmp[ELEMS] = { 0 };
 
-    tmp[0]                = _scale * elems[0];
-    tmp[1]                = _scale * elems[1];
-    tmp[2]                = _scale * elems[2];
-    tmp[3]                = _scale * elems[3];
+    tmp[0]        = _scale * elems[0];
+    tmp[1]        = _scale * elems[1];
+    tmp[2]        = _scale * elems[2];
+    tmp[3]        = _scale * elems[3];
 
-    tmp[4]                = _scale * elems[4];
-    tmp[5]                = _scale * elems[5];
-    tmp[6]                = _scale * elems[6];
-    tmp[7]                = _scale * elems[7];
+    tmp[4]        = _scale * elems[4];
+    tmp[5]        = _scale * elems[5];
+    tmp[6]        = _scale * elems[6];
+    tmp[7]        = _scale * elems[7];
 
-    tmp[8]                = _scale * elems[8];
-    tmp[9]                = _scale * elems[9];
-    tmp[10]               = _scale * elems[10];
-    tmp[11]               = _scale * elems[11];
+    tmp[8]        = _scale * elems[8];
+    tmp[9]        = _scale * elems[9];
+    tmp[10]       = _scale * elems[10];
+    tmp[11]       = _scale * elems[11];
 
-    tmp[12]               = elems[12];
-    tmp[13]               = elems[13];
-    tmp[14]               = elems[14];
-    tmp[15]               = elems[15];
+    tmp[12]       = elems[12];
+    tmp[13]       = elems[13];
+    tmp[14]       = elems[14];
+    tmp[15]       = elems[15];
 
     return matrix4_t<_T>(tmp);
 }
@@ -1006,27 +1008,27 @@ const matrix4_t<_T> matrix4_t<_T>::scale(const _T& _scale) const {
 template <matrix_element_concept_t _T>
 const matrix4_t<_T>
 matrix4_t<_T>::scale(const _T& _x, const _T& _y, const _T& _z) const {
-    _T tmp[ORDER * ORDER] = { 0 };
+    _T tmp[ELEMS] = { 0 };
 
-    tmp[0]                = _x * elems[0];
-    tmp[1]                = _x * elems[1];
-    tmp[2]                = _x * elems[2];
-    tmp[3]                = _x * elems[3];
+    tmp[0]        = _x * elems[0];
+    tmp[1]        = _x * elems[1];
+    tmp[2]        = _x * elems[2];
+    tmp[3]        = _x * elems[3];
 
-    tmp[4]                = _y * elems[4];
-    tmp[5]                = _y * elems[5];
-    tmp[6]                = _y * elems[6];
-    tmp[7]                = _y * elems[7];
+    tmp[4]        = _y * elems[4];
+    tmp[5]        = _y * elems[5];
+    tmp[6]        = _y * elems[6];
+    tmp[7]        = _y * elems[7];
 
-    tmp[8]                = _z * elems[8];
-    tmp[9]                = _z * elems[9];
-    tmp[10]               = _z * elems[10];
-    tmp[11]               = _z * elems[11];
+    tmp[8]        = _z * elems[8];
+    tmp[9]        = _z * elems[9];
+    tmp[10]       = _z * elems[10];
+    tmp[11]       = _z * elems[11];
 
-    tmp[12]               = elems[12];
-    tmp[13]               = elems[13];
-    tmp[14]               = elems[14];
-    tmp[15]               = elems[15];
+    tmp[12]       = elems[12];
+    tmp[13]       = elems[13];
+    tmp[14]       = elems[14];
+    tmp[15]       = elems[15];
 
     return matrix4_t<_T>(tmp);
 }
@@ -1155,32 +1157,32 @@ const matrix4_t<_T> matrix4_t<_T>::rotate_from_to(const vector4f_t& _from,
 
     auto vt(v * (1 - ca));
 
-    _T   tmp[ORDER * ORDER] = { 0 };
+    _T   tmp[ELEMS] = { 0 };
 
-    tmp[0]                  = vt.x * v.x + ca;
-    tmp[5]                  = vt.y * v.y + ca;
-    tmp[10]                 = vt.z * v.z + ca;
+    tmp[0]          = vt.x * v.x + ca;
+    tmp[5]          = vt.y * v.y + ca;
+    tmp[10]         = vt.z * v.z + ca;
 
-    vt.x                    *= v.y;
-    vt.z                    *= v.x;
-    vt.y                    *= v.z;
+    vt.x            *= v.y;
+    vt.z            *= v.x;
+    vt.y            *= v.z;
 
-    tmp[1]                  = vt.x + vs.z;
-    tmp[2]                  = vt.z - vs.y;
-    tmp[3]                  = 0;
+    tmp[1]          = vt.x + vs.z;
+    tmp[2]          = vt.z - vs.y;
+    tmp[3]          = 0;
 
-    tmp[4]                  = vt.x - vs.z;
-    tmp[6]                  = vt.y + vs.x;
-    tmp[7]                  = 0;
+    tmp[4]          = vt.x - vs.z;
+    tmp[6]          = vt.y + vs.x;
+    tmp[7]          = 0;
 
-    tmp[8]                  = vt.z + vs.y;
-    tmp[9]                  = vt.y - vs.x;
-    tmp[11]                 = 0;
+    tmp[8]          = vt.z + vs.y;
+    tmp[9]          = vt.y - vs.x;
+    tmp[11]         = 0;
 
-    tmp[12]                 = 0;
-    tmp[13]                 = 0;
-    tmp[14]                 = 0;
-    tmp[15]                 = 1;
+    tmp[12]         = 0;
+    tmp[13]         = 0;
+    tmp[14]         = 0;
+    tmp[15]         = 1;
 
     return matrix4_t<_T>(tmp);
 }
@@ -1188,27 +1190,27 @@ const matrix4_t<_T> matrix4_t<_T>::rotate_from_to(const vector4f_t& _from,
 template <matrix_element_concept_t _T>
 const matrix4_t<_T>
 matrix4_t<_T>::translate(const _T& _x, const _T& _y, const _T& _z) const {
-    _T tmp[ORDER * ORDER] = { 0 };
+    _T tmp[ELEMS] = { 0 };
 
-    tmp[0]                = elems[0] + _x * elems[12];
-    tmp[1]                = elems[1] + _x * elems[13];
-    tmp[2]                = elems[2] + _x * elems[14];
-    tmp[3]                = elems[3] + _x * elems[15];
+    tmp[0]        = elems[0] + _x * elems[12];
+    tmp[1]        = elems[1] + _x * elems[13];
+    tmp[2]        = elems[2] + _x * elems[14];
+    tmp[3]        = elems[3] + _x * elems[15];
 
-    tmp[4]                = elems[4] + _y * elems[12];
-    tmp[5]                = elems[5] + _y * elems[13];
-    tmp[6]                = elems[6] + _y * elems[14];
-    tmp[7]                = elems[7] + _y * elems[15];
+    tmp[4]        = elems[4] + _y * elems[12];
+    tmp[5]        = elems[5] + _y * elems[13];
+    tmp[6]        = elems[6] + _y * elems[14];
+    tmp[7]        = elems[7] + _y * elems[15];
 
-    tmp[8]                = elems[8] + _z * elems[12];
-    tmp[9]                = elems[9] + _z * elems[13];
-    tmp[10]               = elems[10] + _z * elems[14];
-    tmp[11]               = elems[11] + _z * elems[15];
+    tmp[8]        = elems[8] + _z * elems[12];
+    tmp[9]        = elems[9] + _z * elems[13];
+    tmp[10]       = elems[10] + _z * elems[14];
+    tmp[11]       = elems[11] + _z * elems[15];
 
-    tmp[12]               = elems[12];
-    tmp[13]               = elems[13];
-    tmp[14]               = elems[14];
-    tmp[15]               = elems[15];
+    tmp[12]       = elems[12];
+    tmp[13]       = elems[13];
+    tmp[14]       = elems[14];
+    tmp[15]       = elems[15];
 
     return matrix4_t<_T>(tmp);
 }
