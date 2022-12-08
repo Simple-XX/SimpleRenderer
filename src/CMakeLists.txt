@@ -49,6 +49,7 @@ set(SimpleRender_src
 add_executable(SimpleRender
         ${SimpleRender_src})
 
+# @todo sdl2: https://github.com/aminosbh/sdl2-cmake-modules
 target_link_libraries(SimpleRender
         ${SDL2_LIBRARIES}
         ${SDL2_ttf_LIBRARIES}
