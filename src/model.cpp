@@ -262,7 +262,8 @@ const model_t model_t::operator*(const matrix4f_t& _tran) const {
     auto model = model_t(*this);
 
     /// @todo
-
+    (void)_tran;
+    
     return model;
 }
 

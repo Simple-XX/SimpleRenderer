@@ -68,7 +68,7 @@ public:
      * @brief 将 framebuffer 中的数据绘制到屏幕上
      * @param  _framebuffer     要绘制的 framebuffer
      */
-    void fill(const framebuffer_t& _framebuffer);
+    void fill(const std::shared_ptr<framebuffer_t>& _framebuffer);
 };
 
 #endif /* _DISPLAY_H_ */

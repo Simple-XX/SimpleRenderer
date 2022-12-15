@@ -132,7 +132,7 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
                         const model_t::normal_t& _normal) {
     auto min = _v0.coord.min(_v1.coord).min(_v2.coord);
     auto max = _v0.coord.max(_v1.coord).max(_v2.coord);
-#pragma omp parallel for num_threads(config.procs) collapse(2)
+#pragma omp parallel for num_threads(config->procs) collapse(2)
     for (auto x = int32_t(min.x); x <= int32_t(max.x); x++) {
         for (auto y = int32_t(min.y); y <= int32_t(max.y); y++) {
             /// @todo 这里要用裁剪替换掉
@@ -150,7 +150,7 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
             auto z = interpolate_depth(_v0.coord.z, _v1.coord.z, _v2.coord.z,
                                        barycentric_coord);
             // 深度在已有颜色之上
-            if (z < framebuffer.get_depth_buffer(x, y)) {
+            if (z < framebuffer->get_depth_buffer(x, y)) {
                 continue;
             }
             // 计算颜色，颜色为通过 shader 片段着色器计算
@@ -163,7 +163,7 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
             }
             auto color = color_t(shader_fragment_out.color);
             // 填充像素
-            framebuffer.pixel(x, y, color, z);
+            framebuffer->pixel(x, y, color, z);
         }
     }
     return;
@@ -174,11 +174,12 @@ void draw3d_t::triangle(const model_t::face_t& _face) {
     return;
 }
 
-draw3d_t::draw3d_t(framebuffer_t& _framebuffer, shader_base_t& _shader,
-                   config_t& _config)
+draw3d_t::draw3d_t(const std::shared_ptr<framebuffer_t>& _framebuffer,
+                   shader_base_t&                        _shader,
+                   const std::shared_ptr<config_t>&      _config)
     : framebuffer(_framebuffer), shader(_shader), config(_config) {
-    width  = framebuffer.get_width();
-    height = framebuffer.get_height();
+    width  = framebuffer->get_width();
+    height = framebuffer->get_height();
     return;
 }
 
@@ -219,14 +220,14 @@ void draw3d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
             if ((unsigned)y >= width || (unsigned)x >= height) {
                 continue;
             }
-            framebuffer.pixel(y, x, _color);
+            framebuffer->pixel(y, x, _color);
         }
         else {
             /// @todo 这里要用裁剪替换掉
             if ((unsigned)x >= width || (unsigned)y >= height) {
                 continue;
             }
-            framebuffer.pixel(x, y, _color);
+            framebuffer->pixel(x, y, _color);
         }
         de += std::abs(dy2);
         if (de >= dx2) {
@@ -248,7 +249,7 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
             auto [is_inside, _]
               = get_barycentric_coord(_v0, _v1, _v2, vector4f_t(x, y));
             if (is_inside) {
-                framebuffer.pixel(x, y, _color);
+                framebuffer->pixel(x, y, _color);
             }
         }
     }
@@ -256,8 +257,8 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
 }
 
 void draw3d_t::model(const model_t& _model) {
-    if (config.draw_wireframe == true) {
-#pragma omp parallel for num_threads(config.procs)
+    if (config->draw_wireframe == true) {
+#pragma omp parallel for num_threads(config->procs)
         for (auto f : _model.get_face()) {
             /// @todo 巨大性能开销
             auto face = shader.vertex(shader_vertex_in_t(f)).face;
@@ -270,7 +271,7 @@ void draw3d_t::model(const model_t& _model) {
         }
     }
     else {
-#pragma omp parallel for num_threads(config.procs)
+#pragma omp parallel for num_threads(config->procs)
         for (auto f : _model.get_face()) {
             /// @todo 巨大性能开销
             auto face = shader.vertex(shader_vertex_in_t(f)).face;

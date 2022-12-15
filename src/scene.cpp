@@ -16,13 +16,20 @@
 
 #include "scene.h"
 
-scene_t::scene_t(void) {
+scene_t::scene_t(const std::shared_ptr<config_t>&      _config,
+                 const std::shared_ptr<camera_base_t>& _camera,
+                 const std::shared_ptr<input_t>&       _input)
+    : config(_config), current_camera(_camera), input(_input) {
+    cameras.push_back(current_camera);
+
     return;
 }
 
 scene_t::scene_t(const scene_t& _scene) {
+    config         = _scene.config;
     cameras        = _scene.cameras;
     current_camera = _scene.current_camera;
+    input          = _scene.input;
     models         = _scene.models;
     visible_models = _scene.visible_models;
     lights         = _scene.lights;
@@ -35,8 +42,10 @@ scene_t::~scene_t(void) {
 }
 
 scene_t& scene_t::operator=(const scene_t& _scene) {
+    config         = _scene.config;
     cameras        = _scene.cameras;
     current_camera = _scene.current_camera;
+    input          = _scene.input;
     models         = _scene.models;
     visible_models = _scene.visible_models;
     lights         = _scene.lights;
@@ -59,7 +68,6 @@ void scene_t::add_light(const light_t& _light) {
 
 void scene_t::tick(const uint32_t _delta_time) {
     (void)_delta_time;
-
     /// @todo 更新可见模型
     /// @todo 计算光照
     /// @todo 移动摄像机

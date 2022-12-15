@@ -25,6 +25,7 @@
 #include "input.h"
 #include "matrix.hpp"
 #include "model.h"
+#include "render.h"
 #include "scene.h"
 
 /// @bug 在坐标系上可能有问题，设计的部分：法向量计算，光照方向，屏幕原点
@@ -32,16 +33,17 @@
 auto config  = std::make_shared<config_t>();
 auto display = std::make_shared<display_t>(config->WIDTH, config->HEIGHT);
 auto framebuffer
-  = std::make_shared<framebuffer_t>(config_t::WIDTH, config_t::HEIGHT);
+  = std::make_shared<framebuffer_t>(config->WIDTH, config->HEIGHT);
 auto camera = std::make_shared<surround_camera_t>();
-auto input  = std::make_shared<input_t>(*config, *camera);
-auto scene  = std::make_shared<scene_t>();
+auto input  = std::make_shared<input_t>(config, camera);
+auto scene  = std::make_shared<scene_t>(config, camera, input);
 auto shader = std::make_shared<default_shader_t>();
+auto render = std::make_shared<render_t>(scene, display, framebuffer, input);
 
-void draw(std::shared_ptr<framebuffer_t> _framebuffer,
-          std::shared_ptr<shader_base_t> _shader,
-          std::shared_ptr<config_t>      _config) {
-    draw3d_t draw3d(*_framebuffer, *_shader, *_config);
+void draw(const std::shared_ptr<framebuffer_t>& _framebuffer,
+          const std::shared_ptr<shader_base_t>& _shader,
+          const std::shared_ptr<config_t>&      _config) {
+    draw3d_t draw3d(_framebuffer, *_shader, _config);
 
     auto     obj_path  = "../../obj/utah-teapot/utah-teapot.obj";
     auto     obj_path2 = "../../obj/cube3.obj";
@@ -114,31 +116,7 @@ int main(int _argc, char** _argv) {
     std::thread draw_thread = std::thread(draw, framebuffer, shader, config);
     draw_thread.detach();
 
-    uint64_t sec            = 0;
-    uint32_t frames         = 0;
-    uint32_t fps            = 0;
-    auto     start          = us();
-    auto     end            = us();
-    auto     is_should_quit = true;
-    // 主循环
-    while (is_should_quit == true) {
-        start          = us();
-        // 处理输入
-        /// @todo 移动速度在不同帧率下一致
-        is_should_quit = input->process(1);
-        // 填充窗口
-        display->fill(*framebuffer);
-        // framebuffer->clear();
-        frames++;
-        end = us();
-        sec += end - start;
-        if (sec >= US2S) {
-            std::cout << "fps_window: " << fps << std::endl;
-            fps    = frames;
-            frames = 0;
-            sec    = 0;
-        }
-    }
+    render->loop();
 
     return 0;
 }

@@ -19,11 +19,10 @@
 
 #include "cstdint"
 #include "mutex"
+#include "type_traits"
 
 #include "color.h"
 #include "log.hpp"
-
-/// @todo 替换已有代码
 
 /**
  * @brief 缓冲区，作为 framebuffer 或 zbuffer 的基类
@@ -119,52 +118,25 @@ public:
     size_t         length(void) const;
 };
 
-template <>
-buffer_base_t<color_t>::buffer_base_t(const uint32_t _w, const uint32_t _h)
+template <class _T>
+buffer_base_t<_T>::buffer_base_t(const uint32_t _w, const uint32_t _h)
     : width(_w), height(_h) {
     try {
-        buffer_arr = new color_t[width * height];
+        buffer_arr = new _T[width * height];
     } catch (const std::bad_alloc& e) {
         std::cerr << log(e.what()) << std::endl;
     }
-    std::fill_n(buffer_arr, width * height, color_t::WHITE);
-
-    return;
-}
-
-template <>
-buffer_base_t<float>::buffer_base_t(const uint32_t _w, const uint32_t _h)
-    : width(_w), height(_h) {
-    try {
-        buffer_arr = new float[width * height];
-    } catch (const std::bad_alloc& e) {
-        std::cerr << log(e.what()) << std::endl;
+    if constexpr (std::is_same_v<_T, color_t>) {
+        std::fill_n(buffer_arr, width * height, color_t::WHITE);
     }
-    std::fill_n(buffer_arr, width * height,
-                std::numeric_limits<float>::lowest());
+    else if constexpr ((std::is_same_v<_T, float>)
+                       || (std::is_same_v<_T, double>)) {
+        std::fill_n(buffer_arr, width * height,
+                    std::numeric_limits<_T>::lowest());
+    }
 
     return;
 }
-
-// template <class _T>
-// buffer_base_t<_T>::buffer_base_t(const uint32_t _w, const uint32_t _h)
-//     : width(_w), height(_h) {
-//     try {
-//         buffer_arr = new _T[width * height];
-//     } catch (const std::bad_alloc& e) {
-//         std::cerr << log(e.what()) << std::endl;
-//     }
-//     if (std::is_same<_T, color_t>::value == true) {
-//         std::fill_n(buffer_arr, width * height, color_t::WHITE);
-//     }
-//     else if ((std::is_same<_T, float>::value == true)
-//              || (std::is_same<_T, double>::value == true)) {
-//         std::fill_n(buffer_arr, width * height,
-//                     std::numeric_limits<_T>::lowest());
-//     }
-//
-//     return;
-// }
 
 template <class _T>
 buffer_base_t<_T>::buffer_base_t(const buffer_base_t& _buffer)
@@ -223,31 +195,17 @@ uint32_t buffer_base_t<_T>::get_width(void) const {
     return width;
 }
 
-template <>
-void buffer_base_t<color_t>::clear(void) {
-    std::fill_n(buffer_arr, width * height, color_t::WHITE);
+template <class _T>
+void buffer_base_t<_T>::clear(void) {
+    if constexpr (std::is_same_v<_T, color_t>) {
+        std::fill_n(buffer_arr, width * height, color_t::WHITE);
+    }
+    else if ((std::is_same_v<_T, float>) || (std::is_same_v<_T, double>)) {
+        std::fill_n(buffer_arr, width * height,
+                    std::numeric_limits<_T>::lowest());
+    }
     return;
 }
-
-template <>
-void buffer_base_t<float>::clear(void) {
-    std::fill_n(buffer_arr, width * height,
-                std::numeric_limits<float>::lowest());
-    return;
-}
-
-// template <class _T>
-// void buffer_base_t<_T>::clear(void) {
-//     if (std::is_same<_T, color_t>::value == true) {
-//         std::fill_n(buffer_arr, width * height, color_t::WHITE);
-//     }
-//     else if ((std::is_same<_T, float>::value == true)
-//              || (std::is_same<_T, double>::value == true)) {
-//         std::fill_n(buffer_arr, width * height,
-//                     std::numeric_limits<_T>::lowest());
-//     }
-//     return;
-// }
 
 template <class _T>
 _T& buffer_base_t<_T>::operator()(const uint32_t _x, const uint32_t _y) {
@@ -270,7 +228,7 @@ size_t buffer_base_t<_T>::length() const {
     return width * height * sizeof(_T);
 }
 
-// typedef buffer_base_t<color_t> color_buffer_t;
-// typedef buffer_base_t<float>   zbuffer_t;
+typedef buffer_base_t<color_t> color_buffer_t;
+typedef buffer_base_t<float>   depth_buffer_t;
 
 #endif /* _BUFFER_BASE_HPP_ */

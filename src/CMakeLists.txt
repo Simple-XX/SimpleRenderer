@@ -45,7 +45,8 @@ set(SimpleRender_src
         color.cpp
         scene.cpp
         light.cpp
-        input.cpp)
+        input.cpp
+        render.cpp)
 
 # 生成可执行文件
 add_executable(SimpleRender

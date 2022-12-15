@@ -18,9 +18,11 @@
 #define _SCENE_H_
 
 #include "cstdint"
+#include "memory"
 #include "vector"
 
 #include "camera.h"
+#include "input.h"
 #include "light.h"
 #include "matrix.hpp"
 #include "model.h"
@@ -31,24 +33,40 @@
  */
 class scene_t {
 private:
+    /// @brief 配置文件
+    std::shared_ptr<config_t>                   config;
+
     /// @brief 场景中的摄像机
-    std::vector<camera_base_t> cameras;
+    std::vector<std::shared_ptr<camera_base_t>> cameras;
     /// @brief 当前使用的摄像机
-    camera_base_t              current_camera;
+    std::shared_ptr<camera_base_t>              current_camera;
+
+    /// @brief 场景的输入处理
+    std::shared_ptr<input_t>                    input;
 
     /// @brief 场景中的所有模型
-    std::vector<model_t>       models;
+    std::vector<model_t>                        models;
     /// @brief 场景中的可见模型
-    std::vector<model_t>       visible_models;
+    std::vector<model_t>                        visible_models;
 
     /// @brief 场景中的所有光照
-    std::vector<light_t>       lights;
+    std::vector<light_t>                        lights;
 
 public:
     /**
      * @brief 空构造函数
      */
-    scene_t(void);
+    scene_t(void) = delete;
+
+    /**
+     * @brief 构造函数
+     * @param  _config          配置信息
+     * @param  _camera          相机
+     * @param  _input           输入
+     */
+    explicit scene_t(const std::shared_ptr<config_t>&      _config,
+                     const std::shared_ptr<camera_base_t>& _camera,
+                     const std::shared_ptr<input_t>&       _input);
 
     /**
      * @brief 构造函数

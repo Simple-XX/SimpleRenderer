@@ -95,10 +95,10 @@ display_t::~display_t(void) {
     SDL_Quit();
 }
 
-void display_t::fill(const framebuffer_t& _framebuffer) {
+void display_t::fill(const std::shared_ptr<framebuffer_t>& _framebuffer) {
     // 更新 texture
     auto res = SDL_UpdateTexture(sdl_texture, nullptr,
-                                 _framebuffer.get_color_buffer().to_arr(),
+                                 _framebuffer->get_color_buffer().to_arr(),
                                  width * color_t::bpp());
     if (res != 0) {
         throw std::runtime_error(log(SDL_GetError()));

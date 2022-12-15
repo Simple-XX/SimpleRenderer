@@ -19,63 +19,68 @@
 /// @todo 补全
 
 void input_t::key_a(const uint32_t _delta_time) {
-    camera.update_pos(camera_base_t::SUB_X, _delta_time);
+    camera->update_pos(camera_base_t::SUB_X, _delta_time);
     return;
 }
 
 void input_t::key_d(const uint32_t _delta_time) {
-    camera.update_pos(camera_base_t::ADD_X, _delta_time);
+    camera->update_pos(camera_base_t::ADD_X, _delta_time);
     return;
 }
 
 void input_t::key_w(const uint32_t _delta_time) {
-    camera.update_pos(camera_base_t::ADD_Z, _delta_time);
+    camera->update_pos(camera_base_t::ADD_Z, _delta_time);
     return;
 }
 
 void input_t::key_s(const uint32_t _delta_time) {
-    camera.update_pos(camera_base_t::SUB_Z, _delta_time);
+    camera->update_pos(camera_base_t::SUB_Z, _delta_time);
     return;
 }
 
 void input_t::key_z(const uint32_t _delta_time) {
-    camera.update_pos(camera_base_t::SUB_Y, _delta_time);
+    camera->update_pos(camera_base_t::SUB_Y, _delta_time);
     return;
 }
 
 void input_t::key_r(const uint32_t) {
-    camera.set_default();
+    camera->set_default();
     return;
 }
 
 void input_t::key_q(const uint32_t _delta_time) {
-    camera.update_up(camera_base_t::ADD_Y, _delta_time);
+    camera->update_up(camera_base_t::ADD_Y, _delta_time);
     return;
 }
 
 void input_t::key_e(const uint32_t _delta_time) {
-    camera.update_up(camera_base_t::SUB_Y, _delta_time);
+    camera->update_up(camera_base_t::SUB_Y, _delta_time);
 
     return;
 }
 
 void input_t::key_space(const uint32_t _delta_time) {
-    camera.update_pos(camera_base_t::ADD_Y, _delta_time);
+    camera->update_pos(camera_base_t::ADD_Y, _delta_time);
     return;
 }
 
 void input_t::key_left_ctrl(const uint32_t _delta_time) {
+    (void)_delta_time;
     return;
 }
 
 void input_t::key_left_shift(const uint32_t _delta_time) {
-    config.draw_wireframe = !config.draw_wireframe;
+    (void)_delta_time;
+    config->draw_wireframe = !config->draw_wireframe;
     return;
 }
 
 void input_t::mouse_motion(const int32_t _x, const int32_t _y,
                            const uint32_t _delta_time) {
-    // camera.update_target(_x, _y);
+    (void)_x;
+    (void)_y;
+    (void)_delta_time;
+    // camera->update_target(_x, _y);
     return;
 }
 
@@ -161,7 +166,8 @@ bool input_t::handle(SDL_Event* _event, const uint32_t _delta_time) {
     return res;
 }
 
-input_t::input_t(config_t& _config, surround_camera_t& _camera)
+input_t::input_t(std::shared_ptr<config_t>      _config,
+                 std::shared_ptr<camera_base_t> _camera)
     : config(_config), camera(_camera) {
     return;
 }

@@ -47,7 +47,8 @@ set(test_src
         ${SimpleRender_SOURCE_DIR}/src/color.cpp
         ${SimpleRender_SOURCE_DIR}/src/scene.cpp
         ${SimpleRender_SOURCE_DIR}/src/light.cpp
-        ${SimpleRender_SOURCE_DIR}/src/input.cpp)
+        ${SimpleRender_SOURCE_DIR}/src/input.cpp
+        ${SimpleRender_SOURCE_DIR}/src/render.cpp)
 
 enable_testing()
 
