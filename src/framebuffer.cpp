@@ -113,7 +113,7 @@ size_t framebuffer_t::color_buffer_t::length(void) const {
     return width * height * color_t::bpp();
 }
 
-const color_t* framebuffer_t::color_buffer_t::to_arr(void) {
+const color_t* framebuffer_t::color_buffer_t::to_arr(void) const {
     return color_arr;
 }
 
@@ -215,7 +215,6 @@ framebuffer_t::framebuffer_t(const uint32_t _width, const uint32_t _height)
       height(_height),
       color_buffer(color_buffer_t(_width, _height)),
       depth_buffer(depth_buffer_t(_width, _height)) {
-    std::atomic_init(&is_should_draw, true);
     return;
 }
 

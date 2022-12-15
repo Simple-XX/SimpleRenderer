@@ -17,146 +17,11 @@
 #include "iostream"
 
 #include "camera.h"
+#include "config.h"
 #include "display.h"
-#include "log.hpp"
 
-void display_t::input_handler(void) {
-    // 捕获事件
-    while (SDL_PollEvent(&sdl_event)) {
-        switch (sdl_event.type) {
-            // 键盘事件
-            case SDL_KEYDOWN: {
-                switch (sdl_event.key.keysym.sym) {
-                    case SDLK_ESCAPE: {
-                        // 如果是 esc 键则将 is_should_quit 置位
-                        is_should_quit = true;
-                        break;
-                    }
-                    case SDLK_a: {
-                        event_callback.key_a();
-                        break;
-                    }
-                    case SDLK_d: {
-                        event_callback.key_d();
-                        break;
-                    }
-                    case SDLK_SPACE: {
-                        event_callback.key_space();
-                        break;
-                    }
-                    case SDLK_z: {
-                        event_callback.key_z();
-                        break;
-                    }
-                    case SDLK_r: {
-                        event_callback.key_r();
-                        break;
-                    }
-                    case SDLK_LCTRL: {
-                        event_callback.key_left_ctrl();
-                        break;
-                    }
-                    case SDLK_w: {
-                        event_callback.key_w();
-                        break;
-                    }
-                    case SDLK_s: {
-                        event_callback.key_s();
-                        break;
-                    }
-                    case SDLK_q: {
-                        event_callback.key_q();
-                        break;
-                    }
-                    case SDLK_e: {
-                        event_callback.key_e();
-                        break;
-                    }
-                    case SDLK_LSHIFT: {
-                        event_callback.key_left_shift();
-                        break;
-                    }
-                    default: {
-                        // 输出按键名
-                        printf("key %s down！\n",
-                               SDL_GetKeyName(sdl_event.key.keysym.sym));
-                    }
-                }
-                break;
-            }
-            // 鼠标移动
-            case SDL_MOUSEMOTION: {
-                event_callback.mouse_motion(sdl_event.motion.xrel,
-                                            sdl_event.motion.yrel);
-                break;
-            }
-            // 鼠标点击
-            case SDL_MOUSEBUTTONDOWN: {
-                break;
-            }
-            // 鼠标滚轮
-            case SDL_MOUSEWHEEL: {
-                break;
-            }
-            case SDL_QUIT: {
-                is_should_quit = true;
-                break;
-            }
-        }
-    }
-    return;
-}
-
-void display_t::fill(void) {
-    // 更新 texture
-    auto res = SDL_UpdateTexture(sdl_texture, nullptr,
-                                 framebuffer.get_color_buffer().to_arr(),
-                                 width * color_t::bpp());
-    if (res != 0) {
-        throw std::runtime_error(log(SDL_GetError()));
-    }
-
-    // 复制到渲染器
-    res = SDL_RenderCopy(sdl_renderer, sdl_texture, nullptr, nullptr);
-    if (res != 0) {
-        throw std::runtime_error(log(SDL_GetError()));
-    }
-
-    return;
-}
-
-void display_t::show_fps(const uint32_t _fps) {
-    // 生成字符串
-    auto fps_text    = FPS + std::to_string(_fps);
-    // 生成 surface
-    auto fps_surface = TTF_RenderText_Solid(font, fps_text.c_str(), fps_color);
-    if (fps_surface == nullptr) {
-        throw std::runtime_error(log(TTF_GetError()));
-    }
-    // 生成 texture
-    auto msg = SDL_CreateTextureFromSurface(sdl_renderer, fps_surface);
-    if (msg == nullptr) {
-        throw std::runtime_error(log(SDL_GetError()));
-    }
-    // 复制到 renderer
-    auto res = SDL_RenderCopy(sdl_renderer, msg, nullptr, &FPS_RECT);
-    if (res != 0) {
-        throw std::runtime_error(log(SDL_GetError()));
-    }
-
-    // 释放资源
-    SDL_FreeSurface(fps_surface);
-    SDL_DestroyTexture(msg);
-    return;
-}
-
-display_t::display_t(framebuffer_t& _framebuffer, surround_camera_t& _camera,
-                     event_callback_t& _event_callback)
-    : framebuffer(_framebuffer),
-      camera(_camera),
-      event_callback(_event_callback) {
-    width  = framebuffer.get_width();
-    height = framebuffer.get_height();
+display_t::display_t(const uint32_t _width, const uint32_t _height)
+    : width(_width), height(_height) {
     // 初始化 sdl
     try {
         auto ret = SDL_Init(SDL_INIT_VIDEO);
@@ -203,7 +68,7 @@ display_t::display_t(framebuffer_t& _framebuffer, surround_camera_t& _camera,
             throw std::runtime_error(log(TTF_GetError()));
         }
         // 打开字体库
-        font = TTF_OpenFont(font_file_path, font_size);
+        font = TTF_OpenFont(config_t::FONT_FILE_PATH, font_size);
         if (font == nullptr) {
             TTF_Quit();
             SDL_DestroyTexture(sdl_texture);
@@ -230,42 +95,23 @@ display_t::~display_t(void) {
     SDL_Quit();
 }
 
-void display_t::loop(void) {
-    uint64_t sec    = 0;
-    uint32_t frames = 0;
-    uint32_t fps    = 0;
-    auto     start  = us();
-    auto     end    = us();
-    // 主循环
-    while (is_should_quit == false) {
-        start = us();
-        // 处理输入
-        /// @todo 移动速度在不同帧率下一致
-        input_handler();
-        // 填充窗口
-        /// @todo 巨大性能开销
-        // 等待 draw3d 绘制完成
-        while (framebuffer.is_should_draw == true) {
-            fill();
-            // 清空缓冲区
-            framebuffer.clear();
-            // 更新缓冲区标识，表示当前缓存已绘制
-            framebuffer.is_should_draw = false;
-        }
-        // 显示 fps
-        /// @todo 巨大性能开销
-        show_fps(fps);
-        // 刷新窗口
-        SDL_RenderPresent(sdl_renderer);
-        frames++;
-        end = us();
-        sec += end - start;
-        if (sec >= US2S) {
-            // std::cout << "fps_window: " << fps << std::endl;
-            fps    = frames;
-            frames = 0;
-            sec    = 0;
-        }
+void display_t::fill(const framebuffer_t& _framebuffer) {
+    // 更新 texture
+    auto res = SDL_UpdateTexture(sdl_texture, nullptr,
+                                 _framebuffer.get_color_buffer().to_arr(),
+                                 width * color_t::bpp());
+    if (res != 0) {
+        throw std::runtime_error(log(SDL_GetError()));
     }
+
+    // 复制到渲染器
+    res = SDL_RenderCopy(sdl_renderer, sdl_texture, nullptr, nullptr);
+    if (res != 0) {
+        throw std::runtime_error(log(SDL_GetError()));
+    }
+
+    // 刷新
+    SDL_RenderPresent(sdl_renderer);
+
     return;
 }

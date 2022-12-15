@@ -258,6 +258,14 @@ model_t& model_t::operator=(const model_t& _model) {
     return *this;
 }
 
+const model_t model_t::operator*(const matrix4f_t& _tran) const {
+    auto model = model_t(*this);
+
+    /// @todo
+
+    return model;
+}
+
 const std::vector<model_t::face_t>& model_t::get_face(void) const {
     return face;
 }

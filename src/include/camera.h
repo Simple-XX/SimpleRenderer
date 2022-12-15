@@ -26,32 +26,55 @@
  */
 class camera_base_t {
 private:
-    /// @brief 默认在位置，在原点
-    const vector4f_t default_pos    = vector4f_t(0, 0, 0);
-    /// @brief 默认看向屏幕内
-    const vector4f_t default_target = vector4f_t(0, 0, -1);
-    /// @brief 默认上方向为屏幕向上
-    const vector4f_t default_up     = vector4f_t(0, -1, 0);
-    /// @brief 默认向右为正方向
-    const vector4f_t default_right  = vector4f_t(1, 0, 0);
-    /// @brief 屏幕宽高比
-    const float      default_aspect = 1;
-    /// @brief 相机移动速度
-    const float      default_speed  = 1;
 
 protected:
+    /// @brief 默认在位置，在原点
+    const vector4f_t DEFAULT_POS    = vector4f_t(0, 0, 0);
+    /// @brief 默认看向屏幕内
+    const vector4f_t DEFAULT_TARGET = vector4f_t(0, 0, 0);
+
+    /// @brief 默认上方向为屏幕向上
+    const vector4f_t DEFAULT_UP     = vector4f_t(0, -1, 0);
+    /// @brief 默认向右为正方向
+    const vector4f_t DEFAULT_FRONT  = vector4f_t(0, 0, -1);
+    /// @brief 右方向通过计算得出，默认为 0
+    const vector4f_t DEFAULT_RIGHT  = vector4f_t(0, 0, 0);
+
+    /// @brief 屏幕宽高比
+    const float      DEFAULT_ASPECT = 1;
+    /// @brief 相机移动速度
+    const float      DEFAULT_SPEED  = 1;
+
     /// @brief 位置
-    vector4f_t pos;
+    vector4f_t       pos;
     /// @brief 方向
-    vector4f_t target;
-    /// @brief 上方向
-    vector4f_t up;
+    vector4f_t       target;
+
+    /// @brief 上方向，单位向量
+    vector4f_t       up;
+    /// @brief 前方向，单位向量
+    vector4f_t       front;
+    /// @brief 右方向，单位向量，通过计算得出
+    vector4f_t       right;
+
     /// @brief 比例
-    float      aspect;
+    float            aspect;
     /// @brief 相机速度
-    float      speed = 20;
+    float            speed = 20;
 
 public:
+    /**
+     * @brief 用于标识相机移动的方向
+     */
+    enum to_t : uint8_t {
+        ADD_X,
+        SUB_X,
+        ADD_Y,
+        SUB_Y,
+        ADD_Z,
+        SUB_Z,
+    };
+
     /**
      * @brief 构造函数
      */
@@ -82,20 +105,40 @@ public:
      * @param  _camera          另一个 camera_base_t
      * @return camera_base_t&   结果
      */
-    camera_base_t&           operator=(const camera_base_t& _camera);
+    camera_base_t& operator=(const camera_base_t& _camera);
 
-    /// @todo 补全注释
-    virtual void             set_default(void);
+    /**
+     * @brief 相机复位
+     */
+    virtual void   set_default(void);
+
+    /**
+     * @brief 更新相机位置
+     * @param  _to              移动的方向
+     * @param  _delta_time      时间变化
+     */
+    virtual void   update_pos(const to_t& _to, const uint32_t _delta_time);
+
+    /**
+     * @brief 更新相机目标
+     * @param  _to              移动的方向
+     * @param  _delta_time      时间变化
+     */
+    virtual void   update_target(const to_t& _to, const uint32_t _delta_time);
+
+    /**
+     * @brief 更新相机上方向
+     * @param  _to              移动的方向
+     * @param  _delta_time      时间变化
+     */
+    virtual void   update_up(const to_t& _to, const uint32_t _delta_time);
+
+    /**
+     * @brief 获取视图变换矩阵, 将相机移动到原点，方向指向 -z，即屏幕里，up 为
+     * -y，即屏幕向上
+     * @return const matrix4f_t 视图矩阵
+     */
     virtual const matrix4f_t look_at(void);
-
-    virtual void             update_pos_x(const bool _is_positive);
-    virtual void             update_pos_y(const bool _is_positive);
-    virtual void             update_pos_z(const bool _is_positive);
-    /// @todo 完善
-    virtual void             update_up_x(const bool _is_positive);
-    /// @todo 完善
-    virtual void             update_up_y(const bool _is_positive);
-    virtual void             update_target(const int32_t _x, const int32_t _y);
 };
 
 /**
@@ -103,19 +146,6 @@ public:
  */
 class surround_camera_t : public camera_base_t {
 private:
-    /// @brief 默认在位置，在原点
-    const vector4f_t default_pos    = vector4f_t(0, 0, 0);
-    /// @brief 默认看向屏幕内
-    const vector4f_t default_target = vector4f_t(0, 0, -1);
-    /// @brief 默认上方向为屏幕向上
-    const vector4f_t default_up     = vector4f_t(0, -1, 0);
-    /// @brief 默认向右为正方向
-    const vector4f_t default_right  = vector4f_t(1, 0, 0);
-    /// @brief 屏幕宽高比
-    const float      default_aspect = 1;
-    /// @brief 相机环绕 1 度
-    const float      default_speed  = ((M_PI / 180) * (1));
-    // const float      default_speed  = 1;
 
 public:
     /**
@@ -142,24 +172,6 @@ public:
      * @brief 析构函数
      */
     ~surround_camera_t(void);
-
-    /**
-     * @brief = 重载
-     * @param  _camera          另一个 surround_camera_t
-     * @return surround_camera_t& 结果
-     */
-    surround_camera_t& operator=(const surround_camera_t& _camera);
-
-    /// @todo 补全注释
-    void               set_default(void) override;
-    void               update_pos_x(const bool _is_positive) override;
-    void               update_pos_y(const bool _is_positive) override;
-    void               update_pos_z(const bool _is_positive) override;
-    /// @todo 完善
-    void               update_up_x(const bool _is_positive) override;
-    /// @todo 完善
-    void               update_up_y(const bool _is_positive) override;
-    void update_target(const int32_t _x, const int32_t _y) override;
 };
 
 #endif /* _CAMERA_H_ */

@@ -17,18 +17,41 @@
 #include "camera.h"
 
 camera_base_t::camera_base_t(void) {
-    pos    = default_pos;
-    target = default_target;
-    up     = default_up;
-    aspect = default_aspect;
-    speed  = default_speed;
+    pos    = DEFAULT_POS;
+    target = DEFAULT_TARGET;
+
+    up     = DEFAULT_UP;
+    front  = DEFAULT_FRONT;
+    right  = (front ^ up).normalize();
+
+    aspect = DEFAULT_ASPECT;
+    speed  = DEFAULT_SPEED;
+
+    return;
+}
+
+camera_base_t::camera_base_t(const camera_base_t& _camera) {
+    pos    = _camera.pos;
+    target = _camera.target;
+
+    up     = _camera.up;
+    front  = _camera.front;
+    right  = _camera.right;
+
+    aspect = _camera.aspect;
+    speed  = _camera.speed;
+
     return;
 }
 
 camera_base_t::camera_base_t(const vector4f_t& _pos, const vector4f_t& _target,
                              const float _aspect)
     : pos(_pos), target(_target), aspect(_aspect) {
-    speed = default_speed;
+    up    = DEFAULT_UP;
+    front = DEFAULT_FRONT;
+    right = (front ^ up).normalize();
+
+    speed = DEFAULT_SPEED;
     return;
 }
 
@@ -39,87 +62,139 @@ camera_base_t::~camera_base_t(void) {
 camera_base_t& camera_base_t::operator=(const camera_base_t& _camera) {
     pos    = _camera.pos;
     target = _camera.target;
+
     up     = _camera.up;
+    front  = _camera.front;
+    right  = _camera.right;
+
     aspect = _camera.aspect;
     speed  = _camera.speed;
+
     return *this;
 }
 
-// 视图变换
-// 将相机移动到原点，方向指向 -z，即屏幕里，up 为 -y，即屏幕向上
-const matrix4f_t camera_base_t::look_at(void) {
-    auto  z          = (target - pos).normalize();
-    auto  x          = (up ^ z).normalize();
-    auto  y          = (z ^ x).normalize();
-
-    float Minv[4][4] = {
-        {x.x, x.y,  x.z, 0},
-        {y.x, y.y,  y.z, 0},
-        {z.x, z.y, -z.z, 0},
-        {  0,   0,    0, 1}
-    };
-    auto  minv     = matrix4_t(Minv);
-    float Tr[4][4] = {
-        {1, 0, 0, -pos.x},
-        {0, 1, 0, -pos.y},
-        {0, 0, 1, -pos.z},
-        {0, 0, 0,      1}
-    };
-
-    return minv * matrix4f_t(Tr);
-}
-
 void camera_base_t::set_default(void) {
-    pos    = default_pos;
-    target = default_target;
-    up     = default_up;
-    aspect = default_aspect;
-    speed  = default_speed;
+    pos    = DEFAULT_POS;
+    target = DEFAULT_TARGET;
+
+    up     = DEFAULT_UP;
+    front  = DEFAULT_FRONT;
+    right  = DEFAULT_RIGHT;
+
+    aspect = DEFAULT_ASPECT;
+    speed  = DEFAULT_SPEED;
     return;
 }
 
-void camera_base_t::update_pos_x(const bool _is_positive) {
-    auto delta = _is_positive ? speed : -speed;
-    pos.x      += delta;
+void camera_base_t::update_pos(const to_t& _to, const uint32_t _delta_time) {
+    switch (_to) {
+        case ADD_X: {
+            pos += front * (speed * _delta_time);
+            break;
+        }
+        case SUB_X: {
+            pos -= front * (speed * _delta_time);
+            break;
+        }
+        case ADD_Y: {
+            pos += right * (speed * _delta_time);
+            break;
+        }
+        case SUB_Y: {
+            pos -= right * (speed * _delta_time);
+            break;
+        }
+        case ADD_Z: {
+            pos += up * (speed * _delta_time);
+            break;
+        }
+        case SUB_Z: {
+            pos -= up * (speed * _delta_time);
+            break;
+        }
+    }
+
     return;
 }
 
-void camera_base_t::update_pos_y(const bool _is_positive) {
-    auto delta = _is_positive ? speed : -speed;
-    pos.y      += delta;
+void camera_base_t::update_target(const to_t& _to, const uint32_t _delta_time) {
+    switch (_to) {
+        case ADD_X: {
+            pos += front * (speed * _delta_time);
+            break;
+        }
+        case SUB_X: {
+            pos -= front * (speed * _delta_time);
+            break;
+        }
+        case ADD_Y: {
+            pos += right * (speed * _delta_time);
+            break;
+        }
+        case SUB_Y: {
+            pos -= right * (speed * _delta_time);
+            break;
+        }
+        case ADD_Z: {
+            pos += up * (speed * _delta_time);
+            break;
+        }
+        case SUB_Z: {
+            pos -= up * (speed * _delta_time);
+            break;
+        }
+    }
+
     return;
 }
 
-void camera_base_t::update_pos_z(const bool _is_positive) {
-    auto delta = _is_positive ? speed : -speed;
-    pos.z      += delta;
+void camera_base_t::update_up(const to_t& _to, const uint32_t _delta_time) {
+    switch (_to) {
+        case ADD_X: {
+            up += front * (speed * _delta_time);
+            break;
+        }
+        case SUB_X: {
+            up -= front * (speed * _delta_time);
+            break;
+        }
+        case ADD_Y: {
+            up += right * (speed * _delta_time);
+            break;
+        }
+        case SUB_Y: {
+            up -= right * (speed * _delta_time);
+            break;
+        }
+        case ADD_Z: {
+            up += up * (speed * _delta_time);
+            break;
+        }
+        case SUB_Z: {
+            up -= up * (speed * _delta_time);
+            break;
+        }
+    }
+
     return;
 }
 
-void camera_base_t::update_up_x(const bool _is_positive) {
-    auto delta = _is_positive ? speed : -speed;
-    up.x       += delta;
-    return;
-}
+const matrix4f_t camera_base_t::look_at(void) {
+    auto  z         = (pos - target).normalize();
+    auto  x         = (up ^ z).normalize();
+    auto  y         = (z ^ x).normalize();
 
-void camera_base_t::update_up_y(const bool _is_positive) {
-    auto delta = _is_positive ? speed : -speed;
-    up.y       += delta;
-    return;
-}
+    float arr[4][4] = {
+        {x.x, x.y, x.z, -x * pos},
+        {y.x, y.y, y.z, -y * pos},
+        {z.x, z.y, z.z, -z * pos},
+        {  0,   0,   0,        1}
+    };
 
-void camera_base_t::update_target(const int32_t _x, const int32_t _y) {
-    target.x += _x * speed;
-    target.y += _y * speed;
-    return;
+    return matrix4f_t(arr);
 }
 
 surround_camera_t::surround_camera_t(void) : camera_base_t() {
-    pos    = default_pos;
-    target = default_target;
-    up     = default_up;
-    aspect = default_aspect;
-    speed  = default_speed;
     return;
 }
 
@@ -131,60 +206,5 @@ surround_camera_t::surround_camera_t(const vector4f_t& _pos,
 }
 
 surround_camera_t::~surround_camera_t(void) {
-    return;
-}
-
-surround_camera_t&
-surround_camera_t::operator=(const surround_camera_t& _camera) {
-    pos    = _camera.pos;
-    target = _camera.target;
-    up     = _camera.up;
-    aspect = _camera.aspect;
-    speed  = _camera.speed;
-    return *this;
-}
-
-void surround_camera_t::set_default(void) {
-    pos    = default_pos;
-    target = default_target;
-    up     = default_up;
-    aspect = default_aspect;
-    speed  = default_speed;
-    return;
-}
-
-void surround_camera_t::update_pos_x(const bool _is_positive) {
-    auto delta = _is_positive ? speed : -speed;
-    pos.x      += delta;
-    return;
-}
-
-void surround_camera_t::update_pos_y(const bool _is_positive) {
-    auto delta = _is_positive ? speed : -speed;
-    pos.y      += delta;
-    return;
-}
-
-void surround_camera_t::update_pos_z(const bool _is_positive) {
-    auto delta = _is_positive ? speed : -speed;
-    pos.z      += delta;
-    return;
-}
-
-void surround_camera_t::update_up_x(const bool _is_positive) {
-    auto delta = _is_positive ? speed : -speed;
-    up.x       += delta;
-    return;
-}
-
-void surround_camera_t::update_up_y(const bool _is_positive) {
-    auto delta = _is_positive ? speed : -speed;
-    up.y       += delta;
-    return;
-}
-
-void surround_camera_t::update_target(const int32_t _x, const int32_t _y) {
-    target.x += _x * speed;
-    target.y += _y * speed;
     return;
 }

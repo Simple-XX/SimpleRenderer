@@ -22,21 +22,21 @@
 #include "default_shader.h"
 #include "display.h"
 #include "draw3d.h"
-#include "event_callback.h"
+#include "input.h"
 #include "matrix.hpp"
 #include "model.h"
+#include "scene.h"
 
 /// @bug 在坐标系上可能有问题，设计的部分：法向量计算，光照方向，屏幕原点
 
+auto config  = std::make_shared<config_t>();
+auto display = std::make_shared<display_t>(config->WIDTH, config->HEIGHT);
 auto framebuffer
   = std::make_shared<framebuffer_t>(config_t::WIDTH, config_t::HEIGHT);
-auto config         = std::make_shared<config_t>();
-auto shader         = std::make_shared<default_shader_t>();
-auto camera         = std::make_shared<surround_camera_t>();
-auto event_callback = std::make_shared<event_callback_t>(*config, *camera);
-auto display
-  = std::make_shared<display_t>(*framebuffer, *camera, *event_callback);
-auto models = std::vector<model_t>();
+auto camera = std::make_shared<surround_camera_t>();
+auto input  = std::make_shared<input_t>(*config, *camera);
+auto scene  = std::make_shared<scene_t>();
+auto shader = std::make_shared<default_shader_t>();
 
 void draw(std::shared_ptr<framebuffer_t> _framebuffer,
           std::shared_ptr<shader_base_t> _shader,
@@ -49,10 +49,6 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
     auto     model     = model_t(obj_path);
     auto     model2    = model_t(obj_path2);
     while (1) {
-        // 等待之前的缓冲区数据绘制完成
-        if (_framebuffer->is_should_draw == true) {
-            continue;
-        }
         // 右对角线
         draw3d.line(0, config_t::HEIGHT - 1, config_t::WIDTH - 1, 0,
                     color_t::WHITE);
@@ -83,9 +79,6 @@ void draw(std::shared_ptr<framebuffer_t> _framebuffer,
         _shader->shader_data.view_matrix    = camera->look_at();
         _shader->shader_data.project_matrix = matrix4f_t();
         draw3d.model(model2);
-
-        // 更新缓冲区标识，表示当前缓冲区数据还没有绘制
-        _framebuffer->is_should_draw = true;
     }
     return;
 }
@@ -114,27 +107,38 @@ int main(int _argc, char** _argv) {
     // 读取模型与材质
     for (auto& i : obj_path) {
         model_t model(i);
-        models.push_back(model);
+        scene->add_model(model, matrix4f_t());
     }
+    scene->add_light(light_t());
 
     std::thread draw_thread = std::thread(draw, framebuffer, shader, config);
     draw_thread.detach();
 
-    display->loop();
-
-    auto vector = vector4f_t(100, 100, 0, 1);
-
-    auto m      = get_model_matrix(vector4f_t(10, 10, 10),
-                                   vector4f_t(0, 0, 1).normalize(), 180,
-                                   vector4f_t(config_t::WIDTH / 2,
-                                              config_t::HEIGHT / 2, 0));
-    auto v      = camera->look_at();
-    std::cout << m << std::endl;
-    std::cout << m * vector << std::endl;
-    std::cout << v << std::endl;
-    std::cout << v * vector << std::endl;
-    std::cout << v * m << std::endl;
-    std::cout << v * m * vector << std::endl;
+    uint64_t sec            = 0;
+    uint32_t frames         = 0;
+    uint32_t fps            = 0;
+    auto     start          = us();
+    auto     end            = us();
+    auto     is_should_quit = true;
+    // 主循环
+    while (is_should_quit == true) {
+        start          = us();
+        // 处理输入
+        /// @todo 移动速度在不同帧率下一致
+        is_should_quit = input->process(1);
+        // 填充窗口
+        display->fill(*framebuffer);
+        // framebuffer->clear();
+        frames++;
+        end = us();
+        sec += end - start;
+        if (sec >= US2S) {
+            std::cout << "fps_window: " << fps << std::endl;
+            fps    = frames;
+            frames = 0;
+            sec    = 0;
+        }
+    }
 
     return 0;
 }

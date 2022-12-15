@@ -111,7 +111,7 @@ private:
          * @brief 转换为数组
          * @return const color_t*   数组
          */
-        const color_t*  to_arr(void);
+        const color_t*  to_arr(void) const;
     };
 
     /**
@@ -206,13 +206,6 @@ private:
     depth_buffer_t depth_buffer;
 
 public:
-    /// @brief 缓冲区是否需要绘制
-    ///  true 表示当前缓冲区数据还没有绘制
-    ///  false 表示当前缓冲区数据已绘制
-    ///  draw3d 绘制完成后设为 true，display 将 framebuffer 填充到屏幕后设为
-    ///  false.
-    std::atomic<bool> is_should_draw;
-
     /**
      * @brief 不使用空构造
      */

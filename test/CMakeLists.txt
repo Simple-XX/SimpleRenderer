@@ -45,7 +45,9 @@ set(test_src
         ${SimpleRender_SOURCE_DIR}/src/shader.cpp
         ${SimpleRender_SOURCE_DIR}/src/default_shader.cpp
         ${SimpleRender_SOURCE_DIR}/src/color.cpp
-        ${SimpleRender_SOURCE_DIR}/src/event_callback.cpp)
+        ${SimpleRender_SOURCE_DIR}/src/scene.cpp
+        ${SimpleRender_SOURCE_DIR}/src/light.cpp
+        ${SimpleRender_SOURCE_DIR}/src/input.cpp)
 
 enable_testing()
 

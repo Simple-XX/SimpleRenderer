@@ -206,6 +206,13 @@ public:
     model_t&                   operator=(const model_t& _model);
 
     /**
+     * @brief * 重载，对模型应用变换矩阵
+     * @param  _tran            另一个 要对模型进行的变换矩阵
+     * @return const model_t    结果
+     */
+    const model_t              operator*(const matrix4f_t& _tran) const;
+
+    /**
      * @brief 获取面
      * @return const std::vector<face_t>&   所有面
      */
