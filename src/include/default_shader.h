@@ -54,7 +54,7 @@ public:
      * @return const shader_vertex_out_t    输出
      */
     const shader_vertex_out_t
-    vertex(const shader_vertex_in_t& _shader_vertex_in) override;
+    vertex(const shader_vertex_in_t& _shader_vertex_in) const override;
 
     /**
      * @brief 片段着色器
@@ -62,7 +62,7 @@ public:
      * @return const shader_fragment_out_t  输出
      */
     const shader_fragment_out_t
-    fragment(const shader_fragment_in_t& _shader_fragment_in) override;
+    fragment(const shader_fragment_in_t& _shader_fragment_in) const override;
 };
 
 #endif /* _DEFAULT_SHADER_H_ */

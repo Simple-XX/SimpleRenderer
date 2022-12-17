@@ -43,7 +43,7 @@ default_shader_t::~default_shader_t(void) {
 
 /// @todo 巨大性能开销
 const shader_vertex_out_t
-default_shader_t::vertex(const shader_vertex_in_t& _shader_vertex_in) {
+default_shader_t::vertex(const shader_vertex_in_t& _shader_vertex_in) const {
     /// @todo 处理变换
     auto face(_shader_vertex_in.face);
     // 变换坐标
@@ -67,8 +67,8 @@ default_shader_t::vertex(const shader_vertex_in_t& _shader_vertex_in) {
     return shader_vertex_out_t(face);
 }
 
-const shader_fragment_out_t
-default_shader_t::fragment(const shader_fragment_in_t& _shader_fragment_in) {
+const shader_fragment_out_t default_shader_t::fragment(
+  const shader_fragment_in_t& _shader_fragment_in) const {
     auto intensity = (_shader_fragment_in.normal * _shader_fragment_in.light);
     auto is_need_draw = true;
     // 光照方向为正，不绘制背面

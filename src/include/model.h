@@ -170,8 +170,42 @@ public:
           const face_t&                                        _face);
     };
 
+    /**
+     * @brief 碰撞盒
+     */
+    struct box_t {
+        /// @brief 最小点
+        vector4f_t min;
+        /// @brief 最大点
+        vector4f_t max;
+
+        /**
+         * @brief 构造函数
+         */
+        box_t(void);
+
+        /**
+         * @brief 构造函数
+         * @param  _box             另一个 box
+         */
+        box_t(const box_t& _box);
+
+        /**
+         * @brief 析构函数
+         */
+        ~box_t(void);
+
+        /**
+         * @brief = 重载
+         * @param  _box             另一个 box
+         * @return box_t&           结果
+         */
+        box_t& operator=(const box_t& _box);
+    };
+
 private:
     std::vector<face_t> face;
+    box_t               box;
 
 public:
     /**

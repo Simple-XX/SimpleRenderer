@@ -126,12 +126,35 @@ model_t::face_t& model_t::face_t::operator=(const face_t& _face) {
     return *this;
 }
 
+model_t::box_t::box_t(void) {
+    return;
+}
+
+model_t::box_t::box_t(const model_t::box_t& _box) {
+    min = _box.min;
+    max = _box.max;
+
+    return;
+}
+
+model_t::box_t::~box_t(void) {
+    return;
+}
+
+model_t::box_t& model_t::box_t::operator=(const model_t::box_t& _box) {
+    min = _box.min;
+    max = _box.max;
+
+    return *this;
+}
+
 model_t::model_t(void) {
     return;
 }
 
 model_t::model_t(const model_t& _model) {
     face = _model.face;
+    box  = _model.box;
     return;
 }
 
@@ -161,7 +184,18 @@ model_t::model_t(const std::string& _obj_path, const std::string& _mtl_path) {
     printf("UV数：%ld, ", attrib.texcoords.size() / 2);
     printf("子模型数：%ld, ", shapes.size());
     printf("材质数：%ld\n", materials.size());
+
+    // 用于计算最大/最小的点
+    /// @todo
+    vector4f_t min = vector4f_t(std::numeric_limits<float>::max(),
+                                std::numeric_limits<float>::max(),
+                                std::numeric_limits<float>::max());
+    vector4f_t max = vector4f_t(std::numeric_limits<float>::min(),
+                                std::numeric_limits<float>::min(),
+                                std::numeric_limits<float>::min());
+
     // Loop over shapes
+
     for (size_t s = 0; s < shapes.size(); s++) {
         // Loop over faces(polygon)
         size_t index_offset = 0;
@@ -177,6 +211,7 @@ model_t::model_t(const std::string& _obj_path, const std::string& _mtl_path) {
             texcoord_t texcoord;
             material_t material;
             vertex_t   vertexes[3];
+
             // 遍历面上的顶点，这里 fv == 3
             for (size_t v = 0; v < fv; v++) {
                 // 获取索引
@@ -246,6 +281,9 @@ model_t::model_t(const std::string& _obj_path, const std::string& _mtl_path) {
         }
     }
 
+    box.min = min;
+    box.max = max;
+
     return;
 }
 
@@ -255,6 +293,7 @@ model_t::~model_t(void) {
 
 model_t& model_t::operator=(const model_t& _model) {
     face = _model.face;
+    box  = _model.box;
     return *this;
 }
 
@@ -263,7 +302,7 @@ const model_t model_t::operator*(const matrix4f_t& _tran) const {
 
     /// @todo
     (void)_tran;
-    
+
     return model;
 }
 

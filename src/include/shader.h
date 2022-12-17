@@ -215,15 +215,18 @@ public:
      * @brief 构造函数
      */
     shader_data_t(void);
+
     /**
      * @brief 构造函数
      * @param  _shader_data     另一个 shader_data_t
      */
     explicit shader_data_t(const shader_data_t& _shader_data);
+
     /**
      * @brief 析构函数
      */
     ~shader_data_t(void);
+
     /**
      * @brief = 重载
      * @param  _shader_data     另一个 shader_data_t
@@ -236,10 +239,7 @@ public:
  * @brief 着色器基类
  */
 class shader_base_t {
-private:
-
 public:
-
     /// @brief 着色器数据
     shader_data_t shader_data;
 
@@ -261,7 +261,7 @@ public:
      * @return const shader_vertex_out_t  顶点着色器输出
      */
     virtual const shader_vertex_out_t
-    vertex(const shader_vertex_in_t& _shader_vertex_in)
+    vertex(const shader_vertex_in_t& _shader_vertex_in) const
       = 0;
 
     /**
@@ -271,7 +271,7 @@ public:
      * @return const shader_fragment_out_t  片段着色器输出
      */
     virtual const shader_fragment_out_t
-    fragment(const shader_fragment_in_t& _shader_fragment_in)
+    fragment(const shader_fragment_in_t& _shader_fragment_in) const
       = 0;
 };
 

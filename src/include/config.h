@@ -17,6 +17,7 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+#include "atomic"
 #include "cstdint"
 #include "omp.h"
 
@@ -26,7 +27,7 @@
 class config_t {
 public:
     /// @brief 控制是否绘制线框，false 时绘制整个图像
-    bool                            draw_wireframe = true;
+    std::atomic_bool                draw_wireframe = true;
 
     /// @brief 本机处理器数量，用于 omp
     uint8_t                         procs          = omp_get_num_procs();

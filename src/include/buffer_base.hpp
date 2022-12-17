@@ -85,7 +85,7 @@ public:
     uint32_t       get_height(void) const;
 
     /**
-     * @brief 清空，如果 _T 为 int，设置为白色，否则视为深度缓冲，设为最小值
+     * @brief 清空，如果 _T 为 int，设置为黑色，否则视为深度缓冲，设为最小值
      */
     void           clear(void);
 
@@ -127,7 +127,7 @@ buffer_base_t<_T>::buffer_base_t(const uint32_t _w, const uint32_t _h)
         std::cerr << log(e.what()) << std::endl;
     }
     if constexpr (std::is_same_v<_T, color_t>) {
-        std::fill_n(buffer_arr, width * height, color_t::WHITE);
+        std::fill_n(buffer_arr, width * height, color_t::BLACK);
     }
     else if constexpr ((std::is_same_v<_T, float>)
                        || (std::is_same_v<_T, double>)) {
@@ -198,7 +198,7 @@ uint32_t buffer_base_t<_T>::get_width(void) const {
 template <class _T>
 void buffer_base_t<_T>::clear(void) {
     if constexpr (std::is_same_v<_T, color_t>) {
-        std::fill_n(buffer_arr, width * height, color_t::WHITE);
+        std::fill_n(buffer_arr, width * height, color_t::BLACK);
     }
     else if ((std::is_same_v<_T, float>) || (std::is_same_v<_T, double>)) {
         std::fill_n(buffer_arr, width * height,

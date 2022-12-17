@@ -179,7 +179,7 @@ void camera_base_t::update_up(const to_t& _to, const uint32_t _delta_time) {
     return;
 }
 
-const matrix4f_t camera_base_t::look_at(void) {
+const matrix4f_t camera_base_t::look_at(void) const {
     auto  z         = (pos - target).normalize();
     auto  x         = (up ^ z).normalize();
     auto  y         = (z ^ x).normalize();

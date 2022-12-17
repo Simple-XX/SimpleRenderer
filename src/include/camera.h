@@ -138,7 +138,7 @@ public:
      * -y，即屏幕向上
      * @return const matrix4f_t 视图矩阵
      */
-    virtual const matrix4f_t look_at(void);
+    virtual const matrix4f_t look_at(void) const;
 };
 
 /**
