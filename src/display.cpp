@@ -20,7 +20,7 @@
 #include "config.h"
 #include "display.h"
 
-display_t::display_t(const uint32_t _width, const uint32_t _height)
+display_t::display_t(uint32_t _width, uint32_t _height)
     : width(_width), height(_height) {
     // 初始化 sdl
     try {

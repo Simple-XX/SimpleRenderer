@@ -25,7 +25,7 @@
 #include "sys/time.h"
 
 /// @brief 微秒到秒
-static constexpr const uint32_t US2S = 1000000;
+static constexpr uint32_t       US2S = 1000000;
 
 /**
  * @brief 获取当前时间戳，精确到纳秒

@@ -14,8 +14,6 @@
  * </table>
  */
 
-#include "thread"
-
 #include "camera.h"
 #include "color.h"
 #include "config.h"
@@ -23,10 +21,7 @@
 #include "display.h"
 #include "draw3d.h"
 #include "input.h"
-#include "matrix.hpp"
-#include "model.h"
 #include "render.h"
-#include "scene.h"
 
 /// @bug 在坐标系上可能有问题，设计的部分：法向量计算，光照方向，屏幕原点
 
@@ -90,6 +85,14 @@ auto render
 
 /// @todo 考虑将 framebuffer 和 draw3d 合并
 
+int aaa(const int _b);
+
+int aaa(const int _b) {
+    // _b = 233;
+    (void)_b;
+    return 0;
+}
+
 int main(int _argc, char** _argv) {
     // obj 路径
     std::vector<std::string> obj_path;
@@ -98,7 +101,7 @@ int main(int _argc, char** _argv) {
         // obj_path = "../../obj/helmet.obj";
         //  obj_path = "../../obj/cube.obj";
         //  obj_path = "../../obj/cube2.obj";
-        obj_path.push_back("../../obj/cube3.obj");
+        obj_path.emplace_back("../../obj/cube3.obj");
         // obj_path = "../../obj/cornell_box.obj";
         // obj_path.push_back("../../obj/helmet.obj");
         // obj_path.push_back("../../obj/african_head.obj");
@@ -107,7 +110,7 @@ int main(int _argc, char** _argv) {
     // 否则使用指定的
     else {
         for (auto i = 1; i < _argc; i++) {
-            obj_path.push_back(_argv[i]);
+            obj_path.emplace_back(_argv[i]);
         }
     }
 

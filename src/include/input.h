@@ -36,79 +36,77 @@ private:
      * @param  _scene           要应用到的场景
      * @param  _delta_time      时间变化
      */
-    virtual void key_a(scene_t& _scene, const uint32_t _delta_time) const;
+    virtual void key_a(scene_t& _scene, uint32_t _delta_time) const;
 
     /**
      * @brief d 键
      * @param  _scene           要应用到的场景
      * @param  _delta_time      时间变化
      */
-    virtual void key_d(scene_t& _scene, const uint32_t _delta_time) const;
+    virtual void key_d(scene_t& _scene, uint32_t _delta_time) const;
 
     /**
      * @brief w 键
      * @param  _scene           要应用到的场景
      * @param  _delta_time      时间变化
      */
-    virtual void key_w(scene_t& _scene, const uint32_t _delta_time) const;
+    virtual void key_w(scene_t& _scene, uint32_t _delta_time) const;
 
     /**
      * @brief s 键
      * @param  _scene           要应用到的场景
      * @param  _delta_time      时间变化
      */
-    virtual void key_s(scene_t& _scene, const uint32_t _delta_time) const;
+    virtual void key_s(scene_t& _scene, uint32_t _delta_time) const;
 
     /**
      * @brief z 键
      * @param  _scene           要应用到的场景
      * @param  _delta_time      时间变化
      */
-    virtual void key_z(scene_t& _scene, const uint32_t _delta_time) const;
+    virtual void key_z(scene_t& _scene, uint32_t _delta_time) const;
 
     /**
      * @brief r 键
      * @param  _scene           要应用到的场景
      * @param  _delta_time      时间变化
      */
-    virtual void key_r(scene_t& _scene, const uint32_t _delta_time) const;
+    virtual void key_r(scene_t& _scene, uint32_t _delta_time) const;
 
     /**
      * @brief q 键
      * @param  _scene           要应用到的场景
      * @param  _delta_time      时间变化
      */
-    virtual void key_q(scene_t& _scene, const uint32_t _delta_time) const;
+    virtual void key_q(scene_t& _scene, uint32_t _delta_time) const;
 
     /**
      * @brief e 键
      * @param  _scene           要应用到的场景
      * @param  _delta_time      时间变化
      */
-    virtual void key_e(scene_t& _scene, const uint32_t _delta_time) const;
+    virtual void key_e(scene_t& _scene, uint32_t _delta_time) const;
 
     /**
      * @brief space 键
      * @param  _scene           要应用到的场景
      * @param  _delta_time      时间变化
      */
-    virtual void key_space(scene_t& _scene, const uint32_t _delta_time) const;
+    virtual void key_space(scene_t& _scene, uint32_t _delta_time) const;
 
     /**
      * @brief left_ctrl 键
      * @param  _scene           要应用到的场景
      * @param  _delta_time      时间变化
      */
-    virtual void
-    key_left_ctrl(scene_t& _scene, const uint32_t _delta_time) const;
+    virtual void key_left_ctrl(scene_t& _scene, uint32_t _delta_time) const;
 
     /**
      * @brief left_shift 键
      * @param  _scene           要应用到的场景
      * @param  _delta_time      时间变化
      */
-    virtual void
-    key_left_shift(scene_t& _scene, const uint32_t _delta_time) const;
+    virtual void key_left_shift(scene_t& _scene, uint32_t _delta_time) const;
 
     /**
      * @brief 鼠标移动
@@ -117,9 +115,8 @@ private:
      * @param  _y               纵坐标变化
      * @param  _delta_time      时间变化
      */
-    virtual void
-    mouse_motion(scene_t& _scene, const int32_t _x, const int32_t _y,
-                 const uint32_t _delta_time) const;
+    virtual void mouse_motion(scene_t& _scene, const int32_t _x,
+                              const int32_t _y, uint32_t _delta_time) const;
 
     /**
      * @brief 处理输入
@@ -128,7 +125,7 @@ private:
      * @return true             不退出
      * @return false            需要退出
      */
-    virtual bool handle(scene_t& _scene, const uint32_t _delta_time) const;
+    virtual bool handle(scene_t& _scene, uint32_t _delta_time) const;
 
 public:
     /**
@@ -148,7 +145,7 @@ public:
      * @return true             不退出
      * @return false            退出
      */
-    bool process(scene_t& _scene, const uint32_t _delta_time);
+    bool process(scene_t& _scene, uint32_t _delta_time);
 };
 
 #endif /* SIMPLERENDER_INPUT_H */

@@ -15,7 +15,6 @@
  */
 
 #include "render.h"
-#include "draw3d.h"
 
 render_t::render_t(const std::shared_ptr<config_t>&      _config,
                    const std::shared_ptr<scene_t>&       _scene,
@@ -39,6 +38,10 @@ render_t::~render_t(void) {
 }
 
 render_t& render_t::operator=(const render_t& _render) {
+    if (&_render == this) {
+        return *this;
+    }
+
     scene = _render.scene;
     return *this;
 }

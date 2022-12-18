@@ -57,7 +57,7 @@ public:
     /**
      * @brief 构造函数
      */
-    display_t(const uint32_t _width, const uint32_t _height);
+    display_t(uint32_t _width, uint32_t _height);
 
     /**
      * @brief 析构函数

@@ -27,16 +27,16 @@
 class config_t {
 public:
     /// @brief 控制是否绘制线框，false 时绘制整个图像
-    std::atomic_bool                draw_wireframe = true;
+    std::atomic_bool             draw_wireframe = true;
 
     /// @brief 本机处理器数量，用于 omp
-    uint8_t                         procs          = omp_get_num_procs();
+    uint8_t                      procs          = omp_get_num_procs();
 
-    static constexpr const uint32_t WIDTH          = 1920;
-    static constexpr const uint32_t HEIGHT         = 1080;
+    static constexpr uint32_t    WIDTH          = 1920;
+    static constexpr uint32_t    HEIGHT         = 1080;
 
     /// @brief 字体文件路径
-    static constexpr const char*    FONT_FILE_PATH
+    static constexpr const char* FONT_FILE_PATH
       = "../../src/3rd/wqy-zenhei/wqy-zenhei.ttc";
 };
 

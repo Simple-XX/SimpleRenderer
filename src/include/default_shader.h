@@ -30,9 +30,9 @@ private:
      * @param  _color1          第二个点的颜色
      * @param  _color2          第三个点的颜色
      * @param  _barycentric_coord   重心坐标
-     * @return const color_t    颜色值
+     * @return color_t          颜色值
      */
-    static const color_t
+    static color_t
     interpolate_color(const color_t& _color0, const color_t& _color1,
                       const color_t&    _color2,
                       const vector4f_t& _barycentric_coord);
@@ -53,7 +53,7 @@ public:
      * @param  _shader_vertex_in    输入
      * @return const shader_vertex_out_t    输出
      */
-    const shader_vertex_out_t
+    shader_vertex_out_t
     vertex(const shader_vertex_in_t& _shader_vertex_in) const override;
 
     /**
@@ -61,7 +61,7 @@ public:
      * @param  _shader_fragment_in  输入
      * @return const shader_fragment_out_t  输出
      */
-    const shader_fragment_out_t
+    shader_fragment_out_t
     fragment(const shader_fragment_in_t& _shader_fragment_in) const override;
 };
 

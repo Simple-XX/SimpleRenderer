@@ -62,7 +62,7 @@ public:
      * @param  _width           宽度
      * @param  _height          高度
      */
-    framebuffer_t(const uint32_t _width, const uint32_t _height);
+    framebuffer_t(uint32_t _width, uint32_t _height);
 
     /**
      * @brief 拷贝构造
@@ -110,8 +110,8 @@ public:
      * @param  _depth           深度
      * @note (0, 0) 在屏幕左上角
      */
-    void pixel(const uint32_t _x, const uint32_t _y, const color_t& _color,
-               const depth_t& _depth = std::numeric_limits<depth_t>::lowest());
+    void                  pixel(uint32_t _x, uint32_t _y, const color_t& _color,
+                                const depth_t& _depth = std::numeric_limits<depth_t>::lowest());
 
     /**
      * @brief 获取颜色缓存
@@ -135,7 +135,7 @@ public:
      * @brief 获取深度值
      * @return depth_t&         深度值
      */
-    depth_t& get_depth_buffer(const uint32_t _x, const uint32_t _y);
+    depth_t&              get_depth_buffer(uint32_t _x, uint32_t _y);
 
     /**
      * @brief 获取深度缓存
@@ -147,7 +147,7 @@ public:
      * @brief 获取深度值
      * @return depth_t          深度值
      */
-    depth_t get_depth_buffer(const uint32_t _x, const uint32_t _y) const;
+    depth_t               get_depth_buffer(uint32_t _x, uint32_t _y) const;
 };
 
 #endif /* SIMPLERENDER_FRAMEBUFFER_H */

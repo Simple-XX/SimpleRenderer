@@ -16,27 +16,27 @@
 
 #include "input.h"
 
-void input_t::key_a(scene_t& _scene, const uint32_t _delta_time) const {
+void input_t::key_a(scene_t& _scene, uint32_t _delta_time) const {
     _scene.get_current_camera().move(camera_base_t::LEFT, _delta_time);
     return;
 }
 
-void input_t::key_d(scene_t& _scene, const uint32_t _delta_time) const {
+void input_t::key_d(scene_t& _scene, uint32_t _delta_time) const {
     _scene.get_current_camera().move(camera_base_t::RIGHT, _delta_time);
     return;
 }
 
-void input_t::key_w(scene_t& _scene, const uint32_t _delta_time) const {
+void input_t::key_w(scene_t& _scene, uint32_t _delta_time) const {
     _scene.get_current_camera().move(camera_base_t::FORWARD, _delta_time);
     return;
 }
 
-void input_t::key_s(scene_t& _scene, const uint32_t _delta_time) const {
+void input_t::key_s(scene_t& _scene, uint32_t _delta_time) const {
     _scene.get_current_camera().move(camera_base_t::BACKWARD, _delta_time);
     return;
 }
 
-void input_t::key_z(scene_t& _scene, const uint32_t _delta_time) const {
+void input_t::key_z(scene_t& _scene, uint32_t _delta_time) const {
     _scene.get_current_camera().move(camera_base_t::DOWN, _delta_time);
     return;
 }
@@ -46,37 +46,36 @@ void input_t::key_r(scene_t& _scene, const uint32_t) const {
     return;
 }
 
-void input_t::key_q(scene_t& _scene, const uint32_t _delta_time) const {
+void input_t::key_q(scene_t& _scene, uint32_t _delta_time) const {
     _scene.get_current_camera().update_up(camera_base_t::UP, _delta_time);
     return;
 }
 
-void input_t::key_e(scene_t& _scene, const uint32_t _delta_time) const {
+void input_t::key_e(scene_t& _scene, uint32_t _delta_time) const {
     _scene.get_current_camera().update_up(camera_base_t::DOWN, _delta_time);
 
     return;
 }
 
-void input_t::key_space(scene_t& _scene, const uint32_t _delta_time) const {
+void input_t::key_space(scene_t& _scene, uint32_t _delta_time) const {
     _scene.get_current_camera().move(camera_base_t::UP, _delta_time);
     return;
 }
 
-void input_t::key_left_ctrl(scene_t& _scene, const uint32_t _delta_time) const {
+void input_t::key_left_ctrl(scene_t& _scene, uint32_t _delta_time) const {
     (void)_scene;
     (void)_delta_time;
     return;
 }
 
-void input_t::key_left_shift(scene_t&       _scene,
-                             const uint32_t _delta_time) const {
+void input_t::key_left_shift(scene_t& _scene, uint32_t _delta_time) const {
     (void)_delta_time;
     _scene.get_config().draw_wireframe = !_scene.get_config().draw_wireframe;
     return;
 }
 
 void input_t::mouse_motion(scene_t& _scene, const int32_t _x, const int32_t _y,
-                           const uint32_t _delta_time) const {
+                           uint32_t _delta_time) const {
     (void)_scene;
     (void)_x;
     (void)_y;
@@ -85,7 +84,7 @@ void input_t::mouse_motion(scene_t& _scene, const int32_t _x, const int32_t _y,
     return;
 }
 
-bool input_t::handle(scene_t& _scene, const uint32_t _delta_time) const {
+bool input_t::handle(scene_t& _scene, uint32_t _delta_time) const {
     auto res = true;
     switch (event.type) {
         // 键盘事件
@@ -180,7 +179,7 @@ input_t::~input_t(void) {
     return;
 }
 
-bool input_t::process(scene_t& _scene, const uint32_t _delta_time) {
+bool input_t::process(scene_t& _scene, uint32_t _delta_time) {
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
             return false;

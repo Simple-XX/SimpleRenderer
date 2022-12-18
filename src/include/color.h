@@ -63,7 +63,7 @@ public:
      * @brief 构造函数
      * @param  _data            颜色数据
      */
-    explicit color_t(const uint32_t _data);
+    explicit color_t(uint32_t _data);
 
     /**
      * @brief 构造函数
@@ -104,9 +104,9 @@ public:
      */
     color_t&             operator=(const color_t& _color);
 
-    const color_t        operator*(const float& _f) const;
+    color_t              operator*(const float& _f) const;
 
-    const color_t        operator*(const vector4f_t& _vector4f) const;
+    color_t              operator*(const vector4f_t& _vector4f) const;
 
     color_t&             operator*=(const float& _f);
 

@@ -19,9 +19,8 @@
 #include "iostream"
 
 #include "framebuffer.h"
-#include "log.hpp"
 
-framebuffer_t::framebuffer_t(const uint32_t _width, const uint32_t _height)
+framebuffer_t::framebuffer_t(uint32_t _width, uint32_t _height)
     : width(_width),
       height(_height),
       color_buffer(color_buffer_t(_width, _height)),
@@ -79,8 +78,8 @@ void framebuffer_t::clear(const color_t& _color, const depth_t& _depth) {
     return;
 }
 
-void framebuffer_t::pixel(const uint32_t _x, const uint32_t _y,
-                          const color_t& _color, const depth_t& _depth) {
+void framebuffer_t::pixel(uint32_t _x, uint32_t _y, const color_t& _color,
+                          const depth_t& _depth) {
     if (_x >= width) {
         throw std::invalid_argument(log("_x >= width"));
     }
@@ -111,7 +110,7 @@ depth_buffer_t& framebuffer_t::get_depth_buffer(void) {
 }
 
 framebuffer_t::depth_t&
-framebuffer_t::get_depth_buffer(const uint32_t _x, const uint32_t _y) {
+framebuffer_t::get_depth_buffer(uint32_t _x, uint32_t _y) {
     return depth_buffer(_x, _y);
 }
 
@@ -120,6 +119,6 @@ const depth_buffer_t& framebuffer_t::get_depth_buffer(void) const {
 }
 
 framebuffer_t::depth_t
-framebuffer_t::get_depth_buffer(const uint32_t _x, const uint32_t _y) const {
+framebuffer_t::get_depth_buffer(uint32_t _x, uint32_t _y) const {
     return depth_buffer(_x, _y);
 }

@@ -16,7 +16,7 @@
 
 #include "default_shader.h"
 
-const color_t
+color_t
 default_shader_t::interpolate_color(const color_t&    _color0,
                                     const color_t&    _color1,
                                     const color_t&    _color2,
@@ -42,7 +42,7 @@ default_shader_t::~default_shader_t(void) {
 }
 
 /// @todo 巨大性能开销
-const shader_vertex_out_t
+shader_vertex_out_t
 default_shader_t::vertex(const shader_vertex_in_t& _shader_vertex_in) const {
     /// @todo 处理变换
     auto face(_shader_vertex_in.face);
@@ -67,7 +67,7 @@ default_shader_t::vertex(const shader_vertex_in_t& _shader_vertex_in) const {
     return shader_vertex_out_t(face);
 }
 
-const shader_fragment_out_t default_shader_t::fragment(
+shader_fragment_out_t default_shader_t::fragment(
   const shader_fragment_in_t& _shader_fragment_in) const {
     auto intensity = (_shader_fragment_in.normal * _shader_fragment_in.light);
     auto is_need_draw = true;

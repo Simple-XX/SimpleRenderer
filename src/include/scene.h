@@ -105,7 +105,7 @@ public:
      * @return true             运行
      * @return false            结束
      */
-    bool      tick(const uint32_t _delta_time);
+    bool      tick(uint32_t _delta_time);
 
     /**
      * @brief 获取场景的配置信息

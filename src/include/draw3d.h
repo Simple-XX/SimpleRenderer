@@ -55,7 +55,7 @@ public:
      * @param  _p1              三角形的第二个点
      * @param  _p2              三角形的第三个点
      * @param  _p               要判断的点
-     * @return const std::pair<bool, const vector4f_t>
+     * @return std::pair<bool, const vector4f_t>
      *  第一个返回为 _p 是否在三角形内，第二个为重心坐标
      * @see http://blackpawn.com/texts/pointinpoly/
      * solve
@@ -73,7 +73,7 @@ public:
      *     weight_B = s
      *     weight_C = t
      */
-    static const std::pair<bool, const vector4f_t>
+    static std::pair<bool, const vector4f_t>
     get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
                           const vector4f_t& _p2, const vector4f_t& _p);
 
@@ -85,11 +85,11 @@ public:
      * @param  _barycentric_coord   重心坐标
      * @return framebuffer_t::depth_t 深度值
      */
-    framebuffer_t::depth_t
+    static framebuffer_t::depth_t
     interpolate_depth(const framebuffer_t::depth_t& _v0,
                       const framebuffer_t::depth_t& _v1,
                       const framebuffer_t::depth_t& _v2,
-                      const vector4f_t&             _barycentric_coord) const;
+                      const vector4f_t&             _barycentric_coord);
 
     /**
      * @brief 填充三角形，传入的顶点包含更多信息

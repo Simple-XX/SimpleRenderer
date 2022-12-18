@@ -17,7 +17,6 @@
 #include "limits"
 
 #include "color.h"
-#include "log.hpp"
 
 color_t::color_t(void) {
     channel_r = 0;
@@ -27,7 +26,7 @@ color_t::color_t(void) {
     return;
 }
 
-color_t::color_t(const uint32_t _data) {
+color_t::color_t(uint32_t _data) {
     auto data_ptr = (uint8_t*)&_data;
     channel_r     = data_ptr[0];
     channel_g     = data_ptr[1];
@@ -77,7 +76,7 @@ color_t& color_t::operator=(const color_t& _color) {
     return *this;
 }
 
-const color_t color_t::operator*(const float& _f) const {
+color_t color_t::operator*(const float& _f) const {
     uint8_t r = channel_r * _f;
     uint8_t g = channel_g * _f;
     uint8_t b = channel_b * _f;
@@ -85,7 +84,7 @@ const color_t color_t::operator*(const float& _f) const {
     return color_t(r, g, b, a);
 }
 
-const color_t color_t::operator*(const vector4f_t& _vector) const {
+color_t color_t::operator*(const vector4f_t& _vector) const {
     uint8_t r = channel_r * _vector.x;
     uint8_t g = channel_g * _vector.y;
     uint8_t b = channel_b * _vector.z;

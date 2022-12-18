@@ -264,7 +264,7 @@ model_t::model_t(const std::string& _obj_path, const std::string& _mtl_path) {
                 // std::cout << "materials[s].diffuse_texname: "
                 //           << materials[s].diffuse_texname << std::endl;
                 // std::cout << "materials[s].diffuse_texname: "
-                //           << materials[s].ambient[0] << std::endl;
+                // << materials[s].ambient[0] << std::endl;
                 material.shininess = materials[s].shininess;
                 material.ambient
                   = vector4f_t(materials[s].ambient[0], materials[s].ambient[1],

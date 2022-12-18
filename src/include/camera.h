@@ -97,7 +97,7 @@ public:
      * @brief 构造函数
      * @param  _camera          另一个 camera_base_t
      */
-    explicit camera_base_t(const camera_base_t& _camera);
+    camera_base_t(const camera_base_t& _camera);
 
     /**
      * @brief 构造函数
@@ -106,7 +106,7 @@ public:
      * @param  _aspect          比例
      */
     explicit camera_base_t(const vector4f_t& _pos, const vector4f_t& _target,
-                           const float _aspect);
+                           float _aspect);
 
     /**
      * @brief 析构函数
@@ -130,29 +130,28 @@ public:
      * @param  _to              移动的方向
      * @param  _delta_time      时间变化
      */
-    virtual void   move(const move_to_t& _to, const uint32_t _delta_time);
+    virtual void       move(const move_to_t& _to, uint32_t _delta_time);
 
     /**
      * @brief 更新相机目标
      * @param  _to              移动的方向
      * @param  _delta_time      时间变化
      */
-    virtual void
-    update_target(const move_to_t& _to, const uint32_t _delta_time);
+    virtual void update_target(const move_to_t& _to, uint32_t _delta_time);
 
     /**
      * @brief 更新相机上方向
      * @param  _to              移动的方向
      * @param  _delta_time      时间变化
      */
-    virtual void update_up(const move_to_t& _to, const uint32_t _delta_time);
+    virtual void       update_up(const move_to_t& _to, uint32_t _delta_time);
 
     /**
      * @brief 获取视图变换矩阵, 将相机移动到原点，方向指向 -z，即屏幕里，up 为
      * -y，即屏幕向上
-     * @return const matrix4f_t 视图矩阵
+     * @return matrix4f_t       视图矩阵
      */
-    virtual const matrix4f_t look_at(void) const;
+    virtual matrix4f_t look_at(void) const;
 };
 
 /**
@@ -171,7 +170,7 @@ public:
      * @brief 构造函数
      * @param  _camera          另一个 surround_camera_t
      */
-    explicit surround_camera_t(const surround_camera_t& _camera);
+    surround_camera_t(const surround_camera_t& _camera);
 
     /**
      * @brief 构造函数
@@ -180,12 +179,12 @@ public:
      * @param  _aspect          比例
      */
     explicit surround_camera_t(const vector4f_t& _pos,
-                               const vector4f_t& _target, const float _aspect);
+                               const vector4f_t& _target, float _aspect);
 
     /**
      * @brief 析构函数
      */
-    ~surround_camera_t(void);
+    ~surround_camera_t(void) override;
 };
 
 #endif /* SIMPLERENDER_CAMERA_H */

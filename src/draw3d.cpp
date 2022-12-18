@@ -19,7 +19,7 @@
 #include "draw3d.h"
 
 /// @todo 巨大性能开销
-const std::pair<bool, const vector4f_t>
+std::pair<bool, const vector4f_t>
 draw3d_t::get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
                                 const vector4f_t& _p2, const vector4f_t& _p) {
     auto ab   = _p1 - _p0;
@@ -48,78 +48,11 @@ draw3d_t::get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
     return std::pair<bool, const vector4f_t>(true, vector4f_t(1 - s - t, s, t));
 }
 
-const std::pair<const matrix4f_t, const matrix4f_t>
-draw3d_t::model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
-                           const matrix4f_t& _scale,
-                           const matrix4f_t& _translate) const {
-    // 坐标变换矩阵
-    matrix4f_t coord_mat;
-    coord_mat = _rotate * coord_mat;
-    // 法线变换矩阵
-    matrix4f_t normal_mat;
-    normal_mat = coord_mat.inverse().transpose();
-    // 用旋转后的顶点计算极值
-    auto tmp   = _model.get_face()[0].v0.coord.x;
-    auto x_max = std::numeric_limits<decltype(tmp)>::lowest();
-    auto x_min = std::numeric_limits<decltype(tmp)>::max();
-    auto y_max = x_max;
-    auto y_min = x_min;
-    auto z_max = x_max;
-    auto z_min = x_min;
-    for (auto& i : _model.get_face()) {
-        auto v0 = i.v0.coord * coord_mat;
-        auto v1 = i.v1.coord * coord_mat;
-        auto v2 = i.v2.coord * coord_mat;
-        x_max   = std::max(x_max, v0.x);
-        x_max   = std::max(x_max, v1.x);
-        x_max   = std::max(x_max, v2.x);
-        x_min   = std::min(x_min, v0.x);
-        x_min   = std::min(x_min, v1.x);
-        x_min   = std::min(x_min, v2.x);
-
-        y_max   = std::max(y_max, v0.y);
-        y_max   = std::max(y_max, v1.y);
-        y_max   = std::max(y_max, v2.y);
-        y_min   = std::min(y_min, v0.y);
-        y_min   = std::min(y_min, v1.y);
-        y_min   = std::min(y_min, v2.y);
-
-        z_max   = std::max(z_max, v0.z);
-        z_max   = std::max(z_max, v1.z);
-        z_max   = std::max(z_max, v2.z);
-        z_min   = std::min(z_min, v0.z);
-        z_min   = std::min(z_min, v1.z);
-        z_min   = std::min(z_min, v2.z);
-    }
-
-    // 各分量的长度
-    auto delta_x       = (std::abs(x_max) + std::abs(x_min));
-    auto delta_y       = (std::abs(y_max) + std::abs(y_min));
-    auto delta_z       = (std::abs(z_max) + std::abs(z_min));
-    auto delta_xy_max  = std::max(delta_x, delta_y);
-    auto delta_xyz_max = std::max(delta_xy_max, delta_z);
-
-    // 缩放倍数
-    auto multi         = (height + width) / 4;
-    // 归一化并乘倍数
-    auto scale         = multi / delta_xyz_max;
-    // 缩放
-    coord_mat          = coord_mat.scale(scale);
-    coord_mat          = _scale * coord_mat;
-    // 移动到左上角
-    coord_mat          = coord_mat.translate(std::abs(x_min) * scale,
-                                             std::abs(y_min) * scale, 0);
-    // 从左上角移动到指定位置
-    coord_mat          = _translate * coord_mat;
-    return std::pair<const matrix4f_t, const matrix4f_t>(
-      matrix4f_t(coord_mat), matrix4f_t(normal_mat));
-}
-
 framebuffer_t::depth_t
 draw3d_t::interpolate_depth(const framebuffer_t::depth_t& _depth0,
                             const framebuffer_t::depth_t& _depth1,
                             const framebuffer_t::depth_t& _depth2,
-                            const vector4f_t& _barycentric_coord) const {
+                            const vector4f_t&             _barycentric_coord) {
     auto z = _depth0 * _barycentric_coord.x;
     z      += _depth1 * _barycentric_coord.y;
     z      += _depth2 * _barycentric_coord.z;
@@ -156,7 +89,7 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
             // 计算颜色，颜色为通过 shader 片段着色器计算
             auto shader_fragment_out
               = shader.fragment(shader_fragment_in_t(barycentric_coord, _normal,
-                                                     light, _v0.color,
+                                                     light.dir, _v0.color,
                                                      _v1.color, _v2.color));
             if (shader_fragment_out.is_need_draw == false) {
                 continue;
@@ -174,10 +107,10 @@ void draw3d_t::triangle(const model_t::face_t& _face) {
     return;
 }
 
-draw3d_t::draw3d_t(const std::shared_ptr<framebuffer_t>& _framebuffer,
-                   shader_base_t&                        _shader,
-                   const std::shared_ptr<config_t>&      _config)
-    : framebuffer(_framebuffer), shader(_shader), config(_config) {
+draw3d_t::draw3d_t(const std::shared_ptr<config_t>&      _config,
+                   const std::shared_ptr<framebuffer_t>& _framebuffer,
+                   const shader_base_t&                  _shader)
+    : config(_config), framebuffer(_framebuffer), shader(_shader) {
     width  = framebuffer->get_width();
     height = framebuffer->get_height();
     return;
@@ -259,7 +192,7 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
 void draw3d_t::model(const model_t& _model) {
     if (config->draw_wireframe == true) {
 #pragma omp parallel for num_threads(config->procs)
-        for (auto f : _model.get_face()) {
+        for (const auto f : _model.get_face()) {
             /// @todo 巨大性能开销
             auto face = shader.vertex(shader_vertex_in_t(f)).face;
             line(face.v0.coord.x, face.v0.coord.y, face.v1.coord.x,
@@ -272,7 +205,7 @@ void draw3d_t::model(const model_t& _model) {
     }
     else {
 #pragma omp parallel for num_threads(config->procs)
-        for (auto f : _model.get_face()) {
+        for (const auto f : _model.get_face()) {
             /// @todo 巨大性能开销
             auto face = shader.vertex(shader_vertex_in_t(f)).face;
             triangle(face);
