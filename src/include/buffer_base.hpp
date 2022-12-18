@@ -27,19 +27,20 @@
 /**
  * @brief 缓冲区，作为 framebuffer 或 zbuffer 的基类
  * @todo 大小不一样的赋值处理
+ * @todo get() 方法能否优化
  */
 template <class T_t>
 class buffer_base_t {
 private:
     /// @brief 窗口宽度
-    uint32_t   width;
+    uint32_t               width;
     /// @brief 窗口高度
-    uint32_t   height;
+    uint32_t               height;
 
     /// @brief 缓冲区锁
-    std::mutex buffer_mutex;
+    std::mutex             buffer_mutex;
     /// @brief 缓冲数组
-    T_t*       buffer_arr;
+    std::shared_ptr<T_t[]> buffer_arr;
 
 public:
     /**
@@ -101,15 +102,21 @@ public:
      * @brief () 重载，获取第 _x 行 _y 列的数据
      * @param  _x               行
      * @param  _y               列
-     * @return const T_t        只读的数据
+     * @return const T_t&       只读的数据
      */
-    T_t            operator()(uint32_t _x, uint32_t _y) const;
+    const T_t&     operator()(uint32_t _x, uint32_t _y) const;
+
+    /**
+     * @brief 转换为数组
+     * @return T_t*             数组
+     */
+    T_t*           to_arr(void);
 
     /**
      * @brief 转换为数组
      * @return const T_t*       数组
      */
-    const T_t*     to_arr(void);
+    const T_t*     to_arr(void) const;
 
     /**
      * @brief 获取缓冲区大小(字节数)
@@ -122,16 +129,16 @@ template <class T_t>
 buffer_base_t<T_t>::buffer_base_t(uint32_t _w, uint32_t _h)
     : width(_w), height(_h) {
     try {
-        buffer_arr = new T_t[width * height];
+        buffer_arr = std::make_shared<T_t[]>(width * height);
     } catch (const std::bad_alloc& e) {
         std::cerr << log(e.what()) << std::endl;
     }
     if constexpr (std::is_same_v<T_t, color_t>) {
-        std::fill_n(buffer_arr, width * height, color_t::BLACK);
+        std::fill_n(buffer_arr.get(), width * height, color_t::BLACK);
     }
     else if constexpr ((std::is_same_v<T_t, float>)
                        || (std::is_same_v<T_t, double>)) {
-        std::fill_n(buffer_arr, width * height,
+        std::fill_n(buffer_arr.get(), width * height,
                     std::numeric_limits<T_t>::lowest());
     }
 
@@ -142,13 +149,13 @@ template <class T_t>
 buffer_base_t<T_t>::buffer_base_t(const buffer_base_t& _buffer)
     : width(_buffer.width), height(_buffer.height) {
     try {
-        buffer_arr = new T_t[width * height];
+        buffer_arr = std::make_shared<T_t[]>(width * height);
     } catch (const std::bad_alloc& e) {
         std::cerr << log(e.what()) << std::endl;
     }
     // 复制数据
-    std::copy(_buffer.buffer_arr, _buffer.buffer_arr + _buffer.length(),
-              buffer_arr);
+    std::copy(_buffer.buffer_arr.get(),
+              _buffer.buffer_arr.get() + _buffer.length(), buffer_arr.get());
     return;
 }
 
@@ -156,10 +163,6 @@ template <class T_t>
 buffer_base_t<T_t>::~buffer_base_t(void) {
     width  = 0;
     height = 0;
-    if (buffer_arr != nullptr) {
-        delete[] buffer_arr;
-        buffer_arr = nullptr;
-    }
     return;
 }
 
@@ -173,19 +176,15 @@ buffer_base_t<T_t>::operator=(const buffer_base_t& _buffer) {
     if (width != _buffer.width || height != _buffer.height) {
         width  = _buffer.width;
         height = _buffer.height;
-        if (buffer_arr != nullptr) {
-            delete[] buffer_arr;
-            buffer_arr = nullptr;
-        }
         try {
-            buffer_arr = new T_t[width * height];
+            buffer_arr = std::make_shared<T_t[]>(width * height);
         } catch (const std::bad_alloc& e) {
             std::cerr << log(e.what()) << std::endl;
         }
     }
-    std::copy(_buffer.buffer_arr,
-              _buffer.buffer_arr + width * height * sizeof(color_t),
-              buffer_arr);
+    std::copy(_buffer.buffer_arr.get(),
+              _buffer.buffer_arr.get() + width * height * sizeof(color_t),
+              buffer_arr.get());
 
     return *this;
 }
@@ -203,10 +202,10 @@ uint32_t buffer_base_t<T_t>::get_width(void) const {
 template <class T_t>
 void buffer_base_t<T_t>::clear(void) {
     if constexpr (std::is_same_v<T_t, color_t>) {
-        std::fill_n(buffer_arr, width * height, color_t::BLACK);
+        std::fill_n(buffer_arr.get(), width * height, color_t::BLACK);
     }
     else if ((std::is_same_v<T_t, float>) || (std::is_same_v<T_t, double>)) {
-        std::fill_n(buffer_arr, width * height,
+        std::fill_n(buffer_arr.get(), width * height,
                     std::numeric_limits<T_t>::lowest());
     }
     return;
@@ -218,17 +217,22 @@ T_t& buffer_base_t<T_t>::operator()(uint32_t _x, uint32_t _y) {
 }
 
 template <class T_t>
-T_t buffer_base_t<T_t>::operator()(uint32_t _x, uint32_t _y) const {
+const T_t& buffer_base_t<T_t>::operator()(uint32_t _x, uint32_t _y) const {
     return buffer_arr[_y * width + _x];
 }
 
 template <class T_t>
-const T_t* buffer_base_t<T_t>::to_arr(void) {
-    return buffer_arr;
+T_t* buffer_base_t<T_t>::to_arr(void) {
+    return buffer_arr.get();
 }
 
 template <class T_t>
-size_t buffer_base_t<T_t>::length() const {
+const T_t* buffer_base_t<T_t>::to_arr(void) const {
+    return buffer_arr.get();
+}
+
+template <class T_t>
+size_t buffer_base_t<T_t>::length(void) const {
     return width * height * sizeof(T_t);
 }
 
