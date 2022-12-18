@@ -35,7 +35,7 @@ protected:
 
     /// @brief 默认上方向为屏幕向上
     const vector4f_t DEFAULT_UP     = vector4f_t(0, -1, 0);
-    /// @brief 默认向右为正方向
+    /// @brief 默认指向屏幕内为正方向
     const vector4f_t DEFAULT_FRONT  = vector4f_t(0, 0, -1);
     /// @brief 右方向通过计算得出，默认为 0
     const vector4f_t DEFAULT_RIGHT  = vector4f_t(0, 0, 0);
@@ -60,7 +60,7 @@ protected:
     /// @brief 比例
     float            aspect;
     /// @brief 相机速度
-    float            speed = 20;
+    float            speed;
 
 public:
     /**
@@ -137,7 +137,7 @@ public:
      * @param  _to              移动的方向
      * @param  _delta_time      时间变化
      */
-    virtual void update_target(const move_to_t& _to, uint32_t _delta_time);
+    virtual void   update_target(const move_to_t& _to, uint32_t _delta_time);
 
     /**
      * @brief 更新相机上方向
