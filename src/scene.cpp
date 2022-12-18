@@ -165,7 +165,10 @@ bool scene_t::tick(uint32_t _delta_time) {
     for (const auto& i : models) {
         visible_models.push(i);
     }
-    /// @todo 计算光照
+    /// @todo 根据所有光照进行计算
+    for (const auto& i : lights) {
+        light = i;
+    }
     /// @todo 移动摄像机
 
     return true;
@@ -189,4 +192,12 @@ const camera_base_t& scene_t::get_current_camera(void) const {
 
 const std::queue<model_t>& scene_t::get_visible_models(void) const {
     return visible_models;
+}
+
+light_t& scene_t::get_light(void) {
+    return light;
+}
+
+const light_t& scene_t::get_light(void) const {
+    return light;
 }

@@ -49,6 +49,8 @@ private:
 
     /// @brief 场景中的所有光照
     std::vector<light_t>       lights;
+    /// @brief 场景中的光照合并值
+    light_t                    light;
 
 public:
     /**
@@ -136,6 +138,18 @@ public:
      * @return const std::queue<model_t>&   要渲染的模型队列
      */
     const std::queue<model_t>& get_visible_models(void) const;
+
+    /**
+     * @brief 获取场景的光照
+     * @return light_t&         场景的配置信息
+     */
+    light_t&                   get_light(void);
+
+    /**
+     * @brief 获取场景的光照
+     * @return const light_t&   场景的配置信息
+     */
+    const light_t&             get_light(void) const;
 };
 
 #endif /* SIMPLERENDER_SCENE_H */

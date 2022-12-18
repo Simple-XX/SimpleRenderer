@@ -38,7 +38,6 @@ set(test_src
         matrix_test.cpp
         color_test.cpp
         ${SimpleRender_SOURCE_DIR}/src/model.cpp
-        ${SimpleRender_SOURCE_DIR}/src/draw3d.cpp
         ${SimpleRender_SOURCE_DIR}/src/display.cpp
         ${SimpleRender_SOURCE_DIR}/src/framebuffer.cpp
         ${SimpleRender_SOURCE_DIR}/src/camera.cpp

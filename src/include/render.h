@@ -23,7 +23,6 @@
 #include "config.h"
 #include "default_shader.h"
 #include "display.h"
-#include "draw3d.h"
 #include "framebuffer.h"
 #include "input.h"
 #include "scene.h"

@@ -67,20 +67,18 @@ void render_t::loop(void) {
         // 清空缓冲区
         framebuffer->clear();
 
-        draw3d_t draw3d(config, framebuffer, shader);
-        auto     models = scene->get_visible_models();
         // 右对角线
-        draw3d.line(0, config->HEIGHT - 1, config->WIDTH - 1, 0,
-                    color_t::WHITE);
+        framebuffer->line(0, config->HEIGHT - 1, config->WIDTH - 1, 0,
+                          color_t::WHITE);
         // 左对角线
-        draw3d.line(config->WIDTH - 1, config->HEIGHT - 1, 0, 0,
-                    color_t::WHITE);
+        framebuffer->line(config->WIDTH - 1, config->HEIGHT - 1, 0, 0,
+                          color_t::WHITE);
         // 水平平分线
-        draw3d.line(config->WIDTH - 1, config->HEIGHT / 2, 0,
-                    config->HEIGHT / 2, color_t::WHITE);
+        framebuffer->line(config->WIDTH - 1, config->HEIGHT / 2, 0,
+                          config->HEIGHT / 2, color_t::WHITE);
         // 垂直平分线
-        draw3d.line(config->WIDTH / 2, 0, config->WIDTH / 2, config->HEIGHT - 1,
-                    color_t::WHITE);
+        framebuffer->line(config->WIDTH / 2, 0, config->WIDTH / 2,
+                          config->HEIGHT - 1, color_t::WHITE);
 
         shader.shader_data.model_matrix
           = get_model_matrix(vector4f_t(1000, 1000, 1000),
@@ -90,10 +88,7 @@ void render_t::loop(void) {
         shader.shader_data.view_matrix = scene->get_current_camera().look_at();
         shader.shader_data.project_matrix = matrix4f_t();
 
-        while (!models.empty()) {
-            draw3d.model(models.front());
-            models.pop();
-        }
+        framebuffer->scene(shader, *scene);
 
         // 填充窗口
         display->fill(framebuffer);

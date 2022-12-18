@@ -38,7 +38,6 @@ set(SimpleRender_src
         model.cpp
         framebuffer.cpp
         display.cpp
-        draw3d.cpp
         camera.cpp
         shader.cpp
         default_shader.cpp

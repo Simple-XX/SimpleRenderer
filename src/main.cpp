@@ -15,11 +15,9 @@
  */
 
 #include "camera.h"
-#include "color.h"
 #include "config.h"
 #include "default_shader.h"
 #include "display.h"
-#include "draw3d.h"
 #include "input.h"
 #include "render.h"
 
@@ -82,8 +80,6 @@ auto render
 
 /// @todo 多缓冲区，绘制函数绘制多个 framebuffer，显示函数从 framebuffer[]
 ///     中拿到绘制完成的进行显示，这样可以将两个线程分开
-
-/// @todo 考虑将 framebuffer 和 draw3d 合并
 
 int main(int _argc, char** _argv) {
     // obj 路径

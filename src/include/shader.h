@@ -17,7 +17,6 @@
 #ifndef SIMPLERENDER_SHADER_H
 #define SIMPLERENDER_SHADER_H
 
-#include "framebuffer.h"
 #include "matrix.hpp"
 #include "model.h"
 #include "vector.hpp"
