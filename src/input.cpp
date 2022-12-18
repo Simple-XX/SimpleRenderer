@@ -17,27 +17,27 @@
 #include "input.h"
 
 void input_t::key_a(scene_t& _scene, const uint32_t _delta_time) const {
-    _scene.get_current_camera().update_pos(camera_base_t::SUB_X, _delta_time);
+    _scene.get_current_camera().move(camera_base_t::LEFT, _delta_time);
     return;
 }
 
 void input_t::key_d(scene_t& _scene, const uint32_t _delta_time) const {
-    _scene.get_current_camera().update_pos(camera_base_t::ADD_X, _delta_time);
+    _scene.get_current_camera().move(camera_base_t::RIGHT, _delta_time);
     return;
 }
 
 void input_t::key_w(scene_t& _scene, const uint32_t _delta_time) const {
-    _scene.get_current_camera().update_pos(camera_base_t::ADD_Z, _delta_time);
+    _scene.get_current_camera().move(camera_base_t::FORWARD, _delta_time);
     return;
 }
 
 void input_t::key_s(scene_t& _scene, const uint32_t _delta_time) const {
-    _scene.get_current_camera().update_pos(camera_base_t::SUB_Z, _delta_time);
+    _scene.get_current_camera().move(camera_base_t::BACKWARD, _delta_time);
     return;
 }
 
 void input_t::key_z(scene_t& _scene, const uint32_t _delta_time) const {
-    _scene.get_current_camera().update_pos(camera_base_t::SUB_Y, _delta_time);
+    _scene.get_current_camera().move(camera_base_t::DOWN, _delta_time);
     return;
 }
 
@@ -47,22 +47,23 @@ void input_t::key_r(scene_t& _scene, const uint32_t) const {
 }
 
 void input_t::key_q(scene_t& _scene, const uint32_t _delta_time) const {
-    _scene.get_current_camera().update_up(camera_base_t::ADD_Y, _delta_time);
+    _scene.get_current_camera().update_up(camera_base_t::UP, _delta_time);
     return;
 }
 
 void input_t::key_e(scene_t& _scene, const uint32_t _delta_time) const {
-    _scene.get_current_camera().update_up(camera_base_t::SUB_Y, _delta_time);
+    _scene.get_current_camera().update_up(camera_base_t::DOWN, _delta_time);
 
     return;
 }
 
 void input_t::key_space(scene_t& _scene, const uint32_t _delta_time) const {
-    _scene.get_current_camera().update_pos(camera_base_t::ADD_Y, _delta_time);
+    _scene.get_current_camera().move(camera_base_t::UP, _delta_time);
     return;
 }
 
 void input_t::key_left_ctrl(scene_t& _scene, const uint32_t _delta_time) const {
+    (void)_scene;
     (void)_delta_time;
     return;
 }

@@ -66,13 +66,26 @@ public:
     /**
      * @brief 用于标识相机移动的方向
      */
-    enum to_t : uint8_t {
-        ADD_X,
-        SUB_X,
-        ADD_Y,
-        SUB_Y,
-        ADD_Z,
-        SUB_Z,
+    enum move_to_t : uint8_t {
+        RIGHT,
+        LEFT,
+        UP,
+        DOWN,
+        FORWARD,
+        BACKWARD,
+    };
+
+    /**
+     * @brief 用于标识相机旋转的方向
+     * @todo
+     */
+    enum course_to_t : uint8_t {
+        PITCH_UP,
+        PITCH_DOWN,
+        YAW_LEFT,
+        YAW_RIGHT,
+        ROLL_1,
+        ROLL_2,
     };
 
     /**
@@ -117,21 +130,22 @@ public:
      * @param  _to              移动的方向
      * @param  _delta_time      时间变化
      */
-    virtual void   update_pos(const to_t& _to, const uint32_t _delta_time);
+    virtual void   move(const move_to_t& _to, const uint32_t _delta_time);
 
     /**
      * @brief 更新相机目标
      * @param  _to              移动的方向
      * @param  _delta_time      时间变化
      */
-    virtual void   update_target(const to_t& _to, const uint32_t _delta_time);
+    virtual void
+    update_target(const move_to_t& _to, const uint32_t _delta_time);
 
     /**
      * @brief 更新相机上方向
      * @param  _to              移动的方向
      * @param  _delta_time      时间变化
      */
-    virtual void   update_up(const to_t& _to, const uint32_t _delta_time);
+    virtual void update_up(const move_to_t& _to, const uint32_t _delta_time);
 
     /**
      * @brief 获取视图变换矩阵, 将相机移动到原点，方向指向 -z，即屏幕里，up 为

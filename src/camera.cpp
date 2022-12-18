@@ -86,29 +86,29 @@ void camera_base_t::set_default(void) {
     return;
 }
 
-void camera_base_t::update_pos(const to_t& _to, const uint32_t _delta_time) {
+void camera_base_t::move(const move_to_t& _to, const uint32_t _delta_time) {
     switch (_to) {
-        case ADD_X: {
+        case RIGHT: {
             pos += front * (speed * _delta_time);
             break;
         }
-        case SUB_X: {
+        case LEFT: {
             pos -= front * (speed * _delta_time);
             break;
         }
-        case ADD_Y: {
+        case UP: {
             pos += right * (speed * _delta_time);
             break;
         }
-        case SUB_Y: {
+        case DOWN: {
             pos -= right * (speed * _delta_time);
             break;
         }
-        case ADD_Z: {
+        case FORWARD: {
             pos += up * (speed * _delta_time);
             break;
         }
-        case SUB_Z: {
+        case BACKWARD: {
             pos -= up * (speed * _delta_time);
             break;
         }
@@ -117,29 +117,30 @@ void camera_base_t::update_pos(const to_t& _to, const uint32_t _delta_time) {
     return;
 }
 
-void camera_base_t::update_target(const to_t& _to, const uint32_t _delta_time) {
+void camera_base_t::update_target(const move_to_t& _to,
+                                  const uint32_t   _delta_time) {
     switch (_to) {
-        case ADD_X: {
+        case RIGHT: {
             pos += front * (speed * _delta_time);
             break;
         }
-        case SUB_X: {
+        case LEFT: {
             pos -= front * (speed * _delta_time);
             break;
         }
-        case ADD_Y: {
+        case UP: {
             pos += right * (speed * _delta_time);
             break;
         }
-        case SUB_Y: {
+        case DOWN: {
             pos -= right * (speed * _delta_time);
             break;
         }
-        case ADD_Z: {
+        case FORWARD: {
             pos += up * (speed * _delta_time);
             break;
         }
-        case SUB_Z: {
+        case BACKWARD: {
             pos -= up * (speed * _delta_time);
             break;
         }
@@ -148,29 +149,30 @@ void camera_base_t::update_target(const to_t& _to, const uint32_t _delta_time) {
     return;
 }
 
-void camera_base_t::update_up(const to_t& _to, const uint32_t _delta_time) {
+void camera_base_t::update_up(const move_to_t& _to,
+                              const uint32_t   _delta_time) {
     switch (_to) {
-        case ADD_X: {
+        case RIGHT: {
             up += front * (speed * _delta_time);
             break;
         }
-        case SUB_X: {
+        case LEFT: {
             up -= front * (speed * _delta_time);
             break;
         }
-        case ADD_Y: {
+        case UP: {
             up += right * (speed * _delta_time);
             break;
         }
-        case SUB_Y: {
+        case DOWN: {
             up -= right * (speed * _delta_time);
             break;
         }
-        case ADD_Z: {
+        case FORWARD: {
             up += up * (speed * _delta_time);
             break;
         }
-        case SUB_Z: {
+        case BACKWARD: {
             up -= up * (speed * _delta_time);
             break;
         }
