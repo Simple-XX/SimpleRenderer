@@ -34,56 +34,61 @@ auto config  = std::make_shared<config_t>();
 auto display = std::make_shared<display_t>(config->WIDTH, config->HEIGHT);
 auto framebuffer
   = std::make_shared<framebuffer_t>(config->WIDTH, config->HEIGHT);
-auto camera = std::make_shared<surround_camera_t>();
-auto input  = std::make_shared<input_t>(config, camera);
-auto scene  = std::make_shared<scene_t>(config, camera, input);
+auto scene  = std::make_shared<scene_t>(config);
+auto input  = std::make_shared<input_t>();
 auto shader = std::make_shared<default_shader_t>();
-auto render = std::make_shared<render_t>(scene, display, framebuffer, input);
+auto render
+  = std::make_shared<render_t>(config, scene, display, framebuffer, input);
 
-void draw(const std::shared_ptr<framebuffer_t>& _framebuffer,
-          const std::shared_ptr<shader_base_t>& _shader,
-          const std::shared_ptr<config_t>&      _config) {
-    draw3d_t draw3d(_framebuffer, *_shader, _config);
+// void draw(const std::shared_ptr<framebuffer_t>& _framebuffer,
+//           const std::shared_ptr<shader_base_t>& _shader,
+//           const std::shared_ptr<config_t>&      _config) {
+//     draw3d_t draw3d(_framebuffer, *_shader, _config);
+//
+//     auto     obj_path  = "../../obj/utah-teapot/utah-teapot.obj";
+//     auto     obj_path2 = "../../obj/cube3.obj";
+//
+//     auto     model     = model_t(obj_path);
+//     auto     model2    = model_t(obj_path2);
+//     while (1) {
+//         // 右对角线
+//         draw3d.line(0, config_t::HEIGHT - 1, config_t::WIDTH - 1, 0,
+//                     color_t::WHITE);
+//         // 左对角线
+//         draw3d.line(config_t::WIDTH - 1, config_t::HEIGHT - 1, 0, 0,
+//                     color_t::WHITE);
+//         // 水平平分线
+//         draw3d.line(config_t::WIDTH - 1, config_t::HEIGHT / 2, 0,
+//                     config_t::HEIGHT / 2, color_t::WHITE);
+//         // 垂直平分线
+//         draw3d.line(config_t::WIDTH / 2, 0, config_t::WIDTH / 2,
+//                     config_t::HEIGHT - 1, color_t::WHITE);
+//
+//         _shader->shader_data.model_matrix
+//           = get_model_matrix(vector4f_t(10, 10, 10),
+//                              vector4f_t(0, 0, 1).normalize(), 180,
+//                              vector4f_t(config_t::WIDTH / 2,
+//                                         config_t::HEIGHT / 2, 0));
+//         _shader->shader_data.view_matrix    = camera->look_at();
+//         _shader->shader_data.project_matrix = matrix4f_t();
+//         draw3d.model(model);
+//
+//         _shader->shader_data.model_matrix
+//           = get_model_matrix(vector4f_t(1000, 1000, 1000),
+//                              vector4f_t(0, 1, 1).normalize(), 45,
+//                              vector4f_t(config_t::WIDTH / 2,
+//                                         config_t::HEIGHT / 2, 0));
+//         _shader->shader_data.view_matrix    = camera->look_at();
+//         _shader->shader_data.project_matrix = matrix4f_t();
+//         draw3d.model(model2);
+//     }
+//     return;
+// }
 
-    auto     obj_path  = "../../obj/utah-teapot/utah-teapot.obj";
-    auto     obj_path2 = "../../obj/cube3.obj";
+/// @todo 多缓冲区，绘制函数绘制多个 framebuffer，显示函数从 framebuffer[]
+///     中拿到绘制完成的进行显示，这样可以将两个线程分开
 
-    auto     model     = model_t(obj_path);
-    auto     model2    = model_t(obj_path2);
-    while (1) {
-        // 右对角线
-        draw3d.line(0, config_t::HEIGHT - 1, config_t::WIDTH - 1, 0,
-                    color_t::WHITE);
-        // 左对角线
-        draw3d.line(config_t::WIDTH - 1, config_t::HEIGHT - 1, 0, 0,
-                    color_t::WHITE);
-        // 水平平分线
-        draw3d.line(config_t::WIDTH - 1, config_t::HEIGHT / 2, 0,
-                    config_t::HEIGHT / 2, color_t::WHITE);
-        // 垂直平分线
-        draw3d.line(config_t::WIDTH / 2, 0, config_t::WIDTH / 2,
-                    config_t::HEIGHT - 1, color_t::WHITE);
-
-        _shader->shader_data.model_matrix
-          = get_model_matrix(vector4f_t(10, 10, 10),
-                             vector4f_t(0, 0, 1).normalize(), 180,
-                             vector4f_t(config_t::WIDTH / 2,
-                                        config_t::HEIGHT / 2, 0));
-        _shader->shader_data.view_matrix    = camera->look_at();
-        _shader->shader_data.project_matrix = matrix4f_t();
-        draw3d.model(model);
-
-        _shader->shader_data.model_matrix
-          = get_model_matrix(vector4f_t(1000, 1000, 1000),
-                             vector4f_t(0, 1, 1).normalize(), 45,
-                             vector4f_t(config_t::WIDTH / 2,
-                                        config_t::HEIGHT / 2, 0));
-        _shader->shader_data.view_matrix    = camera->look_at();
-        _shader->shader_data.project_matrix = matrix4f_t();
-        draw3d.model(model2);
-    }
-    return;
-}
+/// @todo 考虑将 framebuffer 和 draw3d 合并
 
 int main(int _argc, char** _argv) {
     // obj 路径
@@ -97,7 +102,7 @@ int main(int _argc, char** _argv) {
         // obj_path = "../../obj/cornell_box.obj";
         // obj_path.push_back("../../obj/helmet.obj");
         // obj_path.push_back("../../obj/african_head.obj");
-        obj_path.push_back("../../obj/utah-teapot/utah-teapot.obj");
+        // obj_path.push_back("../../obj/utah-teapot/utah-teapot.obj");
     }
     // 否则使用指定的
     else {
@@ -109,12 +114,13 @@ int main(int _argc, char** _argv) {
     // 读取模型与材质
     for (auto& i : obj_path) {
         model_t model(i);
-        scene->add_model(model, matrix4f_t());
+
+        scene->add_model(model);
     }
     scene->add_light(light_t());
 
-    std::thread draw_thread = std::thread(draw, framebuffer, shader, config);
-    draw_thread.detach();
+    // std::thread draw_thread = std::thread(draw, framebuffer, shader, config);
+    // draw_thread.detach();
 
     render->loop();
 
