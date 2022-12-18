@@ -85,14 +85,6 @@ auto render
 
 /// @todo 考虑将 framebuffer 和 draw3d 合并
 
-int aaa(const int _b);
-
-int aaa(const int _b) {
-    // _b = 233;
-    (void)_b;
-    return 0;
-}
-
 int main(int _argc, char** _argv) {
     // obj 路径
     std::vector<std::string> obj_path;

@@ -19,7 +19,7 @@
 #include "draw3d.h"
 
 /// @todo 巨大性能开销
-std::pair<bool, const vector4f_t>
+std::pair<bool, vector4f_t>
 draw3d_t::get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
                                 const vector4f_t& _p2, const vector4f_t& _p) {
     auto ab   = _p1 - _p0;
@@ -28,24 +28,25 @@ draw3d_t::get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
 
     auto deno = (ab.x * ac.y - ab.y * ac.x);
     if (std::abs(deno) < std::numeric_limits<decltype(deno)>::epsilon()) {
-        return std::pair<bool, const vector4f_t>(false, vector4f_t());
+        return std::pair<bool, const vector4f_t> { false, vector4f_t() };
     }
 
     auto s = (ac.y * ap.x - ac.x * ap.y) / deno;
     if ((s > 1) || (s < 0)) {
-        return std::pair<bool, const vector4f_t>(false, vector4f_t());
+        return std::pair<bool, const vector4f_t> { false, vector4f_t() };
     }
 
     auto t = (ab.x * ap.y - ab.y * ap.x) / deno;
     if ((t > 1) || (t < 0)) {
-        return std::pair<bool, const vector4f_t>(false, vector4f_t());
+        return std::pair<bool, const vector4f_t> { false, vector4f_t() };
     }
 
     if ((1 - s - t > 1) || (1 - s - t < 0)) {
-        return std::pair<bool, const vector4f_t>(false, vector4f_t());
+        return std::pair<bool, const vector4f_t> { false, vector4f_t() };
     }
 
-    return std::pair<bool, const vector4f_t>(true, vector4f_t(1 - s - t, s, t));
+    return std::pair<bool, const vector4f_t> { true,
+                                               vector4f_t(1 - s - t, s, t) };
 }
 
 framebuffer_t::depth_t
@@ -74,7 +75,8 @@ void draw3d_t::triangle(const model_t::vertex_t& _v0,
             }
             auto [is_inside, barycentric_coord]
               = get_barycentric_coord(_v0.coord, _v1.coord, _v2.coord,
-                                      vector4f_t(x, y, 0));
+                                      vector4f_t(static_cast<float>(x),
+                                                 static_cast<float>(y), 0));
             // 如果点在三角形内再进行下一步
             if (is_inside == false) {
                 continue;
@@ -120,12 +122,12 @@ draw3d_t::~draw3d_t(void) {
     return;
 }
 
-void draw3d_t::line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
-                    const int32_t _y1, const color_t& _color) {
-    auto p0_x  = _x0;
-    auto p0_y  = _y0;
-    auto p1_x  = _x1;
-    auto p1_y  = _y1;
+void draw3d_t::line(float _x0, float _y0, float _x1, float _y1,
+                    const color_t& _color) {
+    auto p0_x  = static_cast<int32_t>(_x0);
+    auto p0_y  = static_cast<int32_t>(_y0);
+    auto p1_x  = static_cast<int32_t>(_x1);
+    auto p1_y  = static_cast<int32_t>(_y1);
 
     auto steep = false;
     if (std::abs(p0_x - p1_x) < std::abs(p0_y - p1_y)) {
@@ -177,10 +179,14 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
     auto min = _v0.min(_v1).min(_v2);
     auto max = _v0.max(_v1).max(_v2);
 
-    for (auto x = min.x; x <= max.x; x++) {
-        for (auto y = min.y; y <= max.y; y++) {
+    for (auto x = static_cast<uint32_t>(min.x);
+         x <= static_cast<uint32_t>(max.x); x++) {
+        for (auto y = static_cast<uint32_t>(min.y);
+             y <= static_cast<uint32_t>(max.y); y++) {
             auto [is_inside, _]
-              = get_barycentric_coord(_v0, _v1, _v2, vector4f_t(x, y));
+              = get_barycentric_coord(_v0, _v1, _v2,
+                                      vector4f_t(static_cast<float>(x),
+                                                 static_cast<float>(y)));
             if (is_inside) {
                 framebuffer->pixel(x, y, _color);
             }
@@ -192,7 +198,7 @@ void draw3d_t::triangle(const vector4f_t& _v0, const vector4f_t& _v1,
 void draw3d_t::model(const model_t& _model) {
     if (config->draw_wireframe == true) {
 #pragma omp parallel for num_threads(config->procs)
-        for (const auto f : _model.get_face()) {
+        for (const auto& f : _model.get_face()) {
             /// @todo 巨大性能开销
             auto face = shader.vertex(shader_vertex_in_t(f)).face;
             line(face.v0.coord.x, face.v0.coord.y, face.v1.coord.x,
@@ -205,7 +211,7 @@ void draw3d_t::model(const model_t& _model) {
     }
     else {
 #pragma omp parallel for num_threads(config->procs)
-        for (const auto f : _model.get_face()) {
+        for (const auto& f : _model.get_face()) {
             /// @todo 巨大性能开销
             auto face = shader.vertex(shader_vertex_in_t(f)).face;
             triangle(face);

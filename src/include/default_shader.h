@@ -46,7 +46,7 @@ public:
     /**
      * @brief 析构函数
      */
-    ~default_shader_t(void);
+    ~default_shader_t(void) final;
 
     /**
      * @brief 顶点着色器

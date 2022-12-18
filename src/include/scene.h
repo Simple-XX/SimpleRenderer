@@ -66,7 +66,7 @@ public:
      * @brief 构造函数
      * @param  _scene           另一个 scene
      */
-    explicit scene_t(const scene_t& _scene);
+    scene_t(const scene_t& _scene);
 
     /**
      * @brief 析构函数

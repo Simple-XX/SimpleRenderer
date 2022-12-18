@@ -71,7 +71,7 @@ public:
      * @brief 构造函数
      * @param  _render          另一个 render
      */
-    explicit render_t(const render_t& _render);
+    render_t(const render_t& _render);
 
     /**
      * @brief 析构函数

@@ -42,6 +42,10 @@ scene_t::~scene_t(void) {
 }
 
 scene_t& scene_t::operator=(const scene_t& _scene) {
+    if (&_scene == this) {
+        return *this;
+    }
+
     config         = _scene.config;
     cameras        = _scene.cameras;
     current_camera = _scene.current_camera;
@@ -60,9 +64,9 @@ scene_t& scene_t::operator=(const scene_t& _scene) {
  * @param  _rotate          在默认变换的基础上进行变换的旋转矩阵，默认为 1
  * @param  _scale           在默认变换的基础上进行变换的缩放矩阵，默认为 1
  * @param  _translate       在默认变换的基础上进行变换的平移矩阵，默认为 1
- * @return const std::pair<const matrix4f_t, const matrix4f_t>  变换矩阵
+ * @return std::pair<const matrix4f_t, const matrix4f_t>    变换矩阵
  */
-inline const std::pair<const matrix4f_t, const matrix4f_t>
+inline std::pair<const matrix4f_t, const matrix4f_t>
 model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
                  const matrix4f_t& _scale, const matrix4f_t& _translate) {
     // 坐标变换矩阵
@@ -113,7 +117,7 @@ model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
     auto delta_xyz_max = std::max(delta_xy_max, delta_z);
 
     // 缩放倍数
-    auto multi         = (1080 + 1920) / 4;
+    auto multi         = static_cast<float>((1080 + 1920) / 4.);
     // 归一化并乘倍数
     auto scale         = multi / delta_xyz_max;
     // 缩放
@@ -124,8 +128,9 @@ model2world_tran(const model_t& _model, const matrix4f_t& _rotate,
                                              std::abs(y_min) * scale, 0);
     // 从左上角移动到指定位置
     coord_mat          = _translate * coord_mat;
-    return std::pair<const matrix4f_t, const matrix4f_t>(
-      matrix4f_t(coord_mat), matrix4f_t(normal_mat));
+    return std::pair<const matrix4f_t, const matrix4f_t> {
+        matrix4f_t(coord_mat), matrix4f_t(normal_mat)
+    };
 }
 
 void scene_t::add_model(const model_t& _model) {

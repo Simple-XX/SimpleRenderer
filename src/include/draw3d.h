@@ -139,8 +139,8 @@ public:
      * @param  _color           直线颜色
      * @todo 多线程支持
      */
-    void line(int32_t _x0, int32_t _y0, int32_t _x1, int32_t _y1,
-              const color_t& _color);
+    void
+    line(float _x0, float _y0, float _x1, float _y1, const color_t& _color);
 
     /**
      * @brief 填充三角形

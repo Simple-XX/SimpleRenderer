@@ -29,9 +29,11 @@ display_t::display_t(uint32_t _width, uint32_t _height)
             throw std::runtime_error(log(SDL_GetError()));
         }
         // 创建窗口，居中，可见
-        sdl_window = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_CENTERED,
-                                      SDL_WINDOWPOS_CENTERED, width, height,
-                                      SDL_WINDOW_SHOWN);
+        sdl_window
+          = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_CENTERED,
+                             SDL_WINDOWPOS_CENTERED,
+                             static_cast<int32_t>(width),
+                             static_cast<int32_t>(height), SDL_WINDOW_SHOWN);
         if (sdl_window == nullptr) {
             SDL_Quit();
             throw std::runtime_error(log(SDL_GetError()));
@@ -49,9 +51,10 @@ display_t::display_t(uint32_t _width, uint32_t _height)
         SDL_SetRenderDrawBlendMode(sdl_renderer, SDL_BLENDMODE_BLEND);
 
         // 创建 texture
-        sdl_texture
-          = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_RGBA32,
-                              SDL_TEXTUREACCESS_STREAMING, width, height);
+        sdl_texture = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_RGBA32,
+                                        SDL_TEXTUREACCESS_STREAMING,
+                                        static_cast<int32_t>(width),
+                                        static_cast<int32_t>(height));
         if (sdl_texture == nullptr) {
             SDL_DestroyRenderer(sdl_renderer);
             SDL_DestroyWindow(sdl_window);
@@ -99,7 +102,7 @@ void display_t::fill(const std::shared_ptr<framebuffer_t>& _framebuffer) {
     // 更新 texture
     auto res = SDL_UpdateTexture(sdl_texture, nullptr,
                                  _framebuffer->get_color_buffer().to_arr(),
-                                 width * color_t::bpp());
+                                 static_cast<int32_t>(width * color_t::bpp()));
     if (res != 0) {
         throw std::runtime_error(log(SDL_GetError()));
     }
