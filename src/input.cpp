@@ -74,7 +74,7 @@ void input_t::key_left_shift(scene_t& _scene, uint32_t _delta_time) const {
     return;
 }
 
-void input_t::mouse_motion(scene_t& _scene, const int32_t _x, const int32_t _y,
+void input_t::mouse_motion(scene_t& _scene, int32_t _x, int32_t _y,
                            uint32_t _delta_time) const {
     (void)_scene;
     (void)_x;
@@ -157,21 +157,20 @@ bool input_t::handle(scene_t& _scene, uint32_t _delta_time) const {
                          _delta_time);
             break;
         }
-        // 鼠标点击
-        case SDL_MOUSEBUTTONDOWN: {
             /// @todo
-            break;
-        }
-        // 鼠标滚轮
-        case SDL_MOUSEWHEEL: {
-            /// @todo
-            break;
-        }
+            // 鼠标点击
+            // case SDL_MOUSEBUTTONDOWN: {
+            // break;
+            // }
+            // 鼠标滚轮
+            // case SDL_MOUSEWHEEL: {
+            //     break;
+            // }
     }
     return res;
 }
 
-input_t::input_t(void) {
+input_t::input_t(void) : event(SDL_Event()) {
     return;
 }
 

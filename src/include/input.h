@@ -115,8 +115,8 @@ private:
      * @param  _y               纵坐标变化
      * @param  _delta_time      时间变化
      */
-    virtual void mouse_motion(scene_t& _scene, const int32_t _x,
-                              const int32_t _y, uint32_t _delta_time) const;
+    virtual void mouse_motion(scene_t& _scene, int32_t _x, int32_t _y,
+                              uint32_t _delta_time) const;
 
     /**
      * @brief 处理输入

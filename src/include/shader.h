@@ -39,13 +39,13 @@ public:
      * @brief 构造函数
      * @param  _face            面信息
      */
-    explicit shader_vertex_in_t(const model_t::face_t _face);
+    explicit shader_vertex_in_t(const model_t::face_t& _face);
 
     /**
      * @brief 构造函数
      * @param  _shader_vertex_in  另一个 shader_vertex_in_t
      */
-    explicit shader_vertex_in_t(const shader_vertex_in_t& _shader_vertex_in);
+    shader_vertex_in_t(const shader_vertex_in_t& _shader_vertex_in);
 
     /**
      * @brief 析构函数
@@ -77,7 +77,7 @@ public:
      * @brief 构造函数
      * @param  _face            面信息
      */
-    explicit shader_vertex_out_t(const model_t::face_t _face);
+    explicit shader_vertex_out_t(const model_t::face_t& _face);
 
     /**
      * @brief 构造函数

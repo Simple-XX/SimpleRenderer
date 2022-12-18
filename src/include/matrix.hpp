@@ -87,7 +87,7 @@ public:
      * @brief 构造函数
      * @param  _arr             指针
      */
-    explicit matrix4_t(const T_t* const _arr);
+    explicit matrix4_t(const T_t* _arr);
 
     /**
      * @brief 构造函数
@@ -333,35 +333,35 @@ public:
      * @param  _mat             另一个 matrix4_t
      * @return matrix4_t<T_t>&  结果
      */
-    matrix4_t<T_t>&      operator*=(const matrix4_t<T_t>& _mat);
+    matrix4_t<T_t>& operator*=(const matrix4_t<T_t>& _mat);
 
     /**
      * @brief 下标重载
-     * @param  _idx             行
-     * @return T_t*             行指针
+     * @param  _idx             元素下标
+     * @return T_t&             元素
      * @note    注意不要越界访问
      */
-    T_t                  operator[](uint8_t _idx);
+    T_t&            operator[](uint8_t _idx);
 
     /**
      * @brief 下标重载
-     * @param  _idx             行
-     * @return const T_t*        行指针
+     * @param  _idx             元素下标
+     * @return const T_t&       元素
      */
-    const T_t            operator[](uint8_t _idx) const;
+    const T_t&      operator[](uint8_t _idx) const;
 
     /**
      * @brief 矩阵转置
      * @return matrix4_t<T_t>   转置矩阵
      */
-    matrix4_t<T_t>       transpose(void) const;
+    matrix4_t<T_t>  transpose(void) const;
 
     /**
      * @brief 逆矩阵
      * @return matrix4_t<T_t>   逆矩阵
      * @see https://www.geeksforgeeks.org/adjoint-inverse-matrix/
      */
-    matrix4_t<T_t>       inverse(void) const;
+    matrix4_t<T_t>  inverse(void) const;
 
     /**
      * @brief 缩放矩阵
@@ -369,21 +369,22 @@ public:
      * @return  matrix4_t<T_t>  构造好的旋转矩阵
      * @note 缩放的是顶点
      */
-    matrix4_t<T_t>       scale(T_t _scale) const;
+    matrix4_t<T_t>  scale(T_t _scale) const;
 
     /**
      * @brief 缩放矩阵
      * @param  _x               x 方向缩放倍数
      * @param  _y               y 方向缩放倍数
      * @param  _z               z 方向缩放倍数
-     * @return  matrix4_t<T_t>  构造好的旋转矩阵
+     * @return  matrix4_t<T_t>  构造好的缩放矩阵
      * @note 缩放的是顶点
      */
-    matrix4_t<T_t>       scale(T_t _x, T_t _y, T_t _z) const;
+    matrix4_t<T_t>  scale(T_t _x, T_t _y, T_t _z) const;
 
     /**
      * @brief 绕 x 轴旋转，返回当前矩阵与旋转矩阵相乘的结果 rotate_x_mat* *this
      * @param  _angle           要旋转的角度
+     * @return matrix4_t<T_t>   构造好的旋转矩阵
      * @note 左手系，x 向右，y 向下，z 向屏幕外
      * @see http://www.songho.ca/opengl/gl_anglestoaxes.html
      *  {
@@ -393,11 +394,12 @@ public:
      *      {0, 0, 0, 1}
      *  }
      */
-    const matrix4_t<T_t> rotate_x(float _angle);
+    matrix4_t<T_t>  rotate_x(float _angle);
 
     /**
      * @brief 绕 y 轴旋转，返回当前矩阵与旋转矩阵相乘的结果 rotate_y_mat* *this
      * @param  _angle           要旋转的角度
+     * @return matrix4_t<T_t>   构造好的旋转矩阵
      * @note 左手系，x 向右，y 向下，z 向屏幕外
      * @see http://www.songho.ca/opengl/gl_anglestoaxes.html
      *  {
@@ -407,11 +409,12 @@ public:
      *      {0, 0, 0, 1}
      *  }
      */
-    const matrix4_t<T_t> rotate_y(float _angle);
+    matrix4_t<T_t>  rotate_y(float _angle);
 
     /**
      * @brief 绕 z 轴旋转，返回当前矩阵与旋转矩阵相乘的结果 rotate_z_mat* *this
      * @param  _angle           要旋转的角度
+     * @return matrix4_t<T_t>   构造好的旋转矩阵
      * @note 左手系，x 向右，y 向下，z 向屏幕外
      * @see http://www.songho.ca/opengl/gl_anglestoaxes.html
      *  {
@@ -421,7 +424,7 @@ public:
      *      {0, 0, 0, 1}
      *  }
      */
-    const matrix4_t<T_t> rotate_z(float _angle);
+    matrix4_t<T_t>  rotate_z(float _angle);
 
     /**
      * @brief 旋转矩阵，Rodriguez 方法
@@ -443,7 +446,7 @@ public:
      *     { _axis.z,        0, -_axis.x},
      *     {-_axis.y,  _axis.x,        0}
      */
-    matrix4_t<T_t> rotate(const vector4_t<T_t>& _axis, float _angle) const;
+    matrix4_t<T_t>  rotate(const vector4_t<T_t>& _axis, float _angle) const;
 
     /**
      * @brief 从 _from 旋转到 _to，不需要单位向量
@@ -476,14 +479,14 @@ public:
      * @param  _deg             角度
      * @return float            弧度
      */
-    static float   RAD(const float _deg);
+    static float   RAD(float _deg);
 
     /**
      * @brief 弧度转换为角度
      * @param  _rad             弧度
      * @return float            角度
      */
-    static float   DEG(const float _rad);
+    static float   DEG(float _rad);
 
     friend std::ostream&
     operator<<(std::ostream& _os, const matrix4_t<T_t>& _mat) {
@@ -610,7 +613,7 @@ matrix4_t<T_t>::matrix4_t(const matrix4_t<T_t>& _mat) {
 }
 
 template <matrix_element_concept_t T_t>
-matrix4_t<T_t>::matrix4_t(const T_t* const _arr) {
+matrix4_t<T_t>::matrix4_t(const T_t* _arr) {
     if (_arr == nullptr) {
         throw std::invalid_argument(log("_arr == nullptr"));
     }
@@ -915,7 +918,7 @@ matrix4_t<T_t>& matrix4_t<T_t>::operator*=(const matrix4_t<T_t>& _mat) {
 }
 
 template <matrix_element_concept_t T_t>
-T_t matrix4_t<T_t>::operator[](uint8_t _idx) {
+T_t& matrix4_t<T_t>::operator[](uint8_t _idx) {
     if (_idx > ORDER) {
         throw std::invalid_argument(log("_idx > ORDER"));
     }
@@ -923,7 +926,7 @@ T_t matrix4_t<T_t>::operator[](uint8_t _idx) {
 }
 
 template <matrix_element_concept_t T_t>
-const T_t matrix4_t<T_t>::operator[](uint8_t _idx) const {
+const T_t& matrix4_t<T_t>::operator[](uint8_t _idx) const {
     if (_idx > ORDER) {
         throw std::invalid_argument(log("_idx > ORDER"));
     }
@@ -1028,7 +1031,7 @@ matrix4_t<T_t> matrix4_t<T_t>::scale(T_t _x, T_t _y, T_t _z) const {
 
 /// @todo 修改为直接返回
 template <matrix_element_concept_t T_t>
-const matrix4_t<T_t> matrix4_t<T_t>::rotate_x(float _angle) {
+matrix4_t<T_t> matrix4_t<T_t>::rotate_x(float _angle) {
     // 角度转弧度
     auto rad    = RAD(_angle);
 
@@ -1045,7 +1048,7 @@ const matrix4_t<T_t> matrix4_t<T_t>::rotate_x(float _angle) {
 
 /// @todo 修改为直接返回
 template <matrix_element_concept_t T_t>
-const matrix4_t<T_t> matrix4_t<T_t>::rotate_y(float _angle) {
+matrix4_t<T_t> matrix4_t<T_t>::rotate_y(float _angle) {
     // 角度转弧度
     auto rad    = RAD(_angle);
 
@@ -1062,7 +1065,7 @@ const matrix4_t<T_t> matrix4_t<T_t>::rotate_y(float _angle) {
 
 /// @todo 修改为直接返回
 template <matrix_element_concept_t T_t>
-const matrix4_t<T_t> matrix4_t<T_t>::rotate_z(float _angle) {
+matrix4_t<T_t> matrix4_t<T_t>::rotate_z(float _angle) {
     // 角度转弧度
     auto rad   = RAD(_angle);
 
@@ -1208,13 +1211,13 @@ matrix4_t<T_t> matrix4_t<T_t>::translate(T_t _x, T_t _y, T_t _z) const {
 }
 
 template <matrix_element_concept_t T_t>
-float matrix4_t<T_t>::RAD(const float _deg) {
-    return ((M_PI / 180) * (_deg));
+float matrix4_t<T_t>::RAD(float _deg) {
+    return static_cast<float>((M_PI / 180) * (_deg));
 }
 
 template <matrix_element_concept_t T_t>
-float matrix4_t<T_t>::DEG(const float _rad) {
-    return ((180 / M_PI) * (_rad));
+float matrix4_t<T_t>::DEG(float _rad) {
+    return static_cast<float>((180 / M_PI) * (_rad));
 }
 
 typedef matrix4_t<float> matrix4f_t;

@@ -40,15 +40,10 @@ private:
     /// @brief 窗口高度
     uint32_t       height;
 
-    /// @brief 颜色缓冲区锁
-    std::mutex     color_buffer_mutex;
     /// @brief 颜色缓冲区
     color_buffer_t color_buffer;
 
-    /// @brief 深度缓冲区锁
-    std::mutex     depth_buffer_mutex;
     /// @brief 深度缓冲区
-
     depth_buffer_t depth_buffer;
 
 public:
@@ -80,27 +75,27 @@ public:
      * @param  _framebuffer     另一个 framebuffer_t
      * @return framebuffer_t&   结果
      */
-    framebuffer_t& operator=(const framebuffer_t& _framebuffer);
+    framebuffer_t&        operator=(const framebuffer_t& _framebuffer);
 
     /**
      * @brief 获取缓冲区宽度
      * @return uint32_t         缓冲区宽度
      */
-    uint32_t       get_width(void) const;
+    uint32_t              get_width(void) const;
 
     /**
      * @brief 获取缓冲区高度
      * @return uint32_t         缓冲区高度
      */
-    uint32_t       get_height(void) const;
+    uint32_t              get_height(void) const;
 
     /**
      * @brief 清空成指定颜色
      * @param  _color           指定颜色
      * @param  _depth           指定深度
      */
-    void           clear(const color_t& _color = color_t(),
-                         const depth_t& _depth = std::numeric_limits<depth_t>::lowest());
+    void                  clear(const color_t& _color = color_t(),
+                                const depth_t& _depth = std::numeric_limits<depth_t>::lowest());
 
     /**
      * @brief 设置像素

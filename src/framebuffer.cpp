@@ -29,14 +29,10 @@ framebuffer_t::framebuffer_t(uint32_t _width, uint32_t _height)
 }
 
 framebuffer_t::framebuffer_t(const framebuffer_t& _framebuffer)
-    : color_buffer(_framebuffer.color_buffer),
+    : width(_framebuffer.width),
+      height(_framebuffer.height),
+      color_buffer(_framebuffer.color_buffer),
       depth_buffer(_framebuffer.depth_buffer) {
-    if (width != _framebuffer.get_width()) {
-        throw std::invalid_argument(log("width != _framebuffer.get_width()"));
-    }
-    if (height != _framebuffer.get_height()) {
-        throw std::invalid_argument(log("height != _framebuffer.get_height()"));
-    }
     return;
 }
 
@@ -69,7 +65,7 @@ uint32_t framebuffer_t::get_height(void) const {
 
 void framebuffer_t::clear(const color_t& _color, const depth_t& _depth) {
     if (std::isnan(_depth)) {
-        throw(log("std::isnan(_depth)"));
+        throw std::invalid_argument(log("std::isnan(_depth)"));
     }
     (void)_color;
     (void)_depth;
@@ -87,11 +83,9 @@ void framebuffer_t::pixel(uint32_t _x, uint32_t _y, const color_t& _color,
         throw std::invalid_argument(log("_y >= height"));
     }
     if (std::isnan(_depth)) {
-        throw(log("std::isnan(_depth)"));
+        throw std::invalid_argument(log("std::isnan(_depth)"));
     }
     /// @todo 性能瓶颈
-    // std::lock_guard<std::mutex> color_buffer_lock(color_buffer_mutex);
-    // std::lock_guard<std::mutex> depth_buffer_lock(depth_buffer_mutex);
     color_buffer(_x, _y) = _color;
     depth_buffer(_x, _y) = _depth;
     return;

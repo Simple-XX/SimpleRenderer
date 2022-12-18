@@ -50,7 +50,7 @@ public:
     /**
      * @brief 构造函数
      */
-    explicit light_t(const light_t& _light);
+    light_t(const light_t& _light);
 
     /**
      * @brief 析构函数

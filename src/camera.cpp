@@ -89,27 +89,27 @@ void camera_base_t::set_default(void) {
 void camera_base_t::move(const move_to_t& _to, uint32_t _delta_time) {
     switch (_to) {
         case RIGHT: {
-            pos += front * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case LEFT: {
-            pos -= front * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case UP: {
             pos += right * (speed * static_cast<decltype(speed)>(_delta_time));
             break;
         }
-        case DOWN: {
+        case LEFT: {
             pos -= right * (speed * static_cast<decltype(speed)>(_delta_time));
             break;
         }
-        case FORWARD: {
+        case UP: {
             pos += up * (speed * static_cast<decltype(speed)>(_delta_time));
             break;
         }
-        case BACKWARD: {
+        case DOWN: {
             pos -= up * (speed * static_cast<decltype(speed)>(_delta_time));
+            break;
+        }
+        case FORWARD: {
+            pos += front * (speed * static_cast<decltype(speed)>(_delta_time));
+            break;
+        }
+        case BACKWARD: {
+            pos -= front * (speed * static_cast<decltype(speed)>(_delta_time));
             break;
         }
     }
@@ -153,27 +153,27 @@ void camera_base_t::update_up(const move_to_t& _to,
                               const uint32_t   _delta_time) {
     switch (_to) {
         case RIGHT: {
-            up += front * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case LEFT: {
-            up -= front * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case UP: {
             up += right * (speed * static_cast<decltype(speed)>(_delta_time));
             break;
         }
-        case DOWN: {
+        case LEFT: {
             up -= right * (speed * static_cast<decltype(speed)>(_delta_time));
             break;
         }
-        case FORWARD: {
+        case UP: {
             up += up * (speed * static_cast<decltype(speed)>(_delta_time));
             break;
         }
-        case BACKWARD: {
+        case DOWN: {
             up -= up * (speed * static_cast<decltype(speed)>(_delta_time));
+            break;
+        }
+        case FORWARD: {
+            up += front * (speed * static_cast<decltype(speed)>(_delta_time));
+            break;
+        }
+        case BACKWARD: {
+            up -= front * (speed * static_cast<decltype(speed)>(_delta_time));
             break;
         }
     }

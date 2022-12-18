@@ -25,13 +25,13 @@
 #include "sys/time.h"
 
 /// @brief 微秒到秒
-static constexpr uint32_t       US2S = 1000000;
+static constexpr uint32_t US2S = 1000000;
 
 /**
  * @brief 获取当前时间戳，精确到纳秒
- * @return const std::string    时间戳
+ * @return std::string          时间戳
  */
-static const std::string        get_time_stamp(void) {
+static std::string        get_time_stamp(void) {
     auto now        = std::chrono::system_clock::now();
     auto now_time_t = std::chrono::system_clock::to_time_t(now);
     auto now_tm     = std::localtime(&now_time_t);
@@ -61,9 +61,9 @@ static const std::string        get_time_stamp(void) {
  * @brief 构造日志字符串
  * @param  _msg             日志信息
  * @param  _location        位置
- * @return const std::string    日志信息，包括时间位置与信息
+ * @return std::string      日志信息，包括时间位置与信息
  */
-inline const std::string
+inline std::string
 log(const std::string_view&     _msg,
     const std::source_location& _location = std::source_location::current()) {
     std::stringstream res;
@@ -76,11 +76,12 @@ log(const std::string_view&     _msg,
 
 /**
  * @brief 获取当前微秒数，用于性能分析
- * @return const auto       当前微秒
+ * @return auto                 当前微秒
  */
-inline const auto us(void) {
-    struct timeval t;
-    gettimeofday(&t, NULL);
+inline auto us(void) {
+    struct timeval t = {};
+
+    gettimeofday(&t, nullptr);
     return t.tv_sec * 1000000 + t.tv_usec;
 }
 

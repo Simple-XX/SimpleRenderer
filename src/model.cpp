@@ -20,6 +20,40 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "3rd/tiny_obj_loader.h"
 
+model_t::material_t::material_t(void) {
+    shininess = 0;
+    ambient   = vector4f_t();
+    diffuse   = vector4f_t();
+    specular  = vector4f_t();
+    return;
+}
+
+model_t::material_t::material_t(const model_t::material_t& _material) {
+    shininess = _material.shininess;
+    ambient   = _material.ambient;
+    diffuse   = _material.diffuse;
+    specular  = _material.specular;
+    return;
+}
+
+model_t::material_t::~material_t(void) {
+    return;
+}
+
+model_t::material_t&
+model_t::material_t::operator=(const model_t::material_t& _material) {
+    if (&_material == this) {
+        return *this;
+    }
+
+    shininess = _material.shininess;
+    ambient   = _material.ambient;
+    diffuse   = _material.diffuse;
+    specular  = _material.specular;
+
+    return *this;
+}
+
 model_t::vertex_t::vertex_t(void) {
     return;
 }
@@ -43,6 +77,9 @@ model_t::vertex_t::~vertex_t(void) {
 }
 
 model_t::vertex_t& model_t::vertex_t::operator=(const vertex_t& _vertex) {
+    if (&_vertex == this) {
+        return *this;
+    }
     coord    = _vertex.coord;
     normal   = _vertex.normal;
     texcoord = _vertex.texcoord;
@@ -50,7 +87,7 @@ model_t::vertex_t& model_t::vertex_t::operator=(const vertex_t& _vertex) {
     return *this;
 }
 
-const model_t::vertex_t
+model_t::vertex_t
 operator*(const std::pair<const matrix4f_t, const matrix4f_t>& _matrices,
           const model_t::vertex_t&                             _vertex) {
     auto ret(_vertex);
@@ -77,7 +114,7 @@ model_t::face_t::face_t(const face_t& _face)
     return;
 }
 
-const model_t::face_t
+model_t::face_t
 operator*(const std::pair<const matrix4f_t, const matrix4f_t>& _matrices,
           const model_t::face_t&                               _face) {
     auto ret(_face);
@@ -118,6 +155,9 @@ model_t::face_t::~face_t(void) {
 }
 
 model_t::face_t& model_t::face_t::operator=(const face_t& _face) {
+    if (&_face == this) {
+        return *this;
+    }
     v0       = _face.v0;
     v1       = _face.v1;
     v2       = _face.v2;
@@ -142,6 +182,9 @@ model_t::box_t::~box_t(void) {
 }
 
 model_t::box_t& model_t::box_t::operator=(const model_t::box_t& _box) {
+    if (&_box == this) {
+        return *this;
+    }
     min = _box.min;
     max = _box.max;
 
@@ -201,7 +244,7 @@ model_t::model_t(const std::string& _obj_path, const std::string& _mtl_path) {
         size_t index_offset = 0;
         for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
             // 由于开启了三角化，所有的 shape 都是由三个点组成的，即 fv == 3
-            size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
+            auto fv = size_t(shapes[s].mesh.num_face_vertices[f]);
             if (fv != 3) {
                 throw(std::runtime_error(log("fv != 3")));
             }
@@ -258,13 +301,7 @@ model_t::model_t(const std::string& _obj_path, const std::string& _mtl_path) {
             index_offset += fv;
 
             // per-face material
-            if (materials.size() > 0) {
-                // std::cout << "materials[s].name: " << materials[s].name
-                //           << std::endl;
-                // std::cout << "materials[s].diffuse_texname: "
-                //           << materials[s].diffuse_texname << std::endl;
-                // std::cout << "materials[s].diffuse_texname: "
-                // << materials[s].ambient[0] << std::endl;
+            if (materials.empty() == false) {
                 material.shininess = materials[s].shininess;
                 material.ambient
                   = vector4f_t(materials[s].ambient[0], materials[s].ambient[1],
@@ -276,8 +313,8 @@ model_t::model_t(const std::string& _obj_path, const std::string& _mtl_path) {
                                                materials[s].specular[1],
                                                materials[s].specular[2]);
             }
-            face.push_back(face_t(vertexes[0], vertexes[1], vertexes[2],
-                                  material));
+            face.emplace_back(face_t(vertexes[0], vertexes[1], vertexes[2],
+                                     material));
         }
     }
 
@@ -292,12 +329,15 @@ model_t::~model_t(void) {
 }
 
 model_t& model_t::operator=(const model_t& _model) {
+    if (&_model == this) {
+        return *this;
+    }
     face = _model.face;
     box  = _model.box;
     return *this;
 }
 
-const model_t model_t::operator*(const matrix4f_t& _tran) const {
+model_t model_t::operator*(const matrix4f_t& _tran) const {
     auto model = model_t(*this);
 
     /// @todo

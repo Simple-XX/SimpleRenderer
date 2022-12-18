@@ -55,7 +55,7 @@ public:
      * @param  _p1              三角形的第二个点
      * @param  _p2              三角形的第三个点
      * @param  _p               要判断的点
-     * @return std::pair<bool, const vector4f_t>
+     * @return std::pair<bool, vector4f_t>
      *  第一个返回为 _p 是否在三角形内，第二个为重心坐标
      * @see http://blackpawn.com/texts/pointinpoly/
      * solve
@@ -73,7 +73,7 @@ public:
      *     weight_B = s
      *     weight_C = t
      */
-    static std::pair<bool, const vector4f_t>
+    static std::pair<bool, vector4f_t>
     get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
                           const vector4f_t& _p2, const vector4f_t& _p);
 
@@ -139,8 +139,8 @@ public:
      * @param  _color           直线颜色
      * @todo 多线程支持
      */
-    void line(const int32_t _x0, const int32_t _y0, const int32_t _x1,
-              const int32_t _y1, const color_t& _color);
+    void line(int32_t _x0, int32_t _y0, int32_t _x1, int32_t _y1,
+              const color_t& _color);
 
     /**
      * @brief 填充三角形

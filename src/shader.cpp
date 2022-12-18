@@ -26,7 +26,7 @@ shader_vertex_in_t::shader_vertex_in_t(
     return;
 }
 
-shader_vertex_in_t::shader_vertex_in_t(const model_t::face_t _face) {
+shader_vertex_in_t::shader_vertex_in_t(const model_t::face_t& _face) {
     face = _face;
     return;
 }
@@ -48,7 +48,7 @@ shader_vertex_out_t::shader_vertex_out_t(void) {
     return;
 }
 
-shader_vertex_out_t::shader_vertex_out_t(const model_t::face_t _face) {
+shader_vertex_out_t::shader_vertex_out_t(const model_t::face_t& _face) {
     face = _face;
     return;
 }
@@ -115,6 +115,7 @@ shader_fragment_in_t& shader_fragment_in_t::operator=(
 }
 
 shader_fragment_out_t::shader_fragment_out_t(void) {
+    is_need_draw = false;
     return;
 }
 

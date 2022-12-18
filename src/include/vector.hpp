@@ -139,9 +139,9 @@ public:
     /**
      * @brief * 重载，向量点积
      * @param  _v               要乘的向量
-     * @return const T_t        结果
+     * @return T_t              结果
      */
-    const T_t      operator*(const vector4_t<T_t>& _v) const;
+    T_t            operator*(const vector4_t<T_t>& _v) const;
 
     /// @brief *矩阵见 matrix.hpp
     // operator*(const vector4_t<U_t>& _v, const matrix4_t<T_t>& _mat);
@@ -189,30 +189,30 @@ public:
     /**
      * @brief [] 重载
      * @param  _idx             下标
-     * @return const T_t        结果
+     * @return const T_t&       结果
      */
-    const T_t       operator[](uint32_t _idx) const;
+    const T_t&      operator[](uint32_t _idx) const;
 
     /**
      * @brief [] 重载
      * @param  _idx             下标
-     * @return T_t              结果
+     * @return T_t&             结果
      */
-    T_t             operator[](uint32_t _idx);
+    T_t&            operator[](uint32_t _idx);
 
     /**
      * @brief 长度的平方
-     * @return const T_t        结果
+     * @return size_t           结果
      * @note w 不参与运算
      */
-    const T_t       length_squared(void) const;
+    size_t          length_squared(void) const;
 
     /**
      * @brief 长度
-     * @return const T_t        结果
+     * @return size_t           结果
      * @note w 不参与运算
      */
-    const T_t       length(void) const;
+    size_t          length(void) const;
 
     /**
      * @brief 对所有分量取绝对值
@@ -378,7 +378,7 @@ vector4_t<T_t> vector4_t<T_t>::operator*(U_t _s) const {
 }
 
 template <vector_element_concept_t T_t>
-const T_t vector4_t<T_t>::operator*(const vector4_t<T_t>& _v) const {
+T_t vector4_t<T_t>::operator*(const vector4_t<T_t>& _v) const {
     return x * _v.x + y * _v.y + z * _v.z + w * _v.w;
 }
 
@@ -423,7 +423,7 @@ vector4_t<T_t>& vector4_t<T_t>::operator/=(U_t _f) {
 }
 
 template <vector_element_concept_t T_t>
-const T_t vector4_t<T_t>::operator[](uint32_t _idx) const {
+const T_t& vector4_t<T_t>::operator[](uint32_t _idx) const {
     if (_idx > 3) {
         throw std::invalid_argument(log("_idx > 3"));
     }
@@ -442,7 +442,7 @@ const T_t vector4_t<T_t>::operator[](uint32_t _idx) const {
 }
 
 template <vector_element_concept_t T_t>
-T_t vector4_t<T_t>::operator[](uint32_t _idx) {
+T_t& vector4_t<T_t>::operator[](uint32_t _idx) {
     if (_idx > 3) {
         throw std::invalid_argument(log("_idx > 3"));
     }
@@ -461,12 +461,12 @@ T_t vector4_t<T_t>::operator[](uint32_t _idx) {
 }
 
 template <vector_element_concept_t T_t>
-const T_t vector4_t<T_t>::length_squared(void) const {
+size_t vector4_t<T_t>::length_squared(void) const {
     return x * x + y * y + z * z + w * w;
 }
 
 template <vector_element_concept_t T_t>
-const T_t vector4_t<T_t>::length(void) const {
+size_t vector4_t<T_t>::length(void) const {
     return std::sqrt(length_squared());
 }
 

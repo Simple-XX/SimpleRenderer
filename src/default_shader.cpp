@@ -22,15 +22,24 @@ default_shader_t::interpolate_color(const color_t&    _color0,
                                     const color_t&    _color2,
                                     const vector4f_t& _barycentric_coord) {
     return color_t(
-      (uint8_t)(_color0[color_t::COLOR_IDX_R] * _barycentric_coord.x
-                + _color1[color_t::COLOR_IDX_R] * _barycentric_coord.y
-                + _color2[color_t::COLOR_IDX_R] * _barycentric_coord.z),
-      (uint8_t)(_color0[color_t::COLOR_IDX_G] * _barycentric_coord.x
-                + _color1[color_t::COLOR_IDX_G] * _barycentric_coord.y
-                + _color2[color_t::COLOR_IDX_G] * _barycentric_coord.z),
-      (uint8_t)(_color0[color_t::COLOR_IDX_B] * _barycentric_coord.x
-                + _color1[color_t::COLOR_IDX_B] * _barycentric_coord.y
-                + _color2[color_t::COLOR_IDX_B] * _barycentric_coord.z));
+      static_cast<uint8_t>(static_cast<float>(_color0[color_t::COLOR_IDX_R])
+                             * _barycentric_coord.x
+                           + static_cast<float>(_color1[color_t::COLOR_IDX_R])
+                               * _barycentric_coord.y
+                           + static_cast<float>(_color2[color_t::COLOR_IDX_R])
+                               * _barycentric_coord.z),
+      static_cast<uint8_t>(static_cast<float>(_color0[color_t::COLOR_IDX_G])
+                             * _barycentric_coord.x
+                           + static_cast<float>(_color1[color_t::COLOR_IDX_G])
+                               * _barycentric_coord.y
+                           + static_cast<float>(_color2[color_t::COLOR_IDX_G])
+                               * _barycentric_coord.z),
+      static_cast<uint8_t>(static_cast<float>(_color0[color_t::COLOR_IDX_B])
+                             * _barycentric_coord.x
+                           + static_cast<float>(_color1[color_t::COLOR_IDX_B])
+                               * _barycentric_coord.y
+                           + static_cast<float>(_color2[color_t::COLOR_IDX_B])
+                               * _barycentric_coord.z));
 }
 
 default_shader_t::default_shader_t(void) {

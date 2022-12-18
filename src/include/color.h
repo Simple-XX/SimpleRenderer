@@ -73,8 +73,8 @@ public:
      * @param  _a               alpha
      * @param  _color_order     颜色顺序，默认为 RGBA
      */
-    explicit color_t(const uint8_t _r, const uint8_t _g, const uint8_t _b,
-                     const uint8_t _a = std::numeric_limits<uint8_t>::max());
+    explicit color_t(uint8_t _r, uint8_t _g, uint8_t _b,
+                     uint8_t _a = std::numeric_limits<uint8_t>::max());
 
     /**
      * @brief 构造函数，从 [0, 1] 构建
@@ -83,14 +83,14 @@ public:
      * @param  _b               蓝色
      * @param  _a               alpha
      */
-    explicit color_t(const float& _r, const float& _g, const float& _b,
-                     const uint8_t _a = std::numeric_limits<uint8_t>::max());
+    explicit color_t(float _r, float _g, float _b,
+                     uint8_t _a = std::numeric_limits<uint8_t>::max());
 
     /**
      * @brief 构造函数
      * @param  _color  另一个 color_t
      */
-    explicit color_t(const color_t& _color);
+    color_t(const color_t& _color);
 
     /**
      * @brief 析构函数
@@ -104,11 +104,13 @@ public:
      */
     color_t&             operator=(const color_t& _color);
 
-    color_t              operator*(const float& _f) const;
+    /// @todo 注释
+
+    color_t              operator*(float _f) const;
 
     color_t              operator*(const vector4f_t& _vector4f) const;
 
-    color_t&             operator*=(const float& _f);
+    color_t&             operator*=(float _f);
 
     color_t&             operator*=(const vector4f_t& _vector4f);
 
@@ -117,14 +119,14 @@ public:
      * @param  _idx             索引
      * @return uint8_t&         对应颜色
      */
-    uint8_t&             operator[](const uint8_t _idx);
+    uint8_t&             operator[](uint8_t _idx);
 
     /**
      * @brief 下标重载
      * @param  _idx             索引
      * @return uint8_t          对应颜色
      */
-    uint8_t              operator[](const uint8_t _idx) const;
+    uint8_t              operator[](uint8_t _idx) const;
 
     /**
      * @brief 获取每像素大小
