@@ -46,20 +46,20 @@ public:
     /**
      * @brief 空构造
      */
-    buffer_base_t(void) = delete;
-
-    /**
-     * @brief 构造函数，整型默认为白色，浮点默认为最小值
-     * @param  _width           宽度
-     * @param  _height          高度
-     */
-    buffer_base_t(uint32_t _width, uint32_t _height);
+    buffer_base_t(void);
 
     /**
      * @brief 拷贝构造
      * @param  _buffer          另一个 buffer_base_t
      */
     buffer_base_t(const buffer_base_t& _buffer);
+
+    /**
+     * @brief 构造函数，整型默认为白色，浮点默认为最小值
+     * @param  _width           宽度
+     * @param  _height          高度
+     */
+    explicit buffer_base_t(uint32_t _width, uint32_t _height);
 
     /**
      * @brief 析构函数
@@ -126,6 +126,27 @@ public:
 };
 
 template <class T_t>
+buffer_base_t<T_t>::buffer_base_t(void) : width(0), height(0) {
+    buffer_arr = nullptr;
+
+    return;
+}
+
+template <class T_t>
+buffer_base_t<T_t>::buffer_base_t(const buffer_base_t& _buffer)
+    : width(_buffer.width), height(_buffer.height) {
+    try {
+        buffer_arr = std::make_shared<T_t[]>(width * height);
+    } catch (const std::bad_alloc& e) {
+        std::cerr << log(e.what()) << std::endl;
+    }
+    // 复制数据
+    std::copy(_buffer.buffer_arr.get(),
+              _buffer.buffer_arr.get() + _buffer.length(), buffer_arr.get());
+    return;
+}
+
+template <class T_t>
 buffer_base_t<T_t>::buffer_base_t(uint32_t _w, uint32_t _h)
     : width(_w), height(_h) {
     try {
@@ -142,20 +163,6 @@ buffer_base_t<T_t>::buffer_base_t(uint32_t _w, uint32_t _h)
                     std::numeric_limits<T_t>::lowest());
     }
 
-    return;
-}
-
-template <class T_t>
-buffer_base_t<T_t>::buffer_base_t(const buffer_base_t& _buffer)
-    : width(_buffer.width), height(_buffer.height) {
-    try {
-        buffer_arr = std::make_shared<T_t[]>(width * height);
-    } catch (const std::bad_alloc& e) {
-        std::cerr << log(e.what()) << std::endl;
-    }
-    // 复制数据
-    std::copy(_buffer.buffer_arr.get(),
-              _buffer.buffer_arr.get() + _buffer.length(), buffer_arr.get());
     return;
 }
 

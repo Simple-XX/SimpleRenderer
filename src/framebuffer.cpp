@@ -62,11 +62,8 @@ float framebuffer_t::interpolate_depth(float _depth0, float _depth1,
     return z;
 }
 
-framebuffer_t::framebuffer_t(uint32_t _width, uint32_t _height)
-    : width(_width),
-      height(_height),
-      color_buffer(color_buffer_t(_width, _height)),
-      depth_buffer(depth_buffer_t(_width, _height)) {
+framebuffer_t::framebuffer_t(void)
+    : width(0), height(0), color_buffer(), depth_buffer() {
     return;
 }
 
@@ -75,6 +72,14 @@ framebuffer_t::framebuffer_t(const framebuffer_t& _framebuffer)
       height(_framebuffer.height),
       color_buffer(_framebuffer.color_buffer),
       depth_buffer(_framebuffer.depth_buffer) {
+    return;
+}
+
+framebuffer_t::framebuffer_t(uint32_t _width, uint32_t _height)
+    : width(_width),
+      height(_height),
+      color_buffer(color_buffer_t(_width, _height)),
+      depth_buffer(depth_buffer_t(_width, _height)) {
     return;
 }
 

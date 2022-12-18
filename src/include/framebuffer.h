@@ -91,9 +91,15 @@ private:
 
 public:
     /**
-     * @brief 不使用空构造
+     * @brief 空构造
      */
-    framebuffer_t(void) = delete;
+    framebuffer_t(void);
+
+    /**
+     * @brief 拷贝构造
+     * @param  _framebuffer     另一个 framebuffer_t
+     */
+    framebuffer_t(const framebuffer_t& _framebuffer);
 
     /**
      * @brief 构造函数
@@ -101,12 +107,6 @@ public:
      * @param  _height          高度
      */
     framebuffer_t(uint32_t _width, uint32_t _height);
-
-    /**
-     * @brief 拷贝构造
-     * @param  _framebuffer     另一个 framebuffer_t
-     */
-    framebuffer_t(const framebuffer_t& _framebuffer);
 
     /**
      * @brief 析构函数
