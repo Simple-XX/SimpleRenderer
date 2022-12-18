@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _LIGHT_H_
-#define _LIGHT_H_
+#ifndef SIMPLERENDER_LIGHT_H
+#define SIMPLERENDER_LIGHT_H
 
 #include "cstdint"
 
@@ -65,4 +65,4 @@ public:
     light_t& operator=(const light_t& _light);
 };
 
-#endif /* _LIGHT_H_ */
+#endif /* SIMPLERENDER_LIGHT_H */

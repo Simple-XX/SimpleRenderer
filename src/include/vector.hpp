@@ -15,8 +15,8 @@
  * </table>
  */
 
-#ifndef _VECTOR_HPP_
-#define _VECTOR_HPP_
+#ifndef SIMPLERENDER_VECTOR_HPP
+#define SIMPLERENDER_VECTOR_HPP
 
 #include "cassert"
 #include "cmath"
@@ -246,21 +246,22 @@ public:
 
     /**
      * @brief 转换为 float 类型
+     * @todo
      */
-                        operator vector4_t<float>(void) const;
+    // operator vector4_t<float>(void) const;
 
     friend std::ostream&
     operator<<(std::ostream& _os, const vector4_t<_T>& _v) {
-                            _os.setf(std::ios::right);
-                            _os.precision(16);
+        _os.setf(std::ios::right);
+        _os.precision(16);
 
-                            _os << "[ " << _v.x << ", " << _v.y << ", " << _v.z
-                                << ", " << _v.w << " ]";
+        _os << "[ " << _v.x << ", " << _v.y << ", " << _v.z << ", " << _v.w
+            << " ]";
 
-                            _os.unsetf(std::ios::right);
-                            _os.precision(6);
-                            return _os;
-                        }
+        _os.unsetf(std::ios::right);
+        _os.precision(6);
+        return _os;
+    }
 };
 
 template <vector_element_concept_t _T>
@@ -498,4 +499,4 @@ const vector4_t<_T> vector4_t<_T>::max(const vector4_t<_T>& _v) const {
 
 typedef vector4_t<float> vector4f_t;
 
-#endif /* _VECTOR_HPP_ */
+#endif /* SIMPLERENDER_VECTOR_HPP */

@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _CAMERA_H_
-#define _CAMERA_H_
+#ifndef SIMPLERENDER_CAMERA_H
+#define SIMPLERENDER_CAMERA_H
 
 #include "log.hpp"
 #include "matrix.hpp"
@@ -188,4 +188,4 @@ public:
     ~surround_camera_t(void);
 };
 
-#endif /* _CAMERA_H_ */
+#endif /* SIMPLERENDER_CAMERA_H */

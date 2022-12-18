@@ -14,14 +14,15 @@
  * </table>
  */
 
-#ifndef _DRAW3D_H_
-#define _DRAW3D_H_
+#ifndef SIMPLERENDER_DRAW3D_H
+#define SIMPLERENDER_DRAW3D_H
 
 #include "memory"
 
 #include "color.h"
 #include "config.h"
 #include "framebuffer.h"
+#include "light.h"
 #include "matrix.hpp"
 #include "model.h"
 #include "shader.h"
@@ -33,12 +34,12 @@
  */
 class draw3d_t {
 private:
+    /// @brief 配置信息
+    std::shared_ptr<config_t>      config;
     /// @brief 帧缓冲
     std::shared_ptr<framebuffer_t> framebuffer;
     /// @brief 要使用的着色器
-    shader_base_t&                 shader;
-    /// @brief 配置信息
-    std::shared_ptr<config_t>      config;
+    const shader_base_t&           shader;
     /// @brief 窗口宽度
     uint32_t                       width;
     /// @brief 窗口高度
@@ -46,7 +47,7 @@ private:
 
 public:
     /// @brief 光照方向，左手系，x 向右，y 向下，z 正方向为屏幕由内向外
-    vector4f_t light = vector4f_t(0, 0, -1);
+    light_t light;
 
     /**
      * @brief 计算重心坐标
@@ -75,22 +76,6 @@ public:
     static const std::pair<bool, const vector4f_t>
     get_barycentric_coord(const vector4f_t& _p0, const vector4f_t& _p1,
                           const vector4f_t& _p2, const vector4f_t& _p);
-
-    /**
-     * @brief 计算从模型坐标(局部坐标)到世界坐标的变换矩阵，缩放 + 移动到 (0,
-     * 0)，屏幕左上角
-     * @param  _model           要被应用的模型
-     * @bug 变换可能有问题
-     * @param  _rotate          在默认变换的基础上进行变换的旋转矩阵，默认为 1
-     * @param  _scale           在默认变换的基础上进行变换的缩放矩阵，默认为 1
-     * @param  _translate       在默认变换的基础上进行变换的平移矩阵，默认为 1
-     * @return const std::pair<const matrix4f_t, const matrix4f_t>  变换矩阵
-     */
-    const std::pair<const matrix4f_t, const matrix4f_t>
-    model2world_tran(const model_t&    _model,
-                     const matrix4f_t& _rotate    = matrix4f_t(),
-                     const matrix4f_t& _scale     = matrix4f_t(),
-                     const matrix4f_t& _translate = matrix4f_t()) const;
 
     /**
      * @brief 深度插值，由重心坐标计算出对应点的深度值
@@ -132,12 +117,13 @@ public:
 
     /**
      * @brief 构造函数
+     * @param  _config          配置信息
      * @param  _framebuffer     帧缓冲
      * @param  _shader          着色器
-     * @param  _config          配置信息
      */
-    draw3d_t(const std::shared_ptr<framebuffer_t>& _framebuffer,
-             shader_base_t& _shader, const std::shared_ptr<config_t>& _config);
+    draw3d_t(const std::shared_ptr<config_t>&      _config,
+             const std::shared_ptr<framebuffer_t>& _framebuffer,
+             const shader_base_t&                  _shader);
 
     /**
      * @brief 析构函数
@@ -174,4 +160,4 @@ public:
     void model(const model_t& _model);
 };
 
-#endif /* _DRAW3D_H_ */
+#endif /* SIMPLERENDER_DRAW3D_H */

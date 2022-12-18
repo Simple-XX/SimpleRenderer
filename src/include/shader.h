@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _SHADER_H_
-#define _SHADER_H_
+#ifndef SIMPLERENDER_SHADER_H
+#define SIMPLERENDER_SHADER_H
 
 #include "framebuffer.h"
 #include "matrix.hpp"
@@ -275,4 +275,4 @@ public:
       = 0;
 };
 
-#endif /* _SHADER_H_ */
+#endif /* SIMPLERENDER_SHADER_H */

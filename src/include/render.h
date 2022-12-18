@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _RENDER_H_
-#define _RENDER_H_
+#ifndef SIMPLERENDER_RENDER_H
+#define SIMPLERENDER_RENDER_H
 
 #include "cstdint"
 #include "memory"
@@ -91,4 +91,4 @@ public:
     void      loop(void);
 };
 
-#endif /* _RENDER_H_ */
+#endif /* SIMPLERENDER_RENDER_H */

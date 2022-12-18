@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _INPUT_H_
-#define _INPUT_H_
+#ifndef SIMPLERENDER_INPUT_H
+#define SIMPLERENDER_INPUT_H
 
 #include "memory"
 
@@ -151,4 +151,4 @@ public:
     bool process(scene_t& _scene, const uint32_t _delta_time);
 };
 
-#endif /* _INPUT_H_ */
+#endif /* SIMPLERENDER_INPUT_H */

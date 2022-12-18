@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _DISPLAY_H_
-#define _DISPLAY_H_
+#ifndef SIMPLERENDER_DISPLAY_H
+#define SIMPLERENDER_DISPLAY_H
 
 #include "cstdint"
 
@@ -71,4 +71,4 @@ public:
     void fill(const std::shared_ptr<framebuffer_t>& _framebuffer);
 };
 
-#endif /* _DISPLAY_H_ */
+#endif /* SIMPLERENDER_DISPLAY_H */

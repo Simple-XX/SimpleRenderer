@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _FRAMEBUFFER_H_
-#define _FRAMEBUFFER_H_
+#ifndef SIMPLERENDER_FRAMEBUFFER_H
+#define SIMPLERENDER_FRAMEBUFFER_H
 
 #include "array"
 #include "cstdint"
@@ -150,4 +150,4 @@ public:
     depth_t get_depth_buffer(const uint32_t _x, const uint32_t _y) const;
 };
 
-#endif /* _FRAMEBUFFER_H_ */
+#endif /* SIMPLERENDER_FRAMEBUFFER_H */

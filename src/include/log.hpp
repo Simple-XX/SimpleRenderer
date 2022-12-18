@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _LOG_HPP_
-#define _LOG_HPP_
+#ifndef SIMPLERENDER_LOG_HPP
+#define SIMPLERENDER_LOG_HPP
 
 #include "chrono"
 #include "ctime"
@@ -84,4 +84,4 @@ inline const auto us(void) {
     return t.tv_sec * 1000000 + t.tv_usec;
 }
 
-#endif /* _LOG_HPP_ */
+#endif /* SIMPLERENDER_LOG_HPP */

@@ -200,6 +200,11 @@ surround_camera_t::surround_camera_t(void) : camera_base_t() {
     return;
 }
 
+surround_camera_t::surround_camera_t(const surround_camera_t& _camera)
+    : camera_base_t(_camera) {
+    return;
+}
+
 surround_camera_t::surround_camera_t(const vector4f_t& _pos,
                                      const vector4f_t& _target,
                                      const float       _aspect)

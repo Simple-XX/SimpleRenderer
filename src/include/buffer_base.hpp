@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _BUFFER_BASE_HPP_
-#define _BUFFER_BASE_HPP_
+#ifndef BUFFER_BASE_HPP
+#define BUFFER_BASE_HPP
 
 #include "cstdint"
 #include "mutex"
@@ -231,4 +231,4 @@ size_t buffer_base_t<_T>::length() const {
 typedef buffer_base_t<color_t> color_buffer_t;
 typedef buffer_base_t<float>   depth_buffer_t;
 
-#endif /* _BUFFER_BASE_HPP_ */
+#endif /* BUFFER_BASE_HPP */

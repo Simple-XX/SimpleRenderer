@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _SCENE_H_
-#define _SCENE_H_
+#ifndef SIMPLERENDER_SCENE_H
+#define SIMPLERENDER_SCENE_H
 
 #include "cstdint"
 #include "memory"
@@ -138,4 +138,4 @@ public:
     const std::queue<model_t>& get_visible_models(void) const;
 };
 
-#endif /* _SCENE_H_ */
+#endif /* SIMPLERENDER_SCENE_H */

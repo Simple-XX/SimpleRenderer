@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#ifndef SIMPLERENDER_CONFIG_H
+#define SIMPLERENDER_CONFIG_H
 
 #include "atomic"
 #include "cstdint"
@@ -40,4 +40,4 @@ public:
       = "../../src/3rd/wqy-zenhei/wqy-zenhei.ttc";
 };
 
-#endif /* _CONFIG_H_ */
+#endif /* SIMPLERENDER_CONFIG_H */

@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _COLOR_H_
-#define _COLOR_H_
+#ifndef SIMPLERENDER_COLOR_H
+#define SIMPLERENDER_COLOR_H
 
 #include "cstdint"
 #include "iostream"
@@ -149,4 +149,4 @@ public:
     }
 };
 
-#endif /* _COLOR_H_ */
+#endif /* SIMPLERENDER_COLOR_H */

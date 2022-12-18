@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _MATRIX4_HPP_
-#define _MATRIX4_HPP_
+#ifndef SIMPLERENDER_MATRIX4_HPP
+#define SIMPLERENDER_MATRIX4_HPP
 
 #include "array"
 #include "cfloat"
@@ -1227,4 +1227,4 @@ float matrix4_t<_T>::DEG(const float _rad) {
 
 typedef matrix4_t<float> matrix4f_t;
 
-#endif /* _MATRIX4_HPP_ */
+#endif /* SIMPLERENDER_MATRIX4_HPP */

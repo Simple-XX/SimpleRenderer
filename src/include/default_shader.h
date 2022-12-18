@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _DEFAULT_SHADER_H_
-#define _DEFAULT_SHADER_H_
+#ifndef SIMPLERENDER_DEFAULT_SHADER_H
+#define SIMPLERENDER_DEFAULT_SHADER_H
 
 #include "shader.h"
 
@@ -65,4 +65,4 @@ public:
     fragment(const shader_fragment_in_t& _shader_fragment_in) const override;
 };
 
-#endif /* _DEFAULT_SHADER_H_ */
+#endif /* SIMPLERENDER_DEFAULT_SHADER_H */

@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _MODEL_H_
-#define _MODEL_H_
+#ifndef SIMPLERENDER_MODEL_H
+#define SIMPLERENDER_MODEL_H
 
 #include "string"
 #include "vector"
@@ -299,4 +299,4 @@ inline const matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio,
     return ortho * proj;
 }
 
-#endif /* _MODEL_H_ */
+#endif /* SIMPLERENDER_MODEL_H */
