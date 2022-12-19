@@ -36,7 +36,13 @@ class framebuffer_t {
 public:
     /// @brief 深度类型
     /// @note 不要进行会影响内存的修改
-    typedef float depth_t;
+    typedef float    depth_t;
+
+    /// @todo 注释
+    /// @todo 多线程安全
+    int              idx;
+
+    std::atomic_bool usable = false;
 
 private:
     /// @brief 窗口宽度

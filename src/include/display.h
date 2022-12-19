@@ -54,6 +54,8 @@ public:
      */
     display_t(void) = delete;
 
+    display_t(const display_t& _display);
+
     /**
      * @brief 构造函数
      */
@@ -69,6 +71,7 @@ public:
      * @param  _framebuffer     要绘制的 framebuffer
      */
     void fill(const std::shared_ptr<framebuffer_t>& _framebuffer);
+    void fill(const framebuffer_t& _framebuffer);
 };
 
 #endif /* SIMPLERENDER_DISPLAY_H */

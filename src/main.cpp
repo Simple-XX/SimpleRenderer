@@ -25,13 +25,10 @@
 
 auto config  = std::make_shared<config_t>();
 auto display = std::make_shared<display_t>(config->WIDTH, config->HEIGHT);
-auto framebuffer
-  = std::make_shared<framebuffer_t>(config->WIDTH, config->HEIGHT);
-auto scene  = std::make_shared<scene_t>(config);
-auto input  = std::make_shared<input_t>();
-auto shader = std::make_shared<default_shader_t>();
-auto render
-  = std::make_shared<render_t>(config, scene, display, framebuffer, input);
+auto scene   = std::make_shared<scene_t>(config);
+auto input   = std::make_shared<input_t>();
+auto shader  = std::make_shared<default_shader_t>();
+auto render  = std::make_shared<render_t>(config, scene, display, input);
 
 // void draw(const std::shared_ptr<framebuffer_t>& _framebuffer,
 //           const std::shared_ptr<shader_base_t>& _shader,
@@ -81,7 +78,7 @@ auto render
 /// @todo 多缓冲区，绘制函数绘制多个 framebuffer，显示函数从 framebuffer[]
 ///     中拿到绘制完成的进行显示，这样可以将两个线程分开
 
-int main(int _argc, char** _argv) {
+int  main(int _argc, char** _argv) {
     // obj 路径
     std::vector<std::string> obj_path;
     // 如果没有指定那么使用默认值
