@@ -36,25 +36,22 @@ class framebuffer_t {
 public:
     /// @brief 深度类型
     /// @note 不要进行会影响内存的修改
-    typedef float    depth_t;
-
-    /// @todo 注释
-    /// @todo 多线程安全
-    int              idx;
-
-    std::atomic_bool usable = false;
+    typedef float depth_t;
 
 private:
     /// @brief 窗口宽度
-    uint32_t       width;
+    uint32_t        width;
     /// @brief 窗口高度
-    uint32_t       height;
+    uint32_t        height;
 
     /// @brief 颜色缓冲区
-    color_buffer_t color_buffer;
+    color_buffer_t  color_buffer;
 
     /// @brief 深度缓冲区
-    depth_buffer_t depth_buffer;
+    depth_buffer_t  depth_buffer;
+
+    /// @brief 缓冲区计数，用于设置 id
+    static uint32_t count;
 
     /**
      * @brief 计算重心坐标
@@ -96,6 +93,12 @@ private:
                                    const vector4f_t& _barycentric_coord);
 
 public:
+    /// @brief 缓冲区 id
+    uint32_t         id;
+
+    /// @brief 是否可显示，为 false 时表示不可显示，需要先绘制
+    std::atomic_bool displayable = false;
+
     /**
      * @brief 空构造
      */

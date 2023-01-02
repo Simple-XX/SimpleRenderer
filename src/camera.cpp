@@ -23,7 +23,7 @@ camera_base_t::camera_base_t(void) {
     up     = DEFAULT_UP;
     front  = DEFAULT_FRONT;
     /// @todo 这里的右方向需要确认正确性
-    right  = (front ^ up).normalize();
+    right  = DEFAULT_RIGHT;
 
     aspect = DEFAULT_ASPECT;
     speed  = DEFAULT_SPEED;
@@ -51,7 +51,7 @@ camera_base_t::camera_base_t(const vector4f_t& _pos, const vector4f_t& _target,
     up    = DEFAULT_UP;
     front = DEFAULT_FRONT;
     /// @todo 这里的右方向需要确认正确性
-    right = (front ^ up).normalize();
+    right = DEFAULT_RIGHT;
 
     speed = DEFAULT_SPEED;
     return;
@@ -81,6 +81,7 @@ void camera_base_t::set_default(void) {
 
     up     = DEFAULT_UP;
     front  = DEFAULT_FRONT;
+    /// @todo 这里的右方向需要确认正确性
     right  = DEFAULT_RIGHT;
 
     aspect = DEFAULT_ASPECT;

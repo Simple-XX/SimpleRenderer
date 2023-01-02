@@ -43,9 +43,13 @@ private:
     std::shared_ptr<input_t>                    input;
 
     /// @brief 缓冲
-    std::vector<std::shared_ptr<framebuffer_t>> framebuffers;
+    std::vector<std::shared_ptr<framebuffer_t>> framebuffer;
 
+    /// @brief 着色器
     default_shader_t                            shader;
+
+    /// @brief 是否还在运行，为 false 时退出
+    std::atomic_bool                            is_running = true;
 
 public:
     /**

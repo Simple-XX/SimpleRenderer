@@ -37,8 +37,8 @@ protected:
     const vector4f_t DEFAULT_UP     = vector4f_t(0, -1, 0);
     /// @brief 默认指向屏幕内为正方向
     const vector4f_t DEFAULT_FRONT  = vector4f_t(0, 0, -1);
-    /// @brief 右方向通过计算得出，默认为 0
-    const vector4f_t DEFAULT_RIGHT  = vector4f_t(0, 0, 0);
+    /// @brief 右方向通过计算得出，默认为 -1
+    const vector4f_t DEFAULT_RIGHT  = vector4f_t(-1, 0, 0);
 
     /// @brief 屏幕宽高比
     const float      DEFAULT_ASPECT = 1;

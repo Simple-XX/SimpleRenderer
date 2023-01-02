@@ -28,6 +28,7 @@
  * @brief 缓冲区，作为 framebuffer 或 zbuffer 的基类
  * @todo 大小不一样的赋值处理
  * @todo get() 方法能否优化
+ * @todo 多线程安全
  */
 template <class T_t>
 class buffer_base_t {

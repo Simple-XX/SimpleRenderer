@@ -75,9 +75,6 @@ auto render  = std::make_shared<render_t>(config, scene, display, input);
 //     return;
 // }
 
-/// @todo 多缓冲区，绘制函数绘制多个 framebuffer，显示函数从 framebuffer[]
-///     中拿到绘制完成的进行显示，这样可以将两个线程分开
-
 int  main(int _argc, char** _argv) {
     // obj 路径
     std::vector<std::string> obj_path;
@@ -106,9 +103,6 @@ int  main(int _argc, char** _argv) {
         scene->add_model(model);
     }
     scene->add_light(light_t());
-
-    // std::thread draw_thread = std::thread(draw, framebuffer, shader, config);
-    // draw_thread.detach();
 
     render->loop();
 

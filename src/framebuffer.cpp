@@ -20,6 +20,8 @@
 
 #include "framebuffer.h"
 
+uint32_t framebuffer_t::count = 0;
+
 /// @todo 巨大性能开销
 std::pair<bool, vector4f_t>
 framebuffer_t::get_barycentric_coord(const vector4f_t& _p0,
@@ -64,6 +66,7 @@ float framebuffer_t::interpolate_depth(float _depth0, float _depth1,
 
 framebuffer_t::framebuffer_t(void)
     : width(0), height(0), color_buffer(), depth_buffer() {
+    id = count++;
     return;
 }
 
@@ -72,6 +75,7 @@ framebuffer_t::framebuffer_t(const framebuffer_t& _framebuffer)
       height(_framebuffer.height),
       color_buffer(_framebuffer.color_buffer),
       depth_buffer(_framebuffer.depth_buffer) {
+    id = count++;
     return;
 }
 
@@ -80,6 +84,7 @@ framebuffer_t::framebuffer_t(uint32_t _width, uint32_t _height)
       height(_height),
       color_buffer(color_buffer_t(_width, _height)),
       depth_buffer(depth_buffer_t(_width, _height)) {
+    id = count++;
     return;
 }
 
