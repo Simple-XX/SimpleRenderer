@@ -22,6 +22,7 @@
 #include "SDL.h"
 #include "SDL_ttf.h"
 
+#include "config.h"
 #include "framebuffer.h"
 
 /**
@@ -58,6 +59,14 @@ public:
 
     /**
      * @brief 构造函数
+     * @param  _config          配置信息
+     */
+    display_t(const config_t& _config);
+
+    /**
+     * @brief 构造函数
+     * @param  _width           宽度
+     * @param  _height          高度
      */
     display_t(uint32_t _width, uint32_t _height);
 
@@ -71,7 +80,6 @@ public:
      * @param  _framebuffer     要绘制的 framebuffer
      */
     void fill(const std::shared_ptr<framebuffer_t>& _framebuffer);
-    void fill(const framebuffer_t& _framebuffer);
 };
 
 #endif /* SIMPLERENDER_DISPLAY_H */

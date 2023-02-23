@@ -46,7 +46,7 @@ public:
     /**
      * @brief 析构函数
      */
-    ~default_shader_t(void) final;
+    ~default_shader_t(void);
 
     /**
      * @brief 顶点着色器
@@ -54,15 +54,15 @@ public:
      * @return const shader_vertex_out_t    输出
      */
     shader_vertex_out_t
-    vertex(const shader_vertex_in_t& _shader_vertex_in) const override;
+    vertex(const shader_vertex_in_t& _shader_vertex_in) const override final;
 
     /**
      * @brief 片段着色器
      * @param  _shader_fragment_in  输入
      * @return const shader_fragment_out_t  输出
      */
-    shader_fragment_out_t
-    fragment(const shader_fragment_in_t& _shader_fragment_in) const override;
+    shader_fragment_out_t fragment(
+      const shader_fragment_in_t& _shader_fragment_in) const override final;
 };
 
 #endif /* SIMPLERENDER_DEFAULT_SHADER_H */

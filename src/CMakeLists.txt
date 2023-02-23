@@ -55,7 +55,4 @@ add_executable(SimpleRender
 target_link_libraries(SimpleRender
         ${SDL2_LIBRARIES}
         ${SDL2_ttf_LIBRARIES}
-        # @todo 这里变量没有值，临时写一个
-        -L/opt/homebrew/Cellar/sdl2_ttf/2.20.1/lib
-        -L/opt/homebrew/lib -lSDL2_ttf -lSDL2
         ${OpenMP_CXX_LIBRARIES})

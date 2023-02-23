@@ -38,6 +38,7 @@ protected:
     /// @brief 默认指向屏幕内为正方向
     const vector4f_t DEFAULT_FRONT  = vector4f_t(0, 0, -1);
     /// @brief 右方向通过计算得出，默认为 -1
+    /// @todo 这里的右方向需要确认正确性
     const vector4f_t DEFAULT_RIGHT  = vector4f_t(-1, 0, 0);
 
     /// @brief 屏幕宽高比
@@ -130,7 +131,7 @@ public:
      * @param  _to              移动的方向
      * @param  _delta_time      时间变化
      */
-    virtual void       move(const move_to_t& _to, uint32_t _delta_time);
+    virtual void   move(const move_to_t& _to, uint32_t _delta_time);
 
     /**
      * @brief 更新相机目标
@@ -144,7 +145,7 @@ public:
      * @param  _to              移动的方向
      * @param  _delta_time      时间变化
      */
-    virtual void       update_up(const move_to_t& _to, uint32_t _delta_time);
+    virtual void   update_up(const move_to_t& _to, uint32_t _delta_time);
 
     /**
      * @brief 获取视图变换矩阵, 将相机移动到原点，方向指向 -z，即屏幕里，up 为

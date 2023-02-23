@@ -39,6 +39,9 @@ public:
     typedef float depth_t;
 
 private:
+    /// @brief 缓冲区计数，用于设置 id
+    static uint32_t count;
+
     /// @brief 窗口宽度
     uint32_t        width;
     /// @brief 窗口高度
@@ -49,9 +52,6 @@ private:
 
     /// @brief 深度缓冲区
     depth_buffer_t  depth_buffer;
-
-    /// @brief 缓冲区计数，用于设置 id
-    static uint32_t count;
 
     /**
      * @brief 计算重心坐标

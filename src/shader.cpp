@@ -37,8 +37,8 @@ shader_vertex_in_t::~shader_vertex_in_t(void) {
 
 shader_vertex_in_t&
 shader_vertex_in_t::operator=(const shader_vertex_in_t& _shader_vertex_in) {
-    if (this == &_shader_vertex_in) {
-        throw std::runtime_error(log("this == &_shader_vertex_in"));
+    if (&_shader_vertex_in == this) {
+        throw std::runtime_error(log("&_shader_vertex_in == this"));
     }
     face = _shader_vertex_in.face;
     return *this;
@@ -65,8 +65,8 @@ shader_vertex_out_t::~shader_vertex_out_t(void) {
 
 shader_vertex_out_t&
 shader_vertex_out_t::operator=(const shader_vertex_out_t& _shader_vertex_out) {
-    if (this == &_shader_vertex_out) {
-        throw std::runtime_error(log("this == &_shader_vertex_out"));
+    if (&_shader_vertex_out == this) {
+        throw std::runtime_error(log("&_shader_vertex_out == this"));
     }
     face = _shader_vertex_out.face;
     return *this;
@@ -105,8 +105,8 @@ shader_fragment_in_t::~shader_fragment_in_t(void) {
 
 shader_fragment_in_t& shader_fragment_in_t::operator=(
   const shader_fragment_in_t& _shader_fragment_in) {
-    if (this == &_shader_fragment_in) {
-        throw std::runtime_error(log("this == &_shader_fragment_in"));
+    if (&_shader_fragment_in == this) {
+        throw std::runtime_error(log("&_shader_fragment_in == this"));
     }
     barycentric_coord = _shader_fragment_in.barycentric_coord;
     normal            = _shader_fragment_in.normal;
@@ -138,8 +138,8 @@ shader_fragment_out_t::~shader_fragment_out_t(void) {
 
 shader_fragment_out_t& shader_fragment_out_t::operator=(
   const shader_fragment_out_t& _shader_fragment_out) {
-    if (this == &_shader_fragment_out) {
-        throw std::runtime_error(log("this == &_shader_fragment_out"));
+    if (&_shader_fragment_out == this) {
+        throw std::runtime_error(log("&_shader_fragment_out == this"));
     }
     is_need_draw = _shader_fragment_out.is_need_draw;
     return *this;
@@ -162,8 +162,8 @@ shader_data_t::~shader_data_t(void) {
 }
 
 shader_data_t& shader_data_t::operator=(const shader_data_t& _shader_data) {
-    if (this == &_shader_data) {
-        throw std::runtime_error(log("this == &_shader_data"));
+    if (&_shader_data == this) {
+        throw std::runtime_error(log("&_shader_data == this"));
     }
     model_matrix   = _shader_data.model_matrix;
     view_matrix    = _shader_data.view_matrix;

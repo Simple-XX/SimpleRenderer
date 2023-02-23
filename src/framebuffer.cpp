@@ -28,21 +28,21 @@ framebuffer_t::get_barycentric_coord(const vector4f_t& _p0,
                                      const vector4f_t& _p1,
                                      const vector4f_t& _p2,
                                      const vector4f_t& _p) {
-    auto ab   = _p1 - _p0;
-    auto ac   = _p2 - _p0;
-    auto ap   = _p - _p0;
+    auto                          ab   = _p1 - _p0;
+    auto                          ac   = _p2 - _p0;
+    auto                          ap   = _p - _p0;
 
-    auto deno = (ab.x * ac.y - ab.y * ac.x);
+    vector_element_concept_t auto deno = (ab.x * ac.y - ab.y * ac.x);
     if (std::abs(deno) < std::numeric_limits<decltype(deno)>::epsilon()) {
         return std::pair<bool, const vector4f_t> { false, vector4f_t() };
     }
 
-    auto s = (ac.y * ap.x - ac.x * ap.y) / deno;
+    vector_element_concept_t auto s = (ac.y * ap.x - ac.x * ap.y) / deno;
     if ((s > 1) || (s < 0)) {
         return std::pair<bool, const vector4f_t> { false, vector4f_t() };
     }
 
-    auto t = (ab.x * ap.y - ab.y * ap.x) / deno;
+    vector_element_concept_t auto t = (ab.x * ap.y - ab.y * ap.x) / deno;
     if ((t > 1) || (t < 0)) {
         return std::pair<bool, const vector4f_t> { false, vector4f_t() };
     }
@@ -232,7 +232,8 @@ void framebuffer_t::triangle(const config_t&          _config,
     auto min = v0.coord.min(v1.coord).min(v2.coord);
     auto max = v0.coord.max(v1.coord).max(v2.coord);
 
-#pragma omp parallel for num_threads(_config.procs) collapse(2)
+#pragma omp parallel for num_threads(_config.procs) collapse(2) default(none) \
+  shared(min, max, v0, v1, v2, _shader) firstprivate(_normal, _light)
     for (auto x = int32_t(min.x); x <= int32_t(max.x); x++) {
         for (auto y = int32_t(min.y); y <= int32_t(max.y); y++) {
             /// @todo 这里要用裁剪替换掉
@@ -251,17 +252,20 @@ void framebuffer_t::triangle(const config_t&          _config,
             auto z = interpolate_depth(v0.coord.z, v1.coord.z, v2.coord.z,
                                        barycentric_coord);
             // 深度在已有颜色之上
-
             if (z < depth_buffer(x, y)) {
                 continue;
             }
+            // 构造着色器输入
+            auto shader_fragment_in
+              = shader_fragment_in_t(barycentric_coord, _normal, _light.dir,
+                                     v0.color, v1.color, v2.color);
             // 计算颜色，颜色为通过 shader 片段着色器计算
-            auto shader_fragment_out = _shader.fragment(
-              shader_fragment_in_t(barycentric_coord, _normal, _light.dir,
-                                   v0.color, v1.color, v2.color));
+            auto shader_fragment_out = _shader.fragment(shader_fragment_in);
+            // 如果不需要绘制则跳过
             if (shader_fragment_out.is_need_draw == false) {
                 continue;
             }
+            // 构造颜色
             auto color = color_t(shader_fragment_out.color);
             // 填充像素
             pixel(x, y, color, z);
@@ -273,7 +277,8 @@ void framebuffer_t::triangle(const config_t&          _config,
 void framebuffer_t::model(const config_t& _config, const shader_base_t& _shader,
                           const light_t& _light, const model_t& _model) {
     if (_config.draw_wireframe == true) {
-#pragma omp parallel for num_threads(_config.procs)
+#pragma omp parallel for num_threads(_config.procs) default(none) \
+  shared(_shader) firstprivate(_model)
         for (const auto& f : _model.get_face()) {
             /// @todo 巨大性能开销
             auto face = _shader.vertex(shader_vertex_in_t(f)).face;
@@ -286,7 +291,8 @@ void framebuffer_t::model(const config_t& _config, const shader_base_t& _shader,
         }
     }
     else {
-#pragma omp parallel for num_threads(_config.procs)
+#pragma omp parallel for num_threads(_config.procs) default(none) \
+  shared(_shader) firstprivate(_model, _config, _light)
         for (const auto& f : _model.get_face()) {
             /// @todo 巨大性能开销
             auto face = _shader.vertex(shader_vertex_in_t(f)).face;
@@ -298,8 +304,9 @@ void framebuffer_t::model(const config_t& _config, const shader_base_t& _shader,
 
 void framebuffer_t::scene(const shader_base_t& _shader, const scene_t& _scene) {
     auto models = _scene.get_visible_models();
-    while (!models.empty()) {
+    while (models.empty() == false) {
         model(_scene.get_config(), _shader, _scene.get_light(), models.front());
         models.pop();
     }
+    return;
 }

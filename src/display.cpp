@@ -32,6 +32,11 @@ display_t::display_t(const display_t& _display) {
     return;
 }
 
+display_t::display_t(const config_t& _config)
+    : display_t(_config.WIDTH, _config.HEIGHT) {
+    return;
+}
+
 display_t::display_t(uint32_t _width, uint32_t _height)
     : width(_width), height(_height) {
     // 初始化 sdl
@@ -108,33 +113,13 @@ display_t::~display_t(void) {
     SDL_DestroyRenderer(sdl_renderer);
     SDL_DestroyWindow(sdl_window);
     SDL_Quit();
+    return;
 }
 
 void display_t::fill(const std::shared_ptr<framebuffer_t>& _framebuffer) {
     // 更新 texture
     auto res = SDL_UpdateTexture(sdl_texture, nullptr,
                                  _framebuffer->get_color_buffer().to_arr(),
-                                 static_cast<int32_t>(width * color_t::bpp()));
-    if (res != 0) {
-        throw std::runtime_error(log(SDL_GetError()));
-    }
-
-    // 复制到渲染器
-    res = SDL_RenderCopy(sdl_renderer, sdl_texture, nullptr, nullptr);
-    if (res != 0) {
-        throw std::runtime_error(log(SDL_GetError()));
-    }
-
-    // 刷新
-    SDL_RenderPresent(sdl_renderer);
-
-    return;
-}
-
-void display_t::fill(const framebuffer_t& _framebuffer) {
-    // 更新 texture
-    auto res = SDL_UpdateTexture(sdl_texture, nullptr,
-                                 _framebuffer.get_color_buffer().to_arr(),
                                  static_cast<int32_t>(width * color_t::bpp()));
     if (res != 0) {
         throw std::runtime_error(log(SDL_GetError()));
