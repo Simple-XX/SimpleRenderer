@@ -30,7 +30,7 @@ include_directories(
         ./include
         ./3rd
         ${SDL2_INCLUDE_DIRS}
-        ${SDL2_ttf_INCLUDE_DIRS}
+        ${SDL2_TTF_INCLUDE_DIRS}
         ${OpenMP_CXX_INCLUDE_DIRS})
 
 set(SimpleRender_src
@@ -53,6 +53,6 @@ add_executable(SimpleRender
 
 # @todo sdl2: https://github.com/aminosbh/sdl2-cmake-modules
 target_link_libraries(SimpleRender
-        ${SDL2_LIBRARIES}
-        ${SDL2_ttf_LIBRARIES}
+        SDL2::Main
+        SDL2::TTF
         ${OpenMP_CXX_LIBRARIES})
