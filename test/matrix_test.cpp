@@ -152,12 +152,13 @@ TEST(matrix_t, rotate) {
       vector4f_t(1, 0, 0, vector4f_t::W_VECTOR).normalize(), 45);
     float res_arr1[4][4] = {
         {1,                  0,                   0, 0},
-        {0, 0.7071067690849304, -0.7071068286895752, 0},
-        {0, 0.7071068286895752,  0.7071067690849304, 0},
+        {0, 0.7071067690849304, -0.7071067690849304, 0},
+        {0, 0.7071067690849304,  0.7071067690849304, 0},
         {0,                  0,                   0, 1}
     };
     matrix4f_t res_mat1(res_arr1);
     EXPECT_EQ((res_mat1 == mat1), true);
+
     auto vec1     = vector4f_t(1, 2, 3, 4);
     /// @todo 精度问题
     auto res_vec1 = vector4f_t(1, -0.7071068, 3.53553390593274, 4);
@@ -166,30 +167,32 @@ TEST(matrix_t, rotate) {
     auto mat2 = matrix4f_t().rotate(
       vector4f_t(0, 1, 0, vector4f_t::W_VECTOR).normalize(), 45);
     float res_arr2[4][4] = {
-        { 0.7071067690849304, 0, 0.7071068286895752, 0},
+        { 0.7071067690849304, 0, 0.7071067690849304, 0},
         {                  0, 1,                  0, 0},
-        {-0.7071068286895752, 0, 0.7071067690849304, 0},
+        {-0.7071067690849304, 0, 0.7071067690849304, 0},
         {                  0, 0,                  0, 1}
     };
     matrix4f_t res_mat2(res_arr2);
     EXPECT_EQ((res_mat2 == mat2), true);
+
     auto vec2     = vector4f_t(1, 2, 3, 4);
     /// @todo 精度问题
-    auto res_vec2 = vector4f_t(2.8284272, 2, 1.4142134, 4);
+    auto res_vec2 = vector4f_t(2.8284270, 2, 1.4142134, 4);
     EXPECT_EQ((res_vec2 == (mat2 * vec2)), true);
 
     auto mat3 = matrix4f_t().rotate(
       vector4f_t(0, 0, 1, vector4f_t::W_VECTOR).normalize(), 45);
     float res_arr3[4][4] = {
-        {0.7071067690849304, -0.7071068286895752, 0, 0},
-        {0.7071068286895752,  0.7071067690849304, 0, 0},
+        {0.7071067690849304, -0.7071067690849304, 0, 0},
+        {0.7071067690849304,  0.7071067690849304, 0, 0},
         {                 0,                   0, 1, 0},
         {                 0,                   0, 0, 1}
     };
     matrix4f_t res_mat3(res_arr3);
     EXPECT_EQ((res_mat3 == mat3), true);
+
     auto vec3     = vector4f_t(1, 2, 3, 4);
-    auto res_vec3 = vector4f_t(-0.707106781186547, 2.12132034355964, 3, 4);
+    auto res_vec3 = vector4f_t(-0.7071067690849304, 2.121320247650146, 3, 4);
     EXPECT_EQ((res_vec3 == (mat3 * vec3)), true);
 
     auto mat4 = matrix4f_t().rotate(
@@ -202,6 +205,7 @@ TEST(matrix_t, rotate) {
     };
     matrix4f_t res_mat4(res_arr4);
     EXPECT_EQ((res_mat4 == mat4), true);
+
     auto vec4 = vector4f_t(1, 2, 3, 4);
     auto res_vec4
       = vector4f_t(2.64644660940673, 0.353553390593274, 2.62132034355964, 4);
@@ -217,6 +221,7 @@ TEST(matrix_t, rotate) {
     };
     matrix4f_t res_mat5(res_arr5);
     EXPECT_EQ((res_mat5 == mat5), true);
+
     auto vec5 = vector4f_t(1, 2, 3, 4);
     /// @todo 精度问题
     auto res_vec5

@@ -202,17 +202,17 @@ public:
 
     /**
      * @brief 长度的平方
-     * @return size_t           结果
+     * @return T_t              结果
      * @note w 不参与运算
      */
-    size_t          length_squared(void) const;
+    T_t             length_squared(void) const;
 
     /**
      * @brief 长度
-     * @return size_t           结果
+     * @return T_t              结果
      * @note w 不参与运算
      */
-    size_t          length(void) const;
+    T_t             length(void) const;
 
     /**
      * @brief 对所有分量取绝对值
@@ -461,12 +461,12 @@ T_t& vector4_t<T_t>::operator[](uint32_t _idx) {
 }
 
 template <vector_element_concept_t T_t>
-size_t vector4_t<T_t>::length_squared(void) const {
+T_t vector4_t<T_t>::length_squared(void) const {
     return x * x + y * y + z * z + w * w;
 }
 
 template <vector_element_concept_t T_t>
-size_t vector4_t<T_t>::length(void) const {
+T_t vector4_t<T_t>::length(void) const {
     return std::sqrt(length_squared());
 }
 
