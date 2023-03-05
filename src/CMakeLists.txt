@@ -19,6 +19,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 
 message(STATUS "CMAKE_CXX_FLAGS is ${CMAKE_CXX_FLAGS}")
 
+# @todo cmake 警告
 find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(OpenMP REQUIRED)
@@ -51,7 +52,6 @@ set(SimpleRender_src
 add_executable(SimpleRender
         ${SimpleRender_src})
 
-# @todo sdl2: https://github.com/aminosbh/sdl2-cmake-modules
 target_link_libraries(SimpleRender
         SDL2::Main
         SDL2::TTF

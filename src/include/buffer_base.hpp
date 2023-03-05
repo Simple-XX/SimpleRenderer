@@ -20,6 +20,7 @@
 #include "cstdint"
 #include "mutex"
 #include "type_traits"
+#include "memory"
 
 #include "color.h"
 #include "log.hpp"

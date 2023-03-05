@@ -15,6 +15,7 @@
  */
 
 #include "thread"
+#include "condition_variable"
 
 #include "render.h"
 

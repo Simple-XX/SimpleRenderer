@@ -41,7 +41,7 @@ public:
     config_t(void)                           = default;
 
     config_t(const config_t& _config) {
-        draw_wireframe = _config.draw_wireframe;
+        draw_wireframe.store (_config.draw_wireframe);
         procs          = _config.procs;
         return;
     }
