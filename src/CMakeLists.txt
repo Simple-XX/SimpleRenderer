@@ -1,15 +1,17 @@
 
-# This file is a part of Simple-XX/SimpleRenderer (https://github.com/Simple-XX/SimpleRenderer).
+# This file is a part of Simple-XX/SimpleRenderer
+# (https://github.com/Simple-XX/SimpleRenderer).
 #
 # CMakeLists.txt for Simple-XX/SimpleRenderer.
 
 # Set CXX flags for debug
 if (CMAKE_BUILD_TYPE STREQUAL DEBUG)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -ggdb -Wall -Wextra")
-endif ()
-
-if (CMAKE_BUILD_TYPE STREQUAL RELEASE)
+elseif (CMAKE_BUILD_TYPE STREQUAL RELEASE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
+else ()
+    set(CMAKE_BUILD_TYPE DEBUG)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -ggdb -Wall -Wextra")
 endif ()
 
 # Set common flags
@@ -17,11 +19,35 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 
 message(STATUS "CMAKE_CXX_FLAGS is ${CMAKE_CXX_FLAGS}")
 
+# @todo cmake 警告
+find_package(SDL2 REQUIRED)
+find_package(SDL2_ttf REQUIRED)
+find_package(OpenMP REQUIRED)
+
 # Set include dir
-include_directories(${SimpleRenderer_SOURCE_CODE_DIR}/include)
+include_directories(
+        ./include
+        ./3rd)
 
-aux_source_directory(${SimpleRenderer_SOURCE_CODE_DIR} cxx_src)
+set(SimpleRender_src
+        main.cpp
+        model.cpp
+        framebuffer.cpp
+        display.cpp
+        camera.cpp
+        shader.cpp
+        default_shader.cpp
+        color.cpp
+        scene.cpp
+        light.cpp
+        input.cpp
+        render.cpp)
 
-# Link
-add_executable(${RendererName}
-    ${cxx_src})
+# 生成可执行文件
+add_executable(SimpleRender
+        ${SimpleRender_src})
+
+target_link_libraries(SimpleRender
+        SDL2::Main
+        SDL2::TTF
+        OpenMP::OpenMP_CXX)

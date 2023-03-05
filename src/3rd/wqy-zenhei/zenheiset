@@ -1,0 +1,50 @@
+#!/bin/sh
+
+###############################################
+# Set WenQuanYi Zen Hei Default Display Styles
+# 
+# Qianqian Fang <fangq at nmr.mgh.harvard.edu>
+###############################################
+
+FAVAIL=/etc/fonts/conf.avail
+FCONF=/etc/fonts/conf.d
+BMPCONF=66-wqy-zenhei-sharp.conf
+BMPSTDCONF=66-wqy-zenhei-sharp-no13px.conf
+AACONF=44-wqy-zenhei.conf
+
+
+if [ $# -ne 1 ]; then
+     echo 1>&2 Usage: $0 \[aa\|bitmap\|bitmapfull\]
+     exit 2
+fi
+
+if [ $1 = "aa" -o $1 = "bitmap" -o $1 = "bitmapfull" ]; then
+     if [ -f "$FAVAIL/$AACONF" ]; then
+	 ln -sf $FAVAIL/$AACONF $FCONF/$AACONF
+	 rm -rf $FCONF/$BMPCONF
+         rm -rf $FCONF/$BMPSTDCONF
+     else
+         echo $FAVAIL/$BMPCONF does not exist!
+	 exit 2
+     fi
+
+     if [ $1 = "bitmap" -o $1 = "bitmapfull" ]; then
+         if [ -f "$FAVAIL/$BMPCONF" ]; then
+             ln -sf $FAVAIL/$BMPCONF $FCONF/$BMPCONF
+             if [ $1 = "bitmap" ]; then
+                  if [ -f "$FAVAIL/$BMPSTDCONF" ]; then
+                      ln -sf $FAVAIL/$BMPSTDCONF $FCONF/$BMPSTDCONF
+                  else
+                      echo $FAVAIL/$BMPSTDCONF does not exist!
+                      exit 2
+                  fi
+             fi
+         else
+             echo $FAVAIL/$BMPCONF does not exist!
+             exit 2
+         fi
+     fi
+else
+     echo $1 is not a valid option
+fi
+

@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // debug 文件名
+            "name": "debug",
+            "type": "cppdbg",
+            "request": "launch",
+            // 构建后的可执行文件
+            "program": "${workspaceFolder}/build/bin/SimpleRender",
+            "cwd": "${workspaceFolder}/build",
+            // 执行调试的前置任务名
+            "preLaunchTask": "make",
+            // 必填（与哪个 debugger 通信）
+            "MIMode": "gdb",
+        }
+    ]
+}
