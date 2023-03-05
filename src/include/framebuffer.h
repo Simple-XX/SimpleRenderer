@@ -17,9 +17,10 @@
 #ifndef _FRAMEBUFFER_H_
 #define _FRAMEBUFFER_H_
 
+#include "array"
+#include "atomic"
 #include "cstdint"
 #include "mutex"
-#include <array>
 
 #include "color.h"
 

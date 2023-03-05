@@ -31,5 +31,4 @@
 *.app
 
 build
-cmake-build-debug
-cmake-build-debug-gcc
+cmake-build-*

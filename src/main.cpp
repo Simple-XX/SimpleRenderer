@@ -14,6 +14,7 @@
  * </table>
  */
 
+#include "memory"
 #include "thread"
 
 #include "camera.h"
