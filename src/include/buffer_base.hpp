@@ -14,52 +14,54 @@
  * </table>
  */
 
-#ifndef _BUFFER_BASE_HPP_
-#define _BUFFER_BASE_HPP_
+#ifndef BUFFER_BASE_HPP
+#define BUFFER_BASE_HPP
 
 #include "cstdint"
+#include "memory"
 #include "mutex"
+#include "type_traits"
 
 #include "color.h"
 #include "log.hpp"
 
-/// @todo 替换已有代码
-
 /**
  * @brief 缓冲区，作为 framebuffer 或 zbuffer 的基类
  * @todo 大小不一样的赋值处理
+ * @todo get() 方法能否优化
+ * @todo 多线程安全
  */
-template <class _T>
+template <class T_t>
 class buffer_base_t {
 private:
     /// @brief 窗口宽度
-    uint32_t   width;
+    uint32_t               width;
     /// @brief 窗口高度
-    uint32_t   height;
+    uint32_t               height;
 
     /// @brief 缓冲区锁
-    std::mutex buffer_mutex;
+    std::mutex             buffer_mutex;
     /// @brief 缓冲数组
-    _T*        buffer_arr;
+    std::shared_ptr<T_t[]> buffer_arr;
 
 public:
     /**
      * @brief 空构造
      */
-    buffer_base_t(void) = delete;
-
-    /**
-     * @brief 构造函数，整型默认为白色，浮点默认为最小值
-     * @param  _width           宽度
-     * @param  _height          高度
-     */
-    buffer_base_t(const uint32_t _width, const uint32_t _height);
+    buffer_base_t(void);
 
     /**
      * @brief 拷贝构造
      * @param  _buffer          另一个 buffer_base_t
      */
     buffer_base_t(const buffer_base_t& _buffer);
+
+    /**
+     * @brief 构造函数，整型默认为白色，浮点默认为最小值
+     * @param  _width           宽度
+     * @param  _height          高度
+     */
+    explicit buffer_base_t(uint32_t _width, uint32_t _height);
 
     /**
      * @brief 析构函数
@@ -86,7 +88,7 @@ public:
     uint32_t       get_height(void) const;
 
     /**
-     * @brief 清空，如果 _T 为 int，设置为白色，否则视为深度缓冲，设为最小值
+     * @brief 清空，如果 T_t 为 int，设置为黑色，否则视为深度缓冲，设为最小值
      */
     void           clear(void);
 
@@ -94,23 +96,29 @@ public:
      * @brief () 重载，获取第 _x 行 _y 列的数据
      * @param  _x               行
      * @param  _y               列
-     * @return _T&              数据
+     * @return T_t&             数据
      */
-    _T&            operator()(const uint32_t _x, const uint32_t _y);
+    T_t&           operator()(uint32_t _x, uint32_t _y);
 
     /**
      * @brief () 重载，获取第 _x 行 _y 列的数据
      * @param  _x               行
      * @param  _y               列
-     * @return const _T         只读的数据
+     * @return const T_t&       只读的数据
      */
-    const _T       operator()(const uint32_t _x, const uint32_t _y) const;
+    const T_t&     operator()(uint32_t _x, uint32_t _y) const;
 
     /**
      * @brief 转换为数组
-     * @return const _T*        数组
+     * @return T_t*             数组
      */
-    const _T*      to_arr(void);
+    T_t*           to_arr(void);
+
+    /**
+     * @brief 转换为数组
+     * @return const T_t*       数组
+     */
+    const T_t*     to_arr(void) const;
 
     /**
      * @brief 获取缓冲区大小(字节数)
@@ -119,158 +127,125 @@ public:
     size_t         length(void) const;
 };
 
-template <>
-buffer_base_t<color_t>::buffer_base_t(const uint32_t _w, const uint32_t _h)
-    : width(_w), height(_h) {
-    try {
-        buffer_arr = new color_t[width * height];
-    } catch (const std::bad_alloc& e) {
-        std::cerr << log(e.what()) << std::endl;
-    }
-    std::fill_n(buffer_arr, width * height, color_t::WHITE);
+template <class T_t>
+buffer_base_t<T_t>::buffer_base_t(void) : width(0), height(0) {
+    buffer_arr = nullptr;
 
     return;
 }
 
-template <>
-buffer_base_t<float>::buffer_base_t(const uint32_t _w, const uint32_t _h)
-    : width(_w), height(_h) {
-    try {
-        buffer_arr = new float[width * height];
-    } catch (const std::bad_alloc& e) {
-        std::cerr << log(e.what()) << std::endl;
-    }
-    std::fill_n(buffer_arr, width * height,
-                std::numeric_limits<float>::lowest());
-
-    return;
-}
-
-// template <class _T>
-// buffer_base_t<_T>::buffer_base_t(const uint32_t _w, const uint32_t _h)
-//     : width(_w), height(_h) {
-//     try {
-//         buffer_arr = new _T[width * height];
-//     } catch (const std::bad_alloc& e) {
-//         std::cerr << log(e.what()) << std::endl;
-//     }
-//     if (std::is_same<_T, color_t>::value == true) {
-//         std::fill_n(buffer_arr, width * height, color_t::WHITE);
-//     }
-//     else if ((std::is_same<_T, float>::value == true)
-//              || (std::is_same<_T, double>::value == true)) {
-//         std::fill_n(buffer_arr, width * height,
-//                     std::numeric_limits<_T>::lowest());
-//     }
-//
-//     return;
-// }
-
-template <class _T>
-buffer_base_t<_T>::buffer_base_t(const buffer_base_t& _buffer)
+template <class T_t>
+buffer_base_t<T_t>::buffer_base_t(const buffer_base_t& _buffer)
     : width(_buffer.width), height(_buffer.height) {
     try {
-        buffer_arr = new _T[width * height];
+        buffer_arr = std::make_shared<T_t[]>(width * height);
     } catch (const std::bad_alloc& e) {
         std::cerr << log(e.what()) << std::endl;
     }
     // 复制数据
-    std::copy(_buffer.buffer_arr, _buffer.buffer_arr + _buffer.length(),
-              buffer_arr);
+    std::copy(_buffer.buffer_arr.get(),
+              _buffer.buffer_arr.get() + _buffer.length(), buffer_arr.get());
     return;
 }
 
-template <class _T>
-buffer_base_t<_T>::~buffer_base_t(void) {
+template <class T_t>
+buffer_base_t<T_t>::buffer_base_t(uint32_t _w, uint32_t _h)
+    : width(_w), height(_h) {
+    try {
+        buffer_arr = std::make_shared<T_t[]>(width * height);
+    } catch (const std::bad_alloc& e) {
+        std::cerr << log(e.what()) << std::endl;
+    }
+    if constexpr (std::is_same_v<T_t, color_t>) {
+        std::fill_n(buffer_arr.get(), width * height, color_t::BLACK);
+    }
+    else if constexpr ((std::is_same_v<T_t, float>)
+                       || (std::is_same_v<T_t, double>)) {
+        std::fill_n(buffer_arr.get(), width * height,
+                    std::numeric_limits<T_t>::lowest());
+    }
+
+    return;
+}
+
+template <class T_t>
+buffer_base_t<T_t>::~buffer_base_t(void) {
     width  = 0;
     height = 0;
-    if (buffer_arr != nullptr) {
-        delete[] buffer_arr;
-        buffer_arr = nullptr;
-    }
     return;
 }
 
-template <class _T>
-buffer_base_t<_T>& buffer_base_t<_T>::operator=(const buffer_base_t& _buffer) {
+template <class T_t>
+buffer_base_t<T_t>&
+buffer_base_t<T_t>::operator=(const buffer_base_t& _buffer) {
+    if (&_buffer == this) {
+        return *this;
+    }
+
     if (width != _buffer.width || height != _buffer.height) {
         width  = _buffer.width;
         height = _buffer.height;
-        if (buffer_arr != nullptr) {
-            delete[] buffer_arr;
-            buffer_arr = nullptr;
-        }
         try {
-            buffer_arr = new _T[width * height];
+            buffer_arr = std::make_shared<T_t[]>(width * height);
         } catch (const std::bad_alloc& e) {
             std::cerr << log(e.what()) << std::endl;
         }
     }
-    std::copy(_buffer.buffer_arr,
-              _buffer.buffer_arr + width * height * sizeof(color_t),
-              buffer_arr);
+    std::copy(_buffer.buffer_arr.get(),
+              _buffer.buffer_arr.get() + width * height * sizeof(color_t),
+              buffer_arr.get());
 
     return *this;
 }
 
-template <class _T>
-uint32_t buffer_base_t<_T>::get_height(void) const {
+template <class T_t>
+uint32_t buffer_base_t<T_t>::get_height(void) const {
     return height;
 }
 
-template <class _T>
-uint32_t buffer_base_t<_T>::get_width(void) const {
+template <class T_t>
+uint32_t buffer_base_t<T_t>::get_width(void) const {
     return width;
 }
 
-template <>
-void buffer_base_t<color_t>::clear(void) {
-    std::fill_n(buffer_arr, width * height, color_t::WHITE);
+template <class T_t>
+void buffer_base_t<T_t>::clear(void) {
+    if constexpr (std::is_same_v<T_t, color_t>) {
+        std::fill_n(buffer_arr.get(), width * height, color_t::BLACK);
+    }
+    else if ((std::is_same_v<T_t, float>) || (std::is_same_v<T_t, double>)) {
+        std::fill_n(buffer_arr.get(), width * height,
+                    std::numeric_limits<T_t>::lowest());
+    }
     return;
 }
 
-template <>
-void buffer_base_t<float>::clear(void) {
-    std::fill_n(buffer_arr, width * height,
-                std::numeric_limits<float>::lowest());
-    return;
-}
-
-// template <class _T>
-// void buffer_base_t<_T>::clear(void) {
-//     if (std::is_same<_T, color_t>::value == true) {
-//         std::fill_n(buffer_arr, width * height, color_t::WHITE);
-//     }
-//     else if ((std::is_same<_T, float>::value == true)
-//              || (std::is_same<_T, double>::value == true)) {
-//         std::fill_n(buffer_arr, width * height,
-//                     std::numeric_limits<_T>::lowest());
-//     }
-//     return;
-// }
-
-template <class _T>
-_T& buffer_base_t<_T>::operator()(const uint32_t _x, const uint32_t _y) {
+template <class T_t>
+T_t& buffer_base_t<T_t>::operator()(uint32_t _x, uint32_t _y) {
     return buffer_arr[_y * width + _x];
 }
 
-template <class _T>
-const _T
-buffer_base_t<_T>::operator()(const uint32_t _x, const uint32_t _y) const {
+template <class T_t>
+const T_t& buffer_base_t<T_t>::operator()(uint32_t _x, uint32_t _y) const {
     return buffer_arr[_y * width + _x];
 }
 
-template <class _T>
-const _T* buffer_base_t<_T>::to_arr(void) {
-    return buffer_arr;
+template <class T_t>
+T_t* buffer_base_t<T_t>::to_arr(void) {
+    return buffer_arr.get();
 }
 
-template <class _T>
-size_t buffer_base_t<_T>::length() const {
-    return width * height * sizeof(_T);
+template <class T_t>
+const T_t* buffer_base_t<T_t>::to_arr(void) const {
+    return buffer_arr.get();
 }
 
-// typedef buffer_base_t<color_t> color_buffer_t;
-// typedef buffer_base_t<float>   zbuffer_t;
+template <class T_t>
+size_t buffer_base_t<T_t>::length(void) const {
+    return width * height * sizeof(T_t);
+}
 
-#endif /* _BUFFER_BASE_HPP_ */
+typedef buffer_base_t<color_t> color_buffer_t;
+typedef buffer_base_t<float>   depth_buffer_t;
+
+#endif /* BUFFER_BASE_HPP */

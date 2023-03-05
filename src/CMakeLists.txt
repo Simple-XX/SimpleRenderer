@@ -19,41 +19,35 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 
 message(STATUS "CMAKE_CXX_FLAGS is ${CMAKE_CXX_FLAGS}")
 
+# @todo cmake 警告
 find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(OpenMP REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-
 # Set include dir
 include_directories(
         ./include
-        ./3rd
-        ${SDL2_INCLUDE_DIRS}
-        ${SDL2_ttf_INCLUDE_DIRS}
-        ${OpenMP_CXX_INCLUDE_DIRS})
+        ./3rd)
 
 set(SimpleRender_src
         main.cpp
         model.cpp
         framebuffer.cpp
         display.cpp
-        draw3d.cpp
         camera.cpp
         shader.cpp
         default_shader.cpp
-        event_callback.cpp
-        color.cpp)
+        color.cpp
+        scene.cpp
+        light.cpp
+        input.cpp
+        render.cpp)
 
 # 生成可执行文件
 add_executable(SimpleRender
         ${SimpleRender_src})
 
-# @todo sdl2: https://github.com/aminosbh/sdl2-cmake-modules
 target_link_libraries(SimpleRender
-        ${SDL2_LIBRARIES}
-        ${SDL2_ttf_LIBRARIES}
-        # @todo 这里变量没有值，临时写一个
-        -L/opt/homebrew/Cellar/sdl2_ttf/2.20.1/lib
-        -L/opt/homebrew/lib -lSDL2_ttf -lSDL2
-        ${OpenMP_CXX_LIBRARIES})
+        SDL2::Main
+        SDL2::TTF
+        OpenMP::OpenMP_CXX)

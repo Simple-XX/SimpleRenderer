@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef _MODEL_H_
-#define _MODEL_H_
+#ifndef SIMPLERENDER_MODEL_H
+#define SIMPLERENDER_MODEL_H
 
 #include "string"
 #include "vector"
@@ -47,8 +47,29 @@ public:
         vector4f_t diffuse;
         /// @brief 镜面光照
         vector4f_t specular;
-        material_t(void)  = default;
-        ~material_t(void) = default;
+
+        /**
+         * @brief 构造函数
+         */
+        material_t(void);
+
+        /**
+         * @brief 构造函数
+         * @param  _material        另一个 material_t
+         */
+        material_t(const material_t& _material);
+
+        /**
+         * @brief 析构函数
+         */
+        ~material_t(void);
+
+        /**
+         * @brief = 重载
+         * @param  _material        另一个 material_t
+         * @return material_t&      结果
+         */
+        material_t& operator=(const material_t& _material);
     };
 
     /**
@@ -100,16 +121,16 @@ public:
          * @param  _vertex          另一个 vertex_t
          * @return vertex_t&        结果
          */
-        vertex_t&             operator=(const vertex_t& _vertex);
+        vertex_t&       operator=(const vertex_t& _vertex);
 
         /**
          * @brief 顶点与矩阵进行运算，效果是对顶点进行变换
          * @param  _matrices        变换矩阵，第一个是坐标变换，第二个是法线变换
          * @param  vertex           要变换的 vertex_t
-         * @return const vertex_t   结果
+         * @return vertex_t         结果
          * @todo 确认这里的乘法顺序
          */
-        friend const vertex_t operator*(
+        friend vertex_t operator*(
           const std::pair<const matrix4f_t, const matrix4f_t>& _matrices,
           const vertex_t&                                      _vertex);
     };
@@ -156,22 +177,56 @@ public:
          * @param  _face            另一个 face_t
          * @return face_t&          结果
          */
-        face_t&             operator=(const face_t& _face);
+        face_t&       operator=(const face_t& _face);
 
         /**
          * @brief 模型与矩阵进行运算，效果是对模型进行变换
          * @param  _matrices        变换矩阵，第一个是坐标变换，第二个是法线变换
          * @param  _face            要变换的 face_t
-         * @return const face_t     结果
+         * @return face_t           结果
          * @todo 确认这里的乘法顺序
          */
-        friend const face_t operator*(
+        friend face_t operator*(
           const std::pair<const matrix4f_t, const matrix4f_t>& _matrices,
           const face_t&                                        _face);
     };
 
+    /**
+     * @brief 碰撞盒
+     */
+    struct box_t {
+        /// @brief 最小点
+        vector4f_t min;
+        /// @brief 最大点
+        vector4f_t max;
+
+        /**
+         * @brief 构造函数
+         */
+        box_t(void);
+
+        /**
+         * @brief 构造函数
+         * @param  _box             另一个 box
+         */
+        box_t(const box_t& _box);
+
+        /**
+         * @brief 析构函数
+         */
+        ~box_t(void);
+
+        /**
+         * @brief = 重载
+         * @param  _box             另一个 box
+         * @return box_t&           结果
+         */
+        box_t& operator=(const box_t& _box);
+    };
+
 private:
     std::vector<face_t> face;
+    box_t               box;
 
 public:
     /**
@@ -191,7 +246,8 @@ public:
      * @param  _mtl_path        mtl 文件路径
      * @todo 顶点去重
      */
-    model_t(const std::string& _obj_path, const std::string& _mtl_path = "");
+    explicit model_t(const std::string& _obj_path,
+                     const std::string& _mtl_path = "");
 
     /**
      * @brief 析构函数
@@ -206,6 +262,13 @@ public:
     model_t&                   operator=(const model_t& _model);
 
     /**
+     * @brief * 重载，对模型应用变换矩阵
+     * @param  _tran            另一个 要对模型进行的变换矩阵
+     * @return model_t          结果
+     */
+    model_t                    operator*(const matrix4f_t& _tran) const;
+
+    /**
      * @brief 获取面
      * @return const std::vector<face_t>&   所有面
      */
@@ -213,7 +276,7 @@ public:
 };
 
 // 模型变换
-inline const matrix4f_t
+inline matrix4f_t
 get_model_matrix(const vector4f_t& _scale, const vector4f_t& _rotate,
                  const float& _angle, const vector4f_t& _translate) {
     // 缩放
@@ -231,8 +294,8 @@ get_model_matrix(const vector4f_t& _scale, const vector4f_t& _rotate,
 }
 
 // 投影变换矩阵
-inline const matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio,
-                                              float zNear, float zFar) {
+inline matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio,
+                                        float zNear, float zFar) {
     // 透视投影矩阵
     float proj_arr[4][4] = {
         {zNear,     0,            0,             0},
@@ -240,11 +303,12 @@ inline const matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio,
         {    0,     0, zNear + zFar, -zNear * zFar},
         {    0,     0,            1,             0}
     };
-    auto  proj            = matrix4f_t(proj_arr);
+    auto proj = matrix4f_t(proj_arr);
 
-    float h               = zNear * tan(eye_fov / 2) * 2;
-    float w               = h * aspect_ratio;
-    float z               = zFar - zNear;
+    auto h
+      = zNear * static_cast<float>(tan(static_cast<double>(eye_fov / 2))) * 2;
+    auto  w               = h * aspect_ratio;
+    auto  z               = zFar - zNear;
     // 正交投影矩阵，因为在观测投影时x0y平面视角默认是中心，所以这里的正交投影就不用平移x和y了
     float ortho_arr[4][4] = {
         {2 / w,     0,     0,                   0},
@@ -258,4 +322,4 @@ inline const matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio,
     return ortho * proj;
 }
 
-#endif /* _MODEL_H_ */
+#endif /* SIMPLERENDER_MODEL_H */
