@@ -16,21 +16,30 @@
 
 #include "default_shader.h"
 
-const color_t
+color_t
 default_shader_t::interpolate_color(const color_t&    _color0,
                                     const color_t&    _color1,
                                     const color_t&    _color2,
                                     const vector4f_t& _barycentric_coord) {
     return color_t(
-      (uint8_t)(_color0[color_t::COLOR_IDX_R] * _barycentric_coord.x
-                + _color1[color_t::COLOR_IDX_R] * _barycentric_coord.y
-                + _color2[color_t::COLOR_IDX_R] * _barycentric_coord.z),
-      (uint8_t)(_color0[color_t::COLOR_IDX_G] * _barycentric_coord.x
-                + _color1[color_t::COLOR_IDX_G] * _barycentric_coord.y
-                + _color2[color_t::COLOR_IDX_G] * _barycentric_coord.z),
-      (uint8_t)(_color0[color_t::COLOR_IDX_B] * _barycentric_coord.x
-                + _color1[color_t::COLOR_IDX_B] * _barycentric_coord.y
-                + _color2[color_t::COLOR_IDX_B] * _barycentric_coord.z));
+      static_cast<uint8_t>(static_cast<float>(_color0[color_t::COLOR_IDX_R])
+                             * _barycentric_coord.x
+                           + static_cast<float>(_color1[color_t::COLOR_IDX_R])
+                               * _barycentric_coord.y
+                           + static_cast<float>(_color2[color_t::COLOR_IDX_R])
+                               * _barycentric_coord.z),
+      static_cast<uint8_t>(static_cast<float>(_color0[color_t::COLOR_IDX_G])
+                             * _barycentric_coord.x
+                           + static_cast<float>(_color1[color_t::COLOR_IDX_G])
+                               * _barycentric_coord.y
+                           + static_cast<float>(_color2[color_t::COLOR_IDX_G])
+                               * _barycentric_coord.z),
+      static_cast<uint8_t>(static_cast<float>(_color0[color_t::COLOR_IDX_B])
+                             * _barycentric_coord.x
+                           + static_cast<float>(_color1[color_t::COLOR_IDX_B])
+                               * _barycentric_coord.y
+                           + static_cast<float>(_color2[color_t::COLOR_IDX_B])
+                               * _barycentric_coord.z));
 }
 
 default_shader_t::default_shader_t(void) {
@@ -42,8 +51,8 @@ default_shader_t::~default_shader_t(void) {
 }
 
 /// @todo 巨大性能开销
-const shader_vertex_out_t
-default_shader_t::vertex(const shader_vertex_in_t& _shader_vertex_in) {
+shader_vertex_out_t
+default_shader_t::vertex(const shader_vertex_in_t& _shader_vertex_in) const {
     /// @todo 处理变换
     auto face(_shader_vertex_in.face);
     // 变换坐标
@@ -67,8 +76,8 @@ default_shader_t::vertex(const shader_vertex_in_t& _shader_vertex_in) {
     return shader_vertex_out_t(face);
 }
 
-const shader_fragment_out_t
-default_shader_t::fragment(const shader_fragment_in_t& _shader_fragment_in) {
+shader_fragment_out_t default_shader_t::fragment(
+  const shader_fragment_in_t& _shader_fragment_in) const {
     auto intensity = (_shader_fragment_in.normal * _shader_fragment_in.light);
     auto is_need_draw = true;
     // 光照方向为正，不绘制背面

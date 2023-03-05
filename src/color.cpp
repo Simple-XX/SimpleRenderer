@@ -17,7 +17,6 @@
 #include "limits"
 
 #include "color.h"
-#include "log.hpp"
 
 color_t::color_t(void) {
     channel_r = 0;
@@ -27,7 +26,7 @@ color_t::color_t(void) {
     return;
 }
 
-color_t::color_t(const uint32_t _data) {
+color_t::color_t(uint32_t _data) {
     auto data_ptr = (uint8_t*)&_data;
     channel_r     = data_ptr[0];
     channel_g     = data_ptr[1];
@@ -36,8 +35,7 @@ color_t::color_t(const uint32_t _data) {
     return;
 }
 
-color_t::color_t(const uint8_t _r, const uint8_t _g, const uint8_t _b,
-                 const uint8_t _a) {
+color_t::color_t(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a) {
     channel_r = _r;
     channel_g = _g;
     channel_b = _b;
@@ -45,8 +43,7 @@ color_t::color_t(const uint8_t _r, const uint8_t _g, const uint8_t _b,
     return;
 }
 
-color_t::color_t(const float& _r, const float& _g, const float& _b,
-                 const uint8_t _a) {
+color_t::color_t(float _r, float _g, float _b, uint8_t _a) {
     channel_r = uint8_t(_r * std::numeric_limits<uint8_t>::max());
     channel_g = uint8_t(_g * std::numeric_limits<uint8_t>::max());
     channel_b = uint8_t(_b * std::numeric_limits<uint8_t>::max());
@@ -77,39 +74,39 @@ color_t& color_t::operator=(const color_t& _color) {
     return *this;
 }
 
-const color_t color_t::operator*(const float& _f) const {
-    uint8_t r = channel_r * _f;
-    uint8_t g = channel_g * _f;
-    uint8_t b = channel_b * _f;
-    uint8_t a = channel_a * _f;
+color_t color_t::operator*(float _f) const {
+    auto r = static_cast<uint8_t>(static_cast<float>(channel_r) * _f);
+    auto g = static_cast<uint8_t>(static_cast<float>(channel_g) * _f);
+    auto b = static_cast<uint8_t>(static_cast<float>(channel_b) * _f);
+    auto a = static_cast<uint8_t>(static_cast<float>(channel_a) * _f);
     return color_t(r, g, b, a);
 }
 
-const color_t color_t::operator*(const vector4f_t& _vector) const {
-    uint8_t r = channel_r * _vector.x;
-    uint8_t g = channel_g * _vector.y;
-    uint8_t b = channel_b * _vector.z;
-    uint8_t a = channel_a * _vector.w;
+color_t color_t::operator*(const vector4f_t& _vector) const {
+    auto r = static_cast<uint8_t>(static_cast<float>(channel_r) * _vector.x);
+    auto g = static_cast<uint8_t>(static_cast<float>(channel_g) * _vector.y);
+    auto b = static_cast<uint8_t>(static_cast<float>(channel_b) * _vector.z);
+    auto a = static_cast<uint8_t>(static_cast<float>(channel_a) * _vector.w);
     return color_t(r, g, b, a);
 }
 
-color_t& color_t::operator*=(const float& _f) {
-    channel_r *= _f;
-    channel_g *= _f;
-    channel_b *= _f;
-    channel_a *= _f;
+color_t& color_t::operator*=(float _f) {
+    channel_r = static_cast<uint8_t>(static_cast<float>(channel_r) * _f);
+    channel_g = static_cast<uint8_t>(static_cast<float>(channel_g) * _f);
+    channel_b = static_cast<uint8_t>(static_cast<float>(channel_b) * _f);
+    channel_a = static_cast<uint8_t>(static_cast<float>(channel_a) * _f);
     return *this;
 }
 
 color_t& color_t::operator*=(const vector4f_t& _vector) {
-    channel_r *= _vector.x;
-    channel_g *= _vector.y;
-    channel_b *= _vector.z;
-    channel_a *= _vector.w;
+    channel_r = static_cast<uint8_t>(static_cast<float>(channel_r) * _vector.x);
+    channel_g = static_cast<uint8_t>(static_cast<float>(channel_g) * _vector.y);
+    channel_b = static_cast<uint8_t>(static_cast<float>(channel_b) * _vector.z);
+    channel_a = static_cast<uint8_t>(static_cast<float>(channel_a) * _vector.w);
     return *this;
 }
 
-uint8_t& color_t::operator[](const uint8_t _idx) {
+uint8_t& color_t::operator[](uint8_t _idx) {
     if (_idx > 3) {
         throw std::invalid_argument(log("_idx > 3"));
     }
@@ -127,7 +124,7 @@ uint8_t& color_t::operator[](const uint8_t _idx) {
     }
 }
 
-uint8_t color_t::operator[](const uint8_t _idx) const {
+uint8_t color_t::operator[](uint8_t _idx) const {
     if (_idx > 3) {
         throw std::invalid_argument(log("_idx > 3"));
     }
