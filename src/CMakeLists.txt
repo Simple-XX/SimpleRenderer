@@ -24,15 +24,10 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(OpenMP REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-
 # Set include dir
 include_directories(
         ./include
-        ./3rd
-        ${SDL2_INCLUDE_DIRS}
-        ${SDL2_TTF_INCLUDE_DIRS}
-        ${OpenMP_CXX_INCLUDE_DIRS})
+        ./3rd)
 
 set(SimpleRender_src
         main.cpp
@@ -55,4 +50,4 @@ add_executable(SimpleRender
 target_link_libraries(SimpleRender
         SDL2::Main
         SDL2::TTF
-        ${OpenMP_CXX_LIBRARIES})
+        OpenMP::OpenMP_CXX)

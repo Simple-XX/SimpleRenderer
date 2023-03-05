@@ -28,12 +28,46 @@ jobs:
       shell: bash
       run: |
         mkdir ${{github.workspace}}/build
+
     - name: cmake
       shell: bash
       working-directory: ${{github.workspace}}/build
-      run: cmake -DCMAKE_BUILD_TYPE=RELEASE ..
+      run: |
+        export CC=gcc-12
+        export CXX=g++-12
+        cmake -DCMAKE_BUILD_TYPE=RELEASE ..
 
     - name: make
       shell: bash
       working-directory: ${{github.workspace}}/build
       run: make
+
+  build_ubuntu:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get code
+        uses: actions/checkout@v2
+
+      - name: Setup apt
+        shell: bash
+        run: |
+          sudo apt install g++
+          sudo apt install libsdl2-dev
+          sudo apt install libsdl2-ttf-dev
+          sudo apt install libomp-dev
+
+      - name: Make build dir
+        shell: bash
+        run: |
+          mkdir ${{github.workspace}}/build
+
+      - name: cmake
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        run: cmake -DCMAKE_BUILD_TYPE=RELEASE ..
+
+      - name: make
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        run: make
