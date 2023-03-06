@@ -167,7 +167,7 @@ ContinuationIndentWidth: 2
 Cpp11BracedListStyle: false
 # 分析文件使用最多的换行符并应用到整个文件，
 # 只有当无法得到结论时才会使用 UseCRLF，禁用
-DeriveLineEnding: false
+DeriveLineEnding: true
 # 分析文件使用最多的指针/引用的对齐方式并应用到整个文件，
 # 只有当无法得到结论时才会使用 PointerAlignment，禁用
 DerivePointerAlignment: false
