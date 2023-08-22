@@ -1,0 +1,125 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "std",
+      "description": "This preset makes sure the project actually builds with at least the specified standard",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_EXTENSIONS": "OFF",
+        "CMAKE_C_STANDARD": "17",
+        "CMAKE_C_STANDARD_REQUIRED": "ON",
+        "CMAKE_CXX_EXTENSIONS": "OFF",
+        "CMAKE_CXX_STANDARD": "20",
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON"
+      }
+    },
+    {
+      "name": "cppcheck",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_CPPCHECK": "cppcheck;--enable=all;--inline-suppr;--suppress-xml=${sourceDir}/tools/cppcheck-suppressions.xml",
+        "CMAKE_CXX_CPPCHECK": "cppcheck;--enable=all;--inline-suppr;--suppress-xml=${sourceDir}/tools/cppcheck-suppressions.xml"
+      }
+    },
+    {
+      "name": "clang-tidy",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_CLANG_TIDY": "clang-tidy",
+        "CMAKE_CXX_CLANG_TIDY": "clang-tidy"
+      }
+    },
+    {
+      "name": "clang-format",
+      "hidden": true,
+      "cacheVariables": {
+        "CLANG_FORMAT_FLAGS": "clang-format"
+      }
+    },
+    {
+      "name": "configurePresets_base",
+      "hidden": true,
+      "inherits": [
+        "std",
+        "cppcheck",
+        "clang-tidy",
+        "clang-format"
+      ],
+      "condition": true,
+      "vendor": {
+        "example.com/ExampleIDE/1.0": {
+          "autoFormat": false
+        }
+      },
+      "displayName": "configurePresets_base",
+      "description": "base configurePresets",
+      "generator": "Unix Makefiles",
+      "architecture": {
+        "value": "set",
+        "strategy": "external"
+      },
+      "toolset": {
+        "value": "set",
+        "strategy": "external"
+      },
+      "toolchainFile": "",
+      "binaryDir": "",
+      "installDir": "",
+      "cmakeExecutable": "",
+      "cacheVariables": {
+        "CMAKE_VERBOSE_MAKEFILE": {
+          "type": "BOOL",
+          "value": "TRUE"
+        },
+        "CMAKE_EXPORT_COMPILE_COMMANDS": {
+          "type": "BOOL",
+          "value": "ON"
+        },
+        "CMAKE_BUILD_TYPE": {
+          "type": "STRING",
+          "value": "Debug"
+        },
+        "ENABLE_TEST_COVERAGE": {
+          "type": "BOOL",
+          "value": "ON"
+        }
+      },
+      "environment": {
+        "MY_ENVIRONMENT_VARIABLE": "Test",
+        "PATH": "$env{HOME}/ninja/bin:$penv{PATH}"
+      },
+      "warnings": {
+        "dev": false,
+        "deprecated": true,
+        "uninitialized": true,
+        "unusedCli": true,
+        "systemVars": false
+      },
+      "errors": {
+        "dev": false,
+        "deprecated": false
+      },
+      "debug": {
+        "output": true,
+        "tryCompile": true,
+        "find": true
+      }
+    },
+    {
+      "name": "build",
+      "hidden": false,
+      "inherits": [
+        "configurePresets_base"
+      ],
+      "displayName": "build SimpleRenderer",
+      "description": "build SimpleRenderer",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}
