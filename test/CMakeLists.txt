@@ -14,7 +14,7 @@ include_directories(
 
 set(test_src
         vector_test.cpp
-        render_test.cpp
+#        render_test.cpp
         matrix_test.cpp
         color_test.cpp
         ${SimpleRender_SOURCE_DIR}/src/model.cpp

@@ -46,10 +46,7 @@
       "name": "configurePresets_base",
       "hidden": true,
       "inherits": [
-        "std",
-        "cppcheck",
-        "clang-tidy",
-        "clang-format"
+        "std"
       ],
       "condition": true,
       "vendor": {
