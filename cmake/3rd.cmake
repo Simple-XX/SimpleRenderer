@@ -89,24 +89,36 @@ endif ()
 #    add_library(Freetype::Freetype ALIAS freetype)
 #endif ()
 
-# https://github.com/gdbinit/Gdbinit
+# https://github.com/tinyobjloader/tinyobjloader.git
 CPMAddPackage(
-        NAME gdbinit
-        GIT_REPOSITORY https://github.com/gdbinit/Gdbinit.git
-        GIT_TAG e5138c24226bdd05360ca41743d8315a9e366c40
+        NAME tinyobjloader
+        GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
+        GIT_TAG v1.0.6
+        VERSION 1.0.6
         DOWNLOAD_ONLY True
 )
-if (gdbinit_ADDED)
-    add_custom_target(gdbinit
-            COMMENT "Generate gdbinit ..."
-            WORKING_DIRECTORY ${gdbinit_SOURCE_DIR}
-            # 复制到根目录下并重命名
-            COMMAND
-            ${CMAKE_COMMAND}
-            -E
-            copy
-            ${gdbinit_SOURCE_DIR}/gdbinit
-            ${CMAKE_SOURCE_DIR}/.gdbinit
+if (tinyobjloader_ADDED)
+    add_library(tinyobjloader INTERFACE)
+    target_sources(tinyobjloader INTERFACE
+            FILE_SET HEADERS
+            BASE_DIRS ${tinyobjloader_SOURCE_DIR}
+            FILES tiny_obj_loader.h
+    )
+endif ()
+
+# https://github.com/nothings/stb.git
+CPMAddPackage(
+        NAME stb
+        GIT_REPOSITORY https://github.com/nothings/stb.git
+        GIT_TAG 5736b15f7ea0ffb08dd38af21067c314d6a3aae9
+        DOWNLOAD_ONLY True
+)
+if (stb_ADDED)
+    add_library(stb INTERFACE)
+    target_sources(stb INTERFACE
+            FILE_SET HEADERS
+            BASE_DIRS ${stb_SOURCE_DIR}
+            FILES stb_image.h
     )
 endif ()
 

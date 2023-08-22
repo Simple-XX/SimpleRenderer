@@ -18,7 +18,7 @@
 #include "iostream"
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "3rd/tiny_obj_loader.h"
+#include "tiny_obj_loader.h"
 
 model_t::material_t::material_t(void) {
     shininess = 0;
