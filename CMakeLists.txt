@@ -4,27 +4,32 @@
 #
 # CMakeLists.txt for Simple-XX/SimpleRenderer.
 
-# Set minimum cmake version
-cmake_minimum_required(VERSION 3.20)
+# 设置最小 cmake 版本
+cmake_minimum_required(VERSION 3.27 FATAL_ERROR)
 
-project(SimpleRender LANGUAGES C CXX)
+# 设置项目名与版本
+project(SimpleRender
+        VERSION 0.0.1)
 
-if (${SimpleRenderer_SOURCE_DIR} STREQUAL ${SimpleRenderer_BINARY_DIR})
-    message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.")
+# 禁止原地编译
+if (${PROJECT_SOURCE_DIR} STREQUAL ${PROJECT_BINARY_DIR})
+    # 如果你看到这句话，cmake 此时已经在根目录下生成了一些临时文件，你需要删除它们
+    # CMakeFiles, CMakeCache.txt
+    message(
+            FATAL_ERROR
+            "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there."
+    )
 endif ()
 
-# Set debug
-set(CMAKE_BUILD_TYPE DEBUG)
+# 设置辅助 cmake 脚本路径
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
-# Set c++20
-set(CMAKE_CXX_STANDARD 20)
+# 导入函数
+include(functions)
+# 导入第三方依赖
+include(3rd)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-# 添加 sdl2 使用的 cmake 模块
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
-
-add_subdirectory(${SimpleRender_SOURCE_DIR}/src)
-add_subdirectory(${SimpleRender_SOURCE_DIR}/test)
+# 添加要编译的目录
+add_subdirectory(${PROJECT_SOURCE_DIR}/src)
+add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+add_subdirectory(${PROJECT_SOURCE_DIR}/doc)

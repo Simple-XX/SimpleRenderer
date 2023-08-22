@@ -46,37 +46,48 @@ endif ()
 include(${CPM_DOWNLOAD_LOCATION})
 # -------- get_cpm.cmake --------
 
-# # https://github.com/google/googletest
-# CPMAddPackage(
-#   NAME googletest
-#   GITHUB_REPOSITORY google/googletest
-#   GIT_TAG v1.13.0
-#   VERSION 1.13.0
-#   OPTIONS
-#       "INSTALL_GTEST OFF"
-#       "gtest_force_shared_crt ON"
-# )
+# https://github.com/google/googletest
+CPMAddPackage(
+        NAME googletest
+        GITHUB_REPOSITORY google/googletest
+        GIT_TAG v1.14.0
+        VERSION 1.14.0
+        OPTIONS
+        "INSTALL_GTEST OFF"
+        "gtest_force_shared_crt ON"
+)
 
-# # https://github.com/abumq/easyloggingpp
-# CPMAddPackage(
-#   NAME easylogingpp
-#   VERSION 9.97.0
-#   GITHUB_REPOSITORY amrayn/easyloggingpp
-#   OPTIONS
-#   "build_static_lib ON"
-#   "lib_utc_datetime ON"
-# )
+## https://github.com/abumq/easyloggingpp
+#CPMAddPackage(
+#        NAME easylogingpp
+#        VERSION 9.97.0
+#        GITHUB_REPOSITORY amrayn/easyloggingpp
+#        OPTIONS
+#        "build_static_lib ON"
+#        "lib_utc_datetime ON"
+#)
 
-# # https://github.com/freetype/freetype
-# CPMAddPackage(
-#   NAME freetype
-#   GIT_REPOSITORY https://github.com/freetype/freetype.git
-#   GIT_TAG VER-2-13-0
-#   VERSION 2.13.0
-# )
-# if (freetype_ADDED)
-#   add_library(Freetype::Freetype ALIAS freetype)
-# endif()
+# https://github.com/aminosbh/sdl2-cmake-modules.git
+CPMAddPackage(
+        NAME sdl2-cmake-modules
+        GIT_REPOSITORY https://github.com/aminosbh/sdl2-cmake-modules.git
+        GIT_TAG ad006a3daae65a612ed87415037e32188b81071e
+        DOWNLOAD_ONLY True
+)
+if (sdl2-cmake-modules_ADDED)
+    list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
+endif ()
+
+## https://github.com/freetype/freetype
+#CPMAddPackage(
+#        NAME freetype
+#        GIT_REPOSITORY https://github.com/freetype/freetype.git
+#        GIT_TAG VER-2-13-0
+#        VERSION 2.13.0
+#)
+#if (freetype_ADDED)
+#    add_library(Freetype::Freetype ALIAS freetype)
+#endif ()
 
 # https://github.com/gdbinit/Gdbinit
 CPMAddPackage(
@@ -147,3 +158,7 @@ if (NOT CLANG_FORMAT_EXE)
     message(FATAL_ERROR "clang-format not found.\n"
             "Following https://clang.llvm.org/docs/ClangFormat.html to install.")
 endif ()
+
+find_package(SDL2 REQUIRED)
+find_package(SDL2_ttf REQUIRED)
+find_package(OpenMP REQUIRED)

@@ -7,21 +7,6 @@
 # Set CXX flags for debug
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
-# gtest
-include(FetchContent)
-FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG release-1.12.1
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
-find_package(SDL2 REQUIRED)
-find_package(SDL2_ttf REQUIRED)
-find_package(OpenMP REQUIRED)
-
 # Set include dir
 include_directories(
         ${SimpleRender_SOURCE_DIR}/src/include
