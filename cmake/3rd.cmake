@@ -29,7 +29,7 @@ function(download_cpm)
     file(DOWNLOAD
             https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
             ${CPM_DOWNLOAD_LOCATION}
-    )
+            )
 endfunction()
 
 if (NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
@@ -93,8 +93,7 @@ endif ()
 CPMAddPackage(
         NAME tinyobjloader
         GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
-        GIT_TAG v1.0.6
-        VERSION 1.0.6
+        GIT_TAG 853f059d778058a43c954850e561a231934b33a7
         DOWNLOAD_ONLY True
 )
 if (tinyobjloader_ADDED)
@@ -103,7 +102,7 @@ if (tinyobjloader_ADDED)
             FILE_SET HEADERS
             BASE_DIRS ${tinyobjloader_SOURCE_DIR}
             FILES tiny_obj_loader.h
-    )
+            )
 endif ()
 
 # https://github.com/nothings/stb.git
@@ -119,7 +118,7 @@ if (stb_ADDED)
             FILE_SET HEADERS
             BASE_DIRS ${stb_SOURCE_DIR}
             FILES stb_image.h
-    )
+            )
 endif ()
 
 # https://github.com/cpm-cmake/CPMLicenses.cmake
@@ -140,7 +139,7 @@ add_custom_target(3rd_licenses
         COMMAND
         make
         write-licenses
-)
+        )
 
 # doxygen
 find_package(Doxygen

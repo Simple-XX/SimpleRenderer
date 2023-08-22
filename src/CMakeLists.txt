@@ -24,7 +24,8 @@ include_directories(
         ./include
 )
 
-set(SimpleRender_src
+# 生成可执行文件
+add_executable(SimpleRender
         main.cpp
         model.cpp
         framebuffer.cpp
@@ -38,13 +39,11 @@ set(SimpleRender_src
         input.cpp
         render.cpp)
 
-# 生成可执行文件
-add_executable(SimpleRender
-        ${SimpleRender_src})
-
 target_link_libraries(SimpleRender
         stb
         tinyobjloader
         SDL2::Main
         SDL2::TTF
         OpenMP::OpenMP_CXX)
+
+disable_clang_tidy(SimpleRender)
