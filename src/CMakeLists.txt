@@ -22,7 +22,7 @@ message(STATUS "CMAKE_CXX_FLAGS is ${CMAKE_CXX_FLAGS}")
 # Set include dir
 include_directories(
         ./include
-        )
+)
 
 set(SimpleRender_src
         main.cpp

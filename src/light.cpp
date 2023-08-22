@@ -18,25 +18,23 @@
 
 light_t::light_t(void)
     : pos(DEFAULT_POS), dir(DEFAULT_DIR), color(DEFAULT_COLOR) {
-    return;
+  return;
 }
 
-light_t::light_t(const light_t& _light) {
-    pos   = _light.pos;
-    dir   = _light.dir;
-    color = _light.color;
+light_t::light_t(const light_t &_light) {
+  pos = _light.pos;
+  dir = _light.dir;
+  color = _light.color;
 
-    return;
+  return;
 }
 
-light_t::~light_t(void) {
-    return;
-}
+light_t::~light_t(void) { return; }
 
-light_t& light_t::operator=(const light_t& _light) {
-    pos   = _light.pos;
-    dir   = _light.dir;
-    color = _light.color;
+light_t &light_t::operator=(const light_t &_light) {
+  pos = _light.pos;
+  dir = _light.dir;
+  color = _light.color;
 
-    return *this;
+  return *this;
 }

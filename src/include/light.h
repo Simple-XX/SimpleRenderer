@@ -27,42 +27,42 @@
  */
 class light_t {
 private:
-    /// @brief 默认位置
-    const vector4f_t DEFAULT_POS   = vector4f_t(0, 0, 0);
-    /// @brief 默认方向，左手系，x 向右，y 向下，z 正方向为屏幕由内向外
-    const vector4f_t DEFAULT_DIR   = vector4f_t(0, 0, -1);
-    /// @brief 默认颜色
-    const color_t    DEFAULT_COLOR = color_t(color_t::WHITE);
+  /// @brief 默认位置
+  const vector4f_t DEFAULT_POS = vector4f_t(0, 0, 0);
+  /// @brief 默认方向，左手系，x 向右，y 向下，z 正方向为屏幕由内向外
+  const vector4f_t DEFAULT_DIR = vector4f_t(0, 0, -1);
+  /// @brief 默认颜色
+  const color_t DEFAULT_COLOR = color_t(color_t::WHITE);
 
 public:
-    /// @brief 位置
-    vector4f_t pos;
-    /// @brief 方向
-    vector4f_t dir;
-    /// @brief 颜色
-    color_t    color;
+  /// @brief 位置
+  vector4f_t pos;
+  /// @brief 方向
+  vector4f_t dir;
+  /// @brief 颜色
+  color_t color;
 
-    /**
-     * @brief 空构造函数
-     */
-    light_t(void);
+  /**
+   * @brief 空构造函数
+   */
+  light_t(void);
 
-    /**
-     * @brief 构造函数
-     */
-    light_t(const light_t& _light);
+  /**
+   * @brief 构造函数
+   */
+  light_t(const light_t &_light);
 
-    /**
-     * @brief 析构函数
-     */
-    ~light_t(void);
+  /**
+   * @brief 析构函数
+   */
+  ~light_t(void);
 
-    /**
-     * @brief 赋值
-     * @param  _light            另一个 light
-     * @return light_t&          结果
-     */
-    light_t& operator=(const light_t& _light);
+  /**
+   * @brief 赋值
+   * @param  _light            另一个 light
+   * @return light_t&          结果
+   */
+  light_t &operator=(const light_t &_light);
 };
 
 #endif /* SIMPLERENDER_LIGHT_H */

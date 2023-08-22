@@ -26,12 +26,12 @@
 
 /// @bug 在坐标系上可能有问题，设计的部分：法向量计算，光照方向，屏幕原点
 
-auto config  = std::make_shared<config_t>();
+auto config = std::make_shared<config_t>();
 auto display = std::make_shared<display_t>(config->WIDTH, config->HEIGHT);
-auto scene   = std::make_shared<scene_t>(config);
-auto input   = std::make_shared<input_t>();
-auto shader  = std::make_shared<default_shader_t>();
-auto render  = std::make_shared<render_t>(config, scene, display, input);
+auto scene = std::make_shared<scene_t>(config);
+auto input = std::make_shared<input_t>();
+auto shader = std::make_shared<default_shader_t>();
+auto render = std::make_shared<render_t>(config, scene, display, input);
 
 // void draw(const std::shared_ptr<framebuffer_t>& _framebuffer,
 //           const std::shared_ptr<shader_base_t>& _shader,
@@ -78,36 +78,36 @@ auto render  = std::make_shared<render_t>(config, scene, display, input);
 //     return;
 // }
 
-int  main(int _argc, char** _argv) {
-    // obj 路径
-    std::vector<std::string> obj_path;
-    // 如果没有指定那么使用默认值
-    if (_argc == 1) {
-        // obj_path = "../../obj/helmet.obj";
-        //  obj_path = "../../obj/cube.obj";
-        //  obj_path = "../../obj/cube2.obj";
-        obj_path.emplace_back("../../obj/cube3.obj");
-        // obj_path = "../../obj/cornell_box.obj";
-        // obj_path.push_back("../../obj/helmet.obj");
-        // obj_path.push_back("../../obj/african_head.obj");
-        // obj_path.push_back("../../obj/utah-teapot/utah-teapot.obj");
+int main(int _argc, char **_argv) {
+  // obj 路径
+  std::vector<std::string> obj_path;
+  // 如果没有指定那么使用默认值
+  if (_argc == 1) {
+    // obj_path = "../../obj/helmet.obj";
+    //  obj_path = "../../obj/cube.obj";
+    //  obj_path = "../../obj/cube2.obj";
+    obj_path.emplace_back("../../obj/cube3.obj");
+    // obj_path = "../../obj/cornell_box.obj";
+    // obj_path.push_back("../../obj/helmet.obj");
+    // obj_path.push_back("../../obj/african_head.obj");
+    // obj_path.push_back("../../obj/utah-teapot/utah-teapot.obj");
+  }
+  // 否则使用指定的
+  else {
+    for (auto i = 1; i < _argc; i++) {
+      obj_path.emplace_back(_argv[i]);
     }
-    // 否则使用指定的
-    else {
-        for (auto i = 1; i < _argc; i++) {
-            obj_path.emplace_back(_argv[i]);
-        }
-    }
+  }
 
-    // 读取模型与材质
-    for (auto& i : obj_path) {
-        model_t model(i);
+  // 读取模型与材质
+  for (auto &i : obj_path) {
+    model_t model(i);
 
-        scene->add_model(model);
-    }
-    scene->add_light(light_t());
+    scene->add_model(model);
+  }
+  scene->add_light(light_t());
 
-    render->loop();
+  render->loop();
 
-    return 0;
+  return 0;
 }

@@ -17,201 +17,193 @@
 #include "camera.h"
 
 camera_base_t::camera_base_t(void) {
-    pos    = DEFAULT_POS;
-    target = DEFAULT_TARGET;
+  pos = DEFAULT_POS;
+  target = DEFAULT_TARGET;
 
-    up     = DEFAULT_UP;
-    front  = DEFAULT_FRONT;
-    right  = DEFAULT_RIGHT;
+  up = DEFAULT_UP;
+  front = DEFAULT_FRONT;
+  right = DEFAULT_RIGHT;
 
-    aspect = DEFAULT_ASPECT;
-    speed  = DEFAULT_SPEED;
+  aspect = DEFAULT_ASPECT;
+  speed = DEFAULT_SPEED;
 
-    return;
+  return;
 }
 
-camera_base_t::camera_base_t(const camera_base_t& _camera) {
-    pos    = _camera.pos;
-    target = _camera.target;
+camera_base_t::camera_base_t(const camera_base_t &_camera) {
+  pos = _camera.pos;
+  target = _camera.target;
 
-    up     = _camera.up;
-    front  = _camera.front;
-    right  = _camera.right;
+  up = _camera.up;
+  front = _camera.front;
+  right = _camera.right;
 
-    aspect = _camera.aspect;
-    speed  = _camera.speed;
+  aspect = _camera.aspect;
+  speed = _camera.speed;
 
-    return;
+  return;
 }
 
-camera_base_t::camera_base_t(const vector4f_t& _pos, const vector4f_t& _target,
+camera_base_t::camera_base_t(const vector4f_t &_pos, const vector4f_t &_target,
                              float _aspect)
     : pos(_pos), target(_target), aspect(_aspect) {
-    up    = DEFAULT_UP;
-    front = DEFAULT_FRONT;
-    right = DEFAULT_RIGHT;
+  up = DEFAULT_UP;
+  front = DEFAULT_FRONT;
+  right = DEFAULT_RIGHT;
 
-    speed = DEFAULT_SPEED;
-    return;
+  speed = DEFAULT_SPEED;
+  return;
 }
 
-camera_base_t::~camera_base_t(void) {
-    return;
-}
+camera_base_t::~camera_base_t(void) { return; }
 
-camera_base_t& camera_base_t::operator=(const camera_base_t& _camera) {
-    pos    = _camera.pos;
-    target = _camera.target;
+camera_base_t &camera_base_t::operator=(const camera_base_t &_camera) {
+  pos = _camera.pos;
+  target = _camera.target;
 
-    up     = _camera.up;
-    front  = _camera.front;
-    right  = _camera.right;
+  up = _camera.up;
+  front = _camera.front;
+  right = _camera.right;
 
-    aspect = _camera.aspect;
-    speed  = _camera.speed;
+  aspect = _camera.aspect;
+  speed = _camera.speed;
 
-    return *this;
+  return *this;
 }
 
 void camera_base_t::set_default(void) {
-    pos    = DEFAULT_POS;
-    target = DEFAULT_TARGET;
+  pos = DEFAULT_POS;
+  target = DEFAULT_TARGET;
 
-    up     = DEFAULT_UP;
-    front  = DEFAULT_FRONT;
-    right  = DEFAULT_RIGHT;
+  up = DEFAULT_UP;
+  front = DEFAULT_FRONT;
+  right = DEFAULT_RIGHT;
 
-    aspect = DEFAULT_ASPECT;
-    speed  = DEFAULT_SPEED;
-    return;
+  aspect = DEFAULT_ASPECT;
+  speed = DEFAULT_SPEED;
+  return;
 }
 
-void camera_base_t::move(const move_to_t& _to, uint32_t _delta_time) {
-    switch (_to) {
-        case RIGHT: {
-            pos += right * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case LEFT: {
-            pos -= right * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case UP: {
-            pos += up * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case DOWN: {
-            pos -= up * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case FORWARD: {
-            pos += front * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case BACKWARD: {
-            pos -= front * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-    }
+void camera_base_t::move(const move_to_t &_to, uint32_t _delta_time) {
+  switch (_to) {
+  case RIGHT: {
+    pos += right * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case LEFT: {
+    pos -= right * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case UP: {
+    pos += up * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case DOWN: {
+    pos -= up * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case FORWARD: {
+    pos += front * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case BACKWARD: {
+    pos -= front * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  }
 
-    return;
+  return;
 }
 
-void camera_base_t::update_target(const move_to_t& _to,
-                                  const uint32_t   _delta_time) {
-    switch (_to) {
-        case RIGHT: {
-            pos += front * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case LEFT: {
-            pos -= front * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case UP: {
-            pos += right * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case DOWN: {
-            pos -= right * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case FORWARD: {
-            pos += up * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case BACKWARD: {
-            pos -= up * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-    }
+void camera_base_t::update_target(const move_to_t &_to,
+                                  const uint32_t _delta_time) {
+  switch (_to) {
+  case RIGHT: {
+    pos += front * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case LEFT: {
+    pos -= front * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case UP: {
+    pos += right * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case DOWN: {
+    pos -= right * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case FORWARD: {
+    pos += up * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case BACKWARD: {
+    pos -= up * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  }
 
-    return;
+  return;
 }
 
-void camera_base_t::update_up(const move_to_t& _to,
-                              const uint32_t   _delta_time) {
-    switch (_to) {
-        case RIGHT: {
-            up += right * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case LEFT: {
-            up -= right * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case UP: {
-            up += up * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case DOWN: {
-            up -= up * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case FORWARD: {
-            up += front * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-        case BACKWARD: {
-            up -= front * (speed * static_cast<decltype(speed)>(_delta_time));
-            break;
-        }
-    }
+void camera_base_t::update_up(const move_to_t &_to,
+                              const uint32_t _delta_time) {
+  switch (_to) {
+  case RIGHT: {
+    up += right * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case LEFT: {
+    up -= right * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case UP: {
+    up += up * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case DOWN: {
+    up -= up * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case FORWARD: {
+    up += front * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  case BACKWARD: {
+    up -= front * (speed * static_cast<decltype(speed)>(_delta_time));
+    break;
+  }
+  }
 
-    return;
+  return;
 }
 
 /// @todo 有问题
 matrix4f_t camera_base_t::look_at(void) const {
-    auto  z         = (pos - target).normalize();
-    auto  x         = (up ^ z).normalize();
-    auto  y         = (z ^ x).normalize();
+  auto z = (pos - target).normalize();
+  auto x = (up ^ z).normalize();
+  auto y = (z ^ x).normalize();
 
-    float arr[4][4] = {
-        {x.x, x.y, x.z, -x * pos},
-        {y.x, y.y, y.z, -y * pos},
-        {z.x, z.y, z.z, -z * pos},
-        {  0,   0,   0,        1}
-    };
+  float arr[4][4] = {{x.x, x.y, x.z, -x * pos},
+                     {y.x, y.y, y.z, -y * pos},
+                     {z.x, z.y, z.z, -z * pos},
+                     {0, 0, 0, 1}};
 
-    return matrix4f_t(arr);
+  return matrix4f_t(arr);
 }
 
-surround_camera_t::surround_camera_t(void) : camera_base_t() {
-    return;
-}
+surround_camera_t::surround_camera_t(void) : camera_base_t() { return; }
 
-surround_camera_t::surround_camera_t(const surround_camera_t& _camera)
+surround_camera_t::surround_camera_t(const surround_camera_t &_camera)
     : camera_base_t(_camera) {
-    return;
+  return;
 }
 
-surround_camera_t::surround_camera_t(const vector4f_t& _pos,
-                                     const vector4f_t& _target, float _aspect)
+surround_camera_t::surround_camera_t(const vector4f_t &_pos,
+                                     const vector4f_t &_target, float _aspect)
     : camera_base_t(_pos, _target, _aspect) {
-    return;
+  return;
 }
 
-surround_camera_t::~surround_camera_t(void) {
-    return;
-}
+surround_camera_t::~surround_camera_t(void) { return; }
