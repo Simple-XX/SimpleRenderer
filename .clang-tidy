@@ -1,0 +1,22 @@
+
+# This file is a part of Simple-XX/SimpleRenderer
+# (https://github.com/Simple-XX/SimpleRenderer).
+#
+# .clang-tidy for Simple-XX/SimpleRenderer.
+
+---
+Checks: '-*,\
+  bugprone-*,\
+  clang-analyzer-*,\
+  cppcoreguidelines-*,\
+  hicpp-*,\
+  llvm-*,\
+  misc-*
+  modernize-*,\
+  performance-*,\
+  portability-*,\
+  readability-*,\
+  -cppcoreguidelines-pro-type-reinterpret-cast'
+HeaderFilterRegex: '^${sourceDir}/src'
+AnalyzeTemporaryDtors: true
+...
