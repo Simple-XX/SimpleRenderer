@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 # Set include dir
 include_directories(
         ${SimpleRender_SOURCE_DIR}/src/include
-        )
+)
 
 set(test_src
         vector_test.cpp
@@ -38,6 +38,7 @@ add_executable(test
 target_link_libraries(test
         stb
         tinyobjloader
+        Eigen
         gtest_main
         ${glog_LIBRARIES}
         SDL2::Main

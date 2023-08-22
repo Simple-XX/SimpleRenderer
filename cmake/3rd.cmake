@@ -121,6 +121,19 @@ if (stb_ADDED)
             )
 endif ()
 
+# https://gitlab.com/libeigen/eigen.git
+CPMAddPackage(
+        NAME Eigen
+        GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+        GIT_TAG 3.4.0
+        VERSION 3.4.0
+        DOWNLOAD_ONLY YES
+)
+if (Eigen_ADDED)
+    add_library(Eigen INTERFACE IMPORTED)
+    target_include_directories(Eigen INTERFACE ${Eigen_SOURCE_DIR})
+endif ()
+
 # https://github.com/cpm-cmake/CPMLicenses.cmake
 # 保持在 CPMAddPackage 的最后
 CPMAddPackage(

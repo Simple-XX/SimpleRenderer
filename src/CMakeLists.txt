@@ -42,6 +42,7 @@ add_executable(SimpleRender
 target_link_libraries(SimpleRender
         stb
         tinyobjloader
+        Eigen
         SDL2::Main
         SDL2::TTF
         OpenMP::OpenMP_CXX)
