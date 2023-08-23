@@ -65,18 +65,6 @@ public:
   matrix4_t(const Eigen::Matrix<T_t, ORDER, ORDER> &_mat);
 
   /**
-   * @brief 构造函数
-   * @param  _arr             指针
-   */
-  explicit matrix4_t(const T_t *_arr);
-
-  /**
-   * @brief 构造函数
-   * @param  _arr             数组
-   */
-  explicit matrix4_t(const T_t _arr[ORDER][ORDER]);
-
-  /**
    * @brief 构造函数，构造齐次坐标，多余位置补 0
    * @param  _v               四维向量
    */
@@ -369,63 +357,6 @@ template <matrix_element_concept_t T_t>
 matrix4_t<T_t>::matrix4_t(const Eigen::Matrix<T_t, ORDER, ORDER> &_mat) {
   eigen_mat = _mat;
   return;
-}
-
-template <matrix_element_concept_t T_t>
-matrix4_t<T_t>::matrix4_t(const T_t *_arr) {
-  if (_arr == nullptr) {
-    throw std::invalid_argument(log("_arr == nullptr"));
-  }
-
-  eigen_mat.setIdentity();
-  eigen_mat(0, 0) = _arr[0];
-  eigen_mat(0, 1) = _arr[1];
-  eigen_mat(0, 2) = _arr[2];
-  eigen_mat(0, 3) = _arr[3];
-
-  eigen_mat(1, 0) = _arr[4];
-  eigen_mat(1, 1) = _arr[5];
-  eigen_mat(1, 2) = _arr[6];
-  eigen_mat(1, 3) = _arr[7];
-
-  eigen_mat(2, 0) = _arr[8];
-  eigen_mat(2, 1) = _arr[9];
-  eigen_mat(2, 2) = _arr[10];
-  eigen_mat(2, 3) = _arr[11];
-
-  eigen_mat(3, 0) = _arr[12];
-  eigen_mat(3, 1) = _arr[13];
-  eigen_mat(3, 2) = _arr[14];
-  eigen_mat(3, 3) = _arr[15];
-
-  return;
-}
-
-template <matrix_element_concept_t T_t>
-matrix4_t<T_t>::matrix4_t(const T_t _arr[ORDER][ORDER]) {
-  if (_arr == nullptr) {
-    throw std::invalid_argument(log("_arr == nullptr"));
-  }
-
-  eigen_mat(0, 0) = _arr[0][0];
-  eigen_mat(0, 1) = _arr[0][1];
-  eigen_mat(0, 2) = _arr[0][2];
-  eigen_mat(0, 3) = _arr[0][3];
-
-  eigen_mat(1, 0) = _arr[1][0];
-  eigen_mat(1, 1) = _arr[1][1];
-  eigen_mat(1, 2) = _arr[1][2];
-  eigen_mat(1, 3) = _arr[1][3];
-
-  eigen_mat(2, 0) = _arr[2][0];
-  eigen_mat(2, 1) = _arr[2][1];
-  eigen_mat(2, 2) = _arr[2][2];
-  eigen_mat(2, 3) = _arr[2][3];
-
-  eigen_mat(3, 0) = _arr[3][0];
-  eigen_mat(3, 1) = _arr[3][1];
-  eigen_mat(3, 2) = _arr[3][2];
-  eigen_mat(3, 3) = _arr[3][3];
 }
 
 template <matrix_element_concept_t T_t>

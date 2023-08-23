@@ -277,11 +277,11 @@ public:
 
 // 模型变换
 inline matrix4f_t get_model_matrix(const vector4f_t &_scale,
-                                   const vector4f_t &_rotate,
-                                   const float &_rad,
+                                   const vector4f_t &_rotate, const float &_rad,
                                    const vector4f_t &_translate) {
   // 缩放
-  auto scale = matrix4f_t().scale(_scale.vector.x(), _scale.vector.y(), _scale.vector.z());
+  auto scale = matrix4f_t().scale(_scale.vector.x(), _scale.vector.y(),
+                                  _scale.vector.z());
 
   // 旋转
   auto rotation = matrix4f_t().rotate(_rotate, _rad);
@@ -301,23 +301,18 @@ inline matrix4f_t get_model_matrix(const vector4f_t &_scale,
 inline matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio,
                                         float zNear, float zFar) {
   // 透视投影矩阵
-  float proj_arr[4][4] = {{zNear, 0, 0, 0},
-                          {0, zNear, 0, 0},
-                          {0, 0, zNear + zFar, -zNear * zFar},
-                          {0, 0, 1, 0}};
-  auto proj = matrix4f_t(proj_arr);
+  auto proj = matrix4f_t();
+  proj.eigen_mat << zNear, 0, 0, 0, 0, zNear, 0, 0, 0, 0, zNear + zFar,
+      -zNear * zFar, 0, 0, 1, 0;
 
   auto h =
       zNear * static_cast<float>(tan(static_cast<double>(eye_fov / 2))) * 2;
   auto w = h * aspect_ratio;
   auto z = zFar - zNear;
   // 正交投影矩阵，因为在观测投影时x0y平面视角默认是中心，所以这里的正交投影就不用平移x和y了
-  float ortho_arr[4][4] = {{2 / w, 0, 0, 0},
-                           {0, 2 / h, 0, 0},
-                           {0, 0, 2 / z, -(zFar + zNear) / 2},
-                           {0, 0, 0, 1}};
-
-  auto ortho = matrix4f_t(ortho_arr);
+  auto ortho = matrix4f_t();
+  ortho.eigen_mat << 2 / w, 0, 0, 0, 0, 2 / h, 0, 0, 0, 0, 2 / z,
+      -(zFar + zNear) / 2, 0, 0, 0, 1;
 
   return ortho * proj;
 }

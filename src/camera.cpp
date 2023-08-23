@@ -185,12 +185,11 @@ matrix4f_t camera_base_t::look_at(void) const {
   auto x = (up ^ z).normalize();
   auto y = (z ^ x).normalize();
 
-  float arr[4][4] = {{x.vector.x(), x.vector.y(), x.vector.z(), -x * pos},
-                     {y.vector.x(), y.vector.y(), y.vector.z(), -y * pos},
-                     {z.vector.x(), z.vector.y(), z.vector.z(), -z * pos},
-                     {0, 0, 0, 1}};
-
-  return matrix4f_t(arr);
+  auto mat = matrix4f_t();
+  mat.eigen_mat << x.vector.x(), x.vector.y(), x.vector.z(), -x * pos,
+      y.vector.x(), y.vector.y(), y.vector.z(), -y * pos, z.vector.x(),
+      z.vector.y(), z.vector.z(), -z * pos, 0, 0, 0, 1;
+  return matrix4f_t(mat);
 }
 
 surround_camera_t::surround_camera_t(void) : camera_base_t() { return; }
