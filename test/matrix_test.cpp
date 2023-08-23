@@ -96,7 +96,11 @@ TEST(matrix_t, inverse) {
 // 缩放
 TEST(matrix_t, scale) {
   auto vec = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-  auto mat = matrix4f_t().scale(1, 2, 3);
+  auto mat = matrix4f_t();
+  mat.eigen_mat.setIdentity();
+  mat.eigen_mat.diagonal()[0] = 1;
+  mat.eigen_mat.diagonal()[1] = 2;
+  mat.eigen_mat.diagonal()[2] = 3;
   auto res_vec = vector4f_t(1, 4, 9, vector4f_t::W_POINT);
   EXPECT_EQ((res_vec == mat * vec), true);
   return;
@@ -278,7 +282,12 @@ TEST(matrix_t, translate) {
 // 缩放 + 旋转
 TEST(matrix_t, scale_rotate) {
   auto vec = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-  auto mat = matrix4f_t().scale(5, 6, 7);
+
+  auto mat = matrix4f_t();
+  mat.eigen_mat.diagonal()[0] = 5;
+  mat.eigen_mat.diagonal()[1] = 6;
+  mat.eigen_mat.diagonal()[2] = 7;
+
   auto res_vec = vector4f_t(5, 12, 21, vector4f_t::W_POINT);
   EXPECT_EQ((res_vec == mat * vec), true);
 
@@ -298,7 +307,14 @@ TEST(matrix_t, rotate_scale) {
   auto res_vec = vector4f_t(-2, 0.99999994, 2.9999997, vector4f_t::W_POINT);
   EXPECT_EQ((res_vec == mat * vec), true);
 
-  mat = mat.scale(5, 6, 7);
+  auto scale_mat = matrix4f_t();
+  scale_mat.eigen_mat.setIdentity();
+  scale_mat.eigen_mat.diagonal()[0] = 5;
+  scale_mat.eigen_mat.diagonal()[1] = 6;
+  scale_mat.eigen_mat.diagonal()[2] = 7;
+
+  mat = scale_mat * mat;
+
   /// @todo 精度问题
   res_vec = vector4f_t(-10, 5.9999995, 20.999998, vector4f_t::W_POINT);
   EXPECT_EQ((res_vec == mat * vec), true);

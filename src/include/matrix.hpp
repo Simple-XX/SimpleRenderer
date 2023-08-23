@@ -247,72 +247,6 @@ public:
   matrix4_t<T_t> inverse(void) const;
 
   /**
-   * @brief 缩放矩阵
-   * @param  _scale           缩放倍数
-   * @return  matrix4_t<T_t>  构造好的旋转矩阵
-   * @note 缩放的是顶点
-   */
-  matrix4_t<T_t> scale(T_t _scale) const;
-
-  /**
-   * @brief 缩放矩阵
-   * @param  _x               x 方向缩放倍数
-   * @param  _y               y 方向缩放倍数
-   * @param  _z               z 方向缩放倍数
-   * @return  matrix4_t<T_t>  构造好的缩放矩阵
-   * @note 缩放的是顶点
-   */
-  matrix4_t<T_t> scale(T_t _x, T_t _y, T_t _z) const;
-
-  //  /**
-  //   * @brief 绕 x 轴旋转，返回当前矩阵与旋转矩阵相乘的结果 rotate_x_mat*
-  //   *this
-  //   * @param  _angle           要旋转的角度
-  //   * @return matrix4_t<T_t>   构造好的旋转矩阵
-  //   * @note 左手系，x 向右，y 向下，z 向屏幕外
-  //   * @see http://www.songho.ca/opengl/gl_anglestoaxes.html
-  //   *  {
-  //   *      {1, 0, 0, 0},
-  //   *      {0, c, -s, 0},
-  //   *      {0, s, c, 0},
-  //   *      {0, 0, 0, 1}
-  //   *  }
-  //   */
-  //  matrix4_t<T_t> rotate_x(float _angle);
-  //
-  //  /**
-  //   * @brief 绕 y 轴旋转，返回当前矩阵与旋转矩阵相乘的结果 rotate_y_mat*
-  //   *this
-  //   * @param  _angle           要旋转的角度
-  //   * @return matrix4_t<T_t>   构造好的旋转矩阵
-  //   * @note 左手系，x 向右，y 向下，z 向屏幕外
-  //   * @see http://www.songho.ca/opengl/gl_anglestoaxes.html
-  //   *  {
-  //   *      {c, 0, s, 0},
-  //   *      {0, 1, 0, 0},
-  //   *      {-s, 0, c, 0},
-  //   *      {0, 0, 0, 1}
-  //   *  }
-  //   */
-  //  matrix4_t<T_t> rotate_y(float _angle);
-  //
-  //  /**
-  //   * @brief 绕 z 轴旋转，返回当前矩阵与旋转矩阵相乘的结果 rotate_z_mat*
-  //   *this
-  //   * @param  _angle           要旋转的角度
-  //   * @return matrix4_t<T_t>   构造好的旋转矩阵
-  //   * @note 左手系，x 向右，y 向下，z 向屏幕外
-  //   * @see http://www.songho.ca/opengl/gl_anglestoaxes.html
-  //   *  {
-  //   *      {c, -s, 0, 0},
-  //   *      {s, c, 0, 0},
-  //   *      {0, 0, 1, 0},
-  //   *      {0, 0, 0, 1}
-  //   *  }
-  //   */
-  //  matrix4_t<T_t> rotate_z(float _angle);
-
-  /**
    * @brief 旋转矩阵，Rodriguez 方法
    * @param  _axis            旋转轴，起点为原点，单位向量
    * @param  _rad             要旋转的弧度
@@ -449,28 +383,6 @@ matrix4_t<T_t> matrix4_t<T_t>::transpose(void) const {
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> matrix4_t<T_t>::inverse(void) const {
   return matrix4_t<T_t>(eigen_mat.inverse());
-}
-
-template <matrix_element_concept_t T_t>
-matrix4_t<T_t> matrix4_t<T_t>::scale(T_t _scale) const {
-  auto diag = Eigen::Matrix<T_t, ORDER, ORDER>();
-  diag.setIdentity();
-  diag.diagonal()[0] = _scale;
-  diag.diagonal()[1] = _scale;
-  diag.diagonal()[2] = _scale;
-
-  return matrix4_t<T_t>(diag * eigen_mat);
-}
-
-template <matrix_element_concept_t T_t>
-matrix4_t<T_t> matrix4_t<T_t>::scale(T_t _x, T_t _y, T_t _z) const {
-  auto diag = Eigen::Matrix<T_t, ORDER, ORDER>();
-  diag.setIdentity();
-  diag.diagonal()[0] = _x;
-  diag.diagonal()[1] = _y;
-  diag.diagonal()[2] = _z;
-
-  return matrix4_t<T_t>(diag * eigen_mat);
 }
 
 template <matrix_element_concept_t T_t>

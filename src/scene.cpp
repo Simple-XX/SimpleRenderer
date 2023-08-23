@@ -15,6 +15,7 @@
  */
 
 #include "scene.h"
+#include "matrix.hpp"
 
 scene_t::scene_t(const std::shared_ptr<config_t> &_config) : config(_config) {
   current_camera = surround_camera_t();
@@ -118,10 +119,16 @@ model2world_tran(const model_t &_model, const matrix4f_t &_rotate,
   // 归一化并乘倍数
   auto scale = multi / delta_xyz_max;
   // 缩放
-  coord_mat = coord_mat.scale(scale);
+  auto scale_mat = matrix4f_t();
+  scale_mat.eigen_mat.setIdentity();
+  scale_mat.eigen_mat.diagonal()[0] = scale;
+  scale_mat.eigen_mat.diagonal()[1] = scale;
+  scale_mat.eigen_mat.diagonal()[2] = scale;
+
+  coord_mat = scale_mat * coord_mat;
   coord_mat = _scale * coord_mat;
   // 移动到左上角
-  auto aaa = matrix4f_t ();
+  auto aaa = matrix4f_t();
   aaa.eigen_mat(0, 3) = std::abs(x_min) * scale;
   aaa.eigen_mat(1, 3) = std::abs(y_min) * scale;
   aaa.eigen_mat(2, 3) = 0;

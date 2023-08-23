@@ -280,8 +280,11 @@ inline matrix4f_t get_model_matrix(const vector4f_t &_scale,
                                    const vector4f_t &_rotate, const float &_rad,
                                    const vector4f_t &_translate) {
   // 缩放
-  auto scale = matrix4f_t().scale(_scale.vector.x(), _scale.vector.y(),
-                                  _scale.vector.z());
+  auto scale = matrix4f_t();
+  scale.eigen_mat.setIdentity();
+  scale.eigen_mat.diagonal()[0] = _scale.vector.x();
+  scale.eigen_mat.diagonal()[1] = _scale.vector.y();
+  scale.eigen_mat.diagonal()[2] = _scale.vector.z();
 
   // 旋转
   auto rotation = matrix4f_t().rotate(_rotate, _rad);
