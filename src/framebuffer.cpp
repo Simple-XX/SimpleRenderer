@@ -30,17 +30,17 @@ std::pair<bool, vector4f_t> framebuffer_t::get_barycentric_coord(
   auto ac = _p2 - _p0;
   auto ap = _p - _p0;
 
-  vector_element_concept_t auto deno = (ab.x * ac.y - ab.y * ac.x);
+  vector_element_concept_t auto deno = (ab.vector.x() * ac.vector.y() - ab.vector.y() * ac.vector.x());
   if (std::abs(deno) < std::numeric_limits<decltype(deno)>::epsilon()) {
     return std::pair<bool, const vector4f_t>{false, vector4f_t()};
   }
 
-  vector_element_concept_t auto s = (ac.y * ap.x - ac.x * ap.y) / deno;
+  vector_element_concept_t auto s = (ac.vector.y() * ap.vector.x() - ac.vector.x() * ap.vector.y()) / deno;
   if ((s > 1) || (s < 0)) {
     return std::pair<bool, const vector4f_t>{false, vector4f_t()};
   }
 
-  vector_element_concept_t auto t = (ab.x * ap.y - ab.y * ap.x) / deno;
+  vector_element_concept_t auto t = (ab.vector.x() * ap.vector.y() - ab.vector.y() * ap.vector.x()) / deno;
   if ((t > 1) || (t < 0)) {
     return std::pair<bool, const vector4f_t>{false, vector4f_t()};
   }
@@ -55,9 +55,9 @@ std::pair<bool, vector4f_t> framebuffer_t::get_barycentric_coord(
 float framebuffer_t::interpolate_depth(float _depth0, float _depth1,
                                        float _depth2,
                                        const vector4f_t &_barycentric_coord) {
-  auto z = _depth0 * _barycentric_coord.x;
-  z += _depth1 * _barycentric_coord.y;
-  z += _depth2 * _barycentric_coord.z;
+  auto z = _depth0 * _barycentric_coord.vector.x();
+  z += _depth1 * _barycentric_coord.vector.y();
+  z += _depth2 * _barycentric_coord.vector.z();
   return z;
 }
 
@@ -218,8 +218,8 @@ void framebuffer_t::triangle(const config_t &_config,
 
 #pragma omp parallel for num_threads(_config.procs) collapse(2) default(none)  \
     shared(min, max, v0, v1, v2, _shader) firstprivate(_normal, _light)
-  for (auto x = int32_t(min.x); x <= int32_t(max.x); x++) {
-    for (auto y = int32_t(min.y); y <= int32_t(max.y); y++) {
+  for (auto x = int32_t(min.vector.x()); x <= int32_t(max.vector.x()); x++) {
+    for (auto y = int32_t(min.vector.y()); y <= int32_t(max.vector.y()); y++) {
       /// @todo 这里要用裁剪替换掉
       if ((unsigned)x >= width || (unsigned)y >= height) {
         continue;
@@ -232,7 +232,7 @@ void framebuffer_t::triangle(const config_t &_config,
         continue;
       }
       // 计算该点的深度，通过重心坐标插值计算
-      auto z = interpolate_depth(v0.coord.z, v1.coord.z, v2.coord.z,
+      auto z = interpolate_depth(v0.coord.vector.z(), v1.coord.vector.z(), v2.coord.vector.z(),
                                  barycentric_coord);
       // 深度在已有颜色之上
       if (z < depth_buffer(x, y)) {
@@ -264,11 +264,11 @@ void framebuffer_t::model(const config_t &_config, const shader_base_t &_shader,
     for (const auto &f : _model.get_face()) {
       /// @todo 巨大性能开销
       auto face = _shader.vertex(shader_vertex_in_t(f)).face;
-      line(face.v0.coord.x, face.v0.coord.y, face.v1.coord.x, face.v1.coord.y,
+      line(face.v0.coord.vector.x(), face.v0.coord.vector.y(), face.v1.coord.vector.x(), face.v1.coord.vector.y(),
            color_t::WHITE);
-      line(face.v1.coord.x, face.v1.coord.y, face.v2.coord.x, face.v2.coord.y,
+      line(face.v1.coord.vector.x(), face.v1.coord.vector.y(), face.v2.coord.vector.x(), face.v2.coord.vector.y(),
            color_t::WHITE);
-      line(face.v2.coord.x, face.v2.coord.y, face.v0.coord.x, face.v0.coord.y,
+      line(face.v2.coord.vector.x(), face.v2.coord.vector.y(), face.v0.coord.vector.x(), face.v0.coord.vector.y(),
            color_t::WHITE);
     }
   } else {

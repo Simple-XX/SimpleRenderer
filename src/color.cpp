@@ -81,10 +81,10 @@ color_t color_t::operator*(float _f) const {
 }
 
 color_t color_t::operator*(const vector4f_t &_vector) const {
-  auto r = static_cast<uint8_t>(static_cast<float>(channel_r) * _vector.x);
-  auto g = static_cast<uint8_t>(static_cast<float>(channel_g) * _vector.y);
-  auto b = static_cast<uint8_t>(static_cast<float>(channel_b) * _vector.z);
-  auto a = static_cast<uint8_t>(static_cast<float>(channel_a) * _vector.w);
+  auto r = static_cast<uint8_t>(static_cast<float>(channel_r) * _vector.vector.x());
+  auto g = static_cast<uint8_t>(static_cast<float>(channel_g) * _vector.vector.y());
+  auto b = static_cast<uint8_t>(static_cast<float>(channel_b) * _vector.vector.z());
+  auto a = static_cast<uint8_t>(static_cast<float>(channel_a) * _vector.vector.w());
   return color_t(r, g, b, a);
 }
 
@@ -97,10 +97,10 @@ color_t &color_t::operator*=(float _f) {
 }
 
 color_t &color_t::operator*=(const vector4f_t &_vector) {
-  channel_r = static_cast<uint8_t>(static_cast<float>(channel_r) * _vector.x);
-  channel_g = static_cast<uint8_t>(static_cast<float>(channel_g) * _vector.y);
-  channel_b = static_cast<uint8_t>(static_cast<float>(channel_b) * _vector.z);
-  channel_a = static_cast<uint8_t>(static_cast<float>(channel_a) * _vector.w);
+  channel_r = static_cast<uint8_t>(static_cast<float>(channel_r) * _vector.vector.x());
+  channel_g = static_cast<uint8_t>(static_cast<float>(channel_g) * _vector.vector.y());
+  channel_b = static_cast<uint8_t>(static_cast<float>(channel_b) * _vector.vector.z());
+  channel_a = static_cast<uint8_t>(static_cast<float>(channel_a) * _vector.vector.w());
   return *this;
 }
 

@@ -48,31 +48,7 @@ public:
   /// @brief 元素个数
   static constexpr uint8_t ELEMS = 16;
   /// @brief 矩阵元素
-  std::array<T_t, ELEMS> elems;
-
   Eigen::Matrix<T_t, ORDER, ORDER> eigen_mat;
-
-  /**
-   * @brief 递归求 n 阶行列式的值
-   * @param  _order           阶数
-   * @return T_t              值
-   */
-  T_t determ(uint8_t _order) const;
-
-  /**
-   * @brief 代数余子式矩阵
-   * @param  _row             行
-   * @param  _col             列
-   * @param  _order           当前阶
-   * @return matrix4_t<T_t>   结果
-   */
-  matrix4_t<T_t> cofactor(uint8_t _row, uint8_t _col, uint8_t _order) const;
-
-  /**
-   * @brief 伴随矩阵
-   * @return matrix4_t<T_t>   结果
-   */
-  matrix4_t<T_t> adjoint(void) const;
 
 public:
   /**
@@ -166,30 +142,6 @@ public:
    */
   template <class U_t>
   friend matrix4_t<T_t> operator*(const U_t &_v, const matrix4_t<T_t> &_mat) {
-    //    T_t tmp[ELEMS] = {0};
-    //
-    //    tmp[0] = _mat.elems[0] * _v;
-    //    tmp[1] = _mat.elems[1] * _v;
-    //    tmp[2] = _mat.elems[2] * _v;
-    //    tmp[3] = _mat.elems[3] * _v;
-    //
-    //    tmp[4] = _mat.elems[4] * _v;
-    //    tmp[5] = _mat.elems[5] * _v;
-    //    tmp[6] = _mat.elems[6] * _v;
-    //    tmp[7] = _mat.elems[7] * _v;
-    //
-    //    tmp[8] = _mat.elems[8] * _v;
-    //    tmp[9] = _mat.elems[9] * _v;
-    //    tmp[10] = _mat.elems[10] * _v;
-    //    tmp[11] = _mat.elems[11] * _v;
-    //
-    //    tmp[12] = _mat.elems[12] * _v;
-    //    tmp[13] = _mat.elems[13] * _v;
-    //    tmp[14] = _mat.elems[14] * _v;
-    //    tmp[15] = _mat.elems[15] * _v;
-    //
-    //    return matrix4_t<T_t>(tmp);
-
     return matrix4_t<T_t>(_mat.eigen_mat * _v);
   }
 
@@ -202,30 +154,6 @@ public:
    */
   template <class U_t>
   friend matrix4_t<T_t> operator*(const matrix4_t<T_t> &_mat, const U_t &_v) {
-    //    T_t tmp[ELEMS] = {0};
-    //
-    //    tmp[0] = _v * _mat.elems[0];
-    //    tmp[1] = _v * _mat.elems[1];
-    //    tmp[2] = _v * _mat.elems[2];
-    //    tmp[3] = _v * _mat.elems[3];
-    //
-    //    tmp[4] = _v * _mat.elems[4];
-    //    tmp[5] = _v * _mat.elems[5];
-    //    tmp[6] = _v * _mat.elems[6];
-    //    tmp[7] = _v * _mat.elems[7];
-    //
-    //    tmp[8] = _v * _mat.elems[8];
-    //    tmp[9] = _v * _mat.elems[9];
-    //    tmp[10] = _v * _mat.elems[10];
-    //    tmp[11] = _v * _mat.elems[11];
-    //
-    //    tmp[12] = _v * _mat.elems[12];
-    //    tmp[13] = _v * _mat.elems[13];
-    //    tmp[14] = _v * _mat.elems[14];
-    //    tmp[15] = _v * _mat.elems[15];
-    //
-    //    return matrix4_t<T_t>(tmp);
-
     return matrix4_t<T_t>(_v * _mat.eigen_mat);
   }
 
@@ -239,16 +167,6 @@ public:
   template <class U_t>
   friend vector4_t<U_t> operator*(const vector4_t<U_t> &_v,
                                   const matrix4_t<T_t> &_mat) {
-//    auto new_x = _v.x * _mat.elems[0] + _v.y * _mat.elems[4] +
-//                 _v.z * _mat.elems[8] + _v.w * _mat.elems[12];
-//    auto new_y = _v.x * _mat.elems[1] + _v.y * _mat.elems[5] +
-//                 _v.z * _mat.elems[9] + _v.w * _mat.elems[13];
-//    auto new_z = _v.x * _mat.elems[2] + _v.y * _mat.elems[6] +
-//                 _v.z * _mat.elems[10] + _v.w * _mat.elems[14];
-//    auto new_w = _v.x * _mat.elems[3] + _v.y * _mat.elems[7] +
-//                 _v.z * _mat.elems[11] + _v.w * _mat.elems[15];
-//    return vector4_t<U_t>(new_x, new_y, new_z, new_w);
-
     return vector4_t<U_t>(_v.vector.transpose() * _mat.eigen_mat);
   }
 
@@ -262,17 +180,7 @@ public:
   template <class U_t>
   friend vector4_t<U_t> operator*(const matrix4_t<T_t> &_mat,
                                   const vector4_t<U_t> &_v) {
-//    auto new_x = _v.x * _mat.elems[0] + _v.y * _mat.elems[1] +
-//                 _v.z * _mat.elems[2] + _v.w * _mat.elems[3];
-//    auto new_y = _v.x * _mat.elems[4] + _v.y * _mat.elems[5] +
-//                 _v.z * _mat.elems[6] + _v.w * _mat.elems[7];
-//    auto new_z = _v.x * _mat.elems[8] + _v.y * _mat.elems[9] +
-//                 _v.z * _mat.elems[10] + _v.w * _mat.elems[11];
-//    auto new_w = _v.x * _mat.elems[12] + _v.y * _mat.elems[13] +
-//                 _v.z * _mat.elems[14] + _v.w * _mat.elems[15];
-//    return vector4_t<U_t>(new_x, new_y, new_z, new_w);
-
-    return vector4_t<U_t>(_mat.eigen_mat*_v.vector);
+    return vector4_t<U_t>(_mat.eigen_mat * _v.vector);
   }
 
   /**
@@ -465,15 +373,6 @@ public:
   matrix4_t<T_t> rotate(const vector4_t<T_t> &_axis, float _angle) const;
 
   /**
-   * @brief 从 _from 旋转到 _to，不需要单位向量
-   * @param  _from            开始位置向量
-   * @param  _to              目标位置向量
-   * @return const matrix4_t<T_t>  旋转矩阵
-   */
-  matrix4_t<T_t> rotate_from_to(const vector4f_t &_from,
-                                const vector4f_t &_to) const;
-
-  /**
    * @brief 平移矩阵，返回当前矩阵与平移矩阵相乘的结果 translate_mat* *this
    * @param  _x               x 方向变换
    * @param  _y               y 方向变换
@@ -506,128 +405,19 @@ public:
 
   friend std::ostream &operator<<(std::ostream &_os,
                                   const matrix4_t<T_t> &_mat) {
-//    _os.setf(std::ios::right);
-//    _os.precision(16);
-//
-//    _os << "{\n";
-//
-//    _os << std::setw(4) << "{" << std::setw(25) << _mat.elems[0] << ", "
-//        << _mat.elems[1] << ", " << _mat.elems[2] << ", " << _mat.elems[3]
-//        << "},\n";
-//
-//    _os << std::setw(4) << "{" << std::setw(25) << _mat.elems[4] << ", "
-//        << _mat.elems[5] << ", " << _mat.elems[6] << ", " << _mat.elems[7]
-//        << "},\n";
-//
-//    _os << std::setw(4) << "{" << std::setw(25) << _mat.elems[8] << ", "
-//        << _mat.elems[9] << ", " << _mat.elems[10] << ", " << _mat.elems[11]
-//        << "},\n";
-//
-//    _os << std::setw(4) << "{" << std::setw(25) << _mat.elems[12] << ", "
-//        << _mat.elems[13] << ", " << _mat.elems[14] << ", " << _mat.elems[15]
-//        << "}\n";
-//
-//    _os << "}";
-//
-//    _os.unsetf(std::ios::right);
-//    _os.precision(6);
-
     _os << _mat.eigen_mat;
 
     return _os;
   }
-
-  /// @todo 逗号初始化
-  /// @see https://gitee.com/aczz/cv-dbg/blob/master/comma_init/v4.cpp
-  /// @see https://zhuanlan.zhihu.com/p/377573738
 };
 
-template <matrix_element_concept_t T_t>
-T_t matrix4_t<T_t>::determ(uint8_t _order) const {
-  // 递归返回条件
-  if (_order == 1) {
-    return elems[0];
-  }
-
-  T_t res = 0;
-  // 当前正负
-  int sign = 1;
-  // 计算 mat[0][i] 的代数余子式
-  for (auto i = 0; i < _order; i++) {
-    res += sign * elems[i] * cofactor(0, i, _order).determ(_order - 1);
-    // 符号取反
-    sign = -sign;
-  }
-
-  return res;
-}
-
-template <matrix_element_concept_t T_t>
-matrix4_t<T_t> matrix4_t<T_t>::cofactor(uint8_t _row, uint8_t _col,
-                                        uint8_t _order) const {
-  T_t tmp[ELEMS] = {0};
-  auto row_idx = 0;
-  auto col_idx = 0;
-  for (auto i = 0; i < _order; i++) {
-    for (auto j = 0; j < _order; j++) {
-      if (i != _row && j != _col) {
-        tmp[row_idx * ORDER + col_idx++] = elems[i * ORDER + j];
-        // 换行
-        if (col_idx == _order - 1) {
-          col_idx = 0;
-          row_idx++;
-        }
-      }
-    }
-  }
-
-  return matrix4_t<T_t>(tmp);
-}
-
-template <matrix_element_concept_t T_t>
-matrix4_t<T_t> matrix4_t<T_t>::adjoint(void) const {
-  T_t tmp[ELEMS] = {0};
-
-  // 计算代数余子式矩阵并转置
-  // 行列索引之和为奇数时为负
-  tmp[0] = cofactor(0, 0, 4).determ(3);
-  tmp[1] = -cofactor(1, 0, 4).determ(3);
-  tmp[2] = cofactor(2, 0, 4).determ(3);
-  tmp[3] = -cofactor(3, 0, 4).determ(3);
-
-  tmp[4] = -cofactor(0, 1, 4).determ(3);
-  tmp[5] = cofactor(1, 1, 4).determ(3);
-  tmp[6] = -cofactor(2, 1, 4).determ(3);
-  tmp[7] = cofactor(3, 1, 4).determ(3);
-
-  tmp[8] = cofactor(0, 2, 4).determ(3);
-  tmp[9] = -cofactor(1, 2, 4).determ(3);
-  tmp[10] = cofactor(2, 2, 4).determ(3);
-  tmp[11] = -cofactor(3, 2, 4).determ(3);
-
-  tmp[12] = -cofactor(0, 3, 4).determ(3);
-  tmp[13] = cofactor(1, 3, 4).determ(3);
-  tmp[14] = -cofactor(2, 3, 4).determ(3);
-  tmp[15] = cofactor(3, 3, 4).determ(3);
-
-  return matrix4_t<T_t>(tmp);
-}
-
 template <matrix_element_concept_t T_t> matrix4_t<T_t>::matrix4_t(void) {
-  elems.fill(0);
-  elems[0] = 1;
-  elems[5] = 1;
-  elems[10] = 1;
-  elems[15] = 1;
-
   eigen_mat.setIdentity();
-
   return;
 }
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t>::matrix4_t(const matrix4_t<T_t> &_mat) {
-  elems = _mat.elems;
   eigen_mat = _mat.eigen_mat;
   return;
 }
@@ -644,27 +434,7 @@ matrix4_t<T_t>::matrix4_t(const T_t *_arr) {
     throw std::invalid_argument(log("_arr == nullptr"));
   }
 
-  elems[0] = _arr[0];
-  elems[1] = _arr[1];
-  elems[2] = _arr[2];
-  elems[3] = _arr[3];
-
-  elems[4] = _arr[4];
-  elems[5] = _arr[5];
-  elems[6] = _arr[6];
-  elems[7] = _arr[7];
-
-  elems[8] = _arr[8];
-  elems[9] = _arr[9];
-  elems[10] = _arr[10];
-  elems[11] = _arr[11];
-
-  elems[12] = _arr[12];
-  elems[13] = _arr[13];
-  elems[14] = _arr[14];
-  elems[15] = _arr[15];
-
-//  eigen_mat.setIdentity();
+  eigen_mat.setIdentity();
   eigen_mat(0, 0) = _arr[0];
   eigen_mat(0, 1) = _arr[1];
   eigen_mat(0, 2) = _arr[2];
@@ -694,26 +464,6 @@ matrix4_t<T_t>::matrix4_t(const T_t _arr[ORDER][ORDER]) {
     throw std::invalid_argument(log("_arr == nullptr"));
   }
 
-  elems[0] = _arr[0][0];
-  elems[1] = _arr[0][1];
-  elems[2] = _arr[0][2];
-  elems[3] = _arr[0][3];
-
-  elems[4] = _arr[1][0];
-  elems[5] = _arr[1][1];
-  elems[6] = _arr[1][2];
-  elems[7] = _arr[1][3];
-
-  elems[8] = _arr[2][0];
-  elems[9] = _arr[2][1];
-  elems[10] = _arr[2][2];
-  elems[11] = _arr[2][3];
-
-  elems[12] = _arr[3][0];
-  elems[13] = _arr[3][1];
-  elems[14] = _arr[3][2];
-  elems[15] = _arr[3][3];
-
   eigen_mat(0, 0) = _arr[0][0];
   eigen_mat(0, 1) = _arr[0][1];
   eigen_mat(0, 2) = _arr[0][2];
@@ -733,25 +483,15 @@ matrix4_t<T_t>::matrix4_t(const T_t _arr[ORDER][ORDER]) {
   eigen_mat(3, 1) = _arr[3][1];
   eigen_mat(3, 2) = _arr[3][2];
   eigen_mat(3, 3) = _arr[3][3];
-
-  return;
 }
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t>::matrix4_t(const vector4_t<T_t> &_v) {
-  elems.fill(0);
-  elems[0] = _v.x;
-  elems[5] = _v.y;
-  elems[10] = _v.z;
-  elems[15] = _v.w;
-
   eigen_mat.setIdentity();
-  //  eigen_mat[0] = _v.x;
-  //  eigen_mat[5] = _v.y;
-  //  eigen_mat[10] = _v.z;
-  //  eigen_mat[15] = _v.w;
-
-  return;
+  eigen_mat(0, 0) = _v.x;
+  eigen_mat(1, 1) = _v.y;
+  eigen_mat(2, 2) = _v.z;
+  eigen_mat(3, 3) = _v.w;
 }
 
 template <matrix_element_concept_t T_t>
@@ -759,7 +499,6 @@ matrix4_t<T_t> &matrix4_t<T_t>::operator=(const matrix4_t<T_t> &_mat) {
   if (this == &_mat) {
     throw std::runtime_error(log("this == &_mat"));
   }
-  elems = _mat.elems;
   eigen_mat = _mat.eigen_mat;
   return *this;
 }
@@ -767,7 +506,6 @@ matrix4_t<T_t> &matrix4_t<T_t>::operator=(const matrix4_t<T_t> &_mat) {
 template <matrix_element_concept_t T_t>
 bool matrix4_t<T_t>::operator==(const matrix4_t<T_t> &_mat) const {
   return eigen_mat.isApprox(_mat.eigen_mat, 1e-5);
-
 }
 
 template <matrix_element_concept_t T_t>
@@ -777,55 +515,11 @@ bool matrix4_t<T_t>::operator!=(const matrix4_t<T_t> &_mat) const {
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> matrix4_t<T_t>::operator+(const matrix4_t<T_t> &_mat) const {
-  //  T_t tmp[ELEMS] = {0};
-  //
-  //  tmp[0] = elems[0] + _mat.elems[0];
-  //  tmp[1] = elems[1] + _mat.elems[1];
-  //  tmp[2] = elems[2] + _mat.elems[2];
-  //  tmp[3] = elems[3] + _mat.elems[3];
-  //
-  //  tmp[4] = elems[4] + _mat.elems[4];
-  //  tmp[5] = elems[5] + _mat.elems[5];
-  //  tmp[6] = elems[6] + _mat.elems[6];
-  //  tmp[7] = elems[7] + _mat.elems[7];
-  //
-  //  tmp[8] = elems[8] + _mat.elems[8];
-  //  tmp[9] = elems[9] + _mat.elems[9];
-  //  tmp[10] = elems[10] + _mat.elems[10];
-  //  tmp[11] = elems[11] + _mat.elems[11];
-  //
-  //  tmp[12] = elems[12] + _mat.elems[12];
-  //  tmp[13] = elems[13] + _mat.elems[13];
-  //  tmp[14] = elems[14] + _mat.elems[14];
-  //  tmp[15] = elems[15] + _mat.elems[15];
-  //
-  //  return matrix4_t<T_t>(tmp);
-
   return matrix4_t<T_t>(eigen_mat + _mat.eigen_mat);
 }
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> &matrix4_t<T_t>::operator+=(const matrix4_t<T_t> &_mat) {
-  elems[0] += _mat.elems[0];
-  elems[1] += _mat.elems[1];
-  elems[2] += _mat.elems[2];
-  elems[3] += _mat.elems[3];
-
-  elems[4] += _mat.elems[4];
-  elems[5] += _mat.elems[5];
-  elems[6] += _mat.elems[6];
-  elems[7] += _mat.elems[7];
-
-  elems[8] += _mat.elems[8];
-  elems[9] += _mat.elems[9];
-  elems[10] += _mat.elems[10];
-  elems[11] += _mat.elems[11];
-
-  elems[12] += _mat.elems[12];
-  elems[13] += _mat.elems[13];
-  elems[14] += _mat.elems[14];
-  elems[15] += _mat.elems[15];
-
   eigen_mat += _mat.eigen_mat;
 
   return *this;
@@ -833,55 +527,11 @@ matrix4_t<T_t> &matrix4_t<T_t>::operator+=(const matrix4_t<T_t> &_mat) {
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> matrix4_t<T_t>::operator-(const matrix4_t<T_t> &_mat) const {
-  //  T_t tmp[ELEMS] = {0};
-  //
-  //  tmp[0] = elems[0] - _mat.elems[0];
-  //  tmp[1] = elems[1] - _mat.elems[1];
-  //  tmp[2] = elems[2] - _mat.elems[2];
-  //  tmp[3] = elems[3] - _mat.elems[3];
-  //
-  //  tmp[4] = elems[4] - _mat.elems[4];
-  //  tmp[5] = elems[5] - _mat.elems[5];
-  //  tmp[6] = elems[6] - _mat.elems[6];
-  //  tmp[7] = elems[7] - _mat.elems[7];
-  //
-  //  tmp[8] = elems[8] - _mat.elems[8];
-  //  tmp[9] = elems[9] - _mat.elems[9];
-  //  tmp[10] = elems[10] - _mat.elems[10];
-  //  tmp[11] = elems[11] - _mat.elems[11];
-  //
-  //  tmp[12] = elems[12] - _mat.elems[12];
-  //  tmp[13] = elems[13] - _mat.elems[13];
-  //  tmp[14] = elems[14] - _mat.elems[14];
-  //  tmp[15] = elems[15] - _mat.elems[15];
-  //
-  //  return matrix4_t<T_t>(tmp);
-
   return matrix4_t<T_t>(eigen_mat - _mat.eigen_mat);
 }
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> &matrix4_t<T_t>::operator-=(const matrix4_t<T_t> &_mat) {
-  elems[0] -= _mat.elems[0];
-  elems[1] -= _mat.elems[1];
-  elems[2] -= _mat.elems[2];
-  elems[3] -= _mat.elems[3];
-
-  elems[4] -= _mat.elems[4];
-  elems[5] -= _mat.elems[5];
-  elems[6] -= _mat.elems[6];
-  elems[7] -= _mat.elems[7];
-
-  elems[8] -= _mat.elems[8];
-  elems[9] -= _mat.elems[9];
-  elems[10] -= _mat.elems[10];
-  elems[11] -= _mat.elems[11];
-
-  elems[12] -= _mat.elems[12];
-  elems[13] -= _mat.elems[13];
-  elems[14] -= _mat.elems[14];
-  elems[15] -= _mat.elems[15];
-
   eigen_mat -= _mat.eigen_mat;
 
   return *this;
@@ -889,117 +539,17 @@ matrix4_t<T_t> &matrix4_t<T_t>::operator-=(const matrix4_t<T_t> &_mat) {
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> matrix4_t<T_t>::operator*(const matrix4_t<T_t> &_mat) const {
-  //  T_t tmp[ELEMS] = {0};
-  //
-  //  tmp[0] = elems[0] * _mat.elems[0] + elems[1] * _mat.elems[4] +
-  //           elems[2] * _mat.elems[8] + elems[3] * _mat.elems[12];
-  //  tmp[1] = elems[0] * _mat.elems[1] + elems[1] * _mat.elems[5] +
-  //           elems[2] * _mat.elems[9] + elems[3] * _mat.elems[13];
-  //  tmp[2] = elems[0] * _mat.elems[2] + elems[1] * _mat.elems[6] +
-  //           elems[2] * _mat.elems[10] + elems[3] * _mat.elems[14];
-  //  tmp[3] = elems[0] * _mat.elems[3] + elems[1] * _mat.elems[7] +
-  //           elems[2] * _mat.elems[11] + elems[3] * _mat.elems[15];
-  //
-  //  tmp[4] = elems[4] * _mat.elems[0] + elems[5] * _mat.elems[4] +
-  //           elems[6] * _mat.elems[8] + elems[7] * _mat.elems[12];
-  //  tmp[5] = elems[4] * _mat.elems[1] + elems[5] * _mat.elems[5] +
-  //           elems[6] * _mat.elems[9] + elems[7] * _mat.elems[13];
-  //  tmp[6] = elems[4] * _mat.elems[2] + elems[5] * _mat.elems[6] +
-  //           elems[6] * _mat.elems[10] + elems[7] * _mat.elems[14];
-  //  tmp[7] = elems[4] * _mat.elems[3] + elems[5] * _mat.elems[7] +
-  //           elems[6] * _mat.elems[11] + elems[7] * _mat.elems[15];
-  //
-  //  tmp[8] = elems[8] * _mat.elems[0] + elems[9] * _mat.elems[4] +
-  //           elems[10] * _mat.elems[8] + elems[11] * _mat.elems[12];
-  //  tmp[9] = elems[8] * _mat.elems[1] + elems[9] * _mat.elems[5] +
-  //           elems[10] * _mat.elems[9] + elems[11] * _mat.elems[13];
-  //  tmp[10] = elems[8] * _mat.elems[2] + elems[9] * _mat.elems[6] +
-  //            elems[10] * _mat.elems[10] + elems[11] * _mat.elems[14];
-  //  tmp[11] = elems[8] * _mat.elems[3] + elems[9] * _mat.elems[7] +
-  //            elems[10] * _mat.elems[11] + elems[11] * _mat.elems[15];
-  //
-  //  tmp[12] = elems[12] * _mat.elems[0] + elems[13] * _mat.elems[4] +
-  //            elems[14] * _mat.elems[8] + elems[15] * _mat.elems[12];
-  //  tmp[13] = elems[12] * _mat.elems[1] + elems[13] * _mat.elems[5] +
-  //            elems[14] * _mat.elems[9] + elems[15] * _mat.elems[13];
-  //  tmp[14] = elems[12] * _mat.elems[2] + elems[13] * _mat.elems[6] +
-  //            elems[14] * _mat.elems[10] + elems[15] * _mat.elems[14];
-  //  tmp[15] = elems[12] * _mat.elems[3] + elems[13] * _mat.elems[7] +
-  //            elems[14] * _mat.elems[11] + elems[15] * _mat.elems[15];
-  //
-  //  return matrix4_t<T_t>(tmp);
-
   return matrix4_t<T_t>(eigen_mat * _mat.eigen_mat);
 }
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> &matrix4_t<T_t>::operator*=(T_t _v) {
-  for (auto &i : elems) {
-    i *= _v;
-  }
-
+  eigen_mat *= _v;
   return *this;
 }
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> &matrix4_t<T_t>::operator*=(const matrix4_t<T_t> &_mat) {
-  T_t tmp[ELEMS] = {0};
-  tmp[0] = elems[0] * _mat.elems[0] + elems[1] * _mat.elems[4] +
-           elems[2] * _mat.elems[8] + elems[3] * _mat.elems[12];
-  tmp[1] = elems[0] * _mat.elems[1] + elems[1] * _mat.elems[5] +
-           elems[2] * _mat.elems[9] + elems[3] * _mat.elems[13];
-  tmp[2] = elems[0] * _mat.elems[2] + elems[1] * _mat.elems[6] +
-           elems[2] * _mat.elems[10] + elems[3] * _mat.elems[14];
-  tmp[3] = elems[0] * _mat.elems[3] + elems[1] * _mat.elems[7] +
-           elems[2] * _mat.elems[11] + elems[3] * _mat.elems[15];
-
-  tmp[4] = elems[4] * _mat.elems[0] + elems[5] * _mat.elems[4] +
-           elems[6] * _mat.elems[8] + elems[7] * _mat.elems[12];
-  tmp[5] = elems[4] * _mat.elems[1] + elems[5] * _mat.elems[5] +
-           elems[6] * _mat.elems[9] + elems[7] * _mat.elems[13];
-  tmp[6] = elems[4] * _mat.elems[2] + elems[5] * _mat.elems[6] +
-           elems[6] * _mat.elems[10] + elems[7] * _mat.elems[14];
-  tmp[7] = elems[4] * _mat.elems[3] + elems[5] * _mat.elems[7] +
-           elems[6] * _mat.elems[11] + elems[7] * _mat.elems[15];
-
-  tmp[8] = elems[8] * _mat.elems[0] + elems[9] * _mat.elems[4] +
-           elems[10] * _mat.elems[8] + elems[11] * _mat.elems[12];
-  tmp[9] = elems[8] * _mat.elems[1] + elems[9] * _mat.elems[5] +
-           elems[10] * _mat.elems[9] + elems[11] * _mat.elems[13];
-  tmp[10] = elems[8] * _mat.elems[2] + elems[9] * _mat.elems[6] +
-            elems[10] * _mat.elems[10] + elems[11] * _mat.elems[14];
-  tmp[11] = elems[8] * _mat.elems[3] + elems[9] * _mat.elems[7] +
-            elems[10] * _mat.elems[11] + elems[11] * _mat.elems[15];
-
-  tmp[12] = elems[12] * _mat.elems[0] + elems[13] * _mat.elems[4] +
-            elems[14] * _mat.elems[8] + elems[15] * _mat.elems[12];
-  tmp[13] = elems[12] * _mat.elems[1] + elems[13] * _mat.elems[5] +
-            elems[14] * _mat.elems[9] + elems[15] * _mat.elems[13];
-  tmp[14] = elems[12] * _mat.elems[2] + elems[13] * _mat.elems[6] +
-            elems[14] * _mat.elems[10] + elems[15] * _mat.elems[14];
-  tmp[15] = elems[12] * _mat.elems[3] + elems[13] * _mat.elems[7] +
-            elems[14] * _mat.elems[11] + elems[15] * _mat.elems[15];
-
-  elems[0] = tmp[0];
-  elems[1] = tmp[1];
-  elems[2] = tmp[2];
-  elems[3] = tmp[3];
-
-  elems[4] = tmp[4];
-  elems[5] = tmp[5];
-  elems[6] = tmp[6];
-  elems[7] = tmp[7];
-
-  elems[8] = tmp[8];
-  elems[9] = tmp[9];
-  elems[10] = tmp[10];
-  elems[11] = tmp[11];
-
-  elems[12] = tmp[12];
-  elems[13] = tmp[13];
-  elems[14] = tmp[14];
-  elems[15] = tmp[15];
-
   eigen_mat *= _mat.eigen_mat;
 
   return *this;
@@ -1023,77 +573,16 @@ const T_t &matrix4_t<T_t>::operator[](uint8_t _idx) const {
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> matrix4_t<T_t>::transpose(void) const {
-  //  T_t tmp[ELEMS] = {0};
-  //  tmp[0] = elems[0];
-  //  tmp[1] = elems[4];
-  //  tmp[2] = elems[8];
-  //  tmp[3] = elems[12];
-  //
-  //  tmp[4] = elems[1];
-  //  tmp[5] = elems[5];
-  //  tmp[6] = elems[9];
-  //  tmp[7] = elems[13];
-  //
-  //  tmp[8] = elems[2];
-  //  tmp[9] = elems[6];
-  //  tmp[10] = elems[10];
-  //  tmp[11] = elems[14];
-  //
-  //  tmp[12] = elems[3];
-  //  tmp[13] = elems[7];
-  //  tmp[14] = elems[11];
-  //  tmp[15] = elems[15];
-  //
-  //  return matrix4_t<T_t>(tmp);
-
   return matrix4_t<T_t>(eigen_mat.transpose());
 }
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> matrix4_t<T_t>::inverse(void) const {
-  //  // 计算行列式
-  //  T_t det = determ(ORDER);
-  //  if (std::abs(det) <= std::numeric_limits<T_t>::epsilon()) {
-  //    throw std::runtime_error(
-  //        log("std::abs(det) <= std::numeric_limits<T_t>::epsilon(), Singular
-  //        "
-  //            "matrix, can't find its inverse"));
-  //  }
-  //
-  //  // 逆矩阵 = 伴随矩阵 / 行列式
-  //  auto tmp = adjoint() * (1 / det);
-  //
-  //  return matrix4_t<T_t>(tmp);
-
   return matrix4_t<T_t>(eigen_mat.inverse());
 }
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> matrix4_t<T_t>::scale(T_t _scale) const {
-//  T_t tmp[ELEMS] = {0};
-//
-//  tmp[0] = _scale * elems[0];
-//  tmp[1] = _scale * elems[1];
-//  tmp[2] = _scale * elems[2];
-//  tmp[3] = _scale * elems[3];
-//
-//  tmp[4] = _scale * elems[4];
-//  tmp[5] = _scale * elems[5];
-//  tmp[6] = _scale * elems[6];
-//  tmp[7] = _scale * elems[7];
-//
-//  tmp[8] = _scale * elems[8];
-//  tmp[9] = _scale * elems[9];
-//  tmp[10] = _scale * elems[10];
-//  tmp[11] = _scale * elems[11];
-//
-//  tmp[12] = elems[12];
-//  tmp[13] = elems[13];
-//  tmp[14] = elems[14];
-//  tmp[15] = elems[15];
-//
-//  return matrix4_t<T_t>(tmp);
-
   Eigen::Matrix<T_t, ORDER, ORDER> res;
   res.setIdentity();
   res(0, 0) = eigen_mat(0, 0) * _scale;
@@ -1121,28 +610,6 @@ matrix4_t<T_t> matrix4_t<T_t>::scale(T_t _scale) const {
 
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> matrix4_t<T_t>::scale(T_t _x, T_t _y, T_t _z) const {
-//  T_t tmp[ELEMS] = {0};
-//
-//  tmp[0] = _x * elems[0];
-//  tmp[1] = _x * elems[1];
-//  tmp[2] = _x * elems[2];
-//  tmp[3] = _x * elems[3];
-//
-//  tmp[4] = _y * elems[4];
-//  tmp[5] = _y * elems[5];
-//  tmp[6] = _y * elems[6];
-//  tmp[7] = _y * elems[7];
-//
-//  tmp[8] = _z * elems[8];
-//  tmp[9] = _z * elems[9];
-//  tmp[10] = _z * elems[10];
-//  tmp[11] = _z * elems[11];
-//
-//  tmp[12] = elems[12];
-//  tmp[13] = elems[13];
-//  tmp[14] = elems[14];
-//  tmp[15] = elems[15];
-
   Eigen::Matrix<T_t, ORDER, ORDER> res;
   res.setIdentity();
   res(0, 0) = eigen_mat(0, 0) * _x;
@@ -1168,185 +635,21 @@ matrix4_t<T_t> matrix4_t<T_t>::scale(T_t _x, T_t _y, T_t _z) const {
   return matrix4_t<T_t>(res);
 }
 
-///// @todo 修改为直接返回
-// template <matrix_element_concept_t T_t>
-// matrix4_t<T_t> matrix4_t<T_t>::rotate_x(float _angle) {
-//   // 角度转弧度
-//   auto rad = RAD(_angle);
-//
-//   auto c = cos(rad);
-//   auto s = sin(rad);
-//   auto m = matrix4_t<T_t>();
-//   m.elems[5] = c;
-//   m.elems[6] = -s;
-//   m.elems[9] = s;
-//   m.elems[10] = c;
-//
-//   return m * *this;
-// }
-//
-///// @todo 修改为直接返回
-// template <matrix_element_concept_t T_t>
-// matrix4_t<T_t> matrix4_t<T_t>::rotate_y(float _angle) {
-//   // 角度转弧度
-//   auto rad = RAD(_angle);
-//
-//   auto c = cos(rad);
-//   auto s = sin(rad);
-//   auto m = matrix4_t<T_t>();
-//   m.elems[0] = c;
-//   m.elems[2] = s;
-//   m.elems[8] = -s;
-//   m.elems[10] = c;
-//
-//   return m * *this;
-// }
-//
-///// @todo 修改为直接返回
-// template <matrix_element_concept_t T_t>
-// matrix4_t<T_t> matrix4_t<T_t>::rotate_z(float _angle) {
-//   // 角度转弧度
-//   auto rad = RAD(_angle);
-//
-//   auto c = cos(rad);
-//   auto s = sin(rad);
-//   auto m = matrix4_t<T_t>();
-//   m.elems[0] = c;
-//   m.elems[1] = -s;
-//   m.elems[4] = s;
-//   m.elems[5] = c;
-//
-//   return m * *this;
-// }
-
-/// @todo 精度问题
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> matrix4_t<T_t>::rotate(const vector4_t<T_t> &_axis,
                                       float _angle) const {
-//  // 角度转弧度
-//  auto rad = RAD(_angle);
-//
-//  // 计算公式中的参数
-//  auto c = std::cos(rad);
-//  auto s = std::sin(rad);
-//  auto t = 1 - c;
-//
-//  auto tx = t * _axis.x;
-//  auto ty = t * _axis.y;
-//  auto tz = t * _axis.z;
-//
-//  auto sx = s * _axis.x;
-//  auto sy = s * _axis.y;
-//  auto sz = s * _axis.z;
-//
-//  // 计算结果
-//  // cos(_angle) * I
-//  T_t cI_arr[4][4] = {{c, 0, 0, 0}, {0, c, 0, 0}, {0, 0, c, 0}, {0, 0, 0, 0}};
-//  auto cI = matrix4_t<T_t>(cI_arr);
-//
-//  // (1 - cos(_angle)) * r * rt
-//  T_t rrt_arr[4][4] = {{tx * _axis.x, tx * _axis.y, tx * _axis.z, 0},
-//                       {tx * _axis.y, ty * _axis.y, ty * _axis.z, 0},
-//                       {tx * _axis.z, ty * _axis.z, tz * _axis.z, 0},
-//                       {0, 0, 0, 0}};
-//  auto rrt = matrix4_t<T_t>(rrt_arr);
-//
-//  // sin(_angle) * N
-//  float sN_arr[4][4] = {
-//      {0, -sz, sy, 0}, {sz, 0, -sx, 0}, {-sy, sx, 0, 0}, {0, 0, 0, 0}};
-//  auto sN = matrix4_t<T_t>(sN_arr);
-//
-//  matrix4_t<T_t> res = cI + rrt + sN;
-//  res.elems[15] = 1;
-//
-//  return res * *this;
-
   auto rad = RAD(_angle);
-
-  Eigen::AngleAxis<float> vec (rad, Eigen::Vector3f (_axis.x,_axis.y,_axis.z));
+  Eigen::AngleAxis<float> vec(rad, Eigen::Vector3f(_axis.vector.x(), _axis.vector.y(), _axis.vector.z()));
   auto mat = vec.matrix();
   Eigen::Matrix<float, 4, 4> res;
   res.setIdentity();
-  res.block<3,3>(0,0) = mat;
+  res.block<3, 3>(0, 0) = mat;
 
   return matrix4_t(res * this->eigen_mat);
 }
 
-/// @todo 精度问题
-template <matrix_element_concept_t T_t>
-matrix4_t<T_t> matrix4_t<T_t>::rotate_from_to(const vector4f_t &_from,
-                                              const vector4f_t &_to) const {
-  auto f = _from.normalize();
-  auto t = _to.normalize();
-
-  // axis multiplication by sin
-  auto vs(t ^ f);
-
-  // axis of rotation
-  auto v(vs);
-  v = v.normalize();
-
-  // cosinus angle
-  auto ca = f * t;
-
-  auto vt(v * (1 - ca));
-
-  T_t tmp[ELEMS] = {0};
-
-  tmp[0] = vt.x * v.x + ca;
-  tmp[5] = vt.y * v.y + ca;
-  tmp[10] = vt.z * v.z + ca;
-
-  vt.x *= v.y;
-  vt.z *= v.x;
-  vt.y *= v.z;
-
-  tmp[1] = vt.x + vs.z;
-  tmp[2] = vt.z - vs.y;
-  tmp[3] = 0;
-
-  tmp[4] = vt.x - vs.z;
-  tmp[6] = vt.y + vs.x;
-  tmp[7] = 0;
-
-  tmp[8] = vt.z + vs.y;
-  tmp[9] = vt.y - vs.x;
-  tmp[11] = 0;
-
-  tmp[12] = 0;
-  tmp[13] = 0;
-  tmp[14] = 0;
-  tmp[15] = 1;
-
-  return matrix4_t<T_t>(tmp);
-}
-
 template <matrix_element_concept_t T_t>
 matrix4_t<T_t> matrix4_t<T_t>::translate(T_t _x, T_t _y, T_t _z) const {
-//  T_t tmp[ELEMS] = {0};
-//
-//  tmp[0] = elems[0] + _x * elems[12];
-//  tmp[1] = elems[1] + _x * elems[13];
-//  tmp[2] = elems[2] + _x * elems[14];
-//  tmp[3] = elems[3] + _x * elems[15];
-//
-//  tmp[4] = elems[4] + _y * elems[12];
-//  tmp[5] = elems[5] + _y * elems[13];
-//  tmp[6] = elems[6] + _y * elems[14];
-//  tmp[7] = elems[7] + _y * elems[15];
-//
-//  tmp[8] = elems[8] + _z * elems[12];
-//  tmp[9] = elems[9] + _z * elems[13];
-//  tmp[10] = elems[10] + _z * elems[14];
-//  tmp[11] = elems[11] + _z * elems[15];
-//
-//  tmp[12] = elems[12];
-//  tmp[13] = elems[13];
-//  tmp[14] = elems[14];
-//  tmp[15] = elems[15];
-//
-//  return matrix4_t<T_t>(tmp);
-
   Eigen::Matrix<T_t, ORDER, ORDER> res;
   res.setIdentity();
   res(0, 0) = eigen_mat(0, 0) + _x * eigen_mat(3, 0);
@@ -1354,15 +657,15 @@ matrix4_t<T_t> matrix4_t<T_t>::translate(T_t _x, T_t _y, T_t _z) const {
   res(0, 2) = eigen_mat(0, 2) + _x * eigen_mat(3, 2);
   res(0, 3) = eigen_mat(0, 3) + _x * eigen_mat(3, 3);
 
-  res(1, 0) = eigen_mat(1, 0) + _y* eigen_mat(3, 0);
-  res(1, 1) = eigen_mat(1, 1) + _y* eigen_mat(3, 1);
-  res(1, 2) = eigen_mat(1, 2) + _y* eigen_mat(3, 2);
-  res(1, 3) = eigen_mat(1, 3) + _y* eigen_mat(3, 3);
+  res(1, 0) = eigen_mat(1, 0) + _y * eigen_mat(3, 0);
+  res(1, 1) = eigen_mat(1, 1) + _y * eigen_mat(3, 1);
+  res(1, 2) = eigen_mat(1, 2) + _y * eigen_mat(3, 2);
+  res(1, 3) = eigen_mat(1, 3) + _y * eigen_mat(3, 3);
 
-  res(2, 0) = eigen_mat(2, 0) + _z* eigen_mat(3, 0);
-  res(2, 1) = eigen_mat(2, 1) + _z* eigen_mat(3, 1);
-  res(2, 2) = eigen_mat(2, 2) + _z* eigen_mat(3, 2);
-  res(2, 3) = eigen_mat(2, 3) + _z* eigen_mat(3, 3);
+  res(2, 0) = eigen_mat(2, 0) + _z * eigen_mat(3, 0);
+  res(2, 1) = eigen_mat(2, 1) + _z * eigen_mat(3, 1);
+  res(2, 2) = eigen_mat(2, 2) + _z * eigen_mat(3, 2);
+  res(2, 3) = eigen_mat(2, 3) + _z * eigen_mat(3, 3);
 
   res(3, 0) = eigen_mat(3, 0);
   res(3, 1) = eigen_mat(3, 1);

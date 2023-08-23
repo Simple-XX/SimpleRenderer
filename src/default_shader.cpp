@@ -21,23 +21,23 @@ color_t default_shader_t::interpolate_color(
     const vector4f_t &_barycentric_coord) {
   return color_t(
       static_cast<uint8_t>(static_cast<float>(_color0[color_t::COLOR_IDX_R]) *
-                               _barycentric_coord.x +
+                               _barycentric_coord.vector.x() +
                            static_cast<float>(_color1[color_t::COLOR_IDX_R]) *
-                               _barycentric_coord.y +
+                               _barycentric_coord.vector.y() +
                            static_cast<float>(_color2[color_t::COLOR_IDX_R]) *
-                               _barycentric_coord.z),
+                               _barycentric_coord.vector.z()),
       static_cast<uint8_t>(static_cast<float>(_color0[color_t::COLOR_IDX_G]) *
-                               _barycentric_coord.x +
+                               _barycentric_coord.vector.x() +
                            static_cast<float>(_color1[color_t::COLOR_IDX_G]) *
-                               _barycentric_coord.y +
+                               _barycentric_coord.vector.y() +
                            static_cast<float>(_color2[color_t::COLOR_IDX_G]) *
-                               _barycentric_coord.z),
+                               _barycentric_coord.vector.z()),
       static_cast<uint8_t>(static_cast<float>(_color0[color_t::COLOR_IDX_B]) *
-                               _barycentric_coord.x +
+                               _barycentric_coord.vector.x() +
                            static_cast<float>(_color1[color_t::COLOR_IDX_B]) *
-                               _barycentric_coord.y +
+                               _barycentric_coord.vector.y() +
                            static_cast<float>(_color2[color_t::COLOR_IDX_B]) *
-                               _barycentric_coord.z));
+                               _barycentric_coord.vector.z()));
 }
 
 default_shader_t::default_shader_t(void) { return; }

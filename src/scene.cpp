@@ -73,7 +73,7 @@ model2world_tran(const model_t &_model, const matrix4f_t &_rotate,
   matrix4f_t normal_mat;
   normal_mat = coord_mat.inverse().transpose();
   // 用旋转后的顶点计算极值
-  auto tmp = _model.get_face()[0].v0.coord.x;
+  auto tmp = _model.get_face()[0].v0.coord.vector.x();
   auto x_max = std::numeric_limits<decltype(tmp)>::lowest();
   auto x_min = std::numeric_limits<decltype(tmp)>::max();
   auto y_max = x_max;
@@ -84,26 +84,26 @@ model2world_tran(const model_t &_model, const matrix4f_t &_rotate,
     auto v0 = i.v0.coord * coord_mat;
     auto v1 = i.v1.coord * coord_mat;
     auto v2 = i.v2.coord * coord_mat;
-    x_max = std::max(x_max, v0.x);
-    x_max = std::max(x_max, v1.x);
-    x_max = std::max(x_max, v2.x);
-    x_min = std::min(x_min, v0.x);
-    x_min = std::min(x_min, v1.x);
-    x_min = std::min(x_min, v2.x);
+    x_max = std::max(x_max, v0.vector.x());
+    x_max = std::max(x_max, v1.vector.x());
+    x_max = std::max(x_max, v2.vector.x());
+    x_min = std::min(x_min, v0.vector.x());
+    x_min = std::min(x_min, v1.vector.x());
+    x_min = std::min(x_min, v2.vector.x());
 
-    y_max = std::max(y_max, v0.y);
-    y_max = std::max(y_max, v1.y);
-    y_max = std::max(y_max, v2.y);
-    y_min = std::min(y_min, v0.y);
-    y_min = std::min(y_min, v1.y);
-    y_min = std::min(y_min, v2.y);
+    y_max = std::max(y_max, v0.vector.y());
+    y_max = std::max(y_max, v1.vector.y());
+    y_max = std::max(y_max, v2.vector.y());
+    y_min = std::min(y_min, v0.vector.y());
+    y_min = std::min(y_min, v1.vector.y());
+    y_min = std::min(y_min, v2.vector.y());
 
-    z_max = std::max(z_max, v0.z);
-    z_max = std::max(z_max, v1.z);
-    z_max = std::max(z_max, v2.z);
-    z_min = std::min(z_min, v0.z);
-    z_min = std::min(z_min, v1.z);
-    z_min = std::min(z_min, v2.z);
+    z_max = std::max(z_max, v0.vector.z());
+    z_max = std::max(z_max, v1.vector.z());
+    z_max = std::max(z_max, v2.vector.z());
+    z_min = std::min(z_min, v0.vector.z());
+    z_min = std::min(z_min, v1.vector.z());
+    z_min = std::min(z_min, v2.vector.z());
   }
 
   // 各分量的长度

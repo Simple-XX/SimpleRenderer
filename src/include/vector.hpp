@@ -46,11 +46,6 @@ public:
   /// @brief 表示一个顶点
   static constexpr const T_t W_POINT = 1;
 
-  T_t x;
-  T_t y;
-  T_t z;
-  T_t w;
-
   Eigen::Vector<T_t, 4> vector;
 
   /**
@@ -252,25 +247,12 @@ public:
   // operator vector4_t<float>(void) const;
 
   friend std::ostream &operator<<(std::ostream &_os, const vector4_t<T_t> &_v) {
-//    _os.setf(std::ios::right);
-//    _os.precision(16);
-//
-//    _os << "[ " << _v.x << ", " << _v.y << ", " << _v.z << ", " << _v.w << " ]";
-//
-//    _os.unsetf(std::ios::right);
-//    _os.precision(6);
-
-  _os << _v.vector;
+    _os << _v.vector;
     return _os;
   }
 };
 
 template <vector_element_concept_t T_t> vector4_t<T_t>::vector4_t(void) {
-  x = 0;
-  y = 0;
-  z = 0;
-  w = 0;
-
   vector.setZero();
 
   return;
@@ -278,92 +260,35 @@ template <vector_element_concept_t T_t> vector4_t<T_t>::vector4_t(void) {
 
 template <vector_element_concept_t T_t>
 vector4_t<T_t>::vector4_t(const vector4_t<T_t> &_v) {
-  x = _v.x;
-  y = _v.y;
-  z = _v.z;
-  w = _v.w;
-
-  vector.x() = _v.x;
-  vector.y() = _v.y;
-  vector.z() = _v.z;
-  vector.w() = _v.w;
-  return;
+  vector = _v.vector;
 }
 
 template <vector_element_concept_t T_t>
 vector4_t<T_t>::vector4_t(const Eigen::Vector<T_t, 4> &_v) {
-  x = _v.x();
-  y = _v.y();
-  z = _v.z();
-  w = _v.w();
-
   vector = _v;
-  return;
 }
 
 template <vector_element_concept_t T_t>
-vector4_t<T_t>::vector4_t(T_t _x, T_t _y, T_t _z, T_t _w)
-    : x(_x), y(_y), z(_z), w(_w) {
+vector4_t<T_t>::vector4_t(T_t _x, T_t _y, T_t _z, T_t _w) {
   vector.x() = _x;
   vector.y() = _y;
   vector.z() = _z;
   vector.w() = _w;
-  return;
 }
 
 template <vector_element_concept_t T_t>
 vector4_t<T_t> &vector4_t<T_t>::operator=(const vector4_t<T_t> &_v) {
-  x = _v.x;
-  y = _v.y;
-  z = _v.z;
-  w = _v.w;
-
   vector = _v.vector;
   return *this;
 }
 
 template <vector_element_concept_t T_t>
 bool vector4_t<T_t>::operator==(const vector4_t<T_t> &_v) const {
-  //  if (std::abs(x - _v.x) > std::numeric_limits<T_t>::epsilon()) {
-  //    return false;
-  //  }
-  //
-  //  if (std::abs(y - _v.y) > std::numeric_limits<T_t>::epsilon()) {
-  //    return false;
-  //  }
-  //
-  //  if (std::abs(z - _v.z) > std::numeric_limits<T_t>::epsilon()) {
-  //    return false;
-  //  }
-  //
-  //  if (std::abs(w - _v.w) > std::numeric_limits<T_t>::epsilon()) {
-  //    return false;
-  //  }
-  //
-  //  return true;
   return vector.isApprox(_v.vector, 1e-5);
 }
 
 template <vector_element_concept_t T_t>
 bool vector4_t<T_t>::operator!=(const vector4_t<T_t> &_v) const {
-  //  if (std::abs(x - _v.x) > std::numeric_limits<T_t>::epsilon()) {
-  //    return true;
-  //  }
-  //
-  //  if (std::abs(y - _v.y) > std::numeric_limits<T_t>::epsilon()) {
-  //    return true;
-  //  }
-  //
-  //  if (std::abs(z - _v.z) > std::numeric_limits<T_t>::epsilon()) {
-  //    return true;
-  //  }
-  //
-  //  if (std::abs(w - _v.w) > std::numeric_limits<T_t>::epsilon()) {
-  //    return true;
-  //  }
-  //
-  //  return false;
-
   return !vector.isApprox(_v.vector, 1e-5);
 }
 
@@ -374,11 +299,6 @@ vector4_t<T_t> vector4_t<T_t>::operator+(const vector4_t<T_t> &_v) const {
 
 template <vector_element_concept_t T_t>
 vector4_t<T_t> &vector4_t<T_t>::operator+=(const vector4_t<T_t> &_v) {
-  x += _v.x;
-  y += _v.y;
-  z += _v.z;
-  w += _v.w;
-
   vector += _v.vector;
   return *this;
 }
@@ -395,11 +315,6 @@ vector4_t<T_t> vector4_t<T_t>::operator-(const vector4_t<T_t> &_v) const {
 
 template <vector_element_concept_t T_t>
 vector4_t<T_t> &vector4_t<T_t>::operator-=(const vector4_t<T_t> &_v) {
-  x -= _v.x;
-  y -= _v.y;
-  z -= _v.z;
-  w -= _v.w;
-
   vector -= _v.vector;
   return *this;
 }
@@ -412,18 +327,12 @@ vector4_t<T_t> vector4_t<T_t>::operator*(U_t _s) const {
 
 template <vector_element_concept_t T_t>
 T_t vector4_t<T_t>::operator*(const vector4_t<T_t> &_v) const {
-  /// @todo
-  return x * _v.x + y * _v.y + z * _v.z + w * _v.w;
+  return vector.dot(_v.vector);
 }
 
 template <vector_element_concept_t T_t>
 template <vector_element_concept_t U_t>
 vector4_t<T_t> &vector4_t<T_t>::operator*=(U_t _s) {
-  x *= _s;
-  y *= _s;
-  z *= _s;
-  w *= _s;
-
   vector *= _s;
   return *this;
 }
@@ -444,8 +353,6 @@ vector4_t<T_t> vector4_t<T_t>::operator/(U_t _f) const {
   if (_f == 0) {
     throw std::invalid_argument(log("_f == 0"));
   }
-  //  T_t inv = (T_t)1 / _f;
-  //  return vector4_t<T_t>(x * inv, y * inv, z * inv, w * inv);
 
   return vector4_t<T_t>(vector / _f);
 }
@@ -456,55 +363,22 @@ vector4_t<T_t> &vector4_t<T_t>::operator/=(U_t _f) {
   if (_f == 0) {
     throw std::invalid_argument(log("_f == 0"));
   }
-  T_t inv = (T_t)1 / _f;
-  x *= inv;
-  y *= inv;
-  z *= inv;
-  w *= inv;
-
   vector /= _f;
   return *this;
 }
 
 template <vector_element_concept_t T_t>
 const T_t &vector4_t<T_t>::operator[](uint32_t _idx) const {
-  //  if (_idx > 3) {
-  //    throw std::invalid_argument(log("_idx > 3"));
-  //  } else if (_idx == 0) {
-  //    return x;
-  //  } else if (_idx == 1) {
-  //    return y;
-  //  } else if (_idx == 2) {
-  //    return z;
-  //  } else {
-  //    return w;
-  //  }
   return vector[_idx];
 }
 
 template <vector_element_concept_t T_t>
 T_t &vector4_t<T_t>::operator[](uint32_t _idx) {
-  //  if (_idx > 3) {
-  //    throw std::invalid_argument(log("_idx > 3"));
-  //  } else if (_idx == 0) {
-  //    return x;
-  //  } else if (_idx == 1) {
-  //    return y;
-  //  } else if (_idx == 2) {
-  //    return z;
-  //  } else {
-  //    return w;
-  //  }
   return vector[_idx];
 }
 
-template <vector_element_concept_t T_t>
-T_t vector4_t<T_t>::length_squared(void) const {
-  return x * x + y * y + z * z + w * w;
-}
-
 template <vector_element_concept_t T_t> T_t vector4_t<T_t>::length(void) const {
-  return std::sqrt(length_squared());
+  return vector.norm();
 }
 
 template <vector_element_concept_t T_t>
@@ -514,12 +388,6 @@ vector4_t<T_t> vector4_t<T_t>::abs(const vector4_t<T_t> &_v) {
 
 template <vector_element_concept_t T_t>
 vector4_t<T_t> vector4_t<T_t>::normalize(void) const {
-  //  if (length() == 0) {
-  //    return vector4_t<T_t>();
-  //  }
-  //  return vector4_t<T_t>(x / length(), y / length(), z / length(), w /
-  //  length());
-
   return vector.normalized();
 }
 
