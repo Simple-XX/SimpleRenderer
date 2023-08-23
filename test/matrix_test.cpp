@@ -35,7 +35,6 @@ TEST(matrix_t, matrix_num) {
         { 6, -2, -18,  8}
     };
     auto res_mat = matrix4f_t(res_arr);
-    std::cout<<res_mat.eigen_mat<<std::endl;
     EXPECT_EQ((res_mat == mat * 2), true);
     EXPECT_EQ((res_mat == 2 * mat), true);
     return;

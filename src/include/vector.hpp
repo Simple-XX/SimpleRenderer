@@ -252,13 +252,15 @@ public:
   // operator vector4_t<float>(void) const;
 
   friend std::ostream &operator<<(std::ostream &_os, const vector4_t<T_t> &_v) {
-    _os.setf(std::ios::right);
-    _os.precision(16);
+//    _os.setf(std::ios::right);
+//    _os.precision(16);
+//
+//    _os << "[ " << _v.x << ", " << _v.y << ", " << _v.z << ", " << _v.w << " ]";
+//
+//    _os.unsetf(std::ios::right);
+//    _os.precision(6);
 
-    _os << "[ " << _v.x << ", " << _v.y << ", " << _v.z << ", " << _v.w << " ]";
-
-    _os.unsetf(std::ios::right);
-    _os.precision(6);
+  _os << _v.vector;
     return _os;
   }
 };
@@ -339,8 +341,7 @@ bool vector4_t<T_t>::operator==(const vector4_t<T_t> &_v) const {
   //  }
   //
   //  return true;
-
-  return vector == _v.vector;
+  return vector.isApprox(_v.vector, 1e-5);
 }
 
 template <vector_element_concept_t T_t>
@@ -363,7 +364,7 @@ bool vector4_t<T_t>::operator!=(const vector4_t<T_t> &_v) const {
   //
   //  return false;
 
-  return vector != _v.vector;
+  return !vector.isApprox(_v.vector, 1e-5);
 }
 
 template <vector_element_concept_t T_t>
