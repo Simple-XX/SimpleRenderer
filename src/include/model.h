@@ -278,17 +278,20 @@ public:
 // 模型变换
 inline matrix4f_t get_model_matrix(const vector4f_t &_scale,
                                    const vector4f_t &_rotate,
-                                   const float &_angle,
+                                   const float &_rad,
                                    const vector4f_t &_translate) {
   // 缩放
   auto scale = matrix4f_t().scale(_scale.vector.x(), _scale.vector.y(), _scale.vector.z());
 
   // 旋转
-  auto rotation = matrix4f_t().rotate(_rotate, _angle);
+  auto rotation = matrix4f_t().rotate(_rotate, _rad);
 
   // 平移
-  auto translate =
-      matrix4f_t().translate(_translate.vector.x(), _translate.vector.y(), _translate.vector.z());
+  auto translate = matrix4f_t();
+
+  translate.eigen_mat(0, 3) = _translate.vector.x();
+  translate.eigen_mat(1, 3) = _translate.vector.y();
+  translate.eigen_mat(2, 3) = _translate.vector.z();
 
   // 应用到向量上时先线性变换(缩放，旋转)再平移
   return translate * rotation * scale;

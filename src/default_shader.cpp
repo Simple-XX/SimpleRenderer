@@ -52,8 +52,14 @@ default_shader_t::vertex(const shader_vertex_in_t &_shader_vertex_in) const {
   // 变换坐标
   /// @todo 这里的问题在于在 m 矩阵中做了 t 操作，然后再应用 v 矩阵时，会在 t
   /// 的基础上 r
-  auto aaa = matrix4f_t().translate(-960, -540, 0);
-  auto bbb = matrix4f_t().translate(960, 540, 0);
+  auto aaa = matrix4f_t();
+  aaa.eigen_mat(0, 3) = -960;
+  aaa.eigen_mat(1, 3) = -540;
+  aaa.eigen_mat(2, 3) = 0;
+  auto bbb = matrix4f_t();
+  bbb.eigen_mat(0, 3) = 960;
+  bbb.eigen_mat(1, 3) = 540;
+  bbb.eigen_mat(2, 3) = 0;
   auto mvp = shader_data.project_matrix * bbb * shader_data.view_matrix * aaa *
              shader_data.model_matrix;
   // auto mvp = shader_data.project_matrix * shader_data.view_matrix

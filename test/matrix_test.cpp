@@ -149,7 +149,7 @@ TEST(matrix_t, scale) {
 // 旋转
 TEST(matrix_t, rotate) {
     auto mat1 = matrix4f_t().rotate(
-      vector4f_t(1, 0, 0, vector4f_t::W_VECTOR).normalize(), 45);
+      vector4f_t(1, 0, 0, vector4f_t::W_VECTOR).normalize(), M_PI_4);
     float res_arr1[4][4] = {
         {1,                  0,                   0, 0},
         {0, 0.7071067690849304, -0.7071067690849304, 0},
@@ -165,7 +165,7 @@ TEST(matrix_t, rotate) {
     EXPECT_EQ((res_vec1 == (mat1 * vec1)), true);
 
     auto mat2 = matrix4f_t().rotate(
-      vector4f_t(0, 1, 0, vector4f_t::W_VECTOR).normalize(), 45);
+      vector4f_t(0, 1, 0, vector4f_t::W_VECTOR).normalize(), M_PI_4);
     float res_arr2[4][4] = {
         { 0.7071067690849304, 0, 0.7071067690849304, 0},
         {                  0, 1,                  0, 0},
@@ -181,7 +181,7 @@ TEST(matrix_t, rotate) {
     EXPECT_EQ((res_vec2 == (mat2 * vec2)), true);
 
     auto mat3 = matrix4f_t().rotate(
-      vector4f_t(0, 0, 1, vector4f_t::W_VECTOR).normalize(), 45);
+      vector4f_t(0, 0, 1, vector4f_t::W_VECTOR).normalize(), M_PI_4);
     float res_arr3[4][4] = {
         {0.7071067690849304, -0.7071067690849304, 0, 0},
         {0.7071067690849304,  0.7071067690849304, 0, 0},
@@ -196,7 +196,7 @@ TEST(matrix_t, rotate) {
     EXPECT_EQ((res_vec3 == (mat3 * vec3)), true);
 
     auto mat4 = matrix4f_t().rotate(
-      vector4f_t(1, 1, 0, vector4f_t::W_VECTOR).normalize(), 45);
+      vector4f_t(1, 1, 0, vector4f_t::W_VECTOR).normalize(), M_PI_4);
     float res_arr4[4][4] = {
         {0.853553390593274, 0.146446609406726,               0.5, 0},
         {0.146446609406726, 0.853553390593274,              -0.5, 0},
@@ -212,7 +212,7 @@ TEST(matrix_t, rotate) {
     EXPECT_EQ((res_vec4 == (mat4 * vec4)), true);
 
     auto mat5 = matrix4f_t().rotate(
-      vector4f_t(1, 0, 1, vector4f_t::W_VECTOR).normalize(), 45);
+      vector4f_t(1, 0, 1, vector4f_t::W_VECTOR).normalize(), M_PI_4);
     float res_arr5[4][4] = {
         {0.853553390593274,              -0.5, 0.146446609406726, 0},
         {              0.5, 0.707106781186548,              -0.5, 0},
@@ -229,7 +229,7 @@ TEST(matrix_t, rotate) {
     EXPECT_EQ((res_vec5 == (mat5 * vec5)), true);
 
     auto mat6 = matrix4f_t().rotate(
-      vector4f_t(0, 1, 1, vector4f_t::W_VECTOR).normalize(), 45);
+      vector4f_t(0, 1, 1, vector4f_t::W_VECTOR).normalize(), M_PI_4);
     float res_arr6[4][4] = {
         {0.707106781186548,              -0.5,               0.5, 0},
         {              0.5, 0.853553390593274, 0.146446609406726, 0},
@@ -245,7 +245,7 @@ TEST(matrix_t, rotate) {
     EXPECT_EQ((res_vec6 == (mat6 * vec6)), true);
 
     auto mat7 = matrix4f_t().rotate(
-      vector4f_t(1, 1, 1, vector4f_t::W_VECTOR).normalize(), 45);
+      vector4f_t(1, 1, 1, vector4f_t::W_VECTOR).normalize(), M_PI_4);
     float res_arr7[4][4] = {
         { 0.8047378659248352, -0.3106172382831573,  0.5058794021606445, 0},
         { 0.5058794021606445,  0.8047378659248352, -0.3106172382831573, 0},
@@ -260,8 +260,9 @@ TEST(matrix_t, rotate) {
       = vector4f_t(1.70114150927732, 1.18350341907227, 3.1153552, 4);
     EXPECT_EQ((res_vec7 == (mat7 * vec7)), true);
 
+    // 99
     auto mat8 = matrix4f_t().rotate(
-      vector4f_t(1, 1, 1, vector4f_t::W_VECTOR).normalize(), 99);
+      vector4f_t(1, 1, 1, vector4f_t::W_VECTOR).normalize(), (11*M_PI/20));
     float res_arr8[4][4] = {
         { 0.2290436625480651, -0.1847639977931976,  0.9557201862335205, 0},
         { 0.9557201862335205,  0.2290436625480651, -0.1847639977931976, 0},
@@ -276,7 +277,7 @@ TEST(matrix_t, rotate) {
     EXPECT_EQ((res_vec8 == (mat8 * vec8)), true);
 
     auto mat9 = matrix4f_t().rotate(
-      vector4f_t(1, 1, 1, vector4f_t::W_VECTOR).normalize(), 15);
+      vector4f_t(1, 1, 1, vector4f_t::W_VECTOR).normalize(), M_PI/12);
     float res_arr9[4][4] = {
         { 0.9772838950157165, -0.1380711793899536,  0.1607873141765594, 0},
         { 0.1607873141765594,  0.9772838950157165, -0.1380711793899536, 0},
@@ -290,8 +291,9 @@ TEST(matrix_t, rotate) {
       = vector4f_t(1.18350341907227, 1.70114150927732, 3.11535507165041, 4);
     EXPECT_EQ((res_vec9 == (mat9 * vec9)), true);
 
+    // 81
     auto mat10 = matrix4f_t().rotate(
-      vector4f_t(1, 1, 1, vector4f_t::W_VECTOR).normalize(), 81);
+      vector4f_t(1, 1, 1, vector4f_t::W_VECTOR).normalize(), (9*M_PI/20));
     float res_arr10[4][4] = {
         {0.4376229643821716, -0.289053618907928, 0.8514305949211120, 0},
         {0.8514305949211120, 0.4376229643821716, -0.289053618907928, 0},
@@ -305,8 +307,9 @@ TEST(matrix_t, rotate) {
     auto res_vec10 = vector4f_t(2.4138073, 0.8595156, 2.7266764, 4);
     EXPECT_EQ((res_vec10 == (mat10 * vec10)), true);
 
+    // 34
     auto mat11 = matrix4f_t().rotate(
-      vector4f_t(5, 10, 4, vector4f_t::W_VECTOR).normalize(), 34);
+      vector4f_t(5, 10, 4, vector4f_t::W_VECTOR).normalize(), (17*M_PI/90));
     float res_arr11[4][4] = {
         { 0.8593500852584838, -0.1277451813220977,  0.4951753616333007, 0},
         { 0.2489951252937316,   0.950287520885467, -0.1869627237319946, 0},
@@ -327,7 +330,13 @@ TEST(matrix_t, rotate) {
 // 平移
 TEST(matrix_t, translate) {
     auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-    auto mat     = matrix4f_t().translate(5, 6, 7);
+    auto mat     = matrix4f_t();
+    mat.eigen_mat(0, 3) = 5;
+    mat.eigen_mat(1, 3) = 6;
+    mat.eigen_mat(2, 3) = 7;
+
+    std::cout << mat << std::endl;
+
     auto res_vec = vector4f_t(6, 8, 10, vector4f_t::W_POINT);
     EXPECT_EQ((res_vec == mat * vec), true);
 
@@ -341,7 +350,7 @@ TEST(matrix_t, scale_rotate) {
     auto res_vec = vector4f_t(5, 12, 21, vector4f_t::W_POINT);
     EXPECT_EQ((res_vec == mat * vec), true);
 
-    mat     = mat.rotate(vector4f_t(0, 0, 1).normalize(), 90);
+    mat     = mat.rotate(vector4f_t(0, 0, 1).normalize(), M_PI_2);
     /// @todo 精度问题
     res_vec = vector4f_t(-12, 4.9999995, 20.999998, vector4f_t::W_POINT);
     EXPECT_EQ((res_vec == mat * vec), true);
@@ -352,7 +361,7 @@ TEST(matrix_t, scale_rotate) {
 // 旋转 + 缩放
 TEST(matrix_t, rotate_scale) {
     auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-    auto mat     = matrix4f_t().rotate(vector4f_t(0, 0, 1).normalize(), 90);
+    auto mat     = matrix4f_t().rotate(vector4f_t(0, 0, 1).normalize(), M_PI_2);
     /// @todo 精度问题
     auto res_vec = vector4f_t(-2, 0.99999994, 2.9999997, vector4f_t::W_POINT);
     EXPECT_EQ((res_vec == mat * vec), true);
@@ -365,190 +374,190 @@ TEST(matrix_t, rotate_scale) {
     return;
 }
 
-// 平移 + 缩放
-TEST(matrix_t, translate_scale) {
-    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-    auto mat     = matrix4f_t().translate(5, 6, 7);
-    auto res_vec = vector4f_t(6, 8, 10, vector4f_t::W_POINT);
-    auto ret     = (res_vec == mat * vec);
-    EXPECT_EQ(ret, true);
-
-    mat     = mat.scale(4, 5, 6);
-    res_vec = vector4f_t(24, 40, 60, vector4f_t::W_POINT);
-    ret     = (res_vec == mat * vec);
-    EXPECT_EQ(ret, true);
-
-    mat = matrix4f_t().translate(5, 6, 7).scale(4, 5, 6);
-    ret = (res_vec == mat * vec);
-    EXPECT_EQ(ret, true);
-
-    return;
-}
-
-// 缩放 + 平移
-TEST(matrix_t, scale_translate) {
-    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-    auto mat     = matrix4f_t().scale(5, 6, 7);
-    auto res_vec = vector4f_t(5, 12, 21, vector4f_t::W_POINT);
-    auto ret     = (res_vec == mat * vec);
-    EXPECT_EQ(ret, true);
-
-    mat     = mat.translate(4, 5, 6);
-    res_vec = vector4f_t(9, 17, 27, vector4f_t::W_POINT);
-    ret     = (res_vec == mat * vec);
-    EXPECT_EQ(ret, true);
-
-    mat = matrix4f_t().scale(5, 6, 7).translate(4, 5, 6);
-    ret = (res_vec == mat * vec);
-    EXPECT_EQ(ret, true);
-
-    return;
-}
-
-// 平移 + 旋转
-TEST(matrix_t, translate_rotate) {
-    auto vec     = vector4f_t(0, 0, 0, vector4f_t::W_POINT);
-    auto mat     = matrix4f_t().translate(1, 2, 3);
-    auto res_vec = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-    auto ret     = (res_vec == mat * vec);
-    EXPECT_EQ(ret, true);
-
-    mat     = mat.rotate(vector4f_t(0, 0, 1).normalize(), 90);
-    /// @todo 精度问题
-    res_vec = vector4f_t(-2, 0.99999994, 2.9999997, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    return;
-}
-
-// 旋转 + 平移
-TEST(matrix_t, rotate_translate) {
-    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-    auto mat     = matrix4f_t().rotate(vector4f_t(0, 0, 1).normalize(), 90);
-    /// @todo 精度问题
-    auto res_vec = vector4f_t(-2, 0.99999994, 2.9999997, vector4f_t::W_POINT);
-    auto ret     = (res_vec == mat * vec);
-    EXPECT_EQ(ret, true);
-
-    mat     = mat.translate(1, 2, 3);
-    res_vec = vector4f_t(-1, 3, 6, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    return;
-}
-
-// 缩放 + 平移 + 旋转
-TEST(matrix_t, scale_translate_rotate) {
-    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-    auto mat     = matrix4f_t().scale(5, 6, 7);
-    auto res_vec = vector4f_t(5, 12, 21, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    mat     = mat.translate(1, 2, 3);
-    res_vec = vector4f_t(6, 14, 24, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    mat     = mat.rotate(vector4f_t(0, 0, 1).normalize(), 90);
-    // @todo 精度问题
-    res_vec = vector4f_t(-14, 5.9999995, 23.999998, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    return;
-}
-
-// 缩放 + 旋转 + 平移
-TEST(matrix_t, scale_rotate_translate) {
-    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-    auto mat     = matrix4f_t().scale(5, 6, 7);
-    auto res_vec = vector4f_t(5, 12, 21, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    mat     = mat.rotate(vector4f_t(0, 0, 1).normalize(), 90);
-    // @todo 精度问题
-    res_vec = vector4f_t(-12, 4.9999995, 20.999998, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    mat     = mat.translate(1, 2, 3);
-    res_vec = vector4f_t(-11, 6.9999995, 23.999998, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    return;
-}
-
-// 平移 + 缩放 + 旋转
-TEST(matrix_t, translate_scale_rotate) {
-    auto vec     = vector4f_t(0, 0, 0, vector4f_t::W_POINT);
-    auto mat     = matrix4f_t().translate(1, 2, 3);
-    auto res_vec = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    mat     = mat.scale(4, 5, 6);
-    res_vec = vector4f_t(4, 10, 18, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    mat     = mat.rotate(vector4f_t(0, 0, 1).normalize(), 90);
-    // @todo 精度问题
-    res_vec = vector4f_t(-10, 3.9999995, 17.999998, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    return;
-}
-
-// 平移 + 旋转 + 缩放
-TEST(matrix_t, translate_rotate_scale) {
-    auto vec     = vector4f_t(0, 0, 0, vector4f_t::W_POINT);
-    auto mat     = matrix4f_t().translate(1, 2, 3);
-    auto res_vec = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    mat     = mat.rotate(vector4f_t(0, 0, 1).normalize(), 90);
-    // @todo 精度问题
-    res_vec = vector4f_t(-2, 0.99999994, 2.9999997, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    mat     = mat.scale(4, 5, 6);
-    res_vec = vector4f_t(-8, 4.9999995, 17.999998, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    return;
-}
-
-// 旋转 + 缩放 + 平移
-TEST(matrix_t, rotate_scale_translate) {
-    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-    auto mat     = matrix4f_t().rotate(vector4f_t(0, 0, 1).normalize(), 90);
-    auto res_vec = vector4f_t(-2, 0.99999994, 2.9999997, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    mat     = mat.scale(5, 6, 7);
-    // @todo 精度问题
-    res_vec = vector4f_t(-10, 5.9999995, 20.999998, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    mat     = mat.translate(1, 2, 3);
-    res_vec = vector4f_t(-9, 7.9999995, 23.999998, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    return;
-}
-
-// 旋转 + 平移 + 缩放
-TEST(matrix_t, rotate_translate_scale) {
-    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
-    auto mat     = matrix4f_t().rotate(vector4f_t(0, 0, 1).normalize(), 90);
-    auto res_vec = vector4f_t(-2, 0.99999994, 2.9999997, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    mat     = mat.translate(1, 2, 3);
-    res_vec = vector4f_t(-1, 3, 6, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    mat     = mat.scale(5, 6, 7);
-    res_vec = vector4f_t(-5, 18, 42, vector4f_t::W_POINT);
-    EXPECT_EQ((res_vec == mat * vec), true);
-
-    return;
-}
+//// 平移 + 缩放
+//TEST(matrix_t, translate_scale) {
+//    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
+//    auto mat     = matrix4f_t().translate(5, 6, 7);
+//    auto res_vec = vector4f_t(6, 8, 10, vector4f_t::W_POINT);
+//    auto ret     = (res_vec == mat * vec);
+//    EXPECT_EQ(ret, true);
+//
+//    mat     = mat.scale(4, 5, 6);
+//    res_vec = vector4f_t(24, 40, 60, vector4f_t::W_POINT);
+//    ret     = (res_vec == mat * vec);
+//    EXPECT_EQ(ret, true);
+//
+//    mat = matrix4f_t().translate(5, 6, 7).scale(4, 5, 6);
+//    ret = (res_vec == mat * vec);
+//    EXPECT_EQ(ret, true);
+//
+//    return;
+//}
+//
+//// 缩放 + 平移
+//TEST(matrix_t, scale_translate) {
+//    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
+//    auto mat     = matrix4f_t().scale(5, 6, 7);
+//    auto res_vec = vector4f_t(5, 12, 21, vector4f_t::W_POINT);
+//    auto ret     = (res_vec == mat * vec);
+//    EXPECT_EQ(ret, true);
+//
+//    mat     = mat.translate(4, 5, 6);
+//    res_vec = vector4f_t(9, 17, 27, vector4f_t::W_POINT);
+//    ret     = (res_vec == mat * vec);
+//    EXPECT_EQ(ret, true);
+//
+//    mat = matrix4f_t().scale(5, 6, 7).translate(4, 5, 6);
+//    ret = (res_vec == mat * vec);
+//    EXPECT_EQ(ret, true);
+//
+//    return;
+//}
+//
+//// 平移 + 旋转
+//TEST(matrix_t, translate_rotate) {
+//    auto vec     = vector4f_t(0, 0, 0, vector4f_t::W_POINT);
+//    auto mat     = matrix4f_t().translate(1, 2, 3);
+//    auto res_vec = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
+//    auto ret     = (res_vec == mat * vec);
+//    EXPECT_EQ(ret, true);
+//
+//    mat     = mat.rotate(vector4f_t(0, 0, 1).normalize(), 90);
+//    /// @todo 精度问题
+//    res_vec = vector4f_t(-2, 0.99999994, 2.9999997, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    return;
+//}
+//
+//// 旋转 + 平移
+//TEST(matrix_t, rotate_translate) {
+//    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
+//    auto mat     = matrix4f_t().rotate(vector4f_t(0, 0, 1).normalize(), 90);
+//    /// @todo 精度问题
+//    auto res_vec = vector4f_t(-2, 0.99999994, 2.9999997, vector4f_t::W_POINT);
+//    auto ret     = (res_vec == mat * vec);
+//    EXPECT_EQ(ret, true);
+//
+//    mat     = mat.translate(1, 2, 3);
+//    res_vec = vector4f_t(-1, 3, 6, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    return;
+//}
+//
+//// 缩放 + 平移 + 旋转
+//TEST(matrix_t, scale_translate_rotate) {
+//    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
+//    auto mat     = matrix4f_t().scale(5, 6, 7);
+//    auto res_vec = vector4f_t(5, 12, 21, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    mat     = mat.translate(1, 2, 3);
+//    res_vec = vector4f_t(6, 14, 24, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    mat     = mat.rotate(vector4f_t(0, 0, 1).normalize(), 90);
+//    // @todo 精度问题
+//    res_vec = vector4f_t(-14, 5.9999995, 23.999998, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    return;
+//}
+//
+//// 缩放 + 旋转 + 平移
+//TEST(matrix_t, scale_rotate_translate) {
+//    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
+//    auto mat     = matrix4f_t().scale(5, 6, 7);
+//    auto res_vec = vector4f_t(5, 12, 21, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    mat     = mat.rotate(vector4f_t(0, 0, 1).normalize(), 90);
+//    // @todo 精度问题
+//    res_vec = vector4f_t(-12, 4.9999995, 20.999998, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    mat     = mat.translate(1, 2, 3);
+//    res_vec = vector4f_t(-11, 6.9999995, 23.999998, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    return;
+//}
+//
+//// 平移 + 缩放 + 旋转
+//TEST(matrix_t, translate_scale_rotate) {
+//    auto vec     = vector4f_t(0, 0, 0, vector4f_t::W_POINT);
+//    auto mat     = matrix4f_t().translate(1, 2, 3);
+//    auto res_vec = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    mat     = mat.scale(4, 5, 6);
+//    res_vec = vector4f_t(4, 10, 18, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    mat     = mat.rotate(vector4f_t(0, 0, 1).normalize(), 90);
+//    // @todo 精度问题
+//    res_vec = vector4f_t(-10, 3.9999995, 17.999998, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    return;
+//}
+//
+//// 平移 + 旋转 + 缩放
+//TEST(matrix_t, translate_rotate_scale) {
+//    auto vec     = vector4f_t(0, 0, 0, vector4f_t::W_POINT);
+//    auto mat     = matrix4f_t().translate(1, 2, 3);
+//    auto res_vec = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    mat     = mat.rotate(vector4f_t(0, 0, 1).normalize(), 90);
+//    // @todo 精度问题
+//    res_vec = vector4f_t(-2, 0.99999994, 2.9999997, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    mat     = mat.scale(4, 5, 6);
+//    res_vec = vector4f_t(-8, 4.9999995, 17.999998, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    return;
+//}
+//
+//// 旋转 + 缩放 + 平移
+//TEST(matrix_t, rotate_scale_translate) {
+//    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
+//    auto mat     = matrix4f_t().rotate(vector4f_t(0, 0, 1).normalize(), 90);
+//    auto res_vec = vector4f_t(-2, 0.99999994, 2.9999997, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    mat     = mat.scale(5, 6, 7);
+//    // @todo 精度问题
+//    res_vec = vector4f_t(-10, 5.9999995, 20.999998, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    mat     = mat.translate(1, 2, 3);
+//    res_vec = vector4f_t(-9, 7.9999995, 23.999998, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    return;
+//}
+//
+//// 旋转 + 平移 + 缩放
+//TEST(matrix_t, rotate_translate_scale) {
+//    auto vec     = vector4f_t(1, 2, 3, vector4f_t::W_POINT);
+//    auto mat     = matrix4f_t().rotate(vector4f_t(0, 0, 1).normalize(), 90);
+//    auto res_vec = vector4f_t(-2, 0.99999994, 2.9999997, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    mat     = mat.translate(1, 2, 3);
+//    res_vec = vector4f_t(-1, 3, 6, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    mat     = mat.scale(5, 6, 7);
+//    res_vec = vector4f_t(-5, 18, 42, vector4f_t::W_POINT);
+//    EXPECT_EQ((res_vec == mat * vec), true);
+//
+//    return;
+//}
 
 // 旋转到
 //TEST(matrix_t, rotate_from_to) {

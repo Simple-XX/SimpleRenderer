@@ -121,8 +121,12 @@ model2world_tran(const model_t &_model, const matrix4f_t &_rotate,
   coord_mat = coord_mat.scale(scale);
   coord_mat = _scale * coord_mat;
   // 移动到左上角
-  coord_mat =
-      coord_mat.translate(std::abs(x_min) * scale, std::abs(y_min) * scale, 0);
+  auto aaa = matrix4f_t ();
+  aaa.eigen_mat(0, 3) = std::abs(x_min) * scale;
+  aaa.eigen_mat(1, 3) = std::abs(y_min) * scale;
+  aaa.eigen_mat(2, 3) = 0;
+  coord_mat *= aaa;
+
   // 从左上角移动到指定位置
   coord_mat = _translate * coord_mat;
   return std::pair<const matrix4f_t, const matrix4f_t>{matrix4f_t(coord_mat),

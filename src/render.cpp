@@ -119,7 +119,7 @@ void render_t::loop(void) {
 
         // 设置 mvp 矩阵
         shader.shader_data.model_matrix = get_model_matrix(
-            vector4f_t(1000, 1000, 1000), vector4f_t(0, 1, 1).normalize(), 45,
+            vector4f_t(1000, 1000, 1000), vector4f_t(0, 1, 1).normalize(), M_PI_4,
             vector4f_t(config->WIDTH / 2, config->HEIGHT / 2, 0));
         shader.shader_data.view_matrix = matrix4f_t();
         // shader.shader_data.view_matrix
