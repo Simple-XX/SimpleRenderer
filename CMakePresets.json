@@ -66,7 +66,7 @@
         "strategy": "external"
       },
       "toolchainFile": "",
-      "binaryDir": "",
+      "binaryDir": "${sourceDir}/build",
       "installDir": "",
       "cmakeExecutable": "",
       "cacheVariables": {
@@ -84,7 +84,7 @@
         },
         "ENABLE_TEST_COVERAGE": {
           "type": "BOOL",
-          "value": "ON"
+          "value": "OFF"
         }
       },
       "environment": {
@@ -115,8 +115,7 @@
         "configurePresets_base"
       ],
       "displayName": "build SimpleRenderer",
-      "description": "build SimpleRenderer",
-      "binaryDir": "${sourceDir}/build"
+      "description": "build SimpleRenderer"
     }
   ]
 }
