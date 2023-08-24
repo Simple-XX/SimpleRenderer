@@ -27,17 +27,18 @@ include_directories(
 # 生成可执行文件
 add_executable(SimpleRender
         main.cpp
-        model.cpp
-        framebuffer.cpp
-        display.cpp
-        camera.cpp
-        shader.cpp
-        default_shader.cpp
-        color.cpp
-        scene.cpp
-        light.cpp
-        input.cpp
-        render.cpp)
+        #        model.cpp
+        #        framebuffer.cpp
+        #        display.cpp
+        #        camera.cpp
+        #        shader.cpp
+        #        default_shader.cpp
+        #        color.cpp
+        #        scene.cpp
+        #        light.cpp
+        #        input.cpp
+        #        render.cpp
+)
 
 target_link_libraries(SimpleRender
         stb
