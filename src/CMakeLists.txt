@@ -32,9 +32,9 @@ add_executable(SimpleRender
         camera.cpp
         light.cpp
         scene.cpp
+        shader.cpp
         #        framebuffer.cpp
         #        display.cpp
-        #        shader.cpp
         #        default_shader.cpp
         #        input.cpp
         #        render.cpp
