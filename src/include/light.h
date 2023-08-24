@@ -20,7 +20,7 @@
 #include "cstdint"
 
 #include "color.h"
-#include "vector.hpp"
+#include "vector.h"
 
 /**
  * @brief 光照抽象

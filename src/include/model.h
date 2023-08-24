@@ -23,8 +23,8 @@
 #include "tiny_obj_loader.h"
 
 #include "color.h"
-#include "matrix.hpp"
-#include "vector.hpp"
+#include "matrix.h"
+#include "vector.h"
 
 /**
  * @brief 模型

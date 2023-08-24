@@ -25,9 +25,9 @@
 #include "camera.h"
 #include "config.h"
 #include "light.h"
-#include "matrix.hpp"
+#include "matrix.h"
 #include "model.h"
-#include "vector.hpp"
+#include "vector.h"
 
 /**
  * @brief 场景抽象

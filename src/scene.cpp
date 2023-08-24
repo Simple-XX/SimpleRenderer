@@ -15,7 +15,7 @@
  */
 
 #include "scene.h"
-#include "matrix.hpp"
+#include "matrix.h"
 
 scene_t::scene_t(const std::shared_ptr<config_t> &_config) : config(_config) {
   current_camera = surround_camera_t();

@@ -18,8 +18,8 @@
 #define SIMPLERENDER_CAMERA_H
 
 #include "log.hpp"
-#include "matrix.hpp"
-#include "vector.hpp"
+#include "matrix.h"
+#include "vector.h"
 
 /**
  * @brief 相机基类

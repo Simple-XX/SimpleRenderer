@@ -17,9 +17,9 @@
 #ifndef SIMPLERENDER_SHADER_H
 #define SIMPLERENDER_SHADER_H
 
-#include "matrix.hpp"
+#include "matrix.h"
 #include "model.h"
-#include "vector.hpp"
+#include "vector.h"
 
 /**
  * @brief 顶点着色器输入数据
