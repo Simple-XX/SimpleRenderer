@@ -82,17 +82,31 @@ public:
 
   /**
    * 下标重载
-   * @param _idx             索引
-   * @return uint8_t&         对应颜色
+   * @param _idx 索引
+   * @return 对应颜色
    */
   auto operator[](uint8_t _idx) -> uint8_t &;
 
   /**
    * 下标重载
-   * @param _idx             索引
-   * @return uint8_t          对应颜色
+   * @param _idx 索引
+   * @return 对应颜色
    */
   auto operator[](uint8_t _idx) const -> uint8_t;
+
+  /**
+   * float * 重载
+   * @param _val 值
+   * @return 颜色
+   */
+  auto operator*(float _val) const -> color_t;
+
+  /**
+   * float *= 重载
+   * @param _val 值
+   * @return 颜色
+   */
+  auto operator*=(float _val) -> color_t &;
 
   /**
    * 获取每像素大小

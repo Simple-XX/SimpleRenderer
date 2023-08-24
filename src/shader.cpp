@@ -16,14 +16,11 @@
 
 #include "shader.h"
 
-shader_vertex_in_t::shader_vertex_in_t(const model_t::face_t &_face) {
-  face = _face;
-}
+shader_vertex_in_t::shader_vertex_in_t(const model_t::face_t &_face)
+    : face(_face) {}
 
-shader_vertex_out_t::shader_vertex_out_t(const model_t::face_t &_face) {
-  face = _face;
-  return;
-}
+shader_vertex_out_t::shader_vertex_out_t(const model_t::face_t &_face)
+    : face(_face) {}
 
 shader_fragment_in_t::shader_fragment_in_t(const vector4f_t &_barycentric_coord,
                                            const vector4f_t &_normal,
@@ -32,9 +29,7 @@ shader_fragment_in_t::shader_fragment_in_t(const vector4f_t &_barycentric_coord,
                                            const color_t &_color1,
                                            const color_t &_color2)
     : barycentric_coord(_barycentric_coord), normal(_normal), light(_light),
-      color0(_color0), color1(_color1), color2(_color2) {
-  return;
-}
+      color0(_color0), color1(_color1), color2(_color2) {}
 
 shader_fragment_out_t::shader_fragment_out_t(const bool &_is_need_draw,
                                              const color_t &_color)

@@ -75,6 +75,22 @@ auto color_t::operator[](uint8_t _idx) const -> uint8_t {
   return channel_a;
 }
 
+auto color_t::operator*(float _val) const -> color_t {
+  auto red = static_cast<uint8_t>(static_cast<float>(channel_r) * _val);
+  auto green = static_cast<uint8_t>(static_cast<float>(channel_g) * _val);
+  auto blue = static_cast<uint8_t>(static_cast<float>(channel_b) * _val);
+  auto alpha = static_cast<uint8_t>(static_cast<float>(channel_a) * _val);
+  return color_t(red, green, blue, alpha);
+}
+
+auto color_t::operator*=(float _val) -> color_t & {
+  channel_r = static_cast<uint8_t>(static_cast<float>(channel_r) * _val);
+  channel_g = static_cast<uint8_t>(static_cast<float>(channel_g) * _val);
+  channel_b = static_cast<uint8_t>(static_cast<float>(channel_b) * _val);
+  channel_a = static_cast<uint8_t>(static_cast<float>(channel_a) * _val);
+  return *this;
+}
+
 [[maybe_unused]] auto color_t::bpp() -> size_t { return BPP; }
 
 [[maybe_unused]] auto color_t::to_uint32() const -> uint32_t {

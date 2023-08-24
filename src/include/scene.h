@@ -31,22 +31,6 @@
  * 场景抽象
  */
 class scene_t {
-private:
-  /// 场景中的摄像机
-  std::vector<camera_base_t> cameras;
-  /// 当前使用的摄像机
-  camera_base_t camera;
-
-  /// 场景中的所有模型
-  std::vector<model_t> models;
-  /// 场景中的可见模型，即要渲染的模型队列
-  std::queue<model_t> visible_models;
-
-  /// 场景中的所有光照
-  std::vector<light_t> lights;
-  /// 场景中的光照合并值
-  light_t light;
-
 public:
   /// @name 默认构造/析构函数
   /// @{
@@ -113,6 +97,22 @@ public:
    * @return 场景的配置信息
    */
   [[nodiscard]] auto get_light() const -> const light_t &;
+
+private:
+  /// 场景中的摄像机
+  std::vector<camera_base_t> cameras;
+  /// 当前使用的摄像机
+  camera_base_t camera;
+
+  /// 场景中的所有模型
+  std::vector<model_t> models;
+  /// 场景中的可见模型，即要渲染的模型队列
+  std::queue<model_t> visible_models;
+
+  /// 场景中的所有光照
+  std::vector<light_t> lights;
+  /// 场景中的光照合并值
+  light_t light;
 };
 
 #endif /* SIMPLERENDER_SCENE_H */

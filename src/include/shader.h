@@ -216,8 +216,9 @@ public:
    * @param _shader_vertex_in 顶点着色器输入
    * @return 顶点着色器输出
    */
-  virtual shader_vertex_out_t
-  vertex(const shader_vertex_in_t &_shader_vertex_in) const = 0;
+  [[nodiscard]] virtual auto
+  vertex(const shader_vertex_in_t &_shader_vertex_in) const
+      -> shader_vertex_out_t = 0;
 
   /**
    * 片段着色器
@@ -225,8 +226,9 @@ public:
    * @param _shader_fragment_in 片段着色器输入
    * @return 片段着色器输出
    */
-  virtual shader_fragment_out_t
-  fragment(const shader_fragment_in_t &_shader_fragment_in) const = 0;
+  [[nodiscard]] virtual auto
+  fragment(const shader_fragment_in_t &_shader_fragment_in) const
+      -> shader_fragment_out_t = 0;
 };
 
 #endif /* SIMPLERENDER_SHADER_H */

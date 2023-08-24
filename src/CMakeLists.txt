@@ -33,9 +33,9 @@ add_executable(SimpleRender
         light.cpp
         scene.cpp
         shader.cpp
+        default_shader.cpp
         #        framebuffer.cpp
         #        display.cpp
-        #        default_shader.cpp
         #        input.cpp
         #        render.cpp
         )
