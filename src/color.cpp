@@ -20,6 +20,12 @@
 #include "color.h"
 #include "log.hpp"
 
+const color_t color_t::WHITE = color_t((uint8_t)0xFF, 0xFF, 0xFF);
+const color_t color_t::BLACK = color_t((uint8_t)0x00, 0x00, 0x00);
+const color_t color_t::RED = color_t((uint8_t)0xFF, 0x00, 0x00);
+const color_t color_t::GREEN = color_t((uint8_t)0x00, 0xFF, 0x00);
+const color_t color_t::BLUE = color_t((uint8_t)0x00, 0x00, 0xFF);
+
 color_t::color_t(uint32_t _data) {
   auto data_ptr = std::span(reinterpret_cast<uint8_t *>(&_data), 4);
   channel_r = data_ptr[0];

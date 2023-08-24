@@ -35,6 +35,15 @@ public:
     COLOR_IDX_A [[maybe_unused]] = 3,
   };
 
+  /// @name 颜色常量
+  /// @{
+  static const color_t WHITE;
+  static const color_t BLACK;
+  static const color_t RED;
+  static const color_t GREEN;
+  static const color_t BLUE;
+  /// @}
+
   /**
    * 构造函数
    * @param _data 颜色数据
@@ -122,17 +131,5 @@ private:
   uint8_t channel_a = std::numeric_limits<uint8_t>::max();
   /// @}
 };
-
-/// @name 颜色常量
-/// @{
-[[maybe_unused]] static const color_t WHITE =
-    color_t((uint8_t)0xFF, 0xFF, 0xFF);
-[[maybe_unused]] static const color_t BLACK =
-    color_t((uint8_t)0x00, 0x00, 0x00);
-[[maybe_unused]] static const color_t RED = color_t((uint8_t)0xFF, 0x00, 0x00);
-[[maybe_unused]] static const color_t GREEN =
-    color_t((uint8_t)0x00, 0xFF, 0x00);
-[[maybe_unused]] static const color_t BLUE = color_t((uint8_t)0x00, 0x00, 0xFF);
-/// @}
 
 #endif /* SIMPLERENDER_COLOR_H */

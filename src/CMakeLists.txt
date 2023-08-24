@@ -30,12 +30,12 @@ add_executable(SimpleRender
         color.cpp
         model.cpp
         camera.cpp
+        light.cpp
         #        framebuffer.cpp
         #        display.cpp
         #        shader.cpp
         #        default_shader.cpp
         #                scene.cpp
-        #        light.cpp
         #        input.cpp
         #        render.cpp
         )
