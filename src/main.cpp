@@ -47,8 +47,8 @@ auto main(int _argc, char **_argv) -> int {
   // 读取模型与材质
   for (auto &obj : objs) {
     std::cout << obj << '\n';
-    model_t model(obj);
-    //
+    model_t const model(obj);
+
     //    scene->add_model(model);
   }
   //  scene->add_light(light_t());

@@ -18,7 +18,9 @@ Checks: '-*,\
   readability-*,\
   -cppcoreguidelines-pro-type-reinterpret-cast,\
   -bugprone-easily-swappable-parameters,\
-  -llvm-header-guard'
+  -llvm-header-guard,\
+  -misc-non-private-member-variables-in-classes,\
+  -cppcoreguidelines-non-private-member-variables-in-classes'
 HeaderFilterRegex: '^${sourceDir}/src'
 AnalyzeTemporaryDtors: true
 ...

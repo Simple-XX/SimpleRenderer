@@ -40,13 +40,13 @@ public:
 
   struct material_t {
     /// 反光度
-    float shininess = 0; // NOLINT(misc-non-private-member-variables-in-classes)
+    float shininess = 0;
     /// 环境光照
-    vector3f_t ambient; // NOLINT(misc-non-private-member-variables-in-classes)
+    vector3f_t ambient;
     /// 漫反射光照
-    vector3f_t diffuse; // NOLINT(misc-non-private-member-variables-in-classes)
+    vector3f_t diffuse;
     /// 镜面光照
-    vector3f_t specular; // NOLINT(misc-non-private-member-variables-in-classes)
+    vector3f_t specular;
 
     /// @name 默认构造/析构函数
     /// @{
@@ -65,18 +65,17 @@ public:
    */
   struct vertex_t {
     /// 坐标
-    coord_t coord; // NOLINT(misc-non-private-member-variables-in-classes)
+    coord_t coord;
     /// 法线，顶点 v 的数量与 vn 的数量一样多
-    normal_t normal; // NOLINT(misc-non-private-member-variables-in-classes)
+    normal_t normal;
     /// 贴图(纹理)，范围为 0~1，顶点 v 的个数不一定与纹理坐标 vt
     /// 的个数一样多， 因为有可能很多顶点公用一个纹理坐标的像素。
-    texture_coord_t
-        texture_coord; // NOLINT(misc-non-private-member-variables-in-classes)
+    texture_coord_t texture_coord;
 
     /// 颜色，最终每个三角面的颜色，是由构成这个三角面的三个顶点进行插值计算
     /// 如果 obj 文件中没有指定则设为 1(白色)
     /// 范围 [0, 1]
-    color_t color; // NOLINT(misc-non-private-member-variables-in-classes)
+    color_t color;
 
     /**
      * 构造函数
@@ -113,14 +112,14 @@ public:
 
   /// @todo 直接保存太浪费内存了
   struct face_t {
-    vertex_t v0; // NOLINT(misc-non-private-member-variables-in-classes)
-    vertex_t v1; // NOLINT(misc-non-private-member-variables-in-classes)
-    vertex_t v2; // NOLINT(misc-non-private-member-variables-in-classes)
+    vertex_t v0;
+    vertex_t v1;
+    vertex_t v2;
     /// 面的法向量为三个点的法向量矢量和
-    normal_t normal; // NOLINT(misc-non-private-member-variables-in-classes)
+    normal_t normal;
     // 面的颜色为三个点的颜色插值
     /// 材质信息
-    material_t material; // NOLINT(misc-non-private-member-variables-in-classes)
+    material_t material;
 
     /**
      * 构造函数
@@ -160,9 +159,9 @@ public:
    */
   struct box_t {
     /// 最小点
-    vector4f_t min; // NOLINT(misc-non-private-member-variables-in-classes)
+    vector4f_t min;
     /// 最大点
-    vector4f_t max; // NOLINT(misc-non-private-member-variables-in-classes)
+    vector4f_t max;
 
     /// @name 默认构造/析构函数
     /// @{

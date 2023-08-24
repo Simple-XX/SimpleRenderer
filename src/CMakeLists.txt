@@ -29,16 +29,16 @@ add_executable(SimpleRender
         main.cpp
         color.cpp
         model.cpp
+        camera.cpp
         #        framebuffer.cpp
         #        display.cpp
-        #        camera.cpp
         #        shader.cpp
         #        default_shader.cpp
-        #        scene.cpp
+        #                scene.cpp
         #        light.cpp
         #        input.cpp
         #        render.cpp
-)
+        )
 
 target_link_libraries(SimpleRender
         stb
