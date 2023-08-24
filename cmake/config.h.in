@@ -1,0 +1,25 @@
+
+/**
+ * @file config.h
+ * @brief 项目配置
+ * @author Zone.N (Zone.Niuzh@hotmail.com)
+ * @version 1.0
+ * @date 2023-08-24
+ * @copyright MIT LICENSE
+ * https://github.com/Simple-XX/SimpleRenderer
+ * @par change log:
+ * <table>
+ * <tr><th>Date<th>Author<th>Description
+ * <tr><td>2023-08-24<td>Zone.N<td>创建文件
+ * </table>
+ */
+
+#ifndef SIMPLERENDER_CONFIG_H
+#define SIMPLERENDER_CONFIG_H
+
+#include "string_view"
+
+static constexpr const std::string_view OBJ_FILE_PATH =
+    std::string_view("@OBJ_FILE_PATH@");
+
+#endif /* SIMPLERENDER_CONFIG_H */

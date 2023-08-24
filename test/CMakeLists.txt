@@ -14,17 +14,18 @@ include_directories(
 
 set(test_src
 #        render_test.cpp
-        ${SimpleRender_SOURCE_DIR}/src/model.cpp
-        ${SimpleRender_SOURCE_DIR}/src/display.cpp
-        ${SimpleRender_SOURCE_DIR}/src/framebuffer.cpp
-        ${SimpleRender_SOURCE_DIR}/src/camera.cpp
-        ${SimpleRender_SOURCE_DIR}/src/shader.cpp
-        ${SimpleRender_SOURCE_DIR}/src/default_shader.cpp
-        ${SimpleRender_SOURCE_DIR}/src/color.cpp
-        ${SimpleRender_SOURCE_DIR}/src/scene.cpp
-        ${SimpleRender_SOURCE_DIR}/src/light.cpp
-        ${SimpleRender_SOURCE_DIR}/src/input.cpp
-        ${SimpleRender_SOURCE_DIR}/src/render.cpp)
+#        ${SimpleRender_SOURCE_DIR}/src/model.cpp
+#        ${SimpleRender_SOURCE_DIR}/src/display.cpp
+#        ${SimpleRender_SOURCE_DIR}/src/framebuffer.cpp
+#        ${SimpleRender_SOURCE_DIR}/src/camera.cpp
+#        ${SimpleRender_SOURCE_DIR}/src/shader.cpp
+#        ${SimpleRender_SOURCE_DIR}/src/default_shader.cpp
+#        ${SimpleRender_SOURCE_DIR}/src/color.cpp
+#        ${SimpleRender_SOURCE_DIR}/src/scene.cpp
+#        ${SimpleRender_SOURCE_DIR}/src/light.cpp
+#        ${SimpleRender_SOURCE_DIR}/src/input.cpp
+#        ${SimpleRender_SOURCE_DIR}/src/render.cpp
+)
 
 enable_testing()
 

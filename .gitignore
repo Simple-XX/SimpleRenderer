@@ -14,3 +14,4 @@ tools/opensbi/build
 .idea
 3rd
 Doxyfile
+src/include/config.h
