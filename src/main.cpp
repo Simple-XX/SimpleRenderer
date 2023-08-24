@@ -22,6 +22,8 @@
 #include "config.h"
 #include "model.h"
 
+#include "buffer_base.hpp"
+
 auto main(int _argc, char **_argv) -> int {
   auto paras = std::span(_argv, _argc);
   // obj 路径
