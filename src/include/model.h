@@ -40,13 +40,13 @@ public:
 
   struct material_t {
     /// 反光度
-    float shininess = 0;
+    float shininess = 0; // NOLINT(misc-non-private-member-variables-in-classes)
     /// 环境光照
-    vector3f_t ambient;
+    vector3f_t ambient; // NOLINT(misc-non-private-member-variables-in-classes)
     /// 漫反射光照
-    vector3f_t diffuse;
+    vector3f_t diffuse; // NOLINT(misc-non-private-member-variables-in-classes)
     /// 镜面光照
-    vector3f_t specular;
+    vector3f_t specular; // NOLINT(misc-non-private-member-variables-in-classes)
 
     /// @name 默认构造/析构函数
     /// @{
@@ -65,24 +65,25 @@ public:
    */
   struct vertex_t {
     /// 坐标
-    coord_t coord;
+    coord_t coord; // NOLINT(misc-non-private-member-variables-in-classes)
     /// 法线，顶点 v 的数量与 vn 的数量一样多
-    normal_t normal;
+    normal_t normal; // NOLINT(misc-non-private-member-variables-in-classes)
     /// 贴图(纹理)，范围为 0~1，顶点 v 的个数不一定与纹理坐标 vt
     /// 的个数一样多， 因为有可能很多顶点公用一个纹理坐标的像素。
-    texture_coord_t texture_coord;
+    texture_coord_t
+        texture_coord; // NOLINT(misc-non-private-member-variables-in-classes)
 
     /// 颜色，最终每个三角面的颜色，是由构成这个三角面的三个顶点进行插值计算
     /// 如果 obj 文件中没有指定则设为 1(白色)
     /// 范围 [0, 1]
-    color_t color;
+    color_t color; // NOLINT(misc-non-private-member-variables-in-classes)
 
     /**
      * 构造函数
-     * @param  _coord 坐标
-     * @param  _normal 法向量
-     * @param  _texture_coord 贴图
-     * @param  _color 颜色
+     * @param _coord 坐标
+     * @param _normal 法向量
+     * @param _texture_coord 贴图
+     * @param _color 颜色
      */
     vertex_t(coord_t _coord, normal_t _normal, texture_coord_t _texture_coord,
              const color_t &_color);
@@ -99,9 +100,9 @@ public:
 
     /**
      * 顶点与矩阵进行运算，效果是对顶点进行变换
-     * @param  _matrices 变换矩阵，第一个是坐标变换，第二个是法线变换
-     * @param  vertex 要变换的 vertex_t
-     * @return vertex_t 结果
+     * @param _matrices 变换矩阵，第一个是坐标变换，第二个是法线变换
+     * @param vertex 要变换的 vertex_t
+     * @return 结果
      * @todo 确认这里的乘法顺序
      */
     //    friend vertex_t
@@ -112,21 +113,21 @@ public:
 
   /// @todo 直接保存太浪费内存了
   struct face_t {
-    vertex_t v0;
-    vertex_t v1;
-    vertex_t v2;
+    vertex_t v0; // NOLINT(misc-non-private-member-variables-in-classes)
+    vertex_t v1; // NOLINT(misc-non-private-member-variables-in-classes)
+    vertex_t v2; // NOLINT(misc-non-private-member-variables-in-classes)
     /// 面的法向量为三个点的法向量矢量和
-    normal_t normal;
+    normal_t normal; // NOLINT(misc-non-private-member-variables-in-classes)
     // 面的颜色为三个点的颜色插值
     /// 材质信息
-    material_t material;
+    material_t material; // NOLINT(misc-non-private-member-variables-in-classes)
 
     /**
      * 构造函数
-     * @param  _v0 第一个顶点
-     * @param  _v1 第二个顶点
-     * @param  _v2 第三个顶点
-     * @param  _material 材质
+     * @param _v0 第一个顶点
+     * @param _v1 第二个顶点
+     * @param _v2 第三个顶点
+     * @param _material 材质
      */
     face_t(const vertex_t &_v0, const vertex_t &_v1, const vertex_t &_v2,
            material_t _material);
@@ -143,9 +144,9 @@ public:
 
     /**
      * 模型与矩阵进行运算，效果是对模型进行变换
-     * @param  _matrices        变换矩阵，第一个是坐标变换，第二个是法线变换
-     * @param  _face            要变换的 face_t
-     * @return face_t           结果
+     * @param _matrices 变换矩阵，第一个是坐标变换，第二个是法线变换
+     * @param _face 要变换的 face_t
+     * @return 结果
      * @todo 确认这里的乘法顺序
      */
     //    friend face_t
@@ -159,9 +160,9 @@ public:
    */
   struct box_t {
     /// 最小点
-    vector4f_t min;
+    vector4f_t min; // NOLINT(misc-non-private-member-variables-in-classes)
     /// 最大点
-    vector4f_t max;
+    vector4f_t max; // NOLINT(misc-non-private-member-variables-in-classes)
 
     /// @name 默认构造/析构函数
     /// @{
@@ -176,8 +177,8 @@ public:
 
   /**
    * 构造函数
-   * @param  _obj_path        obj 文件路径
-   * @param  _mtl_path        mtl 文件路径
+   * @param _obj_path obj 文件路径
+   * @param _mtl_path mtl 文件路径
    * @todo 顶点去重
    */
   explicit model_t(const std::string &_obj_path,
@@ -195,18 +196,21 @@ public:
 
   /**
    * * 重载，对模型应用变换矩阵
-   * @param  _tran            另一个 要对模型进行的变换矩阵
-   * @return model_t          结果
+   * @param _tran 另一个 要对模型进行的变换矩阵
+   * @return 结果
    */
-  model_t operator*(const matrix4f_t &_tran) const;
+  auto operator*(const matrix4f_t &_tran) const -> model_t;
 
   /**
    * 获取面
-   * @return const std::vector<face_t>&   所有面
+   * @return 所有面
    */
   [[nodiscard]] auto get_face() const -> const std::vector<face_t> &;
 
 private:
+  /// 三角形顶点数
+  static constexpr const uint8_t TRIANGLE_FACE_VERTEX_COUNT = 3;
+
   std::vector<face_t> face;
   box_t box;
 };

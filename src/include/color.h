@@ -37,16 +37,16 @@ public:
 
   /**
    * 构造函数
-   * @param  _data            颜色数据
+   * @param _data 颜色数据
    */
   explicit color_t(uint32_t _data);
 
   /**
    * 构造函数
-   * @param  _red 红色
-   * @param  _green 绿色
-   * @param  _blue 蓝色
-   * @param  _alpha alpha
+   * @param _red 红色
+   * @param _green 绿色
+   * @param _blue 蓝色
+   * @param _alpha alpha
    */
   explicit color_t(uint8_t _red, uint8_t _green, uint8_t _blue,
                    uint8_t _alpha = std::numeric_limits<uint8_t>::max());
@@ -73,14 +73,14 @@ public:
 
   /**
    * 下标重载
-   * @param  _idx             索引
+   * @param _idx             索引
    * @return uint8_t&         对应颜色
    */
   auto operator[](uint8_t _idx) -> uint8_t &;
 
   /**
    * 下标重载
-   * @param  _idx             索引
+   * @param _idx             索引
    * @return uint8_t          对应颜色
    */
   auto operator[](uint8_t _idx) const -> uint8_t;
@@ -114,13 +114,17 @@ private:
   /// 每像素字节数
   static constexpr const size_t BPP = sizeof(uint8_t) * DEPTH;
 
-  /// 颜色数据，rgba
+  /// @name 颜色数据，rgba
+  /// @{
   uint8_t channel_r = 0;
   uint8_t channel_g = 0;
   uint8_t channel_b = 0;
   uint8_t channel_a = std::numeric_limits<uint8_t>::max();
+  /// @}
 };
 
+/// @name 颜色常量
+/// @{
 [[maybe_unused]] static const color_t WHITE =
     color_t((uint8_t)0xFF, 0xFF, 0xFF);
 [[maybe_unused]] static const color_t BLACK =
@@ -129,5 +133,6 @@ private:
 [[maybe_unused]] static const color_t GREEN =
     color_t((uint8_t)0x00, 0xFF, 0x00);
 [[maybe_unused]] static const color_t BLUE = color_t((uint8_t)0x00, 0x00, 0xFF);
+/// @}
 
 #endif /* SIMPLERENDER_COLOR_H */

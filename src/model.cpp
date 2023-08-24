@@ -99,12 +99,12 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
   const auto &shapes = reader.GetShapes();
   const auto &materials = reader.GetMaterials();
 
-  std::cout << "顶点数：%ld, " << attrib.vertices.size() / 3;
-  std::cout << "法线数：%ld, " << attrib.normals.size() / 3;
-  std::cout << "颜色数：%ld, " << attrib.colors.size() / 3;
-  std::cout << "UV数：%ld, " << attrib.texcoords.size() / 2;
-  std::cout << "子模型数：%ld, " << shapes.size();
-  std::cout << "材质数：%ld" << materials.size() << '\n';
+  std::cout << "顶点数: " << attrib.vertices.size() / 3;
+  std::cout << ", 法线数: " << attrib.normals.size() / 3;
+  std::cout << ", 颜色数: " << attrib.colors.size() / 3;
+  std::cout << ", UV数: " << attrib.texcoords.size() / 2;
+  std::cout << ", 子模型数: " << shapes.size();
+  std::cout << ", 材质数: " << materials.size() << '\n';
 
   // 用于计算最大/最小的点
   /// @todo
@@ -126,8 +126,9 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
       // 由于开启了三角化，所有的 shape 都是由三个点组成的，即 fv == 3
       auto num_face_vertices = size_t(
           shapes[shapes_size].mesh.num_face_vertices[num_face_vertices_size]);
-      if (num_face_vertices != 3) {
-        throw(std::runtime_error(log("fv != 3")));
+      if (num_face_vertices != TRIANGLE_FACE_VERTEX_COUNT) {
+        throw(std::runtime_error(
+            log("num_face_vertices != TRIANGLE_FACE_VERTEX_COUNT")));
       }
       coord_t coord;
       normal_t normal;
@@ -155,8 +156,6 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
           normal = normal_t(attrib.normals[3 * size_t(idx.normal_index) + 0],
                             attrib.normals[3 * size_t(idx.normal_index) + 1],
                             attrib.normals[3 * size_t(idx.normal_index) + 2]);
-        } else {
-          normal = normal_t(0, 0, 0);
         }
 
         // 如果贴图索引存在(即 idx.texcoord_index >= 0)，
@@ -165,8 +164,6 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
           texture_coord = texture_coord_t(
               attrib.texcoords[2 * size_t(idx.texcoord_index) + 0],
               attrib.texcoords[2 * size_t(idx.texcoord_index) + 1]);
-        } else {
-          texture_coord = texture_coord_t(0, 0);
         }
 
         // 顶点颜色，如果 obj 文件中没有指定则设为 1(白色)，范围 [0, 1]
@@ -178,7 +175,7 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
       }
       index_offset += num_face_vertices;
 
-      // per-face material
+      // 如果材质不为空，加载材质信息
       if (!materials.empty()) {
         material.shininess = materials[shapes_size].shininess;
         material.ambient = vector3f_t(materials[shapes_size].ambient[0],
@@ -191,6 +188,7 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
                                        materials[shapes_size].specular[1],
                                        materials[shapes_size].specular[2]);
       }
+      // 添加到 face 中
       face.emplace_back(vertexes[0], vertexes[1], vertexes[2], material);
     }
   }

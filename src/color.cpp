@@ -14,7 +14,8 @@
  * </table>
  */
 
-#include "limits"
+#include <limits>
+#include <span>
 
 #include "color.h"
 #include "log.hpp"

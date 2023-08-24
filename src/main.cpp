@@ -20,16 +20,18 @@
 #include <vector>
 
 #include "config.h"
+#include "model.h"
 
 auto main(int _argc, char **_argv) -> int {
+  auto paras = std::span(_argv, _argc);
   // obj 路径
   std::vector<std::string> objs;
   // 如果没有指定那么使用默认值
-  if (_argc == 1) {
+  if (paras.size() == 1) {
     // objs = "../../obj/helmet.obj";
     //  objs = "../../obj/cube.obj";
     //  objs = "../../obj/cube2.obj";
-    objs.emplace_back(OBJ_FILE_PATH + "/cube3.obj");
+    objs.emplace_back(OBJ_FILE_PATH + "cube3.obj");
     // objs = "../../obj/cornell_box.obj";
     // objs.push_back("../../obj/helmet.obj");
     // objs.push_back("../../obj/african_head.obj");
@@ -37,7 +39,6 @@ auto main(int _argc, char **_argv) -> int {
   }
   // 否则使用指定的
   else {
-    auto paras = std::span(_argv, _argc);
     for (auto *para : paras) {
       objs.emplace_back(para);
     }
@@ -46,7 +47,7 @@ auto main(int _argc, char **_argv) -> int {
   // 读取模型与材质
   for (auto &obj : objs) {
     std::cout << obj << '\n';
-    //        model_t model(i);
+    model_t model(obj);
     //
     //    scene->add_model(model);
   }

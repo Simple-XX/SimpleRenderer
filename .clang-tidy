@@ -16,7 +16,9 @@ Checks: '-*,\
   performance-*,\
   portability-*,\
   readability-*,\
-  -cppcoreguidelines-pro-type-reinterpret-cast'
+  -cppcoreguidelines-pro-type-reinterpret-cast,\
+  -bugprone-easily-swappable-parameters,\
+  -llvm-header-guard'
 HeaderFilterRegex: '^${sourceDir}/src'
 AnalyzeTemporaryDtors: true
 ...
