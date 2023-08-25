@@ -43,8 +43,20 @@ TEST(buffer_base_t, 拷贝构造) {
   EXPECT_NE(buffer_base1.data(), nullptr);
 }
 
-// TEST(buffer_base_t, ctor) {
-//   buffer_base_t<float> buffer_base;
-//   EXPECT_TRUE(buffer_base.get_height() == 0);
-//   EXPECT_TRUE(buffer_base.get_width() == 0);
-// }
+TEST(buffer_base_t, clear) {
+  buffer_base_t<float> buffer_base0((uint32_t)100, 200, 0);
+  EXPECT_EQ(buffer_base0.get_width(), 100);
+  EXPECT_EQ(buffer_base0.get_height(), 200);
+  EXPECT_EQ(buffer_base0.BPP, sizeof(uint32_t));
+  EXPECT_EQ(buffer_base0.length(), 100 * sizeof(uint32_t) * 200);
+  EXPECT_NE(buffer_base0.data(), nullptr);
+  EXPECT_EQ(buffer_base0.data()[0], 0);
+  buffer_base0.clear();
+  EXPECT_EQ(buffer_base0.data()[0], std::numeric_limits<float>::lowest());
+}
+
+TEST(buffer_base_t, 不同大小的buffer赋值) {
+  buffer_base_t<float> buffer_base;
+  EXPECT_TRUE(buffer_base.get_height() == 0);
+  EXPECT_TRUE(buffer_base.get_width() == 0);
+}

@@ -81,10 +81,10 @@ public:
    */
   void clear() {
     if constexpr (std::is_same_v<T_t, color_t>) {
-      std::fill_n(buffer.get(), width * height, color_t::BLACK);
+      std::fill(buffer.begin(), buffer.end(), color_t::BLACK);
     } else if ((std::is_same_v<T_t, float>) || (std::is_same_v<T_t, double>)) {
-      std::fill_n(buffer.get(), width * height,
-                  std::numeric_limits<T_t>::lowest());
+      std::fill(buffer.begin(), buffer.end(),
+                std::numeric_limits<T_t>::lowest());
     }
   }
 
@@ -136,7 +136,7 @@ private:
   /// @todo 这个锁似乎可以优化掉
   //  std::mutex buffer_mutex;
   /// 缓冲数组
-  std::vector<T_t> buffer;
+  std::vector<T_t> buffer = {};
 };
 
 #endif /* BUFFER_BASE_HPP */
