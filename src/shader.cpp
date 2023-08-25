@@ -22,9 +22,9 @@ shader_vertex_in_t::shader_vertex_in_t(const model_t::face_t &_face)
 shader_vertex_out_t::shader_vertex_out_t(const model_t::face_t &_face)
     : face(_face) {}
 
-shader_fragment_in_t::shader_fragment_in_t(const vector4f_t &_barycentric_coord,
-                                           const vector4f_t &_normal,
-                                           const vector4f_t &_light,
+shader_fragment_in_t::shader_fragment_in_t(const vector3f_t &_barycentric_coord,
+                                           const vector3f_t &_normal,
+                                           const vector3f_t &_light,
                                            const color_t &_color0,
                                            const color_t &_color1,
                                            const color_t &_color2)

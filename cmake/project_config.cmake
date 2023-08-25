@@ -9,6 +9,9 @@
 set(OBJ_FILE_PATH "${PROJECT_SOURCE_DIR}/obj/")
 # 字体文件路径
 set(FONT_FILE_PATH "${PROJECT_SOURCE_DIR}/3rd/wqy-zenhei/")
+# 线程数
+include(ProcessorCount)
+ProcessorCount(NPROC)
 
 # 生成配置头文件
 configure_file(

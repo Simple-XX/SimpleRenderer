@@ -64,7 +64,7 @@ private:
    */
   static auto interpolate_color(const color_t &_color0, const color_t &_color1,
                                 const color_t &_color2,
-                                const vector4f_t &_barycentric_coord)
+                                const vector3f_t &_barycentric_coord)
       -> color_t;
 };
 

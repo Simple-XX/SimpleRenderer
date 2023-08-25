@@ -20,9 +20,14 @@
 #include "string"
 
 /// obj 文件目录
-static const std::string OBJ_FILE_PATH = std::string("@OBJ_FILE_PATH@");
+static const std::string OBJ_FILE_PATH =
+    std::string("@OBJ_FILE_PATH@");
 
 /// 字体文件路径
-static const std::string FONT_FILE_PATH = std::string("@FONT_FILE_PATH@");
+static const std::string FONT_FILE_PATH =
+    std::string("@FONT_FILE_PATH@");
+
+/// 线程数
+static constexpr const size_t NPROC = @NPROC@;
 
 #endif /* SIMPLERENDER_CONFIG_H */

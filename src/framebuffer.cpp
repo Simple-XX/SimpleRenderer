@@ -54,7 +54,7 @@ std::pair<bool, vector3f_t> framebuffer_t::get_barycentric_coord(
 
 float framebuffer_t::interpolate_depth(float _depth0, float _depth1,
                                        float _depth2,
-                                       const vector4f_t &_barycentric_coord) {
+                                       const vector3f_t &_barycentric_coord) {
   auto z = _depth0 * _barycentric_coord.x();
   z += _depth1 * _barycentric_coord.y();
   z += _depth2 * _barycentric_coord.z();
@@ -64,14 +64,19 @@ float framebuffer_t::interpolate_depth(float _depth0, float _depth1,
 framebuffer_t::framebuffer_t() : id(count++) {}
 
 framebuffer_t::framebuffer_t(const framebuffer_t &_framebuffer)
-    : width(_framebuffer.width), height(_framebuffer.height),
+    : id(count++), width(_framebuffer.width), height(_framebuffer.height),
       color_buffer(_framebuffer.color_buffer),
-      depth_buffer(_framebuffer.depth_buffer), id(count++) {}
+      depth_buffer(_framebuffer.depth_buffer) {}
+
+framebuffer_t::framebuffer_t(framebuffer_t &&_framebuffer)
+    : id(_framebuffer.id), width(_framebuffer.width),
+      height(_framebuffer.height), color_buffer(_framebuffer.color_buffer),
+      depth_buffer(_framebuffer.depth_buffer) {}
 
 framebuffer_t::framebuffer_t(uint32_t _width, uint32_t _height)
-    : width(_width), height(_height),
+    : id(count++), width(_width), height(_height),
       color_buffer(color_buffer_t(_width, _height)),
-      depth_buffer(depth_buffer_t(_width, _height)), id(count++) {}
+      depth_buffer(depth_buffer_t(_width, _height)) {}
 
 framebuffer_t &framebuffer_t::operator=(const framebuffer_t &_framebuffer) {
   if (this == &_framebuffer) {
@@ -83,6 +88,22 @@ framebuffer_t &framebuffer_t::operator=(const framebuffer_t &_framebuffer) {
   if (height != _framebuffer.get_height()) {
     throw std::invalid_argument(log("height != _framebuffer.get_height()"));
   }
+  color_buffer = _framebuffer.color_buffer;
+  depth_buffer = _framebuffer.depth_buffer;
+  return *this;
+}
+
+framebuffer_t &framebuffer_t::operator=(framebuffer_t &&_framebuffer) {
+  if (this == &_framebuffer) {
+    throw std::runtime_error(log("this == &_framebuffer"));
+  }
+  if (width != _framebuffer.get_width()) {
+    throw std::invalid_argument(log("width != _framebuffer.get_width()"));
+  }
+  if (height != _framebuffer.get_height()) {
+    throw std::invalid_argument(log("height != _framebuffer.get_height()"));
+  }
+  id = _framebuffer.id;
   color_buffer = _framebuffer.color_buffer;
   depth_buffer = _framebuffer.depth_buffer;
   return *this;
@@ -116,20 +137,24 @@ void framebuffer_t::pixel(uint32_t _row, uint32_t _col, const color_t &_color,
   depth_buffer(_row, _col) = _depth;
 }
 
-color_buffer_t &framebuffer_t::get_color_buffer() { return color_buffer; }
-
-const color_buffer_t &framebuffer_t::get_color_buffer() const {
+framebuffer_t::color_buffer_t &framebuffer_t::get_color_buffer() {
   return color_buffer;
 }
 
-depth_buffer_t &framebuffer_t::get_depth_buffer() { return depth_buffer; }
+const framebuffer_t::color_buffer_t &framebuffer_t::get_color_buffer() const {
+  return color_buffer;
+}
+
+framebuffer_t::depth_buffer_t &framebuffer_t::get_depth_buffer() {
+  return depth_buffer;
+}
 
 auto framebuffer_t::get_depth_buffer(uint32_t _row, uint32_t _col)
     -> framebuffer_t::depth_t & {
   return depth_buffer(_row, _col);
 }
 
-const depth_buffer_t &framebuffer_t::get_depth_buffer() const {
+const framebuffer_t::depth_buffer_t &framebuffer_t::get_depth_buffer() const {
   return depth_buffer;
 }
 
@@ -187,18 +212,19 @@ void framebuffer_t::line(float _x0, float _y0, float _x1, float _y1,
   }
 }
 
-void framebuffer_t::triangle(const config_t &_config,
-                             const shader_base_t &_shader,
+void framebuffer_t::triangle(const shader_base_t &_shader,
                              const light_t &_light,
                              const model_t::normal_t &_normal,
                              const model_t::face_t &_face) {
   auto v0 = _face.v0;
   auto v1 = _face.v1;
   auto v2 = _face.v2;
-  auto min = v0.coord.min(v1.coord).min(v2.coord);
-  auto max = v0.coord.max(v1.coord).max(v2.coord);
+  //  auto min = v0.coord.min(v1.coord).min(v2.coord);
+  //  auto max = v0.coord.max(v1.coord).max(v2.coord);
+  auto min = v0.coord;
+  auto max = v1.coord;
 
-#pragma omp parallel for num_threads(_config.procs) collapse(2) default(none)  \
+#pragma omp parallel for num_threads(NPROC) collapse(2) default(none)          \
     shared(min, max, v0, v1, v2, _shader) firstprivate(_normal, _light)
   for (auto x = int32_t(min.x()); x <= int32_t(max.x()); x++) {
     for (auto y = int32_t(min.y()); y <= int32_t(max.y()); y++) {
@@ -208,7 +234,7 @@ void framebuffer_t::triangle(const config_t &_config,
       }
       auto [is_inside, barycentric_coord] = get_barycentric_coord(
           v0.coord, v1.coord, v2.coord,
-          vector4f_t(static_cast<float>(x), static_cast<float>(y), 0));
+          vector3f_t(static_cast<float>(x), static_cast<float>(y), 0));
       // 如果点在三角形内再进行下一步
       if (is_inside == false) {
         continue;
@@ -236,12 +262,12 @@ void framebuffer_t::triangle(const config_t &_config,
     }
   }
 }
-
-void framebuffer_t::model(const config_t &_config, const shader_base_t &_shader,
-                          const light_t &_light, const model_t &_model) {
-  if (_config.draw_wireframe == true) {
-#pragma omp parallel for num_threads(_config.procs) default(none)              \
-    shared(_shader) firstprivate(_model)
+static bool draw_wireframe = false;
+void framebuffer_t::model(const shader_base_t &_shader, const light_t &_light,
+                          const model_t &_model) {
+  if (draw_wireframe == true) {
+#pragma omp parallel for num_threads(NPROC) default(none) shared(_shader)      \
+    firstprivate(_model)
     for (const auto &f : _model.get_face()) {
       /// @todo 巨大性能开销
       auto face = _shader.vertex(shader_vertex_in_t(f)).face;
@@ -253,12 +279,12 @@ void framebuffer_t::model(const config_t &_config, const shader_base_t &_shader,
            face.v0.coord.y(), color_t::WHITE);
     }
   } else {
-#pragma omp parallel for num_threads(_config.procs) default(none)              \
-    shared(_shader) firstprivate(_model, _config, _light)
+#pragma omp parallel for num_threads(NPROC) default(none) shared(_shader)      \
+    firstprivate(_model, _light)
     for (const auto &f : _model.get_face()) {
       /// @todo 巨大性能开销
       auto face = _shader.vertex(shader_vertex_in_t(f)).face;
-      triangle(_config, _shader, _light, face.normal, face);
+      triangle(_shader, _light, face.normal, face);
     }
   }
 }
@@ -266,7 +292,7 @@ void framebuffer_t::model(const config_t &_config, const shader_base_t &_shader,
 void framebuffer_t::scene(const shader_base_t &_shader, const scene_t &_scene) {
   auto models = _scene.get_visible_models();
   while (!models.empty()) {
-    model(_scene.get_config(), _shader, _scene.get_light(), models.front());
+    model(_shader, _scene.get_light(), models.front());
     models.pop();
   }
 }

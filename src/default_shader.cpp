@@ -19,7 +19,7 @@
 auto default_shader_t::interpolate_color(const color_t &_color0,
                                          const color_t &_color1,
                                          const color_t &_color2,
-                                         const vector4f_t &_barycentric_coord)
+                                         const vector3f_t &_barycentric_coord)
     -> color_t {
   return color_t(
       static_cast<uint8_t>(static_cast<float>(_color0[color_t::COLOR_IDX_R]) *

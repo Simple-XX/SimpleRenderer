@@ -81,11 +81,11 @@ public:
 class shader_fragment_in_t {
 public:
   /// 重心坐标
-  vector4f_t barycentric_coord;
+  vector3f_t barycentric_coord;
   /// 法线方向
-  vector4f_t normal;
+  vector3f_t normal;
   /// 光照方向
-  vector4f_t light;
+  vector3f_t light;
 
   /// @name 三个顶点的颜色
   /// @{
@@ -103,9 +103,9 @@ public:
    * @param _color1 顶点 1 颜色
    * @param _color2 顶点 2 颜色
    */
-  explicit shader_fragment_in_t(const vector4f_t &_barycentric_coord,
-                                const vector4f_t &_normal,
-                                const vector4f_t &_light,
+  explicit shader_fragment_in_t(const vector3f_t &_barycentric_coord,
+                                const vector3f_t &_normal,
+                                const vector3f_t &_light,
                                 const color_t &_color0, const color_t &_color1,
                                 const color_t &_color2);
 

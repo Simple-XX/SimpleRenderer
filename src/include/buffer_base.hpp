@@ -41,8 +41,9 @@ public:
    */
   buffer_base_t(const buffer_base_t &_buffer_base) {
     // 先判空
-    static_assert(_buffer_base.buffer_arr != nullptr,
-                  "buffer_base_t: buffer_arr is nullptr");
+    if (_buffer_base.buffer_arr != nullptr) {
+      throw std::invalid_argument(log("buffer_base_t: buffer_arr is nullptr"));
+    }
     // 如果原对象为空
     if (buffer_arr == nullptr) {
       // 设置数据
@@ -56,9 +57,9 @@ public:
                 buffer_arr.get());
     } else {
       // 需要大小相同
-      static_assert(width != _buffer_base.width ||
-                        height != _buffer_base.height,
-                    "buffer_base_t: size not match");
+      if (width != _buffer_base.width || height != _buffer_base.height) {
+        throw std::invalid_argument(log("buffer_base_t: size not match"));
+      }
       // 复制数据
       std::copy(_buffer_base.buffer_arr.get(),
                 _buffer_base.buffer_arr.get() + _buffer_base.length(),
@@ -84,9 +85,9 @@ public:
       _buffer_base.buffer_arr = nullptr;
     } else {
       // 需要大小相同
-      static_assert(width != _buffer_base.width ||
-                        height != _buffer_base.height,
-                    "buffer_base_t: size not match");
+      if (width != _buffer_base.width || height != _buffer_base.height) {
+        throw std::invalid_argument(log("buffer_base_t: size not match"));
+      }
       // 赋值
       buffer_arr = _buffer_base.buffer_arr;
       _buffer_base.buffer_arr = nullptr;
@@ -100,7 +101,7 @@ public:
    * @param _value 值
    */
   explicit buffer_base_t(uint32_t _width, uint32_t _height,
-                         const T_t &_value = 0)
+                         const T_t &_value = T_t())
       : width(_width), height(_height),
         buffer_arr(std::make_shared<T_t[]>(width * height)) {
     std::fill_n(buffer_arr.get(), width * height, _value);
@@ -115,9 +116,31 @@ public:
     if (&_buffer_base == this) {
       return *this;
     }
-    // 调用拷贝构造
-    this(_buffer_base);
-    return *this;
+    // 先判空
+    if (_buffer_base.buffer_arr != nullptr) {
+      throw std::invalid_argument(log("buffer_base_t: buffer_arr is nullptr"));
+    }
+    // 如果原对象为空
+    if (buffer_arr == nullptr) {
+      // 设置数据
+      width = _buffer_base.width;
+      height = _buffer_base.height;
+      // 分配空间
+      buffer_arr = std::make_shared<T_t[]>(width * height);
+      // 复制数据
+      std::copy(_buffer_base.buffer_arr.get(),
+                _buffer_base.buffer_arr.get() + _buffer_base.length(),
+                buffer_arr.get());
+    } else {
+      // 需要大小相同
+      if (width != _buffer_base.width || height != _buffer_base.height) {
+        throw std::invalid_argument(log("buffer_base_t: size not match"));
+      }
+      // 复制数据
+      std::copy(_buffer_base.buffer_arr.get(),
+                _buffer_base.buffer_arr.get() + _buffer_base.length(),
+                buffer_arr.get());
+    }
   }
 
   /**
@@ -129,9 +152,29 @@ public:
     if (&_buffer_base == this) {
       return *this;
     }
-    // 调用移动构造
-    this(std::move(_buffer_base));
-    return *this;
+    // 先判空
+    if (_buffer_base.buffer_arr != nullptr) {
+      throw std::invalid_argument(log("buffer_base_t: buffer_arr is nullptr"));
+    }
+    // 如果原对象为空
+    if (buffer_arr == nullptr) {
+      // 设置数据
+      width = _buffer_base.width;
+      height = _buffer_base.height;
+      // 移动
+      buffer_arr = std::move(_buffer_base.buffer_arr);
+      _buffer_base.buffer_arr = nullptr;
+    } else {
+      // 需要大小相同
+      if (width != _buffer_base.width || height != _buffer_base.height) {
+        throw std::invalid_argument(log("buffer_base_t: size not match"));
+      }
+      // 释放旧内存
+      delete buffer_arr;
+      // 移动
+      buffer_arr = std::move(_buffer_base.buffer_arr);
+      _buffer_base.buffer_arr = nullptr;
+    }
   }
 
   virtual ~buffer_base_t() {

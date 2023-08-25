@@ -35,12 +35,12 @@
  */
 class framebuffer_t {
 public:
-  using color_buffer_t = buffer_base_t<color_t>;
-  using depth_buffer_t = buffer_base_t<float>;
-
   /// 深度类型
   /// @note 不要进行会影响内存的修改
   using depth_t = float;
+
+  using color_buffer_t = buffer_base_t<color_t>;
+  using depth_buffer_t = buffer_base_t<depth_t>;
 
   /// 缓冲区 id
   uint32_t id;
@@ -59,6 +59,8 @@ public:
    */
   framebuffer_t(const framebuffer_t &_framebuffer);
 
+  framebuffer_t(framebuffer_t &&_framebuffer);
+
   /**
    * 构造函数
    * @param _width 宽度
@@ -73,10 +75,10 @@ public:
    */
   auto operator=(const framebuffer_t &_framebuffer) -> framebuffer_t &;
 
+  auto operator=(framebuffer_t &&_framebuffer) -> framebuffer_t &;
+
   /// @name 默认构造/析构函数
   /// @{
-  framebuffer_t(framebuffer_t &&_framebuffer) = default;
-  auto operator=(framebuffer_t &&_framebuffer) -> framebuffer_t & = default;
   ~framebuffer_t() = default;
   /// @}
 
@@ -172,9 +174,8 @@ public:
    * @param _face 面
    * @todo 多线程支持
    */
-  void triangle(const config_t &_config, const shader_base_t &_shader,
-                const light_t &_light, const model_t::normal_t &_normal,
-                const model_t::face_t &_face);
+  void triangle(const shader_base_t &_shader, const light_t &_light,
+                const model_t::normal_t &_normal, const model_t::face_t &_face);
 
   /**
    * 绘制模型
@@ -183,8 +184,8 @@ public:
    * @param _light 光照信息
    * @param _model 模型
    */
-  void model(const config_t &_config, const shader_base_t &_shader,
-             const light_t &_light, const model_t &_model);
+  void model(const shader_base_t &_shader, const light_t &_light,
+             const model_t &_model);
 
   /**
    * 绘制场景
@@ -246,7 +247,7 @@ private:
    * @return 深度值
    */
   static auto interpolate_depth(float _depth0, float _depth1, float _depth2,
-                                const vector4f_t &_barycentric_coord) -> float;
+                                const vector3f_t &_barycentric_coord) -> float;
 };
 
 #endif /* SIMPLERENDER_FRAMEBUFFER_H */
