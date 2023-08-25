@@ -83,7 +83,7 @@ display_t::display_t(size_t _width, size_t _height)
   }
 }
 
-display_t::~display_t(void) {
+display_t::~display_t() {
   // 回收资源
   TTF_CloseFont(font);
   TTF_Quit();
