@@ -75,8 +75,9 @@ framebuffer_t::framebuffer_t(const framebuffer_t &_framebuffer)
 
 framebuffer_t::framebuffer_t(framebuffer_t &&_framebuffer) noexcept
     : id(_framebuffer.id), width(_framebuffer.width),
-      height(_framebuffer.height), color_buffer(_framebuffer.color_buffer),
-      depth_buffer(_framebuffer.depth_buffer) {}
+      height(_framebuffer.height),
+      color_buffer(std::move(_framebuffer.color_buffer)),
+      depth_buffer(std::move(_framebuffer.depth_buffer)) {}
 
 framebuffer_t::framebuffer_t(size_t _width, size_t _height)
     : id(count++), width(_width), height(_height),
