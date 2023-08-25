@@ -44,7 +44,7 @@ public:
    * @param _height 高度
    * @param _value 值
    */
-  explicit buffer_base_t(uint32_t _width, uint32_t _height,
+  explicit buffer_base_t(size_t _width, size_t _height,
                          const T_t &_value = T_t())
       : width(_width), height(_height),
         buffer(std::vector<T_t>(width * height, _value)) {}
@@ -68,13 +68,13 @@ public:
    * 获取缓冲区宽度
    * @return 缓冲区宽度
    */
-  [[nodiscard]] auto get_width() const -> uint32_t { return width; }
+  [[nodiscard]] auto get_width() const -> size_t { return width; }
 
   /**
    * 获取缓冲区高度
    * @return 缓冲区高度
    */
-  [[nodiscard]] auto get_height() const -> uint32_t { return height; }
+  [[nodiscard]] auto get_height() const -> size_t { return height; }
 
   /**
    * 清空，如果 T_t 为 int，设置为黑色，否则视为深度缓冲，设为最小值
@@ -94,7 +94,7 @@ public:
    * @param _col 列
    * @return 数据
    */
-  auto operator()(uint32_t _row, uint32_t _col) -> T_t & {
+  auto operator()(size_t _row, size_t _col) -> T_t & {
     return buffer[_row * width + _col];
   }
 
@@ -104,7 +104,7 @@ public:
    * @param _col 列
    * @return 只读的数据
    */
-  auto operator()(uint32_t _row, uint32_t _col) const -> const T_t & {
+  auto operator()(size_t _row, size_t _col) const -> const T_t & {
     return buffer[_row * width + _col];
   }
 

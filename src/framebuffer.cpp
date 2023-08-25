@@ -20,27 +20,29 @@
 
 #include "framebuffer.h"
 
-uint32_t framebuffer_t::count = 0;
+size_t framebuffer_t::count = 0;
 
 /// @todo 巨大性能开销
-std::pair<bool, vector3f_t> framebuffer_t::get_barycentric_coord(
-    const vector3f_t &_p0, const vector3f_t &_p1, const vector3f_t &_p2,
-    const vector3f_t &_p) {
-  auto ab = _p1 - _p0;
-  auto ac = _p2 - _p0;
-  auto ap = _p - _p0;
+auto framebuffer_t::get_barycentric_coord(const vector3f_t &_p0,
+                                          const vector3f_t &_p1,
+                                          const vector3f_t &_p2,
+                                          const vector3f_t &_pa)
+    -> std::pair<bool, vector3f_t> {
+  auto p1p0 = _p1 - _p0;
+  auto p2p0 = _p2 - _p0;
+  auto pap0 = _pa - _p0;
 
-  auto deno = (ab.x() * ac.y() - ab.y() * ac.x());
+  auto deno = (p1p0.x() * p2p0.y() - p1p0.y() * p2p0.x());
   if (std::abs(deno) < std::numeric_limits<decltype(deno)>::epsilon()) {
     return std::pair<bool, const vector3f_t>{false, vector3f_t()};
   }
 
-  auto s = (ac.y() * ap.x() - ac.x() * ap.y()) / deno;
+  auto s = (p2p0.y() * pap0.x() - p2p0.x() * pap0.y()) / deno;
   if ((s > 1) || (s < 0)) {
     return std::pair<bool, const vector3f_t>{false, vector3f_t()};
   }
 
-  auto t = (ab.x() * ap.y() - ab.y() * ap.x()) / deno;
+  auto t = (p1p0.x() * pap0.y() - p1p0.y() * pap0.x()) / deno;
   if ((t > 1) || (t < 0)) {
     return std::pair<bool, const vector3f_t>{false, vector3f_t()};
   }
@@ -55,10 +57,10 @@ std::pair<bool, vector3f_t> framebuffer_t::get_barycentric_coord(
 float framebuffer_t::interpolate_depth(float _depth0, float _depth1,
                                        float _depth2,
                                        const vector3f_t &_barycentric_coord) {
-  auto z = _depth0 * _barycentric_coord.x();
-  z += _depth1 * _barycentric_coord.y();
-  z += _depth2 * _barycentric_coord.z();
-  return z;
+  auto depth = _depth0 * _barycentric_coord.x();
+  depth += _depth1 * _barycentric_coord.y();
+  depth += _depth2 * _barycentric_coord.z();
+  return depth;
 }
 
 framebuffer_t::framebuffer_t() : id(count++) {}
@@ -68,17 +70,18 @@ framebuffer_t::framebuffer_t(const framebuffer_t &_framebuffer)
       color_buffer(_framebuffer.color_buffer),
       depth_buffer(_framebuffer.depth_buffer) {}
 
-framebuffer_t::framebuffer_t(framebuffer_t &&_framebuffer)
+framebuffer_t::framebuffer_t(framebuffer_t &&_framebuffer) noexcept
     : id(_framebuffer.id), width(_framebuffer.width),
       height(_framebuffer.height), color_buffer(_framebuffer.color_buffer),
       depth_buffer(_framebuffer.depth_buffer) {}
 
-framebuffer_t::framebuffer_t(uint32_t _width, uint32_t _height)
+framebuffer_t::framebuffer_t(size_t _width, size_t _height)
     : id(count++), width(_width), height(_height),
       color_buffer(color_buffer_t(_width, _height)),
       depth_buffer(depth_buffer_t(_width, _height)) {}
 
-framebuffer_t &framebuffer_t::operator=(const framebuffer_t &_framebuffer) {
+auto framebuffer_t::operator=(const framebuffer_t &_framebuffer)
+    -> framebuffer_t & {
   if (this == &_framebuffer) {
     throw std::runtime_error(log("this == &_framebuffer"));
   }
@@ -93,7 +96,8 @@ framebuffer_t &framebuffer_t::operator=(const framebuffer_t &_framebuffer) {
   return *this;
 }
 
-framebuffer_t &framebuffer_t::operator=(framebuffer_t &&_framebuffer) {
+auto framebuffer_t::operator=(framebuffer_t &&_framebuffer) noexcept
+    -> framebuffer_t & {
   if (this == &_framebuffer) {
     throw std::runtime_error(log("this == &_framebuffer"));
   }
@@ -109,9 +113,9 @@ framebuffer_t &framebuffer_t::operator=(framebuffer_t &&_framebuffer) {
   return *this;
 }
 
-uint32_t framebuffer_t::get_width() const { return width; }
+auto framebuffer_t::get_width() const -> size_t { return width; }
 
-uint32_t framebuffer_t::get_height() const { return height; }
+auto framebuffer_t::get_height() const -> size_t { return height; }
 
 void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
   if (std::isnan(_depth)) {
@@ -121,7 +125,7 @@ void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
   depth_buffer.clear();
 }
 
-void framebuffer_t::pixel(uint32_t _row, uint32_t _col, const color_t &_color,
+void framebuffer_t::pixel(size_t _row, size_t _col, const color_t &_color,
                           const depth_t &_depth) {
   if (_row >= width) {
     throw std::invalid_argument(log("_x >= width"));
@@ -149,7 +153,7 @@ framebuffer_t::depth_buffer_t &framebuffer_t::get_depth_buffer() {
   return depth_buffer;
 }
 
-auto framebuffer_t::get_depth_buffer(uint32_t _row, uint32_t _col)
+auto framebuffer_t::get_depth_buffer(size_t _row, size_t _col)
     -> framebuffer_t::depth_t & {
   return depth_buffer(_row, _col);
 }
@@ -158,7 +162,7 @@ const framebuffer_t::depth_buffer_t &framebuffer_t::get_depth_buffer() const {
   return depth_buffer;
 }
 
-auto framebuffer_t::get_depth_buffer(uint32_t _row, uint32_t _col) const
+auto framebuffer_t::get_depth_buffer(size_t _row, size_t _col) const
     -> framebuffer_t::depth_t {
   return depth_buffer(_row, _col);
 }

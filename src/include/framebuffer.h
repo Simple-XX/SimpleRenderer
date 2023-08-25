@@ -59,14 +59,18 @@ public:
    */
   framebuffer_t(const framebuffer_t &_framebuffer);
 
-  framebuffer_t(framebuffer_t &&_framebuffer);
+  /**
+   * 移动构造
+   * @param _framebuffer 另一个 framebuffer_t
+   */
+  framebuffer_t(framebuffer_t &&_framebuffer) noexcept;
 
   /**
    * 构造函数
    * @param _width 宽度
    * @param _height 高度
    */
-  framebuffer_t(uint32_t _width, uint32_t _height);
+  framebuffer_t(size_t _width, size_t _height);
 
   /**
    * 赋值
@@ -75,7 +79,12 @@ public:
    */
   auto operator=(const framebuffer_t &_framebuffer) -> framebuffer_t &;
 
-  auto operator=(framebuffer_t &&_framebuffer) -> framebuffer_t &;
+  /**
+   * 移动赋值
+   * @param _framebuffer 另一个 framebuffer_t
+   * @return 结果
+   */
+  auto operator=(framebuffer_t &&_framebuffer) noexcept -> framebuffer_t &;
 
   /// @name 默认构造/析构函数
   /// @{
@@ -86,13 +95,13 @@ public:
    * 获取缓冲区宽度
    * @return 缓冲区宽度
    */
-  [[nodiscard]] auto get_width() const -> uint32_t;
+  [[nodiscard]] auto get_width() const -> size_t;
 
   /**
    * 获取缓冲区高度
    * @return 缓冲区高度
    */
-  [[nodiscard]] auto get_height() const -> uint32_t;
+  [[nodiscard]] auto get_height() const -> size_t;
 
   /**
    * 清空成指定颜色
@@ -110,7 +119,7 @@ public:
    * @param _depth 深度
    * @note (0, 0) 在屏幕左上角
    */
-  void pixel(uint32_t _row, uint32_t _col, const color_t &_color,
+  void pixel(size_t _row, size_t _col, const color_t &_color,
              const depth_t &_depth = std::numeric_limits<depth_t>::lowest());
 
   /**
@@ -143,7 +152,7 @@ public:
    * @param _col 列
    * @return 对应位置的深度值
    */
-  auto get_depth_buffer(uint32_t _row, uint32_t _col) -> depth_t &;
+  auto get_depth_buffer(size_t _row, size_t _col) -> depth_t &;
 
   /**
    * 获取深度值
@@ -151,7 +160,7 @@ public:
    * @param _col 列
    * @return 对应位置的深度值
    */
-  [[nodiscard]] auto get_depth_buffer(uint32_t _row, uint32_t _col) const
+  [[nodiscard]] auto get_depth_buffer(size_t _row, size_t _col) const
       -> depth_t;
 
   /**
@@ -196,7 +205,7 @@ public:
 
 private:
   /// 缓冲区计数，用于设置 id
-  static uint32_t count;
+  static size_t count;
 
   /// 窗口宽度
   size_t width = 0;
@@ -214,7 +223,7 @@ private:
    * @param _p0 三角形的第一个点
    * @param _p1 三角形的第二个点
    * @param _p2 三角形的第三个点
-   * @param _p 要判断的点
+   * @param _pa 要判断的点
    * @return std::pair<bool, vector4f_t>
    *  第一个返回为 _p 是否在三角形内，第二个为重心坐标
    * @see http://blackpawn.com/texts/pointinpoly/
@@ -233,9 +242,9 @@ private:
    *     weight_B = s
    *     weight_C = t
    */
-  static auto get_barycentric_coord(const vector3f_t &_p0,
-                                    const vector3f_t &_p1,
-                                    const vector3f_t &_p2, const vector3f_t &_p)
+  static auto
+  get_barycentric_coord(const vector3f_t &_p0, const vector3f_t &_p1,
+                        const vector3f_t &_p2, const vector3f_t &_pa)
       -> std::pair<bool, vector3f_t>;
 
   /**
