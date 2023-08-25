@@ -35,64 +35,8 @@
  */
 template <class T_t> class buffer_base_t {
 public:
-  /**
-   * 拷贝构造
-   * @param _buffer_base 另一个 buffer_base_t
-   */
-  buffer_base_t(const buffer_base_t &_buffer_base) {
-    // 先判空
-    if (_buffer_base.buffer_arr != nullptr) {
-      throw std::invalid_argument(log("buffer_base_t: buffer_arr is nullptr"));
-    }
-    // 如果原对象为空
-    if (buffer_arr == nullptr) {
-      // 设置数据
-      width = _buffer_base.width;
-      height = _buffer_base.height;
-      // 分配空间
-      buffer_arr = std::make_shared<T_t[]>(width * height);
-      // 复制数据
-      std::copy(_buffer_base.buffer_arr.get(),
-                _buffer_base.buffer_arr.get() + _buffer_base.length(),
-                buffer_arr.get());
-    } else {
-      // 需要大小相同
-      if (width != _buffer_base.width || height != _buffer_base.height) {
-        throw std::invalid_argument(log("buffer_base_t: size not match"));
-      }
-      // 复制数据
-      std::copy(_buffer_base.buffer_arr.get(),
-                _buffer_base.buffer_arr.get() + _buffer_base.length(),
-                buffer_arr.get());
-    }
-  }
-
-  /**
-   * 移动构造
-   * @param _buffer_base 另一个 buffer_base_t
-   */
-  buffer_base_t(buffer_base_t &&_buffer_base) noexcept {
-    // 先判空
-    static_assert(_buffer_base.buffer_arr != nullptr,
-                  "buffer_base_t: buffer_arr is nullptr");
-    // 如果原对象为空
-    if (buffer_arr == nullptr) {
-      // 设置数据
-      width = _buffer_base.width;
-      height = _buffer_base.height;
-      // 赋值
-      buffer_arr = _buffer_base.buffer_arr;
-      _buffer_base.buffer_arr = nullptr;
-    } else {
-      // 需要大小相同
-      if (width != _buffer_base.width || height != _buffer_base.height) {
-        throw std::invalid_argument(log("buffer_base_t: size not match"));
-      }
-      // 赋值
-      buffer_arr = _buffer_base.buffer_arr;
-      _buffer_base.buffer_arr = nullptr;
-    }
-  }
+  /// 每个像素的字节数
+  static constexpr const size_t BPP = sizeof(T_t);
 
   /**
    * 构造函数，整型默认为白色，浮点默认为最小值
@@ -103,79 +47,7 @@ public:
   explicit buffer_base_t(uint32_t _width, uint32_t _height,
                          const T_t &_value = T_t())
       : width(_width), height(_height),
-        buffer_arr(std::make_shared<T_t[]>(width * height)) {
-    std::fill_n(buffer_arr.get(), width * height, _value);
-  }
-
-  /**
-   * 赋值
-   * @param _buffer 另一个 buffer_base_t
-   * @return 结果
-   */
-  auto operator=(const buffer_base_t &_buffer_base) -> buffer_base_t & {
-    if (&_buffer_base == this) {
-      return *this;
-    }
-    // 先判空
-    if (_buffer_base.buffer_arr != nullptr) {
-      throw std::invalid_argument(log("buffer_base_t: buffer_arr is nullptr"));
-    }
-    // 如果原对象为空
-    if (buffer_arr == nullptr) {
-      // 设置数据
-      width = _buffer_base.width;
-      height = _buffer_base.height;
-      // 分配空间
-      buffer_arr = std::make_shared<T_t[]>(width * height);
-      // 复制数据
-      std::copy(_buffer_base.buffer_arr.get(),
-                _buffer_base.buffer_arr.get() + _buffer_base.length(),
-                buffer_arr.get());
-    } else {
-      // 需要大小相同
-      if (width != _buffer_base.width || height != _buffer_base.height) {
-        throw std::invalid_argument(log("buffer_base_t: size not match"));
-      }
-      // 复制数据
-      std::copy(_buffer_base.buffer_arr.get(),
-                _buffer_base.buffer_arr.get() + _buffer_base.length(),
-                buffer_arr.get());
-    }
-  }
-
-  /**
-   * 移动赋值
-   * @param _buffer_base
-   * @return 结果
-   */
-  auto operator=(buffer_base_t &&_buffer_base) noexcept -> buffer_base_t & {
-    if (&_buffer_base == this) {
-      return *this;
-    }
-    // 先判空
-    if (_buffer_base.buffer_arr != nullptr) {
-      throw std::invalid_argument(log("buffer_base_t: buffer_arr is nullptr"));
-    }
-    // 如果原对象为空
-    if (buffer_arr == nullptr) {
-      // 设置数据
-      width = _buffer_base.width;
-      height = _buffer_base.height;
-      // 移动
-      buffer_arr = std::move(_buffer_base.buffer_arr);
-      _buffer_base.buffer_arr = nullptr;
-    } else {
-      // 需要大小相同
-      if (width != _buffer_base.width || height != _buffer_base.height) {
-        throw std::invalid_argument(log("buffer_base_t: size not match"));
-      }
-      // 释放旧内存
-      delete buffer_arr;
-      // 移动
-      buffer_arr = std::move(_buffer_base.buffer_arr);
-      _buffer_base.buffer_arr = nullptr;
-    }
-  }
+        buffer(std::vector<T_t>(width * height, _value)) {}
 
   virtual ~buffer_base_t() {
     width = 0;
@@ -185,6 +57,11 @@ public:
   /// @name 默认构造/析构函数
   /// @{
   buffer_base_t() = default;
+  buffer_base_t(const buffer_base_t &_buffer_base) = default;
+  buffer_base_t(buffer_base_t &&_buffer_base) = default;
+  auto operator=(const buffer_base_t &_buffer_base)
+      -> buffer_base_t & = default;
+  auto operator=(buffer_base_t &&_buffer_base) -> buffer_base_t & = default;
   /// @}
 
   /**
@@ -204,9 +81,9 @@ public:
    */
   void clear() {
     if constexpr (std::is_same_v<T_t, color_t>) {
-      std::fill_n(buffer_arr.get(), width * height, color_t::BLACK);
+      std::fill_n(buffer.get(), width * height, color_t::BLACK);
     } else if ((std::is_same_v<T_t, float>) || (std::is_same_v<T_t, double>)) {
-      std::fill_n(buffer_arr.get(), width * height,
+      std::fill_n(buffer.get(), width * height,
                   std::numeric_limits<T_t>::lowest());
     }
   }
@@ -218,7 +95,7 @@ public:
    * @return 数据
    */
   auto operator()(uint32_t _row, uint32_t _col) -> T_t & {
-    return buffer_arr[_row * width + _col];
+    return buffer[_row * width + _col];
   }
 
   /**
@@ -228,28 +105,26 @@ public:
    * @return 只读的数据
    */
   auto operator()(uint32_t _row, uint32_t _col) const -> const T_t & {
-    return buffer_arr[_row * width + _col];
+    return buffer[_row * width + _col];
   }
 
   /**
    * 转换为数组
    * @return 数组
    */
-  auto to_arr() -> T_t * { return buffer_arr.get(); }
+  auto data() -> T_t * { return buffer.data(); }
 
   /**
    * 转换为数组
    * @return 数组
    */
-  auto to_arr() const -> const T_t * { return buffer_arr.get(); }
+  auto data() const -> const T_t * { return buffer.data(); }
 
   /**
    * 获取缓冲区大小(字节数)
    * @return 字节数
    */
-  [[nodiscard]] auto length() const -> size_t {
-    return width * height * sizeof(T_t);
-  }
+  [[nodiscard]] auto length() const -> size_t { return buffer.size() * BPP; }
 
 private:
   /// 窗口宽度
@@ -258,9 +133,10 @@ private:
   size_t height = 0;
 
   /// 缓冲区锁
-  std::mutex buffer_mutex;
+  /// @todo 这个锁似乎可以优化掉
+  //  std::mutex buffer_mutex;
   /// 缓冲数组
-  std::shared_ptr<T_t[]> buffer_arr = nullptr;
+  std::vector<T_t> buffer;
 };
 
 #endif /* BUFFER_BASE_HPP */

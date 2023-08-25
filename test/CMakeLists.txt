@@ -4,44 +4,12 @@
 #
 # CMakeLists.txt for Simple-XX/SimpleRenderer.
 
-# Set CXX flags for debug
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-
-# Set include dir
-include_directories(
-        ${SimpleRender_SOURCE_DIR}/src/include
+# 设置项目名与版本
+project(
+        test
+        VERSION 0.0.1
 )
 
-set(test_src
-#        render_test.cpp
-#        ${SimpleRender_SOURCE_DIR}/src/model.cpp
-#        ${SimpleRender_SOURCE_DIR}/src/display.cpp
-#        ${SimpleRender_SOURCE_DIR}/src/framebuffer.cpp
-#        ${SimpleRender_SOURCE_DIR}/src/camera.cpp
-#        ${SimpleRender_SOURCE_DIR}/src/shader.cpp
-#        ${SimpleRender_SOURCE_DIR}/src/default_shader.cpp
-#        ${SimpleRender_SOURCE_DIR}/src/color.cpp
-#        ${SimpleRender_SOURCE_DIR}/src/scene.cpp
-#        ${SimpleRender_SOURCE_DIR}/src/light.cpp
-#        ${SimpleRender_SOURCE_DIR}/src/input.cpp
-#        ${SimpleRender_SOURCE_DIR}/src/render.cpp
-)
-
-enable_testing()
-
-# 生成可执行文件
-add_executable(test
-        ${test_src})
-
-target_link_libraries(test
-        stb
-        tinyobjloader
-        Eigen
-        gtest_main
-        ${glog_LIBRARIES}
-        SDL2::Main
-        SDL2::TTF
-        OpenMP::OpenMP_CXX)
-
-include(GoogleTest)
-gtest_discover_tests(test)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/unit_test)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/integration_test)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/system_test)
