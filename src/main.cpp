@@ -21,8 +21,14 @@
 
 #include "config.h"
 #include "model.h"
+#include "render.h"
+#include "scene.h"
 
-#include "buffer_base.hpp"
+auto display = std::make_shared<display_t>(WIDTH, HEIGHT);
+auto scene = std::make_shared<scene_t>();
+auto input = std::make_shared<input_t>();
+auto shader = std::make_shared<default_shader_t>();
+auto render = std::make_shared<render_t>(scene, display, input);
 
 auto main(int _argc, char **_argv) -> int {
   auto paras = std::span(_argv, _argc);
@@ -51,11 +57,11 @@ auto main(int _argc, char **_argv) -> int {
     std::cout << obj << '\n';
     model_t const model(obj);
 
-    //    scene->add_model(model);
+    scene->add_model(model);
   }
-  //  scene->add_light(light_t());
-  //
-  //  render->loop();
+  scene->add_light(light_t());
+
+  render->loop();
 
   return 0;
 }

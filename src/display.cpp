@@ -19,6 +19,7 @@
 #include "camera.h"
 #include "config.h"
 #include "display.h"
+#include "log.hpp"
 
 display_t::display_t(size_t _width, size_t _height)
     : width(_width), height(_height) {
@@ -68,7 +69,8 @@ display_t::display_t(size_t _width, size_t _height)
       throw std::runtime_error(log(TTF_GetError()));
     }
     // 打开字体库
-    font = TTF_OpenFont(FONT_FILE_PATH.c_str(), font_size);
+    std::cout << FONT_FILE_PATH << std::endl;
+    font = TTF_OpenFont(FONT_FILE_PATH.data(), font_size);
     if (font == nullptr) {
       TTF_Quit();
       SDL_DestroyTexture(sdl_texture);

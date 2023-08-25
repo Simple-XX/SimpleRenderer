@@ -24,12 +24,23 @@ endif ()
 # 设置辅助 cmake 脚本路径
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
-# 导入项目配置
-include(project_config)
 # 导入函数
 include(functions)
 # 导入第三方依赖
 include(3rd)
+
+# obj 文件路径
+set(OBJ_FILE_PATH "${PROJECT_SOURCE_DIR}/obj/")
+# 字体文件路径
+set(FONT_FILE_PATH "${wqy_font_SOURCE_DIR}/wqy-zenhei.ttc")
+# 线程数
+include(ProcessorCount)
+ProcessorCount(NPROC)
+# 生成配置头文件
+configure_file(
+        "${PROJECT_SOURCE_DIR}/cmake/config.h.in"
+        "${PROJECT_SOURCE_DIR}/src/include/config.h"
+)
 
 # 添加要编译的目录
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)

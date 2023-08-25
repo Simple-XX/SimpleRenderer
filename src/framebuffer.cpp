@@ -137,8 +137,10 @@ void framebuffer_t::pixel(size_t _row, size_t _col, const color_t &_color,
     throw std::invalid_argument(log("std::isnan(_depth)"));
   }
   /// @todo 性能瓶颈
-  color_buffer(_row, _col) = _color;
-  depth_buffer(_row, _col) = _depth;
+  //  color_buffer(_row, _col) = _color;
+  //  depth_buffer(_row, _col) = _depth;
+  color_buffer(_col, _row) = _color;
+  depth_buffer(_col, _row) = _depth;
 }
 
 auto framebuffer_t::get_color_buffer() -> framebuffer_t::color_buffer_t & {

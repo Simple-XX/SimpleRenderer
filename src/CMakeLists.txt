@@ -36,8 +36,8 @@ add_executable(SimpleRender
         framebuffer.cpp
         display.cpp
         default_shader.cpp
-        #        input.cpp
-        #        render.cpp
+        input.cpp
+        render.cpp
         )
 
 target_link_libraries(SimpleRender

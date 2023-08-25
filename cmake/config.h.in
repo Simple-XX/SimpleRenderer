@@ -17,17 +17,23 @@
 #ifndef SIMPLERENDER_CONFIG_H
 #define SIMPLERENDER_CONFIG_H
 
-#include "string"
+#include <string>
+#include <string_view>
 
 /// obj 文件目录
-static const std::string OBJ_FILE_PATH =
-    std::string("@OBJ_FILE_PATH@");
+static const std::string OBJ_FILE_PATH = std::string("@OBJ_FILE_PATH@");
 
 /// 字体文件路径
-static const std::string FONT_FILE_PATH =
-    std::string("@FONT_FILE_PATH@");
+static const std::string_view FONT_FILE_PATH =
+    std::string_view("@FONT_FILE_PATH@");
 
 /// 线程数
-static constexpr const size_t NPROC = @NPROC@;
+static constexpr const size_t NPROC = @NPROC @;
+
+/// @name 默认大小
+/// @{
+static constexpr const size_t WIDTH = 1920;
+static constexpr const size_t HEIGHT = 1080;
+/// @}
 
 #endif /* SIMPLERENDER_CONFIG_H */

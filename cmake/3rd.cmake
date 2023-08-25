@@ -127,12 +127,20 @@ CPMAddPackage(
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
         GIT_TAG 3.4.0
         VERSION 3.4.0
-        DOWNLOAD_ONLY YES
+        DOWNLOAD_ONLY True
 )
 if (Eigen_ADDED)
     add_library(Eigen INTERFACE IMPORTED)
     target_include_directories(Eigen INTERFACE ${Eigen_SOURCE_DIR})
 endif ()
+
+# http://wenq.org/wqy2/index.cgi?ZenHei
+CPMAddPackage(
+        NAME wqy_font
+        URL https://sourceforge.net/projects/wqy/files/wqy-zenhei/0.8.38%20%28Pangu%29/wqy-zenhei-0.8.38-1.tar.gz
+        VERSION 0.8.38
+        DOWNLOAD_ONLY True
+)
 
 # https://github.com/cpm-cmake/CPMLicenses.cmake
 # 保持在 CPMAddPackage 的最后
