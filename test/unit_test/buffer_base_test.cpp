@@ -51,7 +51,7 @@ TEST(buffer_base_t, clear) {
   EXPECT_EQ(buffer_base0.length(), 100 * sizeof(uint32_t) * 200);
   EXPECT_NE(buffer_base0.data(), nullptr);
   EXPECT_EQ(buffer_base0.data()[0], 0);
-  buffer_base0.clear();
+  buffer_base0.clear(std::numeric_limits<float>::lowest());
   EXPECT_EQ(buffer_base0.data()[0], std::numeric_limits<float>::lowest());
 }
 

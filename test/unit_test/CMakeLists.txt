@@ -26,17 +26,17 @@ add_executable(unit_test
         #        ${SimpleRender_SOURCE_DIR}/src/light.cpp
         #        ${SimpleRender_SOURCE_DIR}/src/input.cpp
         #        ${SimpleRender_SOURCE_DIR}/src/render.cpp
-)
+        )
 
 target_include_directories(unit_test PRIVATE
         ${SimpleRender_SOURCE_DIR}/src/include
-)
+        )
 
 target_compile_options(unit_test PRIVATE
         -g -ggdb
         -O0
         -Wall -Wextra
-)
+        )
 
 target_link_libraries(unit_test PRIVATE
         stb
@@ -47,6 +47,8 @@ target_link_libraries(unit_test PRIVATE
         SDL2::Main
         SDL2::TTF
         OpenMP::OpenMP_CXX)
+
+disable_clang_tidy(unit_test)
 
 enable_testing()
 include(GoogleTest)

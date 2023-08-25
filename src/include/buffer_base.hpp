@@ -58,10 +58,11 @@ public:
   /// @{
   buffer_base_t() = default;
   buffer_base_t(const buffer_base_t &_buffer_base) = default;
-  buffer_base_t(buffer_base_t &&_buffer_base) = default;
+  buffer_base_t(buffer_base_t &&_buffer_base) noexcept = default;
   auto operator=(const buffer_base_t &_buffer_base)
       -> buffer_base_t & = default;
-  auto operator=(buffer_base_t &&_buffer_base) -> buffer_base_t & = default;
+  auto operator=(buffer_base_t &&_buffer_base) noexcept
+      -> buffer_base_t & = default;
   /// @}
 
   /**
@@ -79,13 +80,8 @@ public:
   /**
    * 清空，如果 T_t 为 int，设置为黑色，否则视为深度缓冲，设为最小值
    */
-  void clear() {
-    if constexpr (std::is_same_v<T_t, color_t>) {
-      std::fill(buffer.begin(), buffer.end(), color_t::BLACK);
-    } else if ((std::is_same_v<T_t, float>) || (std::is_same_v<T_t, double>)) {
-      std::fill(buffer.begin(), buffer.end(),
-                std::numeric_limits<T_t>::lowest());
-    }
+  void clear(const T_t &_value) {
+    std::fill(buffer.begin(), buffer.end(), _value);
   }
 
   /**

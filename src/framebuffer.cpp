@@ -14,13 +14,15 @@
  * </table>
  */
 
-#include "cassert"
 #include "cmath"
 #include "iostream"
 
 #include "framebuffer.h"
 
-size_t framebuffer_t::count = 0;
+namespace {
+/// 缓冲区计数，用于设置 id
+size_t count = 0;
+} // namespace
 
 /// @todo 巨大性能开销
 auto framebuffer_t::get_barycentric_coord(const vector3f_t &_p0,
@@ -54,9 +56,10 @@ auto framebuffer_t::get_barycentric_coord(const vector3f_t &_p0,
   return std::pair<bool, const vector3f_t>{true, vector3f_t(1 - s - t, s, t)};
 }
 
-float framebuffer_t::interpolate_depth(float _depth0, float _depth1,
-                                       float _depth2,
-                                       const vector3f_t &_barycentric_coord) {
+auto framebuffer_t::interpolate_depth(float _depth0, float _depth1,
+                                      float _depth2,
+                                      const vector3f_t &_barycentric_coord)
+    -> float {
   auto depth = _depth0 * _barycentric_coord.x();
   depth += _depth1 * _barycentric_coord.y();
   depth += _depth2 * _barycentric_coord.z();
@@ -83,13 +86,11 @@ framebuffer_t::framebuffer_t(size_t _width, size_t _height)
 auto framebuffer_t::operator=(const framebuffer_t &_framebuffer)
     -> framebuffer_t & {
   if (this == &_framebuffer) {
-    throw std::runtime_error(log("this == &_framebuffer"));
+    return *this;
   }
-  if (width != _framebuffer.get_width()) {
-    throw std::invalid_argument(log("width != _framebuffer.get_width()"));
-  }
-  if (height != _framebuffer.get_height()) {
-    throw std::invalid_argument(log("height != _framebuffer.get_height()"));
+  if (width != _framebuffer.get_width() ||
+      height != _framebuffer.get_height()) {
+    return *this;
   }
   color_buffer = _framebuffer.color_buffer;
   depth_buffer = _framebuffer.depth_buffer;
@@ -99,13 +100,11 @@ auto framebuffer_t::operator=(const framebuffer_t &_framebuffer)
 auto framebuffer_t::operator=(framebuffer_t &&_framebuffer) noexcept
     -> framebuffer_t & {
   if (this == &_framebuffer) {
-    throw std::runtime_error(log("this == &_framebuffer"));
+    return *this;
   }
-  if (width != _framebuffer.get_width()) {
-    throw std::invalid_argument(log("width != _framebuffer.get_width()"));
-  }
-  if (height != _framebuffer.get_height()) {
-    throw std::invalid_argument(log("height != _framebuffer.get_height()"));
+  if (width != _framebuffer.get_width() ||
+      height != _framebuffer.get_height()) {
+    return *this;
   }
   id = _framebuffer.id;
   color_buffer = _framebuffer.color_buffer;
@@ -121,8 +120,8 @@ void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
   if (std::isnan(_depth)) {
     throw std::invalid_argument(log("std::isnan(_depth)"));
   }
-  color_buffer.clear();
-  depth_buffer.clear();
+  color_buffer.clear(_color);
+  depth_buffer.clear(_depth);
 }
 
 void framebuffer_t::pixel(size_t _row, size_t _col, const color_t &_color,
@@ -141,15 +140,16 @@ void framebuffer_t::pixel(size_t _row, size_t _col, const color_t &_color,
   depth_buffer(_row, _col) = _depth;
 }
 
-framebuffer_t::color_buffer_t &framebuffer_t::get_color_buffer() {
+auto framebuffer_t::get_color_buffer() -> framebuffer_t::color_buffer_t & {
   return color_buffer;
 }
 
-const framebuffer_t::color_buffer_t &framebuffer_t::get_color_buffer() const {
+auto framebuffer_t::get_color_buffer() const
+    -> const framebuffer_t::color_buffer_t & {
   return color_buffer;
 }
 
-framebuffer_t::depth_buffer_t &framebuffer_t::get_depth_buffer() {
+auto framebuffer_t::get_depth_buffer() -> framebuffer_t::depth_buffer_t & {
   return depth_buffer;
 }
 
@@ -158,7 +158,8 @@ auto framebuffer_t::get_depth_buffer(size_t _row, size_t _col)
   return depth_buffer(_row, _col);
 }
 
-const framebuffer_t::depth_buffer_t &framebuffer_t::get_depth_buffer() const {
+auto framebuffer_t::get_depth_buffer() const
+    -> const framebuffer_t::depth_buffer_t & {
   return depth_buffer;
 }
 
@@ -195,7 +196,7 @@ void framebuffer_t::line(float _x0, float _y0, float _x1, float _y1,
     yi = -1;
   }
   for (auto x = p0_x; x <= p1_x; x++) {
-    if (steep == true) {
+    if (steep) {
       /// @todo 这里要用裁剪替换掉
       if ((unsigned)y >= width || (unsigned)x >= height) {
         continue;
@@ -240,7 +241,7 @@ void framebuffer_t::triangle(const shader_base_t &_shader,
           v0.coord, v1.coord, v2.coord,
           vector3f_t(static_cast<float>(x), static_cast<float>(y), 0));
       // 如果点在三角形内再进行下一步
-      if (is_inside == false) {
+      if (!is_inside) {
         continue;
       }
       // 计算该点的深度，通过重心坐标插值计算
@@ -256,7 +257,7 @@ void framebuffer_t::triangle(const shader_base_t &_shader,
       // 计算颜色，颜色为通过 shader 片段着色器计算
       auto shader_fragment_out = _shader.fragment(shader_fragment_in);
       // 如果不需要绘制则跳过
-      if (shader_fragment_out.is_need_draw == false) {
+      if (!shader_fragment_out.is_need_draw) {
         continue;
       }
       // 构造颜色
@@ -269,7 +270,7 @@ void framebuffer_t::triangle(const shader_base_t &_shader,
 static bool draw_wireframe = false;
 void framebuffer_t::model(const shader_base_t &_shader, const light_t &_light,
                           const model_t &_model) {
-  if (draw_wireframe == true) {
+  if (draw_wireframe) {
 #pragma omp parallel for num_threads(NPROC) default(none) shared(_shader)      \
     firstprivate(_model)
     for (const auto &f : _model.get_face()) {

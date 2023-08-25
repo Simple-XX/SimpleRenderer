@@ -204,9 +204,6 @@ public:
   void scene(const shader_base_t &_shader, const scene_t &_scene);
 
 private:
-  /// 缓冲区计数，用于设置 id
-  static size_t count;
-
   /// 窗口宽度
   size_t width = 0;
   /// 窗口高度
