@@ -15,6 +15,7 @@
  */
 
 #include <iostream>
+#include <span>
 #include <string>
 #include <vector>
 
