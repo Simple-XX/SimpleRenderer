@@ -85,23 +85,25 @@ public:
   }
 
   /**
-   * () 重载，获取第 _row 行 _col 列的数据
-   * @param _row 行
-   * @param _col 列
+   * () 重载，获取第 _x 列 _y 行的数据
+   * @param _x 横坐标
+   * @param _y 纵坐标
+   * @note 屏幕左上角为 (0, 0), 右下角为 (width - 1, height - 1)
    * @return 数据
    */
-  auto operator()(size_t _row, size_t _col) -> T_t & {
-    return buffer.at(_row * width + _col);
+  auto operator()(size_t _x, size_t _y) -> T_t & {
+    return buffer.at(_y * width + _x);
   }
 
   /**
-   * () 重载，获取第 _row 行 _col 列的数据
-   * @param _row 行
-   * @param _col 列
-   * @return 只读的数据
+   * () 重载，获取第 _x 列 _y 行的数据
+   * @param _x 横坐标
+   * @param _y 纵坐标
+   * @note 屏幕左上角为 (0, 0), 右下角为 (width - 1, height - 1)
+   * @return 数据
    */
-  auto operator()(size_t _row, size_t _col) const -> const T_t & {
-    return buffer.at(_row * width + _col);
+  auto operator()(size_t _x, size_t _y) const -> const T_t & {
+    return buffer.at(_y * width + _x);
   }
 
   /**

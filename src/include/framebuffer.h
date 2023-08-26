@@ -113,20 +113,20 @@ public:
 
   /**
    * 设置像素
-   * @param _row 行
-   * @param _col 列
+   * @param _x 横坐标
+   * @param _y 纵坐标
    * @param _color 颜色
    * @param _depth 深度
    * @note (0, 0) 在屏幕左上角
    */
-  void pixel(size_t _row, size_t _col, const color_t &_color,
+  void pixel(size_t _x, size_t _y, const color_t &_color,
              const depth_t &_depth = std::numeric_limits<depth_t>::lowest());
 
   /**
    * 获取颜色缓存
    * @return 颜色缓存
    */
-  auto get_color_buffer() -> color_buffer_t &;
+  [[nodiscard]] auto get_color_buffer() -> color_buffer_t &;
 
   /**
    * 获取颜色缓存
@@ -138,7 +138,7 @@ public:
    * 获取深度缓存
    * @return 深度缓存
    */
-  auto get_depth_buffer() -> depth_buffer_t &;
+  [[nodiscard]] auto get_depth_buffer() -> depth_buffer_t &;
 
   /**
    * 获取深度缓存
@@ -148,20 +148,19 @@ public:
 
   /**
    * 获取深度值
-   * @param _row 行
-   * @param _col 列
+   * @param _x 横坐标
+   * @param _y 纵坐标
    * @return 对应位置的深度值
    */
-  auto get_depth_buffer(size_t _row, size_t _col) -> depth_t &;
+  [[nodiscard]] auto get_depth_buffer(size_t _x, size_t _y) -> depth_t &;
 
   /**
    * 获取深度值
-   * @param _row 行
-   * @param _col 列
+   * @param _x 横坐标
+   * @param _y 纵坐标
    * @return 对应位置的深度值
    */
-  [[nodiscard]] auto get_depth_buffer(size_t _row, size_t _col) const
-      -> depth_t;
+  [[nodiscard]] auto get_depth_buffer(size_t _x, size_t _y) const -> depth_t;
 
   /**
    * 画直线 Bresenham 算法

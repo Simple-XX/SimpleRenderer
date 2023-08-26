@@ -82,22 +82,20 @@ void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
   depth_buffer.clear(_depth);
 }
 
-void framebuffer_t::pixel(size_t _row, size_t _col, const color_t &_color,
+void framebuffer_t::pixel(size_t _x, size_t _y, const color_t &_color,
                           const depth_t &_depth) {
-  if (_row >= width) {
+  if (_x >= width) {
     throw std::invalid_argument(log("_x >= width"));
   }
-  if (_col >= height) {
+  if (_y >= height) {
     throw std::invalid_argument(log("_y >= height"));
   }
   if (std::isnan(_depth)) {
     throw std::invalid_argument(log("std::isnan(_depth)"));
   }
   /// @todo 性能瓶颈
-  //  color_buffer(_row, _col) = _color;
-  //  depth_buffer(_row, _col) = _depth;
-  color_buffer(_col, _row) = _color;
-  depth_buffer(_col, _row) = _depth;
+  color_buffer(_x, _y) = _color;
+  depth_buffer(_x, _y) = _depth;
 }
 
 auto framebuffer_t::get_color_buffer() -> framebuffer_t::color_buffer_t & {
@@ -113,9 +111,9 @@ auto framebuffer_t::get_depth_buffer() -> framebuffer_t::depth_buffer_t & {
   return depth_buffer;
 }
 
-auto framebuffer_t::get_depth_buffer(size_t _row, size_t _col)
+auto framebuffer_t::get_depth_buffer(size_t _x, size_t _y)
     -> framebuffer_t::depth_t & {
-  return depth_buffer(_row, _col);
+  return depth_buffer(_x, _y);
 }
 
 auto framebuffer_t::get_depth_buffer() const
@@ -123,9 +121,9 @@ auto framebuffer_t::get_depth_buffer() const
   return depth_buffer;
 }
 
-auto framebuffer_t::get_depth_buffer(size_t _row, size_t _col) const
+auto framebuffer_t::get_depth_buffer(size_t _x, size_t _y) const
     -> framebuffer_t::depth_t {
-  return depth_buffer(_row, _col);
+  return depth_buffer(_x, _y);
 }
 
 void framebuffer_t::line(float _x0, float _y0, float _x1, float _y1,
