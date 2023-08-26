@@ -227,16 +227,13 @@ inline matrix4f_t get_model_matrix(const vector3f_t &_scale,
 
   // 旋转
   //  auto rotation = matrix4f_t().rotate(_rotate, _rad);
-
   //  Eigen::AngleAxis<float> vec(
   //      _rad, Eigen::Vector3f(_rotate.x(), _rotate.y(), _rotate.z()));
   //  auto mat = vec.matrix();
   //  auto rotation = matrix4f_t();
   //  rotation.setIdentity();
   //  rotation.block<3, 3>(0, 0) = mat;
-
-  auto rotation = Eigen::Affine3f(
-      Eigen::Quaternion<float>(0.9238795, 0, 0.2705981, 0.2705981));
+  auto rotation = Eigen::Affine3f(Eigen::AngleAxisf(_rad, _rotate));
 
   // 平移
   auto translate = matrix4f_t();
