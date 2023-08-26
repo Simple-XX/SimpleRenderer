@@ -73,5 +73,12 @@ auto main(int _argc, char **_argv) -> int {
   // 显示线程
   auto display_ret = display.run();
 
+  if (render_ret.get() != state_t::STOP) {
+    std::cout << "render thread exit with error\n";
+  }
+  if (display_ret.get() != state_t::STOP) {
+    std::cout << "display thread exit with error\n";
+  }
+
   return 0;
 }

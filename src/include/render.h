@@ -61,7 +61,7 @@ public:
   /**
    * 运行
    */
-  std::future<state_t::status_t> run();
+  auto run() -> std::future<state_t::status_t>;
 
 private:
   /// 输入
@@ -82,7 +82,7 @@ private:
   /**
    * 渲染循环
    */
-  state_t::status_t loop();
+  auto loop() -> state_t::status_t;
 };
 
 #endif /* SIMPLERENDER_RENDER_H */

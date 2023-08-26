@@ -65,7 +65,7 @@ public:
   /**
    * 运行
    */
-  std::future<state_t::status_t> run();
+  auto run() -> std::future<state_t::status_t>;
 
 private:
   /// 窗口标题
@@ -96,7 +96,7 @@ private:
   /**
    * 显示循环
    */
-  state_t::status_t loop();
+  auto loop() -> state_t::status_t;
 };
 
 #endif /* SIMPLERENDER_DISPLAY_H */

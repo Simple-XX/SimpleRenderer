@@ -29,7 +29,7 @@ render_t::render_t(
 
 /// @todo 验证 std::condition_variable 的正确性
 /// @todo 保证时序正确
-state_t::status_t render_t::loop() {
+auto render_t::loop() -> state_t::status_t {
   uint64_t sec = 0;
   uint32_t frames = 0;
   uint32_t fps = 0;
@@ -99,6 +99,6 @@ state_t::status_t render_t::loop() {
   return state_t::STOP;
 }
 
-std::future<state_t::status_t> render_t::run() {
+auto render_t::run() -> std::future<state_t::status_t> {
   return std::async(std::launch::async, &render_t::loop, this);
 }

@@ -119,7 +119,7 @@ void display_t::fill(const std::shared_ptr<framebuffer_t> &_framebuffer) {
 
 /// @todo 验证 std::condition_variable 的正确性
 /// @todo 保证时序正确
-state_t::status_t display_t::loop() {
+auto display_t::loop() -> state_t::status_t {
   while (state->status != state_t::STOP) {
     // 等待获取锁
     for (const auto &i : framebuffers) {
@@ -137,6 +137,6 @@ state_t::status_t display_t::loop() {
   return state_t::STOP;
 }
 
-std::future<state_t::status_t> display_t::run() {
+auto display_t::run() -> std::future<state_t::status_t> {
   return std::async(std::launch::async, &display_t::loop, this);
 }
