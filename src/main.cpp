@@ -14,9 +14,7 @@
  * </table>
  */
 
-#include <condition_variable>
 #include <iostream>
-#include <span>
 #include <string>
 #include <vector>
 
@@ -50,12 +48,13 @@ auto main(int _argc, char **_argv) -> int {
   }
 
   auto scene = std::make_shared<scene_t>();
-
   // 读取模型与材质
   for (auto &obj : objs) {
     std::cout << obj << '\n';
+    // 添加到场景中
     scene->add_model(model_t(obj));
   }
+  // 添加光照
   scene->add_light(light_t());
 
   auto state = std::make_shared<state_t>();
@@ -69,11 +68,9 @@ auto main(int _argc, char **_argv) -> int {
   auto display = display_t(std::ref(state), std::ref(framebuffers));
 
   // 计算线程
-  render.run();
+  auto render_ret = render.run();
   // 显示线程
-  display.run();
-  while (1)
-    ;
+  auto display_ret = display.run();
 
   return 0;
 }

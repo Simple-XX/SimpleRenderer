@@ -18,6 +18,7 @@
 #define SIMPLERENDER_RENDER_H
 
 #include <cstdint>
+#include <future>
 #include <memory>
 
 #include "config.h"
@@ -60,7 +61,7 @@ public:
   /**
    * 运行
    */
-  void run();
+  std::future<state_t::status_t> run();
 
 private:
   /// 输入
@@ -81,7 +82,7 @@ private:
   /**
    * 渲染循环
    */
-  void loop();
+  state_t::status_t loop();
 };
 
 #endif /* SIMPLERENDER_RENDER_H */

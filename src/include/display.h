@@ -18,6 +18,7 @@
 #define SIMPLERENDER_DISPLAY_H
 
 #include <cstdint>
+#include <future>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -64,7 +65,7 @@ public:
   /**
    * 运行
    */
-  void run();
+  std::future<state_t::status_t> run();
 
 private:
   /// 窗口标题
@@ -95,7 +96,7 @@ private:
   /**
    * 显示循环
    */
-  enum state_t::status_t loop();
+  state_t::status_t loop();
 };
 
 #endif /* SIMPLERENDER_DISPLAY_H */

@@ -110,7 +110,7 @@ inline auto model2world_tran(const model_t &_model, const matrix4f_t &_rotate,
 
 void scene_t::add_model(const model_t &_model) {
   auto aaa = model2world_tran(_model, matrix4f_t(), matrix4f_t(), matrix4f_t());
-  std::cout << aaa.first << std::endl;
+  //  std::cout << aaa.first << std::endl;
 
   models.push_back(_model * aaa.first);
 }

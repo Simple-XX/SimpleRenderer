@@ -14,10 +14,10 @@
  * </table>
  */
 
-#include <condition_variable>
-#include <thread>
+#include <future>
 
 #include "render.h"
+#include "status.h"
 
 render_t::render_t(
     const std::shared_ptr<state_t> &_state,
@@ -29,7 +29,7 @@ render_t::render_t(
 
 /// @todo 验证 std::condition_variable 的正确性
 /// @todo 保证时序正确
-void render_t::loop() {
+state_t::status_t render_t::loop() {
   uint64_t sec = 0;
   uint32_t frames = 0;
   uint32_t fps = 0;
@@ -96,9 +96,9 @@ void render_t::loop() {
       sec = 0;
     }
   }
+  return state_t::STOP;
 }
 
-void render_t::run() {
-  auto render_thread = std::thread(&render_t::loop, this);
-  render_thread.detach();
+std::future<state_t::status_t> render_t::run() {
+  return std::async(std::launch::async, &render_t::loop, this);
 }

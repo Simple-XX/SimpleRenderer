@@ -14,10 +14,8 @@
  * </table>
  */
 
-#include <condition_variable>
 #include <future>
 #include <iostream>
-#include <thread>
 
 #include "camera.h"
 #include "config.h"
@@ -121,11 +119,11 @@ void display_t::fill(const std::shared_ptr<framebuffer_t> &_framebuffer) {
 
 /// @todo 验证 std::condition_variable 的正确性
 /// @todo 保证时序正确
-enum state_t::status_t display_t::loop() {
+state_t::status_t display_t::loop() {
   while (state->status != state_t::STOP) {
     // 等待获取锁
     for (const auto &i : framebuffers) {
-      while (i->displayable != true) {
+      while (i->displayable.load() != true) {
         ;
       }
       // 填充窗口
@@ -136,15 +134,9 @@ enum state_t::status_t display_t::loop() {
       break;
     }
   }
+  return state_t::STOP;
 }
 
-void display_t::run() {
-
-  auto future_result = std::async(&display_t::loop, this);
-  // 等待任务完成并获取结果
-  auto result = future_result.get();
-  std::cout << "Result: " << result << std::endl;
-
-  //  auto display_thread = std::thread(&display_t::loop, this);
-  //  display_thread.detach();
+std::future<state_t::status_t> display_t::run() {
+  return std::async(std::launch::async, &display_t::loop, this);
 }
