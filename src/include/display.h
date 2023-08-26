@@ -24,6 +24,8 @@
 
 #include "config.h"
 #include "framebuffer.h"
+#include "input.h"
+#include "status.h"
 
 /**
  * 显示抽象
@@ -32,10 +34,12 @@ class display_t {
 public:
   /**
    * 构造函数
-   * @param _width 宽度
-   * @param _height 高度
+   * @param _state 运行状态
+   * @param _framebuffers 缓冲区
    */
-  display_t(size_t _width, size_t _height);
+  explicit display_t(
+      const std::shared_ptr<state_t> &_state,
+      const std::vector<std::shared_ptr<framebuffer_t>> &_framebuffers);
 
   /**
    * 析构函数
@@ -57,10 +61,21 @@ public:
    */
   void fill(const std::shared_ptr<framebuffer_t> &_framebuffer);
 
+  /**
+   * 运行
+   */
+  void run();
+
 private:
   /// 窗口标题
   static constexpr const char *WINDOW_TITLE = (char *)"SimpleRenderer";
+  /// 默认字体大小
+  static constexpr const int32_t DEFAULT_FONT_SIZE = 32;
 
+  /// 输入
+  std::shared_ptr<state_t> state;
+  /// 缓冲
+  std::vector<std::shared_ptr<framebuffer_t>> framebuffers;
   /// 窗口宽度
   size_t width;
   /// 窗口高度
@@ -75,7 +90,12 @@ private:
   /// 字体指针
   TTF_Font *font;
   /// 字体大小
-  uint8_t font_size = 32;
+  uint8_t font_size = DEFAULT_FONT_SIZE;
+
+  /**
+   * 显示循环
+   */
+  enum state_t::status_t loop();
 };
 
 #endif /* SIMPLERENDER_DISPLAY_H */

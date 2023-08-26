@@ -15,6 +15,8 @@
  */
 
 #include "default_shader.h"
+#include <Eigen/src/Geometry/Scaling.h>
+#include <Eigen/src/Geometry/Transform.h>
 
 auto default_shader_t::interpolate_color(const color_t &_color0,
                                          const color_t &_color1,
@@ -45,37 +47,38 @@ auto default_shader_t::interpolate_color(const color_t &_color0,
 /// @todo 巨大性能开销
 auto default_shader_t::vertex(const shader_vertex_in_t &_shader_vertex_in) const
     -> shader_vertex_out_t {
-  //  /// @todo 处理变换
-  //  auto face(_shader_vertex_in.face);
-  //  // 变换坐标
-  //  /// @todo 这里的问题在于在 m 矩阵中做了 t 操作，然后再应用 v 矩阵时，会在
-  //  t
-  //  /// 的基础上 r
-  //  auto aaa = matrix4f_t();
-  //  aaa(0, 3) = -960;
-  //  aaa(1, 3) = -540;
-  //  aaa(2, 3) = 0;
-  //  auto bbb = matrix4f_t();
-  //  bbb(0, 3) = 960;
-  //  bbb(1, 3) = 540;
-  //  bbb(2, 3) = 0;
-  //  auto mvp = shader_data.project_matrix * bbb * shader_data.view_matrix *
-  //  aaa *
-  //             shader_data.model_matrix;
-  //  // auto mvp = shader_data.project_matrix * shader_data.view_matrix
-  //  //          * shader_data.model_matrix;
-  //
+  /// @todo 处理变换
+  auto face(_shader_vertex_in.face);
+  // 变换坐标
+  /// @todo 这里的问题在于在 m 矩阵中做了 t 操作，然后再应用 v 矩阵时，会在 t
+  /// 的基础上 r
+  auto aaa = matrix4f_t();
+  aaa(0, 3) = -960;
+  aaa(1, 3) = -540;
+  aaa(2, 3) = 0;
+  auto bbb = matrix4f_t();
+  bbb(0, 3) = 960;
+  bbb(1, 3) = 540;
+  bbb(2, 3) = 0;
+  auto mvp = shader_data.project_matrix * bbb * shader_data.view_matrix * aaa *
+             shader_data.model_matrix;
+  // auto mvp = shader_data.project_matrix * shader_data.view_matrix
+  //          * shader_data.model_matrix;
+
+  auto ccc = Eigen::Scaling(1000.);
+  face.v0.coord = ccc * face.v0.coord;
+  face.v1.coord = ccc * face.v1.coord;
+  face.v2.coord = ccc * face.v2.coord;
+
   //  face.v0.coord = mvp * face.v0.coord;
   //  face.v1.coord = mvp * face.v1.coord;
   //  face.v2.coord = mvp * face.v2.coord;
-  //  /// @todo 通过矩阵变换法线
-  //  auto v2v0 = face.v2.coord - face.v0.coord;
-  //  auto v1v0 = face.v1.coord - face.v0.coord;
-  //  face.normal = (v2v0 ^ v1v0).normalize();
-  //  /// @todo 变换贴图
-  //  return shader_vertex_out_t(face);
-
-  return shader_vertex_out_t();
+  /// @todo 通过矩阵变换法线
+  auto v2v0 = face.v2.coord - face.v0.coord;
+  auto v1v0 = face.v1.coord - face.v0.coord;
+  face.normal = (v2v0.cross(v1v0)).normalized();
+  /// @todo 变换贴图
+  return shader_vertex_out_t(face);
 }
 
 auto default_shader_t::fragment(const shader_fragment_in_t &_shader_fragment_in)

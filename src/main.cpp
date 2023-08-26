@@ -14,21 +14,18 @@
  * </table>
  */
 
+#include <condition_variable>
 #include <iostream>
 #include <span>
 #include <string>
 #include <vector>
 
 #include "config.h"
+#include "framebuffer.h"
 #include "model.h"
 #include "render.h"
 #include "scene.h"
-
-auto display = std::make_shared<display_t>(WIDTH, HEIGHT);
-auto scene = std::make_shared<scene_t>();
-auto input = std::make_shared<input_t>();
-auto shader = std::make_shared<default_shader_t>();
-auto render = std::make_shared<render_t>(scene, display, input);
+#include "status.h"
 
 auto main(int _argc, char **_argv) -> int {
   auto paras = std::span(_argv, _argc);
@@ -52,16 +49,31 @@ auto main(int _argc, char **_argv) -> int {
     }
   }
 
+  auto scene = std::make_shared<scene_t>();
+
   // 读取模型与材质
   for (auto &obj : objs) {
     std::cout << obj << '\n';
-    model_t const model(obj);
-
-    scene->add_model(model);
+    scene->add_model(model_t(obj));
   }
   scene->add_light(light_t());
 
-  render->loop();
+  auto state = std::make_shared<state_t>();
+  auto input = std::make_shared<input_t>();
+  std::vector<std::shared_ptr<framebuffer_t>> framebuffers;
+  framebuffers.emplace_back(std::make_shared<framebuffer_t>(WIDTH, HEIGHT));
+  framebuffers.emplace_back(std::make_shared<framebuffer_t>(WIDTH, HEIGHT));
+  framebuffers.emplace_back(std::make_shared<framebuffer_t>(WIDTH, HEIGHT));
+  auto render = render_t(std::ref(state), std::ref(scene), std::ref(input),
+                         std::ref(framebuffers));
+  auto display = display_t(std::ref(state), std::ref(framebuffers));
+
+  // 计算线程
+  render.run();
+  // 显示线程
+  display.run();
+  while (1)
+    ;
 
   return 0;
 }

@@ -24,48 +24,6 @@ namespace {
 size_t count = 0;
 } // namespace
 
-/// @todo 巨大性能开销
-auto framebuffer_t::get_barycentric_coord(const vector3f_t &_p0,
-                                          const vector3f_t &_p1,
-                                          const vector3f_t &_p2,
-                                          const vector3f_t &_pa)
-    -> std::pair<bool, vector3f_t> {
-  auto p1p0 = _p1 - _p0;
-  auto p2p0 = _p2 - _p0;
-  auto pap0 = _pa - _p0;
-
-  auto deno = (p1p0.x() * p2p0.y() - p1p0.y() * p2p0.x());
-  if (std::abs(deno) < std::numeric_limits<decltype(deno)>::epsilon()) {
-    return std::pair<bool, const vector3f_t>{false, vector3f_t()};
-  }
-
-  auto s = (p2p0.y() * pap0.x() - p2p0.x() * pap0.y()) / deno;
-  if ((s > 1) || (s < 0)) {
-    return std::pair<bool, const vector3f_t>{false, vector3f_t()};
-  }
-
-  auto t = (p1p0.x() * pap0.y() - p1p0.y() * pap0.x()) / deno;
-  if ((t > 1) || (t < 0)) {
-    return std::pair<bool, const vector3f_t>{false, vector3f_t()};
-  }
-
-  if ((1 - s - t > 1) || (1 - s - t < 0)) {
-    return std::pair<bool, const vector3f_t>{false, vector3f_t()};
-  }
-
-  return std::pair<bool, const vector3f_t>{true, vector3f_t(1 - s - t, s, t)};
-}
-
-auto framebuffer_t::interpolate_depth(float _depth0, float _depth1,
-                                      float _depth2,
-                                      const vector3f_t &_barycentric_coord)
-    -> float {
-  auto depth = _depth0 * _barycentric_coord.x();
-  depth += _depth1 * _barycentric_coord.y();
-  depth += _depth2 * _barycentric_coord.z();
-  return depth;
-}
-
 framebuffer_t::framebuffer_t() : id(count++) {}
 
 framebuffer_t::framebuffer_t(const framebuffer_t &_framebuffer)
@@ -80,9 +38,8 @@ framebuffer_t::framebuffer_t(framebuffer_t &&_framebuffer) noexcept
       depth_buffer(std::move(_framebuffer.depth_buffer)) {}
 
 framebuffer_t::framebuffer_t(size_t _width, size_t _height)
-    : id(count++), width(_width), height(_height),
-      color_buffer(color_buffer_t(_width, _height)),
-      depth_buffer(depth_buffer_t(_width, _height)) {}
+    : id(count++), width(_width), height(_height), color_buffer(width, height),
+      depth_buffer(width, height) {}
 
 auto framebuffer_t::operator=(const framebuffer_t &_framebuffer)
     -> framebuffer_t & {
@@ -303,4 +260,46 @@ void framebuffer_t::scene(const shader_base_t &_shader, const scene_t &_scene) {
     model(_shader, _scene.get_light(), models.front());
     models.pop();
   }
+}
+
+/// @todo 巨大性能开销
+auto framebuffer_t::get_barycentric_coord(const vector3f_t &_p0,
+                                          const vector3f_t &_p1,
+                                          const vector3f_t &_p2,
+                                          const vector3f_t &_pa)
+    -> std::pair<bool, vector3f_t> {
+  auto p1p0 = _p1 - _p0;
+  auto p2p0 = _p2 - _p0;
+  auto pap0 = _pa - _p0;
+
+  auto deno = (p1p0.x() * p2p0.y() - p1p0.y() * p2p0.x());
+  if (std::abs(deno) < std::numeric_limits<decltype(deno)>::epsilon()) {
+    return std::pair<bool, const vector3f_t>{false, vector3f_t()};
+  }
+
+  auto s = (p2p0.y() * pap0.x() - p2p0.x() * pap0.y()) / deno;
+  if ((s > 1) || (s < 0)) {
+    return std::pair<bool, const vector3f_t>{false, vector3f_t()};
+  }
+
+  auto t = (p1p0.x() * pap0.y() - p1p0.y() * pap0.x()) / deno;
+  if ((t > 1) || (t < 0)) {
+    return std::pair<bool, const vector3f_t>{false, vector3f_t()};
+  }
+
+  if ((1 - s - t > 1) || (1 - s - t < 0)) {
+    return std::pair<bool, const vector3f_t>{false, vector3f_t()};
+  }
+
+  return std::pair<bool, const vector3f_t>{true, vector3f_t(1 - s - t, s, t)};
+}
+
+auto framebuffer_t::interpolate_depth(float _depth0, float _depth1,
+                                      float _depth2,
+                                      const vector3f_t &_barycentric_coord)
+    -> float {
+  auto depth = _depth0 * _barycentric_coord.x();
+  depth += _depth1 * _barycentric_coord.y();
+  depth += _depth2 * _barycentric_coord.z();
+  return depth;
 }

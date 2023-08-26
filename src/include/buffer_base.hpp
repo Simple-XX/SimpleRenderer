@@ -91,7 +91,7 @@ public:
    * @return 数据
    */
   auto operator()(size_t _row, size_t _col) -> T_t & {
-    return buffer[_row * width + _col];
+    return buffer.at(_row * width + _col);
   }
 
   /**
@@ -101,7 +101,7 @@ public:
    * @return 只读的数据
    */
   auto operator()(size_t _row, size_t _col) const -> const T_t & {
-    return buffer[_row * width + _col];
+    return buffer.at(_row * width + _col);
   }
 
   /**

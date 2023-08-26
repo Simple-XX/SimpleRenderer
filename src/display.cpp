@@ -14,15 +14,22 @@
  * </table>
  */
 
+#include <condition_variable>
+#include <future>
 #include <iostream>
+#include <thread>
 
 #include "camera.h"
 #include "config.h"
 #include "display.h"
 #include "log.hpp"
+#include "status.h"
 
-display_t::display_t(size_t _width, size_t _height)
-    : width(_width), height(_height) {
+/// @todo
+display_t::display_t(
+    const std::shared_ptr<state_t> &_state,
+    const std::vector<std::shared_ptr<framebuffer_t>> &_framebuffers)
+    : state(_state), framebuffers(_framebuffers), width(WIDTH), height(HEIGHT) {
   // 初始化 sdl
   try {
     auto ret = SDL_Init(SDL_INIT_VIDEO);
@@ -69,7 +76,6 @@ display_t::display_t(size_t _width, size_t _height)
       throw std::runtime_error(log(TTF_GetError()));
     }
     // 打开字体库
-    std::cout << FONT_FILE_PATH << std::endl;
     font = TTF_OpenFont(FONT_FILE_PATH.data(), font_size);
     if (font == nullptr) {
       TTF_Quit();
@@ -81,7 +87,6 @@ display_t::display_t(size_t _width, size_t _height)
     }
   } catch (const std::runtime_error &e) {
     std::cerr << e.what() << std::endl;
-    return;
   }
 }
 
@@ -112,4 +117,34 @@ void display_t::fill(const std::shared_ptr<framebuffer_t> &_framebuffer) {
 
   // 刷新
   SDL_RenderPresent(sdl_renderer);
+}
+
+/// @todo 验证 std::condition_variable 的正确性
+/// @todo 保证时序正确
+enum state_t::status_t display_t::loop() {
+  while (state->status != state_t::STOP) {
+    // 等待获取锁
+    for (const auto &i : framebuffers) {
+      while (i->displayable != true) {
+        ;
+      }
+      // 填充窗口
+      fill(i);
+      i->displayable = false;
+    }
+    if (state->status == state_t::STOP) {
+      break;
+    }
+  }
+}
+
+void display_t::run() {
+
+  auto future_result = std::async(&display_t::loop, this);
+  // 等待任务完成并获取结果
+  auto result = future_result.get();
+  std::cout << "Result: " << result << std::endl;
+
+  //  auto display_thread = std::thread(&display_t::loop, this);
+  //  display_thread.detach();
 }
