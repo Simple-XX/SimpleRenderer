@@ -52,23 +52,28 @@ auto default_shader_t::vertex(const shader_vertex_in_t &_shader_vertex_in) const
   // 变换坐标
   /// @todo 这里的问题在于在 m 矩阵中做了 t 操作，然后再应用 v 矩阵时，会在 t
   /// 的基础上 r
-  auto aaa = matrix4f_t();
-  aaa(0, 3) = -960;
-  aaa(1, 3) = -540;
-  aaa(2, 3) = 0;
-  auto bbb = matrix4f_t();
-  bbb(0, 3) = 960;
-  bbb(1, 3) = 540;
-  bbb(2, 3) = 0;
-  auto mvp = shader_data.project_matrix * bbb * shader_data.view_matrix * aaa *
+  auto mvp = shader_data.project_matrix * shader_data.view_matrix *
              shader_data.model_matrix;
+
+  //  std::cout << "mvp: " << std::endl << shader_data.model_matrix <<
+  //  std::endl;
   // auto mvp = shader_data.project_matrix * shader_data.view_matrix
   //          * shader_data.model_matrix;
 
-  auto ccc = Eigen::Scaling(1000.);
-  face.v0.coord = ccc * face.v0.coord;
-  face.v1.coord = ccc * face.v1.coord;
-  face.v2.coord = ccc * face.v2.coord;
+  auto a0 = vector4f_t();
+  a0.head(3) = face.v0.coord;
+  a0 = mvp * a0;
+  face.v0.coord = a0.head(3);
+
+  auto a1 = vector4f_t();
+  a1.head(3) = face.v1.coord;
+  a1 = mvp * a1;
+  face.v1.coord = a1.head(3);
+
+  auto a2 = vector4f_t();
+  a2.head(3) = face.v2.coord;
+  a2 = mvp * a2;
+  face.v2.coord = a2.head(3);
 
   //  face.v0.coord = mvp * face.v0.coord;
   //  face.v1.coord = mvp * face.v1.coord;

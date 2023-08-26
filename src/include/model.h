@@ -221,29 +221,33 @@ inline matrix4f_t get_model_matrix(const vector3f_t &_scale,
   // 缩放
   auto scale = matrix4f_t();
   scale.setIdentity();
-  scale.diagonal()[0] = _scale.x();
-  scale.diagonal()[1] = _scale.y();
-  scale.diagonal()[2] = _scale.z();
+  scale(0, 0) = _scale.x();
+  scale(1, 1) = _scale.y();
+  scale(2, 2) = _scale.z();
 
   // 旋转
   //  auto rotation = matrix4f_t().rotate(_rotate, _rad);
 
-  Eigen::AngleAxis<float> vec(
-      _rad, Eigen::Vector3f(_rotate.x(), _rotate.y(), _rotate.z()));
-  auto mat = vec.matrix();
-  auto rotation = matrix4f_t();
-  rotation.setIdentity();
-  rotation.block<3, 3>(0, 0) = mat;
+  //  Eigen::AngleAxis<float> vec(
+  //      _rad, Eigen::Vector3f(_rotate.x(), _rotate.y(), _rotate.z()));
+  //  auto mat = vec.matrix();
+  //  auto rotation = matrix4f_t();
+  //  rotation.setIdentity();
+  //  rotation.block<3, 3>(0, 0) = mat;
+
+  auto rotation = Eigen::Affine3f(
+      Eigen::Quaternion<float>(0.9238795, 0, 0.2705981, 0.2705981));
 
   // 平移
   auto translate = matrix4f_t();
-
+  translate.setIdentity();
   translate(0, 3) = _translate.x();
   translate(1, 3) = _translate.y();
   translate(2, 3) = _translate.z();
+  //  std::cout << translate * rotation * scale << "  24242"<<std::endl;
 
   // 应用到向量上时先线性变换(缩放，旋转)再平移
-  return translate * rotation * scale;
+  return rotation * translate * scale;
 }
 
 //// 投影变换矩阵

@@ -225,7 +225,7 @@ void framebuffer_t::triangle(const shader_base_t &_shader,
     }
   }
 }
-static bool draw_wireframe = false;
+static bool draw_wireframe = true;
 void framebuffer_t::model(const shader_base_t &_shader, const light_t &_light,
                           const model_t &_model) {
   if (draw_wireframe) {

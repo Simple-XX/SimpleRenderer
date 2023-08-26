@@ -109,10 +109,35 @@ inline auto model2world_tran(const model_t &_model, const matrix4f_t &_rotate,
 }
 
 void scene_t::add_model(const model_t &_model) {
-  auto aaa = model2world_tran(_model, matrix4f_t(), matrix4f_t(), matrix4f_t());
-  //  std::cout << aaa.first << std::endl;
+  auto matrix = matrix4f_t();
+  matrix.setIdentity();
+  // 缩放
+  auto scale_mat = matrix4f_t();
+  scale_mat.setIdentity();
+  scale_mat(0, 0) = 1000;
+  scale_mat(1, 1) = 1000;
+  scale_mat(2, 2) = 1000;
+  //  std::cout << scale_mat * matrix << std::endl;
+  // 旋转
+  auto rotate = Eigen::Affine3f(Eigen::Quaternion<float>(
+      Eigen::AngleAxisf(0.1, Eigen::Vector3f::UnitZ())));
+  //  std::cout << rotate * matrix << std::endl;
+  // 平移
+  auto tran_mat = matrix4f_t();
+  tran_mat.setIdentity();
+  tran_mat(0, 3) = 960;
+  tran_mat(1, 3) = 480;
+  tran_mat(2, 3) = 0;
+  //  std::cout << tran_mat * matrix << std::endl;
+  // 应用顺序为从右到左，即先缩放，再旋转，最后平移
+  //  auto first = tran_mat * rotate * scale_mat * matrix;
+  auto first = rotate * tran_mat * scale_mat * matrix;
 
-  models.push_back(_model * aaa.first);
+  std::cout << first << std::endl;
+  //  auto aaa = model2world_tran(_model, matrix4f_t(), matrix4f_t(),
+  //  matrix4f_t()); std::cout << aaa.first << std::endl;
+
+  models.push_back(_model);
 }
 
 void scene_t::add_model(const model_t &_model,
