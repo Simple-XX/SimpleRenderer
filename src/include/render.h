@@ -73,9 +73,7 @@ private:
   /// 输入
   std::shared_ptr<input_t> input;
   /// 着色器
-  //  std::shared_ptr<shader_base_t> shader =
-  //  std::make_shared<default_shader_t>();
-  default_shader_t shader;
+  std::shared_ptr<shader_base_t> shader = std::make_shared<default_shader_t>();
   /// 缓冲
   std::vector<std::shared_ptr<framebuffer_t>> framebuffers;
 

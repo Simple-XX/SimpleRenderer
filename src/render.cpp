@@ -72,14 +72,14 @@ auto render_t::loop() -> state_t::status_t {
         //        HEIGHT / 2,
         //            0));
 
-        shader.shader_data.model_matrix = matrix4f_t();
-        shader.shader_data.view_matrix = matrix4f_t();
-        // shader.shader_data.view_matrix
+        shader->shader_data.model_matrix = matrix4f_t();
+        shader->shader_data.view_matrix = matrix4f_t();
+        // shader->shader_data.view_matrix
         //   = scene->get_current_camera().look_at();
-        shader.shader_data.project_matrix = matrix4f_t();
+        shader->shader_data.project_matrix = matrix4f_t();
 
         // 绘制场景
-        i->scene(shader, *scene);
+        i->scene(*shader, *scene);
 
         // 将可显示标记置位
         i->displayable = true;
