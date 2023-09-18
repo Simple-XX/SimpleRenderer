@@ -184,5 +184,26 @@ if (NOT CLANG_FORMAT_EXE)
 endif ()
 
 find_package(SDL2 REQUIRED)
+if (NOT SDL2_FOUND)
+    message(FATAL_ERROR "sdl2 not found.\n"
+            "Following https://github.com/libsdl-org/SDL to install.")
+endif ()
+
 find_package(SDL2_ttf REQUIRED)
+if (NOT SDL2_TTF_FOUND)
+    message(FATAL_ERROR "sdl2_ttf not found.\n"
+            "Following https://github.com/libsdl-org/SDL to install.")
+endif ()
+
+if (APPLE)
+    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp")
+    set(OpenMP_C_LIB_NAMES "omp")
+    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp")
+    set(OpenMP_CXX_LIB_NAMES "omp")
+    set(OpenMP_omp_LIBRARY omp)
+endif ()
 find_package(OpenMP REQUIRED)
+if (NOT OpenMP_FOUND)
+    message(FATAL_ERROR "OpenMP not found.\n"
+            "Following https://www.openmp.org to install.")
+endif ()
