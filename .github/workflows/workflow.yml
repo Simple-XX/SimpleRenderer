@@ -1,0 +1,81 @@
+# This file is a part of Simple-XX/SimpleRenderer
+# (https://github.com/Simple-XX/SimpleRenderer).
+#
+# workflow.yml for Simple-XX/SimpleRenderer.
+
+name: build
+
+on:
+  - push
+  - pull_request
+  - release
+
+env:
+  CMAKE_BUILD_TYPE: Release
+
+jobs:
+  build_docs:
+    name: Build and publish documentation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install --fix-missing -y doxygen graphviz clang-format clang-tidy cppcheck lcov
+          sudo apt install --fix-missing -y gcc g++ libsdl2-dev libsdl2-ttf-dev libomp-dev
+
+      - name: Build
+        run: |
+          cmake --preset=build
+          cmake --build build --target doc
+
+      - name: Publish
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{github.workspace}}/doc/html
+
+  build_ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install --fix-missing -y doxygen graphviz clang-format clang-tidy cppcheck lcov
+          sudo apt install --fix-missing -y gcc g++ libsdl2-dev libsdl2-ttf-dev libomp-dev
+
+      - name: Build
+        run: |
+          cmake --preset=build
+          cmake --build build --target all
+          cmake --build build --target coverage
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: build/coverage/coverage.info
+          verbose: true
+
+  build_macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          brew install doxygen graphviz llvm cppcheck lcov
+          ln -s "$(brew --prefix llvm)/bin/clang-format" "/usr/local/bin/clang-format"
+          ln -s "$(brew --prefix llvm)/bin/clang-tidy" "/usr/local/bin/clang-tidy"
+          brew install gcc g++ sdl2 sdl2_ttf libomp
+
+      - name: Build
+        run: |
+          cmake --preset=build
+          cmake --build build --target all
+          cmake --build build --target coverage
