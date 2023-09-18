@@ -26,30 +26,22 @@ add_executable(unit_test
         #        ${SimpleRender_SOURCE_DIR}/src/light.cpp
         #        ${SimpleRender_SOURCE_DIR}/src/input.cpp
         #        ${SimpleRender_SOURCE_DIR}/src/render.cpp
-        )
+)
 
 target_include_directories(unit_test PRIVATE
         ${SimpleRender_SOURCE_DIR}/src/include
-        )
+)
 
 target_compile_options(unit_test PRIVATE
-        -g -ggdb
-        -O0
-        -Wall -Wextra
-        )
+        ${DEFAULT_TEST_COMPILE_OPTIONS}
+)
+
+target_link_options(unit_test PRIVATE
+        ${DEFAULT_TEST_LINK_OPTIONS}
+)
 
 target_link_libraries(unit_test PRIVATE
-        stb
-        tinyobjloader
-        Eigen
-        gtest_main
-        ${glog_LIBRARIES}
-        SDL2::Main
-        SDL2::TTF
-        OpenMP::OpenMP_CXX)
+        ${DEFAULT_TEST_LINK_LIB}
+)
 
-disable_clang_tidy(unit_test)
-
-enable_testing()
-include(GoogleTest)
 gtest_discover_tests(unit_test)

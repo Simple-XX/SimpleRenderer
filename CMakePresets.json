@@ -20,92 +20,23 @@
       }
     },
     {
-      "name": "cppcheck",
-      "hidden": true,
-      "cacheVariables": {
-        "CMAKE_C_CPPCHECK": "cppcheck;--enable=all;--inline-suppr;--suppress-xml=${sourceDir}/tools/cppcheck-suppressions.xml",
-        "CMAKE_CXX_CPPCHECK": "cppcheck;--enable=all;--inline-suppr;--suppress-xml=${sourceDir}/tools/cppcheck-suppressions.xml"
-      }
-    },
-    {
-      "name": "clang-tidy",
-      "hidden": true,
-      "cacheVariables": {
-        "CMAKE_C_CLANG_TIDY": "clang-tidy",
-        "CMAKE_CXX_CLANG_TIDY": "clang-tidy"
-      }
-    },
-    {
-      "name": "clang-format",
-      "hidden": true,
-      "cacheVariables": {
-        "CLANG_FORMAT_FLAGS": "clang-format"
-      }
-    },
-    {
       "name": "configurePresets_base",
       "hidden": true,
       "inherits": [
         "std"
       ],
-      "condition": true,
-      "vendor": {
-        "example.com/ExampleIDE/1.0": {
-          "autoFormat": false
-        }
-      },
       "displayName": "configurePresets_base",
       "description": "base configurePresets",
-      "generator": "Unix Makefiles",
-      "architecture": {
-        "value": "set",
-        "strategy": "external"
-      },
-      "toolset": {
-        "value": "set",
-        "strategy": "external"
-      },
-      "toolchainFile": "",
       "binaryDir": "${sourceDir}/build",
-      "installDir": "",
-      "cmakeExecutable": "",
       "cacheVariables": {
-        "CMAKE_VERBOSE_MAKEFILE": {
-          "type": "BOOL",
-          "value": "TRUE"
-        },
         "CMAKE_EXPORT_COMPILE_COMMANDS": {
           "type": "BOOL",
           "value": "ON"
         },
-        "CMAKE_BUILD_TYPE": {
+        "COVERAGE_OUTPUT_DIR": {
           "type": "STRING",
-          "value": "Debug"
-        },
-        "ENABLE_TEST_COVERAGE": {
-          "type": "BOOL",
-          "value": "OFF"
+          "value": "coverage"
         }
-      },
-      "environment": {
-        "MY_ENVIRONMENT_VARIABLE": "Test",
-        "PATH": "$env{HOME}/ninja/bin:$penv{PATH}"
-      },
-      "warnings": {
-        "dev": false,
-        "deprecated": true,
-        "uninitialized": true,
-        "unusedCli": true,
-        "systemVars": false
-      },
-      "errors": {
-        "dev": false,
-        "deprecated": false
-      },
-      "debug": {
-        "output": true,
-        "tryCompile": true,
-        "find": true
       }
     },
     {
@@ -114,8 +45,8 @@
       "inherits": [
         "configurePresets_base"
       ],
-      "displayName": "build SimpleRenderer",
-      "description": "build SimpleRenderer"
+      "displayName": "build",
+      "description": "build"
     }
   ]
 }

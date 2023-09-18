@@ -29,7 +29,7 @@ function(download_cpm)
     file(DOWNLOAD
             https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
             ${CPM_DOWNLOAD_LOCATION}
-            )
+    )
 endfunction()
 
 if (NOT (EXISTS ${CPM_DOWNLOAD_LOCATION}))
@@ -102,7 +102,7 @@ if (tinyobjloader_ADDED)
             FILE_SET HEADERS
             BASE_DIRS ${tinyobjloader_SOURCE_DIR}
             FILES tiny_obj_loader.h
-            )
+    )
 endif ()
 
 # https://github.com/nothings/stb.git
@@ -118,7 +118,7 @@ if (stb_ADDED)
             FILE_SET HEADERS
             BASE_DIRS ${stb_SOURCE_DIR}
             FILES stb_image.h
-            )
+    )
 endif ()
 
 # https://gitlab.com/libeigen/eigen.git
@@ -160,7 +160,7 @@ add_custom_target(3rd_licenses
         COMMAND
         make
         write-licenses
-        )
+)
 
 # doxygen
 find_package(Doxygen
@@ -176,6 +176,28 @@ if (NOT CPPCHECK_EXE)
     message(FATAL_ERROR "cppcheck not found.\n"
             "Following https://cppcheck.sourceforge.io to install.")
 endif ()
+add_custom_target(cppcheck
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Run cppcheck on ${CMAKE_BINARY_DIR}/compile_commands.json ..."
+        COMMAND
+        ${CPPCHECK_EXE}
+        --enable=all
+        --project=${CMAKE_BINARY_DIR}/compile_commands.json
+        --suppress-xml=${CMAKE_SOURCE_DIR}/tools/cppcheck-suppressions.xml
+        --output-file=${CMAKE_BINARY_DIR}/cppcheck_report.log
+)
+
+# 获取全部源文件
+file(GLOB_RECURSE ALL_SOURCE_FILES
+        ${CMAKE_SOURCE_DIR}/src/*.h
+        ${CMAKE_SOURCE_DIR}/src/*.hpp
+        ${CMAKE_SOURCE_DIR}/src/*.c
+        ${CMAKE_SOURCE_DIR}/src/*.cpp
+        ${CMAKE_SOURCE_DIR}/test/*.h
+        ${CMAKE_SOURCE_DIR}/test/*.hpp
+        ${CMAKE_SOURCE_DIR}/test/*.c
+        ${CMAKE_SOURCE_DIR}/test/*.cpp
+)
 
 # clang-tidy
 find_program(CLANG_TIDY_EXE NAMES clang-tidy)
@@ -183,12 +205,41 @@ if (NOT CLANG_TIDY_EXE)
     message(FATAL_ERROR "clang-tidy not found.\n"
             "Following https://clang.llvm.org/extra/clang-tidy to install.")
 endif ()
+add_custom_target(clang-tidy
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Run clang-tidy on ${ALL_SOURCE_FILES} ..."
+        COMMAND
+        ${CLANG_TIDY_EXE}
+        --config-file=${CMAKE_SOURCE_DIR}/.clang-tidy
+        -p=${CMAKE_BINARY_DIR}
+        ${ALL_SOURCE_FILES}
+        > ${CMAKE_BINARY_DIR}/clang_tidy_report.log 2>&1
+)
 
 # clang-format
 find_program(CLANG_FORMAT_EXE NAMES clang-format)
 if (NOT CLANG_FORMAT_EXE)
     message(FATAL_ERROR "clang-format not found.\n"
             "Following https://clang.llvm.org/docs/ClangFormat.html to install.")
+endif ()
+add_custom_target(clang-format
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Run clang-format on ${ALL_SOURCE_FILES} ..."
+        COMMAND ${CLANG_FORMAT_EXE} -i -style=file ${ALL_SOURCE_FILES}
+)
+
+# genhtml 生成测试覆盖率报告网页
+find_program(GENHTML_EXE genhtml)
+if (NOT GENHTML_EXE)
+    message(FATAL_ERROR "genhtml not found.\n"
+            "Following https://github.com/linux-test-project/lcov to install.")
+endif ()
+
+# lcov 生成测试覆盖率报告
+find_program(LCOV_EXE lcov)
+if (NOT LCOV_EXE)
+    message(FATAL_ERROR "lcov not found.\n"
+            "Following https://github.com/linux-test-project/lcov to install.")
 endif ()
 
 find_package(SDL2 REQUIRED)

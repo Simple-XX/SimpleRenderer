@@ -28,6 +28,8 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include(functions)
 # 导入第三方依赖
 include(3rd)
+# 导入编译配置
+include(compile_config)
 
 # obj 文件路径
 set(OBJ_FILE_PATH "${PROJECT_SOURCE_DIR}/obj/")
