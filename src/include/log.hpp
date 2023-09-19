@@ -63,9 +63,10 @@ static auto get_time_stamp(void) -> std::string {
  * @param  _location        位置
  * @return std::string      日志信息，包括时间位置与信息
  */
-inline std::string
+inline auto
 log(const std::string_view &_msg,
-    const std::source_location &_location = std::source_location::current()) {
+    const std::source_location &_location = std::source_location::current())
+    -> std::string {
   std::stringstream res;
   res << "[" << get_time_stamp() << "] " << _msg << ", function \'"
       << _location.function_name() << "\'"
