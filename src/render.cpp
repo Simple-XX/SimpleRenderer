@@ -69,7 +69,7 @@ auto render_t::loop() -> state_t::status_t {
 
         // 设置 mvp 矩阵
         shader->shader_data.model_matrix = get_model_matrix(
-            vector3f_t(1000, 1000, 1000), vector3f_t(0, 1, 1).normalized(),
+            vector3f_t(1000, 1000, 1000), vector3f_t(1, 1, 1).normalized(),
             M_PI_4, vector3f_t(WIDTH / 2, HEIGHT / 2, 0));
         shader->shader_data.view_matrix = matrix4f_t().setIdentity();
         // shader->shader_data.view_matrix

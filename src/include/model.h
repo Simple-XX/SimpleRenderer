@@ -251,7 +251,7 @@ inline auto get_model_matrix(const vector3f_t &_scale,
   //  std::cout << translate * rotation * scale << "  24242"<<std::endl;
 
   // 应用到向量上时先线性变换(缩放，旋转)再平移
-  return rotation * translate * scale;
+  return translate * rotation * scale;
 }
 
 //// 投影变换矩阵
