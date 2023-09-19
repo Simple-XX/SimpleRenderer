@@ -31,7 +31,7 @@ static constexpr uint32_t US2S = 1000000;
  * 获取当前时间戳，精确到纳秒
  * @return std::string          时间戳
  */
-static auto get_time_stamp(void) -> std::string {
+static auto get_time_stamp() -> std::string {
   auto now = std::chrono::system_clock::now();
   auto now_time_t = std::chrono::system_clock::to_time_t(now);
   auto now_tm = std::localtime(&now_time_t);
@@ -79,7 +79,7 @@ log(const std::string_view &_msg,
  * 获取当前微秒数，用于性能分析
  * @return auto                 当前微秒
  */
-inline auto us(void) {
+inline auto us() {
   struct timeval t = {};
 
   gettimeofday(&t, nullptr);
