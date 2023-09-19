@@ -159,9 +159,9 @@ public:
    */
   struct box_t {
     /// 最小点
-    vector4f_t min;
+    vector3f_t min;
     /// 最大点
-    vector4f_t max;
+    vector3f_t max;
 
     /// @name 默认构造/析构函数
     /// @{
@@ -211,6 +211,8 @@ private:
   static constexpr const uint8_t TRIANGLE_FACE_VERTEX_COUNT = 3;
 
   std::vector<face_t> face;
+
+  /// 体积盒
   box_t box;
 };
 

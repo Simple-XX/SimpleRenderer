@@ -26,6 +26,8 @@
 #include "scene.h"
 #include "status.h"
 
+/// @todo 不应该出现明确的类型，应该使用模板
+
 auto main(int _argc, char **_argv) -> int {
   auto paras = std::span(_argv, _argc);
   // obj 路径
@@ -53,7 +55,8 @@ auto main(int _argc, char **_argv) -> int {
   for (auto &obj : objs) {
     std::cout << obj << '\n';
     // 添加到场景中
-    scene->add_model(model_t(obj));
+    auto model = model_t(obj);
+    scene->add_model(model);
   }
   // 添加光照
   scene->add_light(light_t());

@@ -31,7 +31,7 @@ static constexpr uint32_t US2S = 1000000;
  * 获取当前时间戳，精确到纳秒
  * @return std::string          时间戳
  */
-static std::string get_time_stamp(void) {
+static auto get_time_stamp(void) -> std::string {
   auto now = std::chrono::system_clock::now();
   auto now_time_t = std::chrono::system_clock::to_time_t(now);
   auto now_tm = std::localtime(&now_time_t);

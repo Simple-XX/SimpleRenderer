@@ -106,15 +106,6 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
   std::cout << ", 子模型数: " << shapes.size();
   std::cout << ", 材质数: " << materials.size() << '\n';
 
-  // 用于计算最大/最小的点
-  /// @todo
-  auto min = vector3f_t(std::numeric_limits<float>::max(),
-                        std::numeric_limits<float>::max(),
-                        std::numeric_limits<float>::max());
-  auto max = vector3f_t(std::numeric_limits<float>::min(),
-                        std::numeric_limits<float>::min(),
-                        std::numeric_limits<float>::min());
-
   // 遍历所有 shape
   for (size_t shapes_size = 0; shapes_size < shapes.size(); shapes_size++) {
     // Loop over faces(polygon)
@@ -193,8 +184,35 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
     }
   }
 
-  //  box.min = min;
-  //  box.max = max;
+  // 计算体积盒
+  auto max = face.at(0).v0.coord;
+  auto min = face.at(0).v0.coord;
+
+  for (const auto &i : face) {
+    auto curr_max_x =
+        std::max(i.v0.coord.x(), std::max(i.v1.coord.x(), i.v2.coord.x()));
+    auto curr_max_y =
+        std::max(i.v0.coord.y(), std::max(i.v1.coord.y(), i.v2.coord.y()));
+    auto curr_max_z =
+        std::max(i.v0.coord.z(), std::max(i.v1.coord.z(), i.v2.coord.z()));
+
+    max.x() = curr_max_x > max.x() ? curr_max_x : max.x();
+    max.y() = curr_max_y > max.y() ? curr_max_y : max.y();
+    max.z() = curr_max_z > max.z() ? curr_max_z : max.z();
+
+    auto curr_min_x =
+        std::max(i.v0.coord.x(), std::max(i.v1.coord.x(), i.v2.coord.x()));
+    auto curr_min_y =
+        std::max(i.v0.coord.y(), std::max(i.v1.coord.y(), i.v2.coord.y()));
+    auto curr_min_z =
+        std::max(i.v0.coord.z(), std::max(i.v1.coord.z(), i.v2.coord.z()));
+
+    min.x() = curr_min_x < min.x() ? curr_min_x : min.x();
+    min.y() = curr_min_y < min.y() ? curr_min_y : min.y();
+    min.z() = curr_min_z < min.z() ? curr_min_z : min.z();
+  }
+  box.min = min;
+  box.max = max;
 }
 
 auto model_t::operator*(const matrix4f_t &_tran) const -> model_t {
