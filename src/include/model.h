@@ -214,12 +214,17 @@ private:
 
   /// 体积盒
   box_t box;
+
+  /**
+   * 计算 model 的体积盒
+   */
+  void set_box();
 };
 
 // 模型变换
-inline matrix4f_t get_model_matrix(const vector3f_t &_scale,
-                                   const vector3f_t &_rotate, const float &_rad,
-                                   const vector3f_t &_translate) {
+inline auto get_model_matrix(const vector3f_t &_scale,
+                             const vector3f_t &_rotate, const float &_rad,
+                             const vector3f_t &_translate) -> matrix4f_t {
   // 缩放
   auto scale = matrix4f_t();
   scale.setIdentity();

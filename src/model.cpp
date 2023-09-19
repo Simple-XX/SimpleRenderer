@@ -185,6 +185,23 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
   }
 
   // 计算体积盒
+  set_box();
+}
+
+auto model_t::operator*(const matrix4f_t &_tran) const -> model_t {
+  auto model = model_t(*this);
+
+  /// @todo
+  (void)_tran;
+
+  return model;
+}
+
+auto model_t::get_face() const -> const std::vector<model_t::face_t> & {
+  return face;
+}
+
+void model_t::set_box() {
   auto max = face.at(0).v0.coord;
   auto min = face.at(0).v0.coord;
 
@@ -213,17 +230,4 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
   }
   box.min = min;
   box.max = max;
-}
-
-auto model_t::operator*(const matrix4f_t &_tran) const -> model_t {
-  auto model = model_t(*this);
-
-  /// @todo
-  (void)_tran;
-
-  return model;
-}
-
-auto model_t::get_face() const -> const std::vector<model_t::face_t> & {
-  return face;
 }

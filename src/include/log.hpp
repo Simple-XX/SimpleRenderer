@@ -24,6 +24,8 @@
 #include "string"
 #include "sys/time.h"
 
+/// @todo 修复 clang-tidy
+
 /// 微秒到秒
 static constexpr uint32_t US2S = 1000000;
 

@@ -40,7 +40,8 @@ void input_t::key_space(scene_t &_scene, uint32_t _delta_time) const {
   _scene.get_current_camera().move(camera_base_t::UP, _delta_time);
 }
 
-void input_t::key_r(scene_t &_scene, const uint32_t) const {
+void input_t::key_r(scene_t &_scene,
+                    const uint32_t _delta_time [[maybe_unused]]) const {
   _scene.get_current_camera().set_default();
 }
 
