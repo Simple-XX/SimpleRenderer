@@ -120,18 +120,15 @@ void display_t::fill(const std::shared_ptr<framebuffer_t> &_framebuffer) {
 /// @todo 验证 std::condition_variable 的正确性
 /// @todo 保证时序正确
 auto display_t::loop() -> state_t::status_t {
-  while (state->status != state_t::STOP) {
+  while (state->status.load() != state_t::STOP) {
     // 等待获取锁
     for (const auto &i : framebuffers) {
-      while (i->displayable.load() != true) {
+      while (!i->displayable.load()) {
         ;
       }
       // 填充窗口
       fill(i);
       i->displayable = false;
-    }
-    if (state->status == state_t::STOP) {
-      break;
     }
   }
   return state_t::STOP;

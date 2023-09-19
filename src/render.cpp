@@ -42,7 +42,11 @@ auto render_t::loop() -> state_t::status_t {
     /// @todo 移动速度在不同帧率下一致
 
     // 处理输入
-    state->status = input->process(*scene, 1);
+    auto is_running = input->process(*scene, 1);
+    if (!is_running) {
+      state->status.store(state_t::STOP);
+    }
+
     // 更新场景
     scene->tick(1);
 
@@ -50,7 +54,7 @@ auto render_t::loop() -> state_t::status_t {
     for (auto &i : framebuffers) {
       // 加锁
       // 如果当前缓冲区还没有填充
-      if (i->displayable == false) {
+      if (!i->displayable.load()) {
         // 清空缓冲区
         i->clear();
 
@@ -76,7 +80,7 @@ auto render_t::loop() -> state_t::status_t {
         i->scene(*shader, *scene);
 
         // 将可显示标记置位
-        i->displayable = true;
+        i->displayable.store(true);
       }
     }
 
