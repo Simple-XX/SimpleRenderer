@@ -259,6 +259,6 @@ endif ()
 
 find_package(spdlog REQUIRED)
 if (NOT spdlog_FOUND)
-    message(FATAL_ERROR "OpenMP not found.\n"
+    message(FATAL_ERROR "spdlog not found.\n"
             "Following https://github.com/gabime/spdlog to install.")
 endif ()
