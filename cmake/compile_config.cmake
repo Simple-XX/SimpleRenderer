@@ -14,6 +14,7 @@ list(APPEND DEFAULT_COMPILE_OPTIONS
 )
 
 list(APPEND DEFAULT_LINK_LIB
+        spdlog::spdlog
         stb
         tinyobjloader
         Eigen

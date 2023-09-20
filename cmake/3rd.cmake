@@ -57,16 +57,6 @@ CPMAddPackage(
         "gtest_force_shared_crt ON"
 )
 
-## https://github.com/abumq/easyloggingpp
-#CPMAddPackage(
-#        NAME easylogingpp
-#        VERSION 9.97.0
-#        GITHUB_REPOSITORY amrayn/easyloggingpp
-#        OPTIONS
-#        "build_static_lib ON"
-#        "lib_utc_datetime ON"
-#)
-
 # https://github.com/aminosbh/sdl2-cmake-modules.git
 CPMAddPackage(
         NAME sdl2-cmake-modules
@@ -265,4 +255,10 @@ find_package(OpenMP REQUIRED)
 if (NOT OpenMP_FOUND)
     message(FATAL_ERROR "OpenMP not found.\n"
             "Following https://www.openmp.org to install.")
+endif ()
+
+find_package(spdlog REQUIRED)
+if (NOT spdlog_FOUND)
+    message(FATAL_ERROR "OpenMP not found.\n"
+            "Following https://github.com/gabime/spdlog to install.")
 endif ()
