@@ -24,6 +24,8 @@
 #include "string"
 #include "sys/time.h"
 
+#include <spdlog/spdlog.h>
+
 /// @todo 修复 clang-tidy
 
 /// 微秒到秒
