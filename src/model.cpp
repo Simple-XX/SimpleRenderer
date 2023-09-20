@@ -22,7 +22,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-#include "log.hpp"
+#include "log.h"
 
 model_t::vertex_t::vertex_t(coord_t _coord, normal_t _normal,
                             texture_coord_t _texture_coord,

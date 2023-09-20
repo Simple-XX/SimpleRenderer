@@ -17,7 +17,7 @@
 #ifndef SIMPLERENDER_CAMERA_H
 #define SIMPLERENDER_CAMERA_H
 
-#include "log.hpp"
+#include "log.h"
 #include "matrix.h"
 #include "vector.h"
 

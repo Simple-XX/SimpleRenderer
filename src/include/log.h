@@ -1,7 +1,7 @@
 
 /**
- * @file log.hpp
- * @brief 简单日志
+ * @file log.h
+ * @brief 日志封装
  * @author Zone.N (Zone.Niuzh@hotmail.com)
  * @version 1.0
  * @date 2022-09-14
@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_LOG_HPP
-#define SIMPLERENDER_LOG_HPP
+#ifndef SIMPLERENDER_LOG_H
+#define SIMPLERENDER_LOG_H
 
 #include "chrono"
 #include "ctime"
@@ -90,4 +90,4 @@ inline auto us() {
   return t.tv_sec * 1000000 + t.tv_usec;
 }
 
-#endif /* SIMPLERENDER_LOG_HPP */
+#endif /* SIMPLERENDER_LOG_H */

@@ -20,7 +20,7 @@
 #include "camera.h"
 #include "config.h"
 #include "display.h"
-#include "log.hpp"
+#include "log.h"
 #include "status.h"
 
 /// @todo

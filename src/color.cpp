@@ -18,7 +18,7 @@
 #include <span>
 
 #include "color.h"
-#include "log.hpp"
+#include "log.h"
 
 const color_t color_t::WHITE = color_t((uint8_t)0xFF, 0xFF, 0xFF);
 const color_t color_t::BLACK = color_t((uint8_t)0x00, 0x00, 0x00);

@@ -25,7 +25,7 @@
 #include <type_traits>
 
 #include "color.h"
-#include "log.hpp"
+#include "log.h"
 
 /**
  * 缓冲区，作为 framebuffer 或 zbuffer 的基类
