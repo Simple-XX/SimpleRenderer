@@ -7,6 +7,7 @@
 # 生成可执行文件
 add_executable(SimpleRender
         main.cpp
+        log.cpp
         color.cpp
         model.cpp
         camera.cpp
