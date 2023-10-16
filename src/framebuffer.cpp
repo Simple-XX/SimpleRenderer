@@ -76,7 +76,8 @@ auto framebuffer_t::get_height() const -> size_t { return height; }
 
 void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
   if (std::isnan(_depth)) {
-    throw std::invalid_argument(log("std::isnan(_depth)"));
+    SRLOG->error("std::isnan(_depth)");
+    throw std::invalid_argument("");
   }
   color_buffer.clear(_color);
   depth_buffer.clear(_depth);
@@ -85,13 +86,16 @@ void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
 void framebuffer_t::pixel(size_t _x, size_t _y, const color_t &_color,
                           const depth_t &_depth) {
   if (_x >= width) {
-    throw std::invalid_argument(log("_x >= width"));
+    SRLOG->error("_x >= width");
+    throw std::invalid_argument("");
   }
   if (_y >= height) {
-    throw std::invalid_argument(log("_y >= height"));
+    SRLOG->error("_y >= height");
+    throw std::invalid_argument("");
   }
   if (std::isnan(_depth)) {
-    throw std::invalid_argument(log("std::isnan(_depth)"));
+    SRLOG->error("std::isnan(_depth)");
+    throw std::invalid_argument("");
   }
   /// @todo 性能瓶颈
   color_buffer(_x, _y) = _color;

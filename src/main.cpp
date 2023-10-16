@@ -29,7 +29,6 @@
 // @todo 不应该出现明确的类型，应该使用模板
 auto main(int _argc, char **_argv) -> int {
   log_init();
-  SRLOG->error("ttttt24242-=-----------------main");
   auto paras = std::span(_argv, _argc);
   // obj 路径
   std::vector<std::string> objs;

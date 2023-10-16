@@ -32,7 +32,8 @@ display_t::display_t(
   try {
     auto ret = SDL_Init(SDL_INIT_VIDEO);
     if (ret != 0) {
-      throw std::runtime_error(log(SDL_GetError()));
+      SRLOG->error(SDL_GetError());
+      throw std::runtime_error("");
     }
     // 创建窗口，居中，可见
     sdl_window =
@@ -41,7 +42,8 @@ display_t::display_t(
                          static_cast<int32_t>(height), SDL_WINDOW_SHOWN);
     if (sdl_window == nullptr) {
       SDL_Quit();
-      throw std::runtime_error(log(SDL_GetError()));
+      SRLOG->error(SDL_GetError());
+      throw std::runtime_error("");
     }
 
     // 创建渲染器
@@ -49,7 +51,8 @@ display_t::display_t(
     if (sdl_renderer == nullptr) {
       SDL_DestroyWindow(sdl_window);
       SDL_Quit();
-      throw std::runtime_error(log(SDL_GetError()));
+      SRLOG->error(SDL_GetError());
+      throw std::runtime_error("");
     }
     // 设置 alpha 通道有效
     SDL_SetRenderDrawBlendMode(sdl_renderer, SDL_BLENDMODE_BLEND);
@@ -62,7 +65,8 @@ display_t::display_t(
       SDL_DestroyRenderer(sdl_renderer);
       SDL_DestroyWindow(sdl_window);
       SDL_Quit();
-      throw std::runtime_error(log(SDL_GetError()));
+      SRLOG->error(SDL_GetError());
+      throw std::runtime_error("");
     }
 
     // 文字显示
@@ -71,7 +75,8 @@ display_t::display_t(
       SDL_DestroyRenderer(sdl_renderer);
       SDL_DestroyWindow(sdl_window);
       SDL_Quit();
-      throw std::runtime_error(log(TTF_GetError()));
+      SRLOG->error(TTF_GetError());
+      throw std::runtime_error("");
     }
     // 打开字体库
     font = TTF_OpenFont(FONT_FILE_PATH.data(), font_size);
@@ -81,7 +86,8 @@ display_t::display_t(
       SDL_DestroyRenderer(sdl_renderer);
       SDL_DestroyWindow(sdl_window);
       SDL_Quit();
-      throw std::runtime_error(log(TTF_GetError()));
+      SRLOG->error(TTF_GetError());
+      throw std::runtime_error("");
     }
   } catch (const std::runtime_error &e) {
     std::cerr << e.what() << '\n';
@@ -104,13 +110,15 @@ void display_t::fill(const std::shared_ptr<framebuffer_t> &_framebuffer) {
                                _framebuffer->get_color_buffer().data(),
                                static_cast<int32_t>(width * color_t::bpp()));
   if (res != 0) {
-    throw std::runtime_error(log(SDL_GetError()));
+    SRLOG->error(SDL_GetError());
+    throw std::runtime_error("");
   }
 
   // 复制到渲染器
   res = SDL_RenderCopy(sdl_renderer, sdl_texture, nullptr, nullptr);
   if (res != 0) {
-    throw std::runtime_error(log(SDL_GetError()));
+    SRLOG->error(SDL_GetError());
+    throw std::runtime_error("");
   }
 
   // 刷新
