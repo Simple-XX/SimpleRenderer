@@ -46,9 +46,7 @@ color_t::color_t(float _red, float _green, float _blue, float _alpha)
 
 auto color_t::operator[](uint8_t _idx) -> uint8_t & {
   if (_idx > 3) {
-    SRLOG->error("_idx > 3");
     throw SimpleRenderer::exception("_idx > 3");
-    // throw std::invalid_argument("");
   }
   if (_idx == 0) {
     return channel_r;
@@ -64,8 +62,7 @@ auto color_t::operator[](uint8_t _idx) -> uint8_t & {
 
 auto color_t::operator[](uint8_t _idx) const -> uint8_t {
   if (_idx > 3) {
-    SRLOG->error("_idx > 3");
-    throw std::invalid_argument("");
+    throw SimpleRenderer::exception("_idx > 3");
   }
   if (_idx == 0) {
     return channel_r;
