@@ -37,4 +37,12 @@ static constexpr const size_t WIDTH = 1920;
 static constexpr const size_t HEIGHT = 1080;
 /// @}
 
+/// 日志文件路径
+static const std::string LOG_FILE_PATH =
+    std::string("@LOG_FILE_PATH@");
+/// 日志文件大小
+static constexpr const size_t LOG_FILE_MAX_SIZE = @LOG_FILE_MAX_SIZE@;
+/// 日志文件数量
+static constexpr const size_t LOG_FILE_MAX_COUNT = @LOG_FILE_MAX_COUNT@;
+
 #endif /* SIMPLERENDER_CONFIG_H */

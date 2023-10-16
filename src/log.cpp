@@ -27,17 +27,13 @@
 
 std::shared_ptr<spdlog::logger> SRLOG = nullptr;
 
-static constexpr const size_t KB = 1024;
-static constexpr const size_t MB = KB * 1024;
-static constexpr const size_t LOG_FILE_MAX_COUNT = 8;
-
 /// @note 在 win 下使用时需要在程序结束时使用 `spdlog::shutdown()` 回收资源
 void log_init(void) {
   try {
     spdlog::init_thread_pool(65536, 1);
     auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-        "logs/SimpleRendererLog.txt", 4 * MB, LOG_FILE_MAX_COUNT);
+        LOG_FILE_PATH, LOG_FILE_MAX_SIZE, LOG_FILE_MAX_COUNT);
     std::vector<spdlog::sink_ptr> sinks{stdout_sink, rotating_sink};
     auto logger = std::make_shared<spdlog::async_logger>(
         "multi_sink", sinks.begin(), sinks.end(), spdlog::thread_pool(),

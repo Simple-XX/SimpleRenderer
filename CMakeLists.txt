@@ -38,6 +38,12 @@ set(FONT_FILE_PATH "${wqy_font_SOURCE_DIR}/wqy-zenhei.ttc")
 # 线程数
 include(ProcessorCount)
 ProcessorCount(NPROC)
+# 日志文件路径
+set(LOG_FILE_PATH "${EXECUTABLE_OUTPUT_PATH}/logs/SimpleRendererLog.log")
+# 日志文件大小
+set(LOG_FILE_MAX_SIZE 1024*1024*4)
+# 日志文件数量
+set(LOG_FILE_MAX_COUNT 8)
 # 生成配置头文件
 configure_file(
         "${PROJECT_SOURCE_DIR}/cmake/config.h.in"

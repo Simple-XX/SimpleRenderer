@@ -26,6 +26,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include "config.h"
+
 extern std::shared_ptr<spdlog::logger> SRLOG;
 
 /// @todo 修复 clang-tidy
