@@ -36,6 +36,14 @@
         "COVERAGE_OUTPUT_DIR": {
           "type": "STRING",
           "value": "coverage"
+        },
+        "EXECUTABLE_OUTPUT_PATH": {
+          "type": "STRING",
+          "value": "${sourceDir}/build/bin"
+        },
+        "LIBRARY_OUTPUT_PATH": {
+          "type": "STRING",
+          "value": "${sourceDir}/build/lib"
         }
       }
     },
