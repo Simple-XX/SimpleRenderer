@@ -43,7 +43,7 @@
         },
         "COVERAGE_OUTPUT_DIR": {
           "type": "STRING",
-          "value": "coverage"
+          "value": "${sourceDir}/build/coverage"
         }
       }
     },
