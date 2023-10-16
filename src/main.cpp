@@ -25,6 +25,7 @@
 #include "render.h"
 #include "scene.h"
 #include "status.h"
+#include "exception.hpp"
 
 // @todo 不应该出现明确的类型，应该使用模板
 auto main(int _argc, char **_argv) -> int {
@@ -70,6 +71,8 @@ auto main(int _argc, char **_argv) -> int {
   auto render = render_t(std::ref(state), std::ref(scene), std::ref(input),
                          std::ref(framebuffers));
   auto display = display_t(std::ref(state), std::ref(framebuffers));
+
+  throw SimpleRenderer::exception("_idx > 3");
 
   // 计算线程
   auto render_ret = render.run();

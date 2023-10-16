@@ -18,6 +18,7 @@
 #include <span>
 
 #include "color.h"
+#include "exception.hpp"
 #include "log.h"
 
 const color_t color_t::WHITE = color_t((uint8_t)0xFF, 0xFF, 0xFF);
@@ -46,7 +47,8 @@ color_t::color_t(float _red, float _green, float _blue, float _alpha)
 auto color_t::operator[](uint8_t _idx) -> uint8_t & {
   if (_idx > 3) {
     SRLOG->error("_idx > 3");
-    throw std::invalid_argument("");
+    throw SimpleRenderer::exception("_idx > 3");
+    // throw std::invalid_argument("");
   }
   if (_idx == 0) {
     return channel_r;
