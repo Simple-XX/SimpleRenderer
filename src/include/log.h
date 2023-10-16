@@ -24,6 +24,10 @@
 #include "string"
 #include "sys/time.h"
 
+#include <spdlog/spdlog.h>
+
+extern std::shared_ptr<spdlog::logger> SRLOG;
+
 /// @todo 修复 clang-tidy
 
 /// 微秒到秒

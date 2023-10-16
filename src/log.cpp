@@ -15,40 +15,38 @@
  */
 
 #include <chrono>
-#include <memory>
-#include <thread>
+#include <cstdio>
 
 #include <spdlog/async.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-#include <log.h>
+#include "log.h"
 
-// std::shared_ptr<spdlog::async_logger> logger;
+std::shared_ptr<spdlog::logger> SRLOG = nullptr;
 
-// void log_thread() {
-//   spdlog::apply_all(
-//       [&](auto &logger) { logger->flush_on(spdlog::level::err); });
-//   spdlog::set_default_logger(logger);
-//   spdlog::flush_every(std::chrono::seconds(1));
-//   spdlog::shutdown();
-// }
+static constexpr const size_t KB = 1024;
+static constexpr const size_t MB = KB * 1024;
+static constexpr const size_t LOG_FILE_MAX_COUNT = 8;
 
-// std::thread log_thread(log_thread);
+/// @note 在 win 下使用时需要在程序结束时使用 `spdlog::shutdown()` 回收资源
+void log_init(void) {
+  try {
+    spdlog::init_thread_pool(65536, 1);
+    auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+        "logs/SimpleRendererLog.txt", 4 * MB, LOG_FILE_MAX_COUNT);
+    std::vector<spdlog::sink_ptr> sinks{stdout_sink, rotating_sink};
+    auto logger = std::make_shared<spdlog::async_logger>(
+        "multi_sink", sinks.begin(), sinks.end(), spdlog::thread_pool(),
+        spdlog::async_overflow_policy::block);
+    spdlog::register_logger(logger);
+    spdlog::flush_on(spdlog::level::trace);
 
-// void log_init() {
-//   auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-//   auto file_sink =
-//       std::make_shared<spdlog::sinks::basic_file_sink_mt>("example.log", true);
-//   spdlog::init_thread_pool(8192, 1);
-//   logger = std::make_shared<spdlog::async_logger>(
-//       "async_logger", spdlog::sinks_init_list{console_sink, file_sink},
-//       spdlog::thread_pool(), spdlog::async_overflow_policy::block);
-//   logger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] %v");
-
-//   for (int i = 0; i < 100; ++i) {
-//     // 在其他线程中记录日志
-//     logger->info("This is a log message from another thread. Index: {}", i);
-//   }
-//   // 等待所有线程结束
-//   log_thread.join();
-// }
+    SRLOG = spdlog::get("multi_sink");
+  } catch (const spdlog::spdlog_ex &e) {
+    std::printf("Log initialization failed: %s\n", e.what());
+  }
+}
