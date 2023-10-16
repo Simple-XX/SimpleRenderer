@@ -17,10 +17,10 @@
 #ifndef SIMPLERENDER_MODEL_H
 #define SIMPLERENDER_MODEL_H
 
-#include "string"
-#include "vector"
+#include <string>
+#include <vector>
 
-#include "tiny_obj_loader.h"
+#include <tiny_obj_loader.h>
 
 #include "color.h"
 #include "matrix.h"

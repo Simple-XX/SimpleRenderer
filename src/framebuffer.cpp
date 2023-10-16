@@ -14,11 +14,11 @@
  * </table>
  */
 
-#include "cmath"
-#include "iostream"
+#include <cmath>
+#include <iostream>
 
+#include "exception.hpp"
 #include "framebuffer.h"
-
 namespace {
 /// 缓冲区计数，用于设置 id
 size_t count = 0;
@@ -76,8 +76,7 @@ auto framebuffer_t::get_height() const -> size_t { return height; }
 
 void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
   if (std::isnan(_depth)) {
-    SRLOG->error("std::isnan(_depth)");
-    throw std::invalid_argument("");
+    throw SimpleRenderer::exception("std::isnan(_depth)");
   }
   color_buffer.clear(_color);
   depth_buffer.clear(_depth);
@@ -86,16 +85,13 @@ void framebuffer_t::clear(const color_t &_color, const depth_t &_depth) {
 void framebuffer_t::pixel(size_t _x, size_t _y, const color_t &_color,
                           const depth_t &_depth) {
   if (_x >= width) {
-    SRLOG->error("_x >= width");
-    throw std::invalid_argument("");
+    throw SimpleRenderer::exception("_x >= width");
   }
   if (_y >= height) {
-    SRLOG->error("_y >= height");
-    throw std::invalid_argument("");
+    throw SimpleRenderer::exception("_y >= height");
   }
   if (std::isnan(_depth)) {
-    SRLOG->error("std::isnan(_depth)");
-    throw std::invalid_argument("");
+    throw SimpleRenderer::exception("std::isnan(_depth)");
   }
   /// @todo 性能瓶颈
   color_buffer(_x, _y) = _color;

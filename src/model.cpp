@@ -16,12 +16,13 @@
 
 #include "model.h"
 
-#include "iostream"
+#include <iostream>
 #include <utility>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
+#include "exception.hpp"
 #include "log.h"
 
 model_t::vertex_t::vertex_t(coord_t _coord, normal_t _normal,
@@ -87,8 +88,7 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
   auto ret = reader.ParseFromFile(_obj_path, config);
   if (!ret) {
     if (!reader.Error().empty()) {
-      SRLOG->error(reader.Error());
-      throw(std::runtime_error(""));
+      throw SimpleRenderer::exception(reader.Error());
     }
   }
 
@@ -119,8 +119,8 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
       auto num_face_vertices = size_t(
           shapes[shapes_size].mesh.num_face_vertices[num_face_vertices_size]);
       if (num_face_vertices != TRIANGLE_FACE_VERTEX_COUNT) {
-        SRLOG->error("num_face_vertices != TRIANGLE_FACE_VERTEX_COUNT");
-        throw(std::runtime_error(""));
+        throw SimpleRenderer::exception(
+            "num_face_vertices != TRIANGLE_FACE_VERTEX_COUNT");
       }
       coord_t coord;
       normal_t normal;
