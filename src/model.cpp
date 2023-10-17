@@ -139,8 +139,7 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
 
         // 如果法线索引存在(即 idx.normal_index >= 0)，
         // 则构造并保存，否则设置为 0
-        auto normal = normal_t();
-        normal.Zero();
+        normal_t normal = normal_t::Zero();
         if (idx.normal_index >= 0) {
           normal = normal_t(attrib.normals[3 * size_t(idx.normal_index) + 0],
                             attrib.normals[3 * size_t(idx.normal_index) + 1],
@@ -149,8 +148,7 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
 
         // 如果贴图索引存在(即 idx.texcoord_index >= 0)，
         // 则构造并保存，否则设置为 0
-        auto texture_coord = texture_coord_t();
-        texture_coord.Zero();
+        texture_coord_t texture_coord = texture_coord_t::Zero();
         if (idx.texcoord_index >= 0) {
           texture_coord = texture_coord_t(
               attrib.texcoords[2 * size_t(idx.texcoord_index) + 0],
