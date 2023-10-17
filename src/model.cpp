@@ -122,13 +122,8 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
         throw SimpleRenderer::exception(
             "num_face_vertices != TRIANGLE_FACE_VERTEX_COUNT");
       }
-      coord_t coord;
-      normal_t normal;
-      color_t color;
-      texture_coord_t texture_coord;
-      material_t material;
-      std::array<vertex_t, 3> vertexes;
 
+      auto vertexes = std::array<vertex_t, 3>();
       // 遍历面上的顶点，这里 fv == 3
       for (size_t num_face_vertices_idx = 0;
            num_face_vertices_idx < num_face_vertices; num_face_vertices_idx++) {
@@ -138,12 +133,13 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
 
         // 构造顶点信息并保存
         // 每组顶点信息有 xyz 三个分量，因此需要 3*
-        coord = coord_t(attrib.vertices[3 * size_t(idx.vertex_index) + 0],
+        auto coord = coord_t(attrib.vertices[3 * size_t(idx.vertex_index) + 0],
                         attrib.vertices[3 * size_t(idx.vertex_index) + 1],
                         attrib.vertices[3 * size_t(idx.vertex_index) + 2]);
 
         // 如果法线索引存在(即 idx.normal_index >= 0)，
         // 则构造并保存，否则设置为 0
+        auto normal = normal_t();
         if (idx.normal_index >= 0) {
           normal = normal_t(attrib.normals[3 * size_t(idx.normal_index) + 0],
                             attrib.normals[3 * size_t(idx.normal_index) + 1],
@@ -152,6 +148,7 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
 
         // 如果贴图索引存在(即 idx.texcoord_index >= 0)，
         // 则构造并保存，否则设置为 0
+        auto texture_coord = texture_coord_t();
         if (idx.texcoord_index >= 0) {
           texture_coord = texture_coord_t(
               attrib.texcoords[2 * size_t(idx.texcoord_index) + 0],
@@ -159,7 +156,7 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
         }
 
         // 顶点颜色，如果 obj 文件中没有指定则设为 1(白色)，范围 [0, 1]
-        color = color_t(attrib.colors[3 * size_t(idx.vertex_index) + 0],
+        auto color = color_t(attrib.colors[3 * size_t(idx.vertex_index) + 0],
                         attrib.colors[3 * size_t(idx.vertex_index) + 1],
                         attrib.colors[3 * size_t(idx.vertex_index) + 2]);
         vertexes.at(num_face_vertices_idx) =
@@ -168,6 +165,7 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
       index_offset += num_face_vertices;
 
       // 如果材质不为空，加载材质信息
+      auto material = material_t();
       if (!materials.empty()) {
         material.shininess = materials[shapes_size].shininess;
         material.ambient = vector3f_t(materials[shapes_size].ambient[0],
