@@ -71,8 +71,6 @@ auto main(int _argc, char **_argv) -> int {
                          std::ref(framebuffers));
   auto display = display_t(std::ref(state), std::ref(framebuffers));
 
-  return 0;
-
   // 计算线程
   auto render_ret = render.run();
   // 显示线程
