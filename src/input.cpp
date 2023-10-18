@@ -125,13 +125,13 @@ auto input_t::handle(scene_t &_scene, uint32_t _delta_time) const -> bool {
     }
     case SDLK_LSHIFT: {
       /// @bug 按一次触发两次
-      std::cout << "key " << SDL_GetKeyName(event.key.keysym.sym) << " down!\n";
+      SPDLOG_LOGGER_INFO(SRLOG, "key {} down!", SDL_GetKeyName(event.key.keysym.sym));
       key_left_shift(_scene, _delta_time);
       break;
     }
     default: {
       // 输出按键名
-      std::cout << "key " << SDL_GetKeyName(event.key.keysym.sym) << " down!\n";
+      SPDLOG_LOGGER_INFO(SRLOG, "key {} down!", SDL_GetKeyName(event.key.keysym.sym));
       break;
     }
     }

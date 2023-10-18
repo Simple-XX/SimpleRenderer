@@ -54,7 +54,6 @@ auto main(int _argc, char **_argv) -> int {
   auto scene = std::make_shared<scene_t>();
   // 读取模型与材质
   for (auto &obj : objs) {
-    std::cout << obj << '\n';
     // 添加到场景中
     auto model = model_t(obj);
     scene->add_model(model);
@@ -86,10 +85,10 @@ return 0;
   auto display_ret = display.run();
 
   if (render_ret.get() != state_t::STOP) {
-    std::cout << "render thread exit with error\n";
+    throw SimpleRenderer::exception("render thread exit with error");
   }
   if (display_ret.get() != state_t::STOP) {
-    std::cout << "display thread exit with error\n";
+    throw SimpleRenderer::exception("display thread exit with error");
   }
 
   return 0;

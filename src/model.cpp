@@ -16,7 +16,6 @@
 
 #include "model.h"
 
-#include <iostream>
 #include <utility>
 
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -93,19 +92,20 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
   }
 
   if (!reader.Warning().empty()) {
-    std::cout << "TinyObjReader: " << reader.Warning();
+    SPDLOG_LOGGER_WARN(SRLOG, "TinyObjReader %s", reader.Warning());
   }
 
   const auto &attrib = reader.GetAttrib();
   const auto &shapes = reader.GetShapes();
   const auto &materials = reader.GetMaterials();
 
-  std::cout << "顶点数: " << attrib.vertices.size() / 3;
-  std::cout << ", 法线数: " << attrib.normals.size() / 3;
-  std::cout << ", 颜色数: " << attrib.colors.size() / 3;
-  std::cout << ", UV数: " << attrib.texcoords.size() / 2;
-  std::cout << ", 子模型数: " << shapes.size();
-  std::cout << ", 材质数: " << materials.size() << '\n';
+  SPDLOG_LOGGER_INFO(SRLOG,
+                     "加载模型: {}, 顶点数: {}, 法线数: {}, 颜色数: {}, UV数: {}, "
+                     "子模型数: {}, 材质数: {}",
+                     _obj_path, attrib.vertices.size() / 3,
+                     attrib.normals.size() / 3, attrib.colors.size() / 3,
+                     attrib.texcoords.size() / 2, shapes.size(),
+                     materials.size());
 
   // 遍历所有 shape
   for (size_t shapes_size = 0; shapes_size < shapes.size(); shapes_size++) {
@@ -134,8 +134,8 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
         // 构造顶点信息并保存
         // 每组顶点信息有 xyz 三个分量，因此需要 3*
         auto coord = coord_t(attrib.vertices[3 * size_t(idx.vertex_index) + 0],
-                        attrib.vertices[3 * size_t(idx.vertex_index) + 1],
-                        attrib.vertices[3 * size_t(idx.vertex_index) + 2]);
+                             attrib.vertices[3 * size_t(idx.vertex_index) + 1],
+                             attrib.vertices[3 * size_t(idx.vertex_index) + 2]);
 
         // 如果法线索引存在(即 idx.normal_index >= 0)，
         // 则构造并保存，否则设置为 0
@@ -157,8 +157,8 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
 
         // 顶点颜色，如果 obj 文件中没有指定则设为 1(白色)，范围 [0, 1]
         auto color = color_t(attrib.colors[3 * size_t(idx.vertex_index) + 0],
-                        attrib.colors[3 * size_t(idx.vertex_index) + 1],
-                        attrib.colors[3 * size_t(idx.vertex_index) + 2]);
+                             attrib.colors[3 * size_t(idx.vertex_index) + 1],
+                             attrib.colors[3 * size_t(idx.vertex_index) + 2]);
         vertexes.at(num_face_vertices_idx) =
             vertex_t(coord, normal, texture_coord, color);
       }

@@ -88,7 +88,7 @@ auto render_t::loop() -> state_t::status_t {
     end = us();
     sec += end - start;
     if (sec >= US2S) {
-      std::cout << "fps_window: " << fps << std::endl;
+      SPDLOG_LOGGER_INFO(SRLOG, "fps_window: {}", fps);
       fps = frames;
       frames = 0;
       sec = 0;
