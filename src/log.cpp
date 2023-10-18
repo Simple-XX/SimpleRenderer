@@ -38,6 +38,8 @@ void log_init(void) {
     auto logger = std::make_shared<spdlog::async_logger>(
         "multi_sink", sinks.begin(), sinks.end(), spdlog::thread_pool(),
         spdlog::async_overflow_policy::block);
+    // [年-月-日 时:分:秒.毫秒] [文件名:行号] [日志级别以彩色大写输出 8 字符右对齐] 内容
+    logger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%s:%# %!] [%^%8l%$] %v");
     spdlog::register_logger(logger);
     spdlog::flush_on(spdlog::level::trace);
 

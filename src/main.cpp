@@ -72,8 +72,14 @@ auto main(int _argc, char **_argv) -> int {
                          std::ref(framebuffers));
   auto display = display_t(std::ref(state), std::ref(framebuffers));
 
-  throw SimpleRenderer::exception("_idx > 3");
-
+  SPDLOG_LOGGER_TRACE(SRLOG, "Test");
+  SPDLOG_LOGGER_DEBUG(SRLOG, "Test");
+  SPDLOG_LOGGER_INFO(SRLOG, "Test");
+  SPDLOG_LOGGER_WARN(SRLOG, "Test");
+  SPDLOG_LOGGER_ERROR(SRLOG, "Test");
+  SPDLOG_LOGGER_CRITICAL(SRLOG, "Test");
+  // throw SimpleRenderer::exception("TODO");
+return 0;
   // 计算线程
   auto render_ret = render.run();
   // 显示线程
