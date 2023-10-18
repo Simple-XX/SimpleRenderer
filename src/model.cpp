@@ -99,13 +99,13 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
   const auto &shapes = reader.GetShapes();
   const auto &materials = reader.GetMaterials();
 
-  SPDLOG_LOGGER_INFO(SRLOG,
-                     "加载模型: {}, 顶点数: {}, 法线数: {}, 颜色数: {}, UV数: {}, "
-                     "子模型数: {}, 材质数: {}",
-                     _obj_path, attrib.vertices.size() / 3,
-                     attrib.normals.size() / 3, attrib.colors.size() / 3,
-                     attrib.texcoords.size() / 2, shapes.size(),
-                     materials.size());
+  SPDLOG_LOGGER_INFO(
+      SRLOG,
+      "加载模型: {}, 顶点数: {}, 法线数: {}, 颜色数: {}, UV数: {}, "
+      "子模型数: {}, 材质数: {}",
+      _obj_path, attrib.vertices.size() / 3, attrib.normals.size() / 3,
+      attrib.colors.size() / 3, attrib.texcoords.size() / 2, shapes.size(),
+      materials.size());
 
   // 遍历所有 shape
   for (size_t shapes_size = 0; shapes_size < shapes.size(); shapes_size++) {
