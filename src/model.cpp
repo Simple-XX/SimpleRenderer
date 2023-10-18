@@ -79,7 +79,8 @@ model_t::face_t::face_t(const model_t::vertex_t &_v0,
   }
 }
 
-model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
+model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path)
+    : obj_path(_obj_path), mtl_path(_mtl_path) {
   tinyobj::ObjReader reader;
   tinyobj::ObjReaderConfig config;
   config.mtl_search_path = _mtl_path;
@@ -92,7 +93,7 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path) {
   }
 
   if (!reader.Warning().empty()) {
-    SPDLOG_LOGGER_WARN(SRLOG, "TinyObjReader %s", reader.Warning());
+    SPDLOG_LOGGER_WARN(SRLOG, "TinyObjReader {}", reader.Warning());
   }
 
   const auto &attrib = reader.GetAttrib();

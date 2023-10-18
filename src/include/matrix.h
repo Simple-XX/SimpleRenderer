@@ -17,7 +17,7 @@
 #ifndef SIMPLERENDER_MATRIX_H
 #define SIMPLERENDER_MATRIX_H
 
-#include "Eigen/Dense"
+#include <Eigen/Dense>
 
 template <class T> using matrix4_t = Eigen::Matrix<T, 4, 4>;
 

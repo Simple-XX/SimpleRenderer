@@ -17,8 +17,9 @@
 #ifndef SIMPLERENDER_SCENE_H
 #define SIMPLERENDER_SCENE_H
 
-#include "queue"
-#include "vector"
+#include <queue>
+#include <string>
+#include <vector>
 
 #include "camera.h"
 #include "config.h"
@@ -32,6 +33,15 @@
  */
 class scene_t {
 public:
+  /// 场景名称
+  std::string name = "default scene name";
+
+  /**
+   * 构造函数
+   * @param _name 场景名称
+   */
+  explicit scene_t(const std::string &_name);
+
   /// @name 默认构造/析构函数
   /// @{
   scene_t() = default;

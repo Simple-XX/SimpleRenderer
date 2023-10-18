@@ -15,7 +15,10 @@
  */
 
 #include "scene.h"
+#include "log.h"
 #include "matrix.h"
+
+scene_t::scene_t(const std::string &_name) : name(_name) {}
 
 /**
  * @brief 计算从模型坐标(局部坐标)到世界坐标的变换矩阵，缩放 + 移动到 (0,
@@ -108,14 +111,24 @@
 //                                                        matrix4f_t()};
 // }
 
-void scene_t::add_model(const model_t &_model) { models.push_back(_model); }
+void scene_t::add_model(const model_t &_model) {
+  models.push_back(_model);
+  SPDLOG_LOGGER_INFO(SRLOG, "add_model: {} to: {}, total: {}", _model.obj_path,
+                     name, models.size());
+}
 
 void scene_t::add_model(const model_t &_model,
                         const matrix4f_t &_model_matrix) {
   models.push_back(_model * _model_matrix);
+  SPDLOG_LOGGER_INFO(SRLOG, "add_model: {} with model matrix to: {}, total: {}",
+                     _model.obj_path, name, models.size());
 }
 
-void scene_t::add_light(const light_t &_light) { lights.push_back(_light); }
+void scene_t::add_light(const light_t &_light) {
+  lights.push_back(_light);
+  SPDLOG_LOGGER_INFO(SRLOG, "add_light: {} to: {}, total: {}", _light.name,
+                     name, lights.size());
+}
 
 auto scene_t::tick(uint32_t _delta_time) -> bool {
   (void)_delta_time;

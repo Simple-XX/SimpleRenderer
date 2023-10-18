@@ -17,7 +17,8 @@
 #ifndef SIMPLERENDER_LIGHT_H
 #define SIMPLERENDER_LIGHT_H
 
-#include "cstdint"
+#include <cstdint>
+#include <string>
 
 #include "color.h"
 #include "vector.h"
@@ -27,12 +28,20 @@
  */
 class light_t {
 public:
+  /// 光照名称
+  std::string name = "default light name";
   /// 位置
   vector3f_t pos = DEFAULT_POS;
   /// 方向
   vector3f_t dir = DEFAULT_DIR;
   /// 颜色
   color_t color = DEFAULT_COLOR;
+
+  /**
+   * 构造函数
+   * @param _name 光照名称
+   */
+  explicit light_t(const std::string &_name);
 
   /// @name 默认构造/析构函数
   /// @{

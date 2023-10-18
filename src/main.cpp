@@ -20,12 +20,12 @@
 #include <vector>
 
 #include "config.h"
+#include "exception.hpp"
 #include "framebuffer.h"
 #include "model.h"
 #include "render.h"
 #include "scene.h"
 #include "status.h"
-#include "exception.hpp"
 
 // @todo 不应该出现明确的类型，应该使用模板
 auto main(int _argc, char **_argv) -> int {
@@ -71,14 +71,8 @@ auto main(int _argc, char **_argv) -> int {
                          std::ref(framebuffers));
   auto display = display_t(std::ref(state), std::ref(framebuffers));
 
-  SPDLOG_LOGGER_TRACE(SRLOG, "Test");
-  SPDLOG_LOGGER_DEBUG(SRLOG, "Test");
-  SPDLOG_LOGGER_INFO(SRLOG, "Test");
-  SPDLOG_LOGGER_WARN(SRLOG, "Test");
-  SPDLOG_LOGGER_ERROR(SRLOG, "Test");
-  SPDLOG_LOGGER_CRITICAL(SRLOG, "Test");
-  // throw SimpleRenderer::exception("TODO");
-return 0;
+  return 0;
+
   // 计算线程
   auto render_ret = render.run();
   // 显示线程

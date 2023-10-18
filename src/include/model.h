@@ -174,6 +174,11 @@ public:
     /// @}
   };
 
+  /// obj 文件路径
+  std::string obj_path = "";
+  /// mtl 路径
+  std::string mtl_path = "";
+
   /**
    * 构造函数
    * @param _obj_path obj 文件路径
