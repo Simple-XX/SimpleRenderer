@@ -13,6 +13,10 @@ project(
 enable_testing()
 include(GoogleTest)
 
+include_directories(
+        ${SimpleRenderer_SOURCE_DIR}/src/include
+)
+
 list(APPEND DEFAULT_TEST_COMPILE_OPTIONS
         ${DEFAULT_COMPILE_OPTIONS}
         --coverage
@@ -27,7 +31,7 @@ list(APPEND DEFAULT_TEST_LINK_OPTIONS
         -fno-omit-frame-pointer
 )
 
-list(APPEND DEFAULT_TEST_LINK_LIB
+link_libraries(
         ${DEFAULT_LINK_LIB}
         gtest_main
         ${glog_LIBRARIES}

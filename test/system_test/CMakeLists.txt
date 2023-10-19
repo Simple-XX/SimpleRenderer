@@ -16,18 +16,10 @@ add_executable(system_test
         main.cpp
 )
 
-target_include_directories(system_test PRIVATE
-        ${SimpleRenderer_SOURCE_DIR}/src/include
-)
-
 target_compile_options(system_test PRIVATE
         ${DEFAULT_TEST_COMPILE_OPTIONS}
 )
 
 target_link_options(system_test PRIVATE
         ${DEFAULT_TEST_LINK_OPTIONS}
-)
-
-target_link_libraries(system_test PRIVATE
-        ${DEFAULT_TEST_LINK_LIB}
 )
