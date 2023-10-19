@@ -73,7 +73,7 @@ private:
   /// 默认字体大小
   static constexpr const int32_t DEFAULT_FONT_SIZE = 32;
 
-  /// 输入
+  /// 状态
   std::shared_ptr<state_t> state;
   /// 缓冲
   std::vector<std::shared_ptr<framebuffer_t>> framebuffers;

@@ -39,13 +39,11 @@ public:
    * 构造函数
    * @param _state 运行状态
    * @param _scene 场景
-   * @param _input 输入
    * @param _framebuffer 缓冲区
    */
   explicit render_t(
       const std::shared_ptr<state_t> &_state,
       const std::shared_ptr<scene_t> &_scene,
-      const std::shared_ptr<input_t> &_input,
       const std::vector<std::shared_ptr<framebuffer_t>> &_framebuffers);
 
   /// @name 默认构造/析构函数
@@ -64,14 +62,12 @@ public:
   auto run() -> std::future<state_t::status_t>;
 
 private:
-  /// 输入
+  /// 状态
   std::shared_ptr<state_t> state;
   /// 场景
   std::shared_ptr<scene_t> scene;
   /// 显示
   std::shared_ptr<display_t> display;
-  /// 输入
-  std::shared_ptr<input_t> input;
   /// 着色器
   std::shared_ptr<shader_base_t> shader = std::make_shared<default_shader_t>();
   /// 缓冲
