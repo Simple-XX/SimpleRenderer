@@ -132,6 +132,9 @@ CPMAddPackage(
         DOWNLOAD_ONLY True
 )
 
+# https://github.com/TheLartians/PackageProject.cmake
+CPMAddPackage("gh:TheLartians/PackageProject.cmake@1.11.0")
+
 # https://github.com/cpm-cmake/CPMLicenses.cmake
 # 保持在 CPMAddPackage 的最后
 CPMAddPackage(
