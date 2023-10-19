@@ -74,10 +74,10 @@ void input_t::mouse_motion(scene_t &_scene, int32_t _x, int32_t _y,
 
 auto input_t::handle(scene_t &_scene, uint32_t _delta_time) const -> bool {
   auto res = true;
-  switch (event.type) {
+  switch (curr_event.type) {
   // 键盘事件
   case SDL_KEYDOWN: {
-    switch (event.key.keysym.sym) {
+    switch (curr_event.key.keysym.sym) {
     case SDLK_ESCAPE: {
       // 如果是 esc 键则返回 false，程序退出
       res = false;
@@ -125,13 +125,13 @@ auto input_t::handle(scene_t &_scene, uint32_t _delta_time) const -> bool {
     }
     case SDLK_LSHIFT: {
       /// @bug 按一次触发两次
-      SPDLOG_LOGGER_INFO(SRLOG, "key {} down!", SDL_GetKeyName(event.key.keysym.sym));
+      SPDLOG_LOGGER_INFO(SRLOG, "key {} down!", SDL_GetKeyName(curr_event.key.keysym.sym));
       key_left_shift(_scene, _delta_time);
       break;
     }
     default: {
       // 输出按键名
-      SPDLOG_LOGGER_INFO(SRLOG, "key {} down!", SDL_GetKeyName(event.key.keysym.sym));
+      SPDLOG_LOGGER_INFO(SRLOG, "key {} down!", SDL_GetKeyName(curr_event.key.keysym.sym));
       break;
     }
     }
@@ -139,7 +139,7 @@ auto input_t::handle(scene_t &_scene, uint32_t _delta_time) const -> bool {
   }
   // 鼠标移动
   case SDL_MOUSEMOTION: {
-    mouse_motion(_scene, event.motion.xrel, event.motion.yrel, _delta_time);
+    mouse_motion(_scene, curr_event.motion.xrel, curr_event.motion.yrel, _delta_time);
     break;
   }
     /// @todo
@@ -155,12 +155,25 @@ auto input_t::handle(scene_t &_scene, uint32_t _delta_time) const -> bool {
   return res;
 }
 
-auto input_t::process(scene_t &_scene, uint32_t _delta_time) -> bool {
-  while (SDL_PollEvent(&event) != 0) {
-    if (event.type == SDL_QUIT) {
+auto input_t::process() -> bool {
+  SDL_Event event = SDL_Event();
+  if (SDL_PollEvent(&event) != 0) {
+    event_q.push(event);
+    if (curr_event.type == SDL_QUIT) {
       return false;
     }
-    return handle(_scene, _delta_time);
+  }
+  return true;
+}
+
+auto input_t::process(scene_t &_scene, uint32_t _delta_time) -> bool {
+  for (size_t i = 0; i < event_q.size(); i++) {
+    curr_event = event_q.front();
+    event_q.pop();
+    auto handle_ret = handle(_scene, _delta_time);
+    if (handle_ret == false) {
+      return false;
+    }
   }
   return true;
 }

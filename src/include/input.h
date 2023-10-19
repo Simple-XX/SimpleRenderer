@@ -17,18 +17,24 @@
 #ifndef SIMPLERENDER_INPUT_H
 #define SIMPLERENDER_INPUT_H
 
-#include <SDL_events.h>
+#include <queue>
 #include <memory>
 
+#include <SDL_events.h>
 #include <SDL.h>
 
 #include "scene.h"
 
 /**
  * 输入处理
+ * @todo 在 sdl 中获取事件并添加到待处理队列中，render 时进行处理
  */
 class input_t {
 public:
+  /// 事件栈
+  /// @todo std::queue 确保线程安全
+  std::queue<SDL_Event> event_q;
+
   /// @name 默认构造/析构函数
   /// @{
   input_t() = default;
@@ -40,7 +46,13 @@ public:
   /// @}
 
   /**
-   * 处理输入, 如果程序退出返回 false
+   * 处理输入, 如果程序退出返回 false，在 display 线程中 push 入事件
+   * @return 为 false 时退出
+   */
+  auto process() -> bool;
+
+  /**
+   * 处理输入, 如果程序退出返回 false，在 render 线程中 pop 事件并进行处理
    * @param _scene 要应用到的场景
    * @param _delta_time 时间变化
    * @return 为 false 时退出
@@ -48,8 +60,8 @@ public:
   auto process(scene_t &_scene, uint32_t _delta_time) -> bool;
 
 private:
-  /// SDL 事件
-  SDL_Event event = SDL_Event();
+  /// 正在处理的事件
+  SDL_Event curr_event = SDL_Event();
 
   /**
    * a 键

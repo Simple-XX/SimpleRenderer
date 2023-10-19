@@ -27,8 +27,9 @@
 /// @todo
 display_t::display_t(
     const std::shared_ptr<state_t> &_state,
+    const std::shared_ptr<input_t> &_input,
     const std::vector<std::shared_ptr<framebuffer_t>> &_framebuffers)
-    : state(_state), framebuffers(_framebuffers), width(WIDTH), height(HEIGHT) {
+    : state(_state), input(_input), framebuffers(_framebuffers), width(WIDTH), height(HEIGHT) {
   // 初始化 sdl
   try {
     auto ret = SDL_Init(SDL_INIT_VIDEO);
@@ -122,6 +123,11 @@ void display_t::fill(const std::shared_ptr<framebuffer_t> &_framebuffer) {
 /// @todo 保证时序正确
 auto display_t::loop() -> state_t::status_t {
   while (state->status.load() != state_t::STOP) {
+    // 记录输入，等待 render 处理
+    auto is_running = input->process();
+    if (!is_running) {
+      state->status.store(state_t::STOP);
+    }
     // 等待获取锁
     for (const auto &i : framebuffers) {
       while (!i->displayable.load()) {
