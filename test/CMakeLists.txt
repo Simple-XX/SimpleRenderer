@@ -38,13 +38,13 @@ link_libraries(
         SimpleRenderer-shared
 )
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/unit_test)
-#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/integration_test)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/system_test)
+add_subdirectory(unit_test)
+#add_subdirectory(integration_test)
+add_subdirectory(system_test)
 
 add_coverage_target(
         DEPENDS unit_test
-        SOURCE_DIR ${CMAKE_SOURCE_DIR}
-        BINARY_DIR ${CMAKE_BINARY_DIR}
-        EXCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rd/*
+        SOURCE_DIR ${SimpleRenderer_SOURCE_DIR}
+        BINARY_DIR ${SimpleRenderer_BINARY_DIR}
+        EXCLUDE_DIR ${SimpleRenderer_SOURCE_DIR}/3rd/*
 )

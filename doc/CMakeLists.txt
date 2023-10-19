@@ -14,8 +14,8 @@ project(
 set(DOXYGEN_HAVE_DOT YES)
 set(DOXYGEN_DOT_MULTI_TARGETS YES)
 set(DOXYGEN_GENERATE_LATEX NO)
-set(DOXYGEN_PROJECT_NAME ${CMAKE_PROJECT_NAME})
-set(DOXYGEN_PROJECT_NUMBER ${CMAKE_PROJECT_VERSION})
+set(DOXYGEN_PROJECT_NAME ${SimpleRenderer_PROJECT_NAME})
+set(DOXYGEN_PROJECT_NUMBER ${SimpleRenderer_PROJECT_VERSION})
 set(DOXYGEN_PROJECT_BRIEF ${PROJECT_DESCRIPTION})
 set(DOXYGEN_RECURSIVE YES)
 set(DOXYGEN_EXCLUDE_PATTERNS */3rd/*, */.vscode/*, */.idea/*, */.github/*, */.git/*, */build*/*, */cmake-/*)
@@ -41,5 +41,5 @@ set(DOXYGEN_HTML_TIMESTAMP YES)
 doxygen_add_docs(doc
         COMMENT "Generating docs at ${PROJECT_BINARY_DIR}/html/index.html ..."
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-        ${CMAKE_SOURCE_DIR}
+        ${SimpleRenderer_SOURCE_DIR}
 )

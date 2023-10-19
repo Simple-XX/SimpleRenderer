@@ -51,6 +51,6 @@ configure_file(
 )
 
 # 添加要编译的目录
-add_subdirectory(${PROJECT_SOURCE_DIR}/src)
-add_subdirectory(${PROJECT_SOURCE_DIR}/test)
-add_subdirectory(${PROJECT_SOURCE_DIR}/doc)
+add_subdirectory(src)
+add_subdirectory(test)
+add_subdirectory(doc)
