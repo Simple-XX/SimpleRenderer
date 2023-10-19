@@ -31,6 +31,7 @@ list(APPEND DEFAULT_TEST_LINK_LIB
         ${DEFAULT_LINK_LIB}
         gtest_main
         ${glog_LIBRARIES}
+        SimpleRenderer-shared
 )
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/unit_test)

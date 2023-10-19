@@ -14,18 +14,6 @@ enable_language(CXX)
 
 add_executable(unit_test
         buffer_base_test.cpp
-        #        render_test.cpp
-        #        ${SimpleRender_SOURCE_DIR}/src/model.cpp
-        #        ${SimpleRender_SOURCE_DIR}/src/display.cpp
-        #        ${SimpleRender_SOURCE_DIR}/src/framebuffer.cpp
-        #        ${SimpleRender_SOURCE_DIR}/src/camera.cpp
-        #        ${SimpleRender_SOURCE_DIR}/src/shader.cpp
-        #        ${SimpleRender_SOURCE_DIR}/src/default_shader.cpp
-        #        ${SimpleRender_SOURCE_DIR}/src/color.cpp
-        #        ${SimpleRender_SOURCE_DIR}/src/scene.cpp
-        #        ${SimpleRender_SOURCE_DIR}/src/light.cpp
-        #        ${SimpleRender_SOURCE_DIR}/src/input.cpp
-        #        ${SimpleRender_SOURCE_DIR}/src/render.cpp
 )
 
 target_include_directories(unit_test PRIVATE
