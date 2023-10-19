@@ -125,13 +125,15 @@ auto input_t::handle(scene_t &_scene, uint32_t _delta_time) const -> bool {
     }
     case SDLK_LSHIFT: {
       /// @bug 按一次触发两次
-      SPDLOG_LOGGER_INFO(SRLOG, "key {} down!", SDL_GetKeyName(curr_event.key.keysym.sym));
+      SPDLOG_LOGGER_INFO(SRLOG, "key {} down!",
+                         SDL_GetKeyName(curr_event.key.keysym.sym));
       key_left_shift(_scene, _delta_time);
       break;
     }
     default: {
       // 输出按键名
-      SPDLOG_LOGGER_INFO(SRLOG, "key {} down!", SDL_GetKeyName(curr_event.key.keysym.sym));
+      SPDLOG_LOGGER_INFO(SRLOG, "key {} down!",
+                         SDL_GetKeyName(curr_event.key.keysym.sym));
       break;
     }
     }
@@ -139,7 +141,8 @@ auto input_t::handle(scene_t &_scene, uint32_t _delta_time) const -> bool {
   }
   // 鼠标移动
   case SDL_MOUSEMOTION: {
-    mouse_motion(_scene, curr_event.motion.xrel, curr_event.motion.yrel, _delta_time);
+    mouse_motion(_scene, curr_event.motion.xrel, curr_event.motion.yrel,
+                 _delta_time);
     break;
   }
     /// @todo

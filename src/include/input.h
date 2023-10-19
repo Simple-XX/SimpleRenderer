@@ -17,11 +17,11 @@
 #ifndef SIMPLERENDER_INPUT_H
 #define SIMPLERENDER_INPUT_H
 
-#include <queue>
 #include <memory>
+#include <queue>
 
-#include <SDL_events.h>
 #include <SDL.h>
+#include <SDL_events.h>
 
 #include "scene.h"
 

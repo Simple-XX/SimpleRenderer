@@ -29,7 +29,8 @@ display_t::display_t(
     const std::shared_ptr<state_t> &_state,
     const std::shared_ptr<input_t> &_input,
     const std::vector<std::shared_ptr<framebuffer_t>> &_framebuffers)
-    : state(_state), input(_input), framebuffers(_framebuffers), width(WIDTH), height(HEIGHT) {
+    : state(_state), input(_input), framebuffers(_framebuffers), width(WIDTH),
+      height(HEIGHT) {
   // 初始化 sdl
   try {
     auto ret = SDL_Init(SDL_INIT_VIDEO);

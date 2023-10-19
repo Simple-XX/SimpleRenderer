@@ -28,28 +28,18 @@
 #include "status.h"
 
 // @todo 不应该出现明确的类型，应该使用模板
-auto main(int _argc, char **_argv) -> int {
+auto main(int, char **) -> int {
   log_init();
-  auto paras = std::span(_argv, _argc);
   // obj 路径
   std::vector<std::string> objs;
-  // 如果没有指定那么使用默认值
-  if (paras.size() == 1) {
-    // objs = "../../obj/helmet.obj";
-    //  objs = "../../obj/cube.obj";
-    //  objs = "../../obj/cube2.obj";
-    objs.emplace_back(OBJ_FILE_PATH + "cube3.obj");
-    // objs = "../../obj/cornell_box.obj";
-    // objs.push_back("../../obj/helmet.obj");
-    // objs.push_back("../../obj/african_head.obj");
-    // objs.push_back("../../obj/utah-teapot/utah-teapot.obj");
-  }
-  // 否则使用指定的
-  else {
-    for (auto *para : paras) {
-      objs.emplace_back(para);
-    }
-  }
+  // objs = "../../obj/helmet.obj";
+  //  objs = "../../obj/cube.obj";
+  //  objs = "../../obj/cube2.obj";
+  objs.emplace_back(OBJ_FILE_PATH + "cube3.obj");
+  // objs = "../../obj/cornell_box.obj";
+  // objs.push_back("../../obj/helmet.obj");
+  // objs.push_back("../../obj/african_head.obj");
+  // objs.push_back("../../obj/utah-teapot/utah-teapot.obj");
 
   auto scene = std::make_shared<scene_t>();
   // 读取模型与材质
