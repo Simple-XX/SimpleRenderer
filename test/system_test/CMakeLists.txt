@@ -6,30 +6,28 @@
 
 # 设置项目名与版本
 project(
-        unit-test
+        system-test
         VERSION 0.0.1
 )
 
 enable_language(CXX)
 
-add_executable(unit_test
-        buffer_base_test.cpp
+add_executable(system_test
+        main.cpp
 )
 
-target_include_directories(unit_test PRIVATE
+target_include_directories(system_test PRIVATE
         ${SimpleRenderer_SOURCE_DIR}/src/include
 )
 
-target_compile_options(unit_test PRIVATE
+target_compile_options(system_test PRIVATE
         ${DEFAULT_TEST_COMPILE_OPTIONS}
 )
 
-target_link_options(unit_test PRIVATE
+target_link_options(system_test PRIVATE
         ${DEFAULT_TEST_LINK_OPTIONS}
 )
 
-target_link_libraries(unit_test PRIVATE
+target_link_libraries(system_test PRIVATE
         ${DEFAULT_TEST_LINK_LIB}
 )
-
-gtest_discover_tests(unit_test)

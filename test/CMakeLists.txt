@@ -36,7 +36,7 @@ list(APPEND DEFAULT_TEST_LINK_LIB
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/unit_test)
 #add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/integration_test)
-#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/system_test)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/system_test)
 
 add_coverage_target(
         DEPENDS unit_test

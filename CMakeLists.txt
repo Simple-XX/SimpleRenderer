@@ -8,7 +8,7 @@
 cmake_minimum_required(VERSION 3.27 FATAL_ERROR)
 
 # 设置项目名与版本
-project(SimpleRender
+project(SimpleRenderer
         VERSION 0.0.1)
 
 # 禁止原地编译
