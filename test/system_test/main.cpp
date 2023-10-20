@@ -52,15 +52,13 @@ auto main(int, char **) -> int {
   scene->add_light(light_t());
 
   auto state = std::make_shared<state_t>();
-  auto input = std::make_shared<input_t>();
   std::vector<std::shared_ptr<framebuffer_t>> framebuffers;
   framebuffers.emplace_back(std::make_shared<framebuffer_t>(WIDTH, HEIGHT));
   framebuffers.emplace_back(std::make_shared<framebuffer_t>(WIDTH, HEIGHT));
   framebuffers.emplace_back(std::make_shared<framebuffer_t>(WIDTH, HEIGHT));
-  auto render = render_t(std::ref(state), std::ref(scene), std::ref(input),
-                         std::ref(framebuffers));
-  auto display =
-      display_t(std::ref(state), std::ref(input), std::ref(framebuffers));
+  auto render =
+      render_t(std::ref(state), std::ref(scene), std::ref(framebuffers));
+  auto display = display_t(std::ref(state), std::ref(framebuffers));
 
   // 计算线程
   auto render_ret = render.run();

@@ -22,10 +22,8 @@
 render_t::render_t(
     const std::shared_ptr<state_t> &_state,
     const std::shared_ptr<scene_t> &_scene,
-    const std::shared_ptr<input_t> &_input,
     const std::vector<std::shared_ptr<framebuffer_t>> &_framebuffers)
-    : state(_state), scene(_scene), input(_input), framebuffers(_framebuffers) {
-}
+    : state(_state), scene(_scene), framebuffers(_framebuffers) {}
 
 /// @todo 验证 std::condition_variable 的正确性
 /// @todo 保证时序正确
@@ -39,14 +37,6 @@ auto render_t::loop() -> state_t::status_t {
   // 主循环
   while (state->status != state_t::STOP) {
     start = us();
-    /// @todo 移动速度在不同帧率下一致
-
-    // 处理输入
-    auto is_running = input->process(*scene, 1);
-    if (!is_running) {
-      state->status.store(state_t::STOP);
-    }
-
     // 更新场景
     scene->tick(1);
 

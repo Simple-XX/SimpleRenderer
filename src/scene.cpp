@@ -148,12 +148,6 @@ auto scene_t::tick(uint32_t _delta_time) -> bool {
   return true;
 }
 
-auto scene_t::get_current_camera() -> camera_base_t & { return camera; }
-
-auto scene_t::get_current_camera() const -> const camera_base_t & {
-  return camera;
-}
-
 auto scene_t::get_visible_models() const -> const std::queue<model_t> & {
   return visible_models;
 }

@@ -24,7 +24,6 @@
 
 #include "config.h"
 #include "framebuffer.h"
-#include "input.h"
 #include "status.h"
 
 /**
@@ -39,7 +38,6 @@ public:
    */
   explicit display_t(
       const std::shared_ptr<state_t> &_state,
-      const std::shared_ptr<input_t> &_input,
       const std::vector<std::shared_ptr<framebuffer_t>> &_framebuffers);
 
   /**
@@ -75,8 +73,6 @@ private:
 
   /// 状态
   std::shared_ptr<state_t> state;
-  /// 输入
-  std::shared_ptr<input_t> input;
   /// 缓冲
   std::vector<std::shared_ptr<framebuffer_t>> framebuffers;
   /// 窗口宽度

@@ -21,7 +21,6 @@
 #include <string>
 #include <vector>
 
-#include "camera.h"
 #include "config.h"
 #include "light.h"
 #include "matrix.h"
@@ -79,18 +78,6 @@ public:
   auto tick(uint32_t _delta_time) -> bool;
 
   /**
-   * 获取当前相机
-   * @return 要使用相机
-   */
-  auto get_current_camera() -> camera_base_t &;
-
-  /**
-   * 获取当前相机
-   * @return 当前相机
-   */
-  [[nodiscard]] auto get_current_camera() const -> const camera_base_t &;
-
-  /**
    * 获取要渲染的模型队列
    * @return 要渲染的模型队列
    */
@@ -109,11 +96,6 @@ public:
   [[nodiscard]] auto get_light() const -> const light_t &;
 
 private:
-  /// 场景中的摄像机
-  std::vector<camera_base_t> cameras;
-  /// 当前使用的摄像机
-  camera_base_t camera;
-
   /// 场景中的所有模型
   std::vector<model_t> models;
   /// 场景中的可见模型，即要渲染的模型队列

@@ -9,14 +9,12 @@ set(lib_src
         log.cpp
         color.cpp
         model.cpp
-        camera.cpp
         light.cpp
         scene.cpp
         shader.cpp
         framebuffer.cpp
         display.cpp
         default_shader.cpp
-        input.cpp
         render.cpp
 )
 
