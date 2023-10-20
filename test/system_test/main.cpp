@@ -48,8 +48,8 @@ auto main(int, char **) -> int {
     auto model = model_t(obj);
     scene->add_model(model);
   }
-  // 添加光照
-  scene->add_light(light_t());
+  // 设置光照
+  scene->set_light(light_t());
 
   auto state = std::make_shared<state_t>();
   std::vector<std::shared_ptr<framebuffer_t>> framebuffers;

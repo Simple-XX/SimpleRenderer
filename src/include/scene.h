@@ -65,10 +65,16 @@ public:
   void add_model(const model_t &_model, const matrix4f_t &_model_matrix);
 
   /**
-   * 将光照添加到场景中
-   * @param _light 要添加的 light
+   * 获取模型向量
+   * @return 模型向量
    */
-  void add_light(const light_t &_light);
+  [[nodiscard]] auto get_models() const -> const std::vector<model_t> &;
+
+  /**
+   * 设置场景光照
+   * @param _light 要设置的 light
+   */
+  void set_light(const light_t &_light);
 
   /**
    * 更新场景，根据时间变化更新，返回是否继续运行
@@ -78,16 +84,10 @@ public:
   auto tick(uint32_t _delta_time) -> bool;
 
   /**
-   * 获取要渲染的模型队列
-   * @return 要渲染的模型队列
-   */
-  [[nodiscard]] auto get_visible_models() const -> const std::queue<model_t> &;
-
-  /**
    * 获取场景的光照
    * @return 场景的光照信息
    */
-  auto get_light() -> light_t &;
+  [[nodiscard]] auto get_light() -> light_t &;
 
   /**
    * 获取场景的光照
@@ -98,12 +98,8 @@ public:
 private:
   /// 场景中的所有模型
   std::vector<model_t> models;
-  /// 场景中的可见模型，即要渲染的模型队列
-  std::queue<model_t> visible_models;
 
-  /// 场景中的所有光照
-  std::vector<light_t> lights;
-  /// 场景中的光照合并值
+  /// 光照
   light_t light;
 };
 

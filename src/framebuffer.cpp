@@ -269,10 +269,9 @@ void framebuffer_t::model(const shader_base_t &_shader, const light_t &_light,
 }
 
 void framebuffer_t::scene(const shader_base_t &_shader, const scene_t &_scene) {
-  auto models = _scene.get_visible_models();
-  while (!models.empty()) {
-    model(_shader, _scene.get_light(), models.front());
-    models.pop();
+  const auto &light = _scene.get_light();
+  for (const auto &i : _scene.get_models()) {
+    model(_shader, light, i);
   }
 }
 

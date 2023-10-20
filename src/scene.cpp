@@ -124,32 +124,18 @@ void scene_t::add_model(const model_t &_model,
                      _model.obj_path, name, models.size());
 }
 
-void scene_t::add_light(const light_t &_light) {
-  lights.push_back(_light);
-  SPDLOG_LOGGER_INFO(SRLOG, "add_light: {} to: {}, total: {}", _light.name,
-                     name, lights.size());
+auto scene_t::get_models() const -> const std::vector<model_t> & {
+  return models;
+}
+
+void scene_t::set_light(const light_t &_light) {
+  light = _light;
+  SPDLOG_LOGGER_INFO(SRLOG, "set_light: {} to: {}", light.name, name);
 }
 
 auto scene_t::tick(uint32_t _delta_time) -> bool {
   (void)_delta_time;
-  /// @todo 更新可见模型
-  // 清空队列
-  std::queue<model_t> empty;
-  swap(visible_models, empty);
-  for (const auto &i : models) {
-    visible_models.push(i);
-  }
-  /// @todo 根据所有光照进行计算
-  for (const auto &i : lights) {
-    light = i;
-  }
-  /// @todo 移动摄像机
-
   return true;
-}
-
-auto scene_t::get_visible_models() const -> const std::queue<model_t> & {
-  return visible_models;
 }
 
 auto scene_t::get_light() -> light_t & { return light; }
