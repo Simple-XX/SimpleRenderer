@@ -41,7 +41,7 @@ auto model_t::vertex_t::operator*(const matrix4f_t &_tran) const
   coord_tmp.coord.y() = coord3.y();
   coord_tmp.coord.z() = coord3.z();
 
-  return model_t::vertex_t();
+  return coord_tmp;
 }
 
 model_t::face_t::face_t(const model_t::vertex_t &_v0,
@@ -238,11 +238,16 @@ void model_t::scale_half(size_t _width, size_t _height) {
   SPDLOG_LOGGER_INFO(SRLOG, "delta_xyz_max: {}", delta_xyz_max);
 
   // 缩放倍数
-  auto multi = static_cast<float>((_width + _height) / 4.);
-  SPDLOG_LOGGER_INFO(SRLOG, "multi: {}", multi);
+  auto multi = static_cast<float>((_width < _height ? _width : _height) / 2.);
   // 归一化并乘倍数
   auto scale = multi / delta_xyz_max;
-  SPDLOG_LOGGER_INFO(SRLOG, "scale: {}", scale);
+
+  // 平移到屏幕中间
+  auto translate_mat = matrix4f_t();
+  translate_mat.setIdentity();
+  translate_mat(0, 3) = WIDTH / 2;
+  translate_mat(1, 3) = HEIGHT / 2;
+  translate_mat(2, 3) = 0;
 
   // 缩放
   auto scale_mat = matrix4f_t();
@@ -250,21 +255,13 @@ void model_t::scale_half(size_t _width, size_t _height) {
   scale_mat.diagonal()[0] = scale;
   scale_mat.diagonal()[1] = scale;
   scale_mat.diagonal()[2] = scale;
-  SPDLOG_LOGGER_INFO(SRLOG, "scale_mat: {}", scale_mat);
 
-  // 从左上角移动到指定位置
-  auto translate_mat = matrix4f_t();
-  translate_mat.setIdentity();
-  translate_mat.diagonal()[0] = 1;
-  translate_mat.diagonal()[1] = 1;
-  translate_mat.diagonal()[2] = 1;
-  translate_mat(0, 3) = WIDTH / 2;
-  translate_mat(1, 3) = HEIGHT / 2;
-  translate_mat(2, 3) = 0;
-  SPDLOG_LOGGER_INFO(SRLOG, "translate_mat: {}", translate_mat);
+  auto matrix = matrix4f_t(translate_mat * scale_mat);
 
-  auto matrix = scale_mat * translate_mat;
-  //  SPDLOG_LOGGER_INFO(SRLOG, "apply: {}", matrix);
+  SPDLOG_LOGGER_INFO(
+      SRLOG,
+      "multi: {}, scale: {}, translate_mat: {},\n scale_mat: {},\n apply: {}",
+      multi, scale, translate_mat, scale_mat, matrix);
 
-  *this = *this * scale_mat;
+  *this = *this * matrix;
 }

@@ -133,6 +133,14 @@ void framebuffer_t::line(float _x0, float _y0, float _x1, float _y1,
   auto p0_y = static_cast<int32_t>(_y0);
   auto p1_x = static_cast<int32_t>(_x1);
   auto p1_y = static_cast<int32_t>(_y1);
+  if (p0_x >= static_cast<int32_t>(WIDTH) ||
+      p0_y >= static_cast<int32_t>(HEIGHT) ||
+      p1_x >= static_cast<int32_t>(WIDTH) ||
+      p1_y >= static_cast<int32_t>(HEIGHT)) {
+    SPDLOG_LOGGER_WARN(
+        SRLOG, "WIDTH: {}, HEIGHT: {}, p0_x: {}, p0_y: {}, p1_x: {}, p1_y: {}",
+        WIDTH, HEIGHT, p0_x, p0_y, p1_x, p1_y);
+  }
 
   auto steep = false;
   if (std::abs(p0_x - p1_x) < std::abs(p0_y - p1_y)) {
@@ -241,9 +249,11 @@ void framebuffer_t::triangle(const shader_base_t &_shader,
   }
 }
 /// @todo
-static bool draw_wireframe = true;
+static bool draw_wireframe = false;
 void framebuffer_t::model(const shader_base_t &_shader, const light_t &_light,
                           const model_t &_model) {
+  SPDLOG_LOGGER_INFO(SRLOG, "draw {}", _model.obj_path);
+
   if (draw_wireframe) {
 #pragma omp parallel for num_threads(NPROC) default(none) shared(_shader)      \
     firstprivate(_model)

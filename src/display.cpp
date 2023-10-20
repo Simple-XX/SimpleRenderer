@@ -120,14 +120,14 @@ auto display_t::loop() -> state_t::status_t {
       }
       // 鼠标移动
       case SDL_MOUSEMOTION: {
-        SPDLOG_LOGGER_INFO(SRLOG, "鼠标移动 {} {}", event.motion.xrel,
-                           event.motion.yrel);
+        SPDLOG_LOGGER_DEBUG(SRLOG, "鼠标移动 {} {}", event.motion.xrel,
+                            event.motion.yrel);
         break;
       }
       // 鼠标点击
       case SDL_MOUSEBUTTONDOWN: {
-        SPDLOG_LOGGER_INFO(SRLOG, "鼠标点击 {} {}", event.button.x,
-                           event.button.y);
+        SPDLOG_LOGGER_DEBUG(SRLOG, "鼠标点击 {} {}", event.button.x,
+                            event.button.y);
         break;
       }
       }
