@@ -98,7 +98,7 @@ void display_t::fill(const std::shared_ptr<framebuffer_t> &_framebuffer) {
 auto display_t::loop() -> state_t::status_t {
   while (state->status.load() != state_t::STOP) {
     SDL_Event event = SDL_Event();
-    if (SDL_PollEvent(&event) != 0) {
+    while (SDL_PollEvent(&event) != 0) {
       if (event.type == SDL_QUIT) {
         state->status.store(state_t::STOP);
       }
@@ -107,6 +107,21 @@ auto display_t::loop() -> state_t::status_t {
       case SDL_KEYDOWN: {
         switch (event.key.keysym.sym) {
         case SDLK_SPACE: {
+          break;
+        }
+        case SDLK_TAB: {
+          state->obj_index++;
+          SPDLOG_LOGGER_INFO(SRLOG, "obj_index: {}", state->obj_index);
+          break;
+        }
+        case SDLK_1: {
+          state->draw_line = !state->draw_line;
+          SPDLOG_LOGGER_INFO(SRLOG, "draw_line: {}", state->draw_line);
+          break;
+        }
+        case SDLK_2: {
+          state->draw_triangle = !state->draw_triangle;
+          SPDLOG_LOGGER_INFO(SRLOG, "draw_triangle: {}", state->draw_triangle);
           break;
         }
         default: {

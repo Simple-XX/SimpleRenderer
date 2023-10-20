@@ -191,16 +191,21 @@ public:
    * @param _shader 要使用的着色器
    * @param _light 光照信息
    * @param _model 模型
+   * @param _draw_line 是否绘制线框
+   * @param _draw_triangle 是否绘制三角形
    */
   void model(const shader_base_t &_shader, const light_t &_light,
-             const model_t &_model);
+             const model_t &_model, bool _draw_line, bool _draw_triangle);
 
   /**
    * 绘制场景
    * @param _shader 要使用的着色器
    * @param _scene 场景
+   * @param _draw_line 是否绘制线框
+   * @param _draw_triangle 是否绘制三角形
    */
-  void scene(const shader_base_t &_shader, const scene_t &_scene);
+  void scene(const shader_base_t &_shader, const scene_t &_scene,
+             uint32_t _obj_index, bool _draw_line, bool _draw_triangle);
 
 private:
   /// 窗口宽度

@@ -58,13 +58,6 @@ public:
   void add_model(const model_t &_model);
 
   /**
-   * 将模型添加到场景中
-   * @param _model 要添加的 model
-   * @param _model_matrix 模型变换矩阵变换
-   */
-  void add_model(const model_t &_model, const matrix4f_t &_model_matrix);
-
-  /**
    * 获取模型向量
    * @return 模型向量
    */

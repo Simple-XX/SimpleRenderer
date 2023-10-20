@@ -34,6 +34,12 @@ struct state_t {
 
   /// 是否还在运行，为 false 时退出
   std::atomic_uint8_t status = RUNNING;
+  /// 是否绘制线框
+  std::atomic_bool draw_line = true;
+  /// 是否绘制三角形
+  std::atomic_bool draw_triangle = false;
+  /// 当前绘制的 obj 索引
+  std::atomic_uint32_t obj_index = 0;
 };
 
 #endif /* SIMPLERENDER_STATUS_H */

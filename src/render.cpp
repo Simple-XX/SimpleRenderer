@@ -63,7 +63,11 @@ auto render_t::loop() -> state_t::status_t {
         shader->shader_data.project_matrix = matrix4f_t().setIdentity();
 
         // 绘制场景
-        i->scene(*shader, *scene);
+        if (state->obj_index >= scene->get_models().size()) {
+          state->obj_index = 0;
+        }
+        i->scene(*shader, *scene, state->obj_index, state->draw_line,
+                 state->draw_triangle);
 
         // 将可显示标记置位
         i->displayable.store(true);

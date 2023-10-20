@@ -248,13 +248,13 @@ void framebuffer_t::triangle(const shader_base_t &_shader,
     }
   }
 }
-/// @todo
-static bool draw_wireframe = false;
+
 void framebuffer_t::model(const shader_base_t &_shader, const light_t &_light,
-                          const model_t &_model) {
+                          const model_t &_model, bool _draw_line,
+                          bool _draw_triangle) {
   SPDLOG_LOGGER_INFO(SRLOG, "draw {}", _model.obj_path);
 
-  if (draw_wireframe) {
+  if (_draw_line) {
 #pragma omp parallel for num_threads(NPROC) default(none) shared(_shader)      \
     firstprivate(_model)
     for (const auto &f : _model.get_face()) {
@@ -267,7 +267,8 @@ void framebuffer_t::model(const shader_base_t &_shader, const light_t &_light,
       line(face.v2.coord.x(), face.v2.coord.y(), face.v0.coord.x(),
            face.v0.coord.y(), color_t::WHITE);
     }
-  } else {
+  }
+  if (_draw_triangle) {
 #pragma omp parallel for num_threads(NPROC) default(none) shared(_shader)      \
     firstprivate(_model, _light)
     for (const auto &f : _model.get_face()) {
@@ -278,11 +279,12 @@ void framebuffer_t::model(const shader_base_t &_shader, const light_t &_light,
   }
 }
 
-void framebuffer_t::scene(const shader_base_t &_shader, const scene_t &_scene) {
+void framebuffer_t::scene(const shader_base_t &_shader, const scene_t &_scene,
+                          uint32_t _obj_index, bool _draw_line,
+                          bool _draw_triangle) {
   const auto &light = _scene.get_light();
-  for (const auto &i : _scene.get_models()) {
-    model(_shader, light, i);
-  }
+  const auto &model = _scene.get_models().at(_obj_index);
+  this->model(_shader, light, model, _draw_line, _draw_triangle);
 }
 
 /// @todo 巨大性能开销
