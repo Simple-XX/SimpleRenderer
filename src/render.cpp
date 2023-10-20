@@ -58,12 +58,8 @@ auto render_t::loop() -> state_t::status_t {
         i->line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, color_t::WHITE);
 
         // 设置 mvp 矩阵
-        shader->shader_data.model_matrix = get_model_matrix(
-            vector3f_t(1000, 1000, 1000), vector3f_t(1, 1, 1).normalized(),
-            M_PI_4, vector3f_t(WIDTH / 2, HEIGHT / 2, 0));
+        shader->shader_data.model_matrix = matrix4f_t().setIdentity();
         shader->shader_data.view_matrix = matrix4f_t().setIdentity();
-        // shader->shader_data.view_matrix
-        //   = scene->get_current_camera().look_at();
         shader->shader_data.project_matrix = matrix4f_t().setIdentity();
 
         // 绘制场景

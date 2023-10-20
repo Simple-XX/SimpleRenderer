@@ -19,6 +19,7 @@
 
 #include "exception.hpp"
 #include "framebuffer.h"
+
 namespace {
 /// 缓冲区计数，用于设置 id
 size_t count = 0;
@@ -182,10 +183,24 @@ void framebuffer_t::triangle(const shader_base_t &_shader,
   auto v0 = _face.v0;
   auto v1 = _face.v1;
   auto v2 = _face.v2;
-  //  auto min = v0.coord.min(v1.coord).min(v2.coord);
-  //  auto max = v0.coord.max(v1.coord).max(v2.coord);
+
+  // 获取三角形的最小 box
   auto min = v0.coord;
   auto max = v1.coord;
+  auto max_x = std::max(_face.v0.coord.x(),
+                        std::max(_face.v1.coord.x(), _face.v2.coord.x()));
+  auto max_y = std::max(_face.v0.coord.y(),
+                        std::max(_face.v1.coord.y(), _face.v2.coord.y()));
+  max.x() = max_x > max.x() ? max_x : max.x();
+  max.y() = max_y > max.y() ? max_y : max.y();
+  max.z() = 0;
+  auto min_x = std::min(_face.v0.coord.x(),
+                        std::min(_face.v1.coord.x(), _face.v2.coord.x()));
+  auto min_y = std::min(_face.v0.coord.y(),
+                        std::min(_face.v1.coord.y(), _face.v2.coord.y()));
+  min.x() = min_x < min.x() ? min_x : min.x();
+  min.y() = min_y < min.y() ? min_y : min.y();
+  min.z() = 0;
 
 #pragma omp parallel for num_threads(NPROC) collapse(2) default(none)          \
     shared(min, max, v0, v1, v2, _shader) firstprivate(_normal, _light)

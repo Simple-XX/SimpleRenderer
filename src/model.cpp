@@ -30,36 +30,6 @@ model_t::vertex_t::vertex_t(coord_t _coord, normal_t _normal,
     : coord(std::move(_coord)), normal(std::move(_normal)),
       texture_coord(std::move(_texture_coord)), color(_color) {}
 
-// model_t::vertex_t
-// operator*(const std::pair<const matrix4f_t, const matrix4f_t> &_matrices,
-//           const model_t::vertex_t &_vertex) {
-//   auto ret(_vertex);
-//   // 变换坐标
-//
-//   ret.coord = _matrices.first * _vertex.coord;
-//   ret.coord = _matrices.first * _vertex.coord;
-//   ret.coord = _matrices.first * _vertex.coord;
-//   // 变换法线
-//   /// @todo 法线变换矩阵
-//   // ret.normal   = _matrices.second * _vertex.normal;
-//   return ret;
-// }
-
-// model_t::face_t
-// operator*(const std::pair<const matrix4f_t, const matrix4f_t> &_matrices,
-//           const model_t::face_t &_face) {
-//   auto ret(_face);
-//   // 变换坐标
-//   ret.v0 = _matrices * _face.v0;
-//   ret.v1 = _matrices * _face.v1;
-//   ret.v2 = _matrices * _face.v2;
-//   /// @todo 法线变换矩阵
-//   auto v2v0 = ret.v2.coord - ret.v0.coord;
-//   auto v1v0 = ret.v1.coord - ret.v0.coord;
-//   ret.normal = (v2v0.cross(v1v0)).normalized();
-//   return ret;
-// }
-
 model_t::face_t::face_t(const model_t::vertex_t &_v0,
                         const model_t::vertex_t &_v1,
                         const model_t::vertex_t &_v2, material_t _material)
@@ -183,9 +153,6 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path)
       face.emplace_back(vertexes[0], vertexes[1], vertexes[2], material);
     }
   }
-
-  // 计算体积盒
-  set_box();
 }
 
 auto model_t::operator*(const matrix4f_t &_tran) const -> model_t {
@@ -199,35 +166,4 @@ auto model_t::operator*(const matrix4f_t &_tran) const -> model_t {
 
 auto model_t::get_face() const -> const std::vector<model_t::face_t> & {
   return face;
-}
-
-void model_t::set_box() {
-  auto max = face.at(0).v0.coord;
-  auto min = face.at(0).v0.coord;
-
-  for (const auto &i : face) {
-    auto curr_max_x =
-        std::max(i.v0.coord.x(), std::max(i.v1.coord.x(), i.v2.coord.x()));
-    auto curr_max_y =
-        std::max(i.v0.coord.y(), std::max(i.v1.coord.y(), i.v2.coord.y()));
-    auto curr_max_z =
-        std::max(i.v0.coord.z(), std::max(i.v1.coord.z(), i.v2.coord.z()));
-
-    max.x() = curr_max_x > max.x() ? curr_max_x : max.x();
-    max.y() = curr_max_y > max.y() ? curr_max_y : max.y();
-    max.z() = curr_max_z > max.z() ? curr_max_z : max.z();
-
-    auto curr_min_x =
-        std::max(i.v0.coord.x(), std::max(i.v1.coord.x(), i.v2.coord.x()));
-    auto curr_min_y =
-        std::max(i.v0.coord.y(), std::max(i.v1.coord.y(), i.v2.coord.y()));
-    auto curr_min_z =
-        std::max(i.v0.coord.z(), std::max(i.v1.coord.z(), i.v2.coord.z()));
-
-    min.x() = curr_min_x < min.x() ? curr_min_x : min.x();
-    min.y() = curr_min_y < min.y() ? curr_min_y : min.y();
-    min.z() = curr_min_z < min.z() ? curr_min_z : min.z();
-  }
-  box.min = min;
-  box.max = max;
 }

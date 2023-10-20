@@ -96,18 +96,6 @@ public:
     auto operator=(vertex_t &&_vertex) -> vertex_t & = default;
     ~vertex_t() = default;
     /// @}
-
-    /**
-     * 顶点与矩阵进行运算，效果是对顶点进行变换
-     * @param _matrices 变换矩阵，第一个是坐标变换，第二个是法线变换
-     * @param vertex 要变换的 vertex_t
-     * @return 结果
-     * @todo 确认这里的乘法顺序
-     */
-    //    friend vertex_t
-    //    operator*(const std::pair<const matrix4f_t, const matrix4f_t>
-    //    &_matrices,
-    //              const vertex_t &_vertex);
   };
 
   /// @todo 直接保存太浪费内存了
@@ -140,18 +128,6 @@ public:
     auto operator=(face_t &&_face) -> face_t & = default;
     ~face_t() = default;
     /// @}
-
-    /**
-     * 模型与矩阵进行运算，效果是对模型进行变换
-     * @param _matrices 变换矩阵，第一个是坐标变换，第二个是法线变换
-     * @param _face 要变换的 face_t
-     * @return 结果
-     * @todo 确认这里的乘法顺序
-     */
-    //    friend face_t
-    //    operator*(const std::pair<const matrix4f_t, const matrix4f_t>
-    //    &_matrices,
-    //              const face_t &_face);
   };
 
   /**
@@ -216,70 +192,6 @@ private:
   static constexpr const uint8_t TRIANGLE_FACE_VERTEX_COUNT = 3;
 
   std::vector<face_t> face;
-
-  /// 体积盒
-  box_t box;
-
-  /**
-   * 计算 model 的体积盒
-   */
-  void set_box();
 };
-
-// 模型变换
-inline auto get_model_matrix(const vector3f_t &_scale,
-                             const vector3f_t &_rotate, const float &_rad,
-                             const vector3f_t &_translate) -> matrix4f_t {
-  // 缩放
-  auto scale = matrix4f_t();
-  scale.setIdentity();
-  scale(0, 0) = _scale.x();
-  scale(1, 1) = _scale.y();
-  scale(2, 2) = _scale.z();
-
-  // 旋转
-  //  auto rotation = matrix4f_t().rotate(_rotate, _rad);
-  //  Eigen::AngleAxis<float> vec(
-  //      _rad, Eigen::Vector3f(_rotate.x(), _rotate.y(), _rotate.z()));
-  //  auto mat = vec.matrix();
-  //  auto rotation = matrix4f_t();
-  //  rotation.setIdentity();
-  //  rotation.block<3, 3>(0, 0) = mat;
-  auto rotation = Eigen::Affine3f(Eigen::AngleAxisf(_rad, _rotate));
-
-  // 平移
-  auto translate = matrix4f_t();
-  translate.setIdentity();
-  translate(0, 3) = _translate.x();
-  translate(1, 3) = _translate.y();
-  translate(2, 3) = _translate.z();
-  //  std::cout << translate * rotation * scale << "  24242"<<std::endl;
-
-  // 应用到向量上时先线性变换(缩放，旋转)再平移
-  return translate * rotation * scale;
-}
-
-//// 投影变换矩阵
-// inline matrix4f_t get_projection_matrix(float eye_fov, float aspect_ratio,
-//                                         float zNear, float zFar) {
-//   // 透视投影矩阵
-//   auto proj = matrix4f_t();
-//   proj << zNear, 0, 0, 0, 0, zNear, 0, 0, 0, 0, zNear + zFar, -zNear * zFar,
-//   0,
-//       0, 1, 0;
-//
-//   auto h =
-//       zNear * static_cast<float>(tan(static_cast<double>(eye_fov / 2))) * 2;
-//   auto w = h * aspect_ratio;
-//   auto z = zFar - zNear;
-//   //
-//   正交投影矩阵，因为在观测投影时x0y平面视角默认是中心，所以这里的正交投影就不用平移x和y了
-//   auto ortho = matrix4f_t();
-//   ortho << 2 / w, 0, 0, 0, 0, 2 / h, 0, 0, 0, 0, 2 / z, -(zFar + zNear) / 2,
-//   0,
-//       0, 0, 1;
-//
-//   return ortho * proj;
-// }
 
 #endif /* SIMPLERENDER_MODEL_H */
