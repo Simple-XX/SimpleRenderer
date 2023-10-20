@@ -20,6 +20,5 @@ list(APPEND DEFAULT_LINK_LIB
         Eigen
         ${glog_LIBRARIES}
         SDL2::Main
-        SDL2::TTF
         OpenMP::OpenMP_CXX
 )

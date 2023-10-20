@@ -241,12 +241,6 @@ if (NOT SDL2_FOUND)
             "Following https://github.com/libsdl-org/SDL to install.")
 endif ()
 
-find_package(SDL2_ttf REQUIRED)
-if (NOT SDL2_TTF_FOUND)
-    message(FATAL_ERROR "sdl2_ttf not found.\n"
-            "Following https://github.com/libsdl-org/SDL to install.")
-endif ()
-
 if (APPLE)
     set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include/")
     set(OpenMP_C_LIB_NAMES "omp")

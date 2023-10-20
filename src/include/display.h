@@ -21,7 +21,6 @@
 #include <future>
 
 #include <SDL.h>
-#include <SDL_ttf.h>
 
 #include "config.h"
 #include "framebuffer.h"
@@ -91,10 +90,6 @@ private:
   SDL_Renderer *sdl_renderer;
   /// sdl 纹理
   SDL_Texture *sdl_texture;
-  /// 字体指针
-  TTF_Font *font;
-  /// 字体大小
-  uint8_t font_size = DEFAULT_FONT_SIZE;
 
   /**
    * 显示循环

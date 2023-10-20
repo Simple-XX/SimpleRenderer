@@ -67,25 +67,6 @@ display_t::display_t(
       SDL_Quit();
       throw SimpleRenderer::exception(SDL_GetError());
     }
-
-    // 文字显示
-    if (TTF_Init() != 0) {
-      SDL_DestroyTexture(sdl_texture);
-      SDL_DestroyRenderer(sdl_renderer);
-      SDL_DestroyWindow(sdl_window);
-      SDL_Quit();
-      throw SimpleRenderer::exception(TTF_GetError());
-    }
-    // 打开字体库
-    font = TTF_OpenFont(FONT_FILE_PATH.data(), font_size);
-    if (font == nullptr) {
-      TTF_Quit();
-      SDL_DestroyTexture(sdl_texture);
-      SDL_DestroyRenderer(sdl_renderer);
-      SDL_DestroyWindow(sdl_window);
-      SDL_Quit();
-      throw SimpleRenderer::exception(TTF_GetError());
-    }
   } catch (const std::runtime_error &e) {
     std::cerr << e.what() << '\n';
   }
@@ -93,8 +74,6 @@ display_t::display_t(
 
 display_t::~display_t() {
   // 回收资源
-  TTF_CloseFont(font);
-  TTF_Quit();
   SDL_DestroyTexture(sdl_texture);
   SDL_DestroyRenderer(sdl_renderer);
   SDL_DestroyWindow(sdl_window);
