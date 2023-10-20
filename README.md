@@ -47,3 +47,6 @@ done
 参考：https://github.com/ssloy/tinyrenderer
 
 正在开发中...
+
+
+TODO: 删除输入控制、模型加载等内容，模型数据写死，验证渲染即可，其余部分放在游戏引擎中
