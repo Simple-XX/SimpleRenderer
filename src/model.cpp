@@ -30,6 +30,20 @@ model_t::vertex_t::vertex_t(coord_t _coord, normal_t _normal,
     : coord(std::move(_coord)), normal(std::move(_normal)),
       texture_coord(std::move(_texture_coord)), color(_color) {}
 
+auto model_t::vertex_t::operator*(const matrix4f_t &_tran) const
+    -> model_t::vertex_t {
+  auto coord_tmp = model_t::vertex_t(*this);
+
+  auto coord4 = vector4f_t(coord.x(), coord.y(), coord.z(), 1);
+  auto coord3 = _tran * coord4;
+
+  coord_tmp.coord.x() = coord3.x();
+  coord_tmp.coord.y() = coord3.y();
+  coord_tmp.coord.z() = coord3.z();
+
+  return model_t::vertex_t();
+}
+
 model_t::face_t::face_t(const model_t::vertex_t &_v0,
                         const model_t::vertex_t &_v1,
                         const model_t::vertex_t &_v2, material_t _material)
@@ -47,6 +61,16 @@ model_t::face_t::face_t(const model_t::vertex_t &_v0,
     auto v1v0 = _v1.coord - _v0.coord;
     normal = (v2v0.cross(v1v0)).normalized();
   }
+}
+
+auto model_t::face_t::operator*(const matrix4f_t &_tran) const
+    -> model_t::face_t {
+  auto face = model_t::face_t(*this);
+  face.v0 = face.v0 * _tran;
+  face.v1 = face.v1 * _tran;
+  face.v2 = face.v2 * _tran;
+
+  return face;
 }
 
 model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path)
@@ -150,20 +174,97 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path)
                                        materials[shapes_size].specular[2]);
       }
       // 添加到 face 中
-      face.emplace_back(vertexes[0], vertexes[1], vertexes[2], material);
+      faces.emplace_back(vertexes[0], vertexes[1], vertexes[2], material);
     }
   }
+
+  // 计算模型包围盒
+  set_box();
+  scale_half();
 }
 
 auto model_t::operator*(const matrix4f_t &_tran) const -> model_t {
   auto model = model_t(*this);
 
-  /// @todo
-  (void)_tran;
+  for (auto &i : model.faces) {
+    i = i * _tran;
+  }
 
   return model;
 }
 
 auto model_t::get_face() const -> const std::vector<model_t::face_t> & {
-  return face;
+  return faces;
+}
+
+void model_t::set_box() {
+  auto max = faces.at(0).v0.coord;
+  auto min = faces.at(0).v0.coord;
+
+  for (const auto &i : faces) {
+    auto curr_max_x =
+        std::max(i.v0.coord.x(), std::max(i.v1.coord.x(), i.v2.coord.x()));
+    auto curr_max_y =
+        std::max(i.v0.coord.y(), std::max(i.v1.coord.y(), i.v2.coord.y()));
+    auto curr_max_z =
+        std::max(i.v0.coord.z(), std::max(i.v1.coord.z(), i.v2.coord.z()));
+
+    max.x() = curr_max_x > max.x() ? curr_max_x : max.x();
+    max.y() = curr_max_y > max.y() ? curr_max_y : max.y();
+    max.z() = curr_max_z > max.z() ? curr_max_z : max.z();
+
+    auto curr_min_x =
+        std::max(i.v0.coord.x(), std::max(i.v1.coord.x(), i.v2.coord.x()));
+    auto curr_min_y =
+        std::max(i.v0.coord.y(), std::max(i.v1.coord.y(), i.v2.coord.y()));
+    auto curr_min_z =
+        std::max(i.v0.coord.z(), std::max(i.v1.coord.z(), i.v2.coord.z()));
+
+    min.x() = curr_min_x < min.x() ? curr_min_x : min.x();
+    min.y() = curr_min_y < min.y() ? curr_min_y : min.y();
+    min.z() = curr_min_z < min.z() ? curr_min_z : min.z();
+  }
+  box.min = min;
+  box.max = max;
+}
+
+void model_t::scale_half(size_t _width, size_t _height) {
+  // 各分量的长度
+  auto delta_x = (std::abs(box.max.x()) + std::abs(box.min.x()));
+  auto delta_y = (std::abs(box.max.y()) + std::abs(box.min.y()));
+  auto delta_z = (std::abs(box.max.z()) + std::abs(box.min.z()));
+  auto delta_xy_max = std::max(delta_x, delta_y);
+  auto delta_xyz_max = std::max(delta_xy_max, delta_z);
+  SPDLOG_LOGGER_INFO(SRLOG, "delta_xyz_max: {}", delta_xyz_max);
+
+  // 缩放倍数
+  auto multi = static_cast<float>((_width + _height) / 4.);
+  SPDLOG_LOGGER_INFO(SRLOG, "multi: {}", multi);
+  // 归一化并乘倍数
+  auto scale = multi / delta_xyz_max;
+  SPDLOG_LOGGER_INFO(SRLOG, "scale: {}", scale);
+
+  // 缩放
+  auto scale_mat = matrix4f_t();
+  scale_mat.setIdentity();
+  scale_mat.diagonal()[0] = scale;
+  scale_mat.diagonal()[1] = scale;
+  scale_mat.diagonal()[2] = scale;
+  SPDLOG_LOGGER_INFO(SRLOG, "scale_mat: {}", scale_mat);
+
+  // 从左上角移动到指定位置
+  auto translate_mat = matrix4f_t();
+  translate_mat.setIdentity();
+  translate_mat.diagonal()[0] = 1;
+  translate_mat.diagonal()[1] = 1;
+  translate_mat.diagonal()[2] = 1;
+  translate_mat(0, 3) = WIDTH / 2;
+  translate_mat(1, 3) = HEIGHT / 2;
+  translate_mat(2, 3) = 0;
+  SPDLOG_LOGGER_INFO(SRLOG, "translate_mat: {}", translate_mat);
+
+  auto matrix = scale_mat * translate_mat;
+  //  SPDLOG_LOGGER_INFO(SRLOG, "apply: {}", matrix);
+
+  *this = *this * scale_mat;
 }

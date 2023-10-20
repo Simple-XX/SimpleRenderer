@@ -16,7 +16,7 @@
 
 #include "scene.h"
 #include "log.h"
-#include "matrix.h"
+#include "matrix.hpp"
 
 scene_t::scene_t(const std::string &_name) : name(_name) {}
 

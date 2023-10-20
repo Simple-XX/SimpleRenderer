@@ -32,14 +32,14 @@ auto main(int, char **) -> int {
   log_init();
   // obj 路径
   std::vector<std::string> objs;
-  objs.emplace_back(OBJ_FILE_PATH + "helmet.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "cube.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "cube2.obj");
+  //  objs.emplace_back(OBJ_FILE_PATH + "helmet.obj");
+  //  objs.emplace_back(OBJ_FILE_PATH + "cube.obj");
+  //  objs.emplace_back(OBJ_FILE_PATH + "cube2.obj");
   objs.emplace_back(OBJ_FILE_PATH + "cube3.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "cornell_box.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "helmet.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "african_head.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "utah-teapot/utah-teapot.obj");
+  //  objs.emplace_back(OBJ_FILE_PATH + "cornell_box.obj");
+  //  objs.emplace_back(OBJ_FILE_PATH + "helmet.obj");
+  //  objs.emplace_back(OBJ_FILE_PATH + "african_head.obj");
+  //  objs.emplace_back(OBJ_FILE_PATH + "utah-teapot/utah-teapot.obj");
 
   auto scene = std::make_shared<scene_t>();
   // 读取模型与材质

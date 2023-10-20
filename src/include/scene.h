@@ -23,7 +23,7 @@
 
 #include "config.h"
 #include "light.h"
-#include "matrix.h"
+#include "matrix.hpp"
 #include "model.h"
 #include "vector.h"
 

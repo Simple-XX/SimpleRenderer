@@ -29,43 +29,40 @@ display_t::display_t(
     const std::vector<std::shared_ptr<framebuffer_t>> &_framebuffers)
     : state(_state), framebuffers(_framebuffers), width(WIDTH), height(HEIGHT) {
   // 初始化 sdl
-  try {
-    auto ret = SDL_Init(SDL_INIT_VIDEO);
-    if (ret != 0) {
-      throw SimpleRenderer::exception(SDL_GetError());
-    }
-    // 创建窗口，居中，可见
-    sdl_window =
-        SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_CENTERED,
-                         SDL_WINDOWPOS_CENTERED, static_cast<int32_t>(width),
-                         static_cast<int32_t>(height), SDL_WINDOW_SHOWN);
-    if (sdl_window == nullptr) {
-      SDL_Quit();
-      throw SimpleRenderer::exception(SDL_GetError());
-    }
 
-    // 创建渲染器
-    sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_SOFTWARE);
-    if (sdl_renderer == nullptr) {
-      SDL_DestroyWindow(sdl_window);
-      SDL_Quit();
-      throw SimpleRenderer::exception(SDL_GetError());
-    }
-    // 设置 alpha 通道有效
-    SDL_SetRenderDrawBlendMode(sdl_renderer, SDL_BLENDMODE_BLEND);
+  auto ret = SDL_Init(SDL_INIT_VIDEO);
+  if (ret != 0) {
+    throw SimpleRenderer::exception(SDL_GetError());
+  }
+  // 创建窗口，居中，可见
+  sdl_window =
+      SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_CENTERED,
+                       SDL_WINDOWPOS_CENTERED, static_cast<int32_t>(width),
+                       static_cast<int32_t>(height), SDL_WINDOW_SHOWN);
+  if (sdl_window == nullptr) {
+    SDL_Quit();
+    throw SimpleRenderer::exception(SDL_GetError());
+  }
 
-    // 创建 texture
-    sdl_texture = SDL_CreateTexture(
-        sdl_renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
-        static_cast<int32_t>(width), static_cast<int32_t>(height));
-    if (sdl_texture == nullptr) {
-      SDL_DestroyRenderer(sdl_renderer);
-      SDL_DestroyWindow(sdl_window);
-      SDL_Quit();
-      throw SimpleRenderer::exception(SDL_GetError());
-    }
-  } catch (const std::runtime_error &e) {
-    std::cerr << e.what() << '\n';
+  // 创建渲染器
+  sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_SOFTWARE);
+  if (sdl_renderer == nullptr) {
+    SDL_DestroyWindow(sdl_window);
+    SDL_Quit();
+    throw SimpleRenderer::exception(SDL_GetError());
+  }
+  // 设置 alpha 通道有效
+  SDL_SetRenderDrawBlendMode(sdl_renderer, SDL_BLENDMODE_BLEND);
+
+  // 创建 texture
+  sdl_texture = SDL_CreateTexture(
+      sdl_renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
+      static_cast<int32_t>(width), static_cast<int32_t>(height));
+  if (sdl_texture == nullptr) {
+    SDL_DestroyRenderer(sdl_renderer);
+    SDL_DestroyWindow(sdl_window);
+    SDL_Quit();
+    throw SimpleRenderer::exception(SDL_GetError());
   }
 }
 

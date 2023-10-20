@@ -23,7 +23,8 @@
 #include <tiny_obj_loader.h>
 
 #include "color.h"
-#include "matrix.h"
+#include "config.h"
+#include "matrix.hpp"
 #include "vector.h"
 
 /**
@@ -84,8 +85,8 @@ public:
      * @param _texture_coord 贴图
      * @param _color 颜色
      */
-    vertex_t(coord_t _coord, normal_t _normal, texture_coord_t _texture_coord,
-             const color_t &_color);
+    explicit vertex_t(coord_t _coord, normal_t _normal,
+                      texture_coord_t _texture_coord, const color_t &_color);
 
     /// @name 默认构造/析构函数
     /// @{
@@ -96,6 +97,13 @@ public:
     auto operator=(vertex_t &&_vertex) -> vertex_t & = default;
     ~vertex_t() = default;
     /// @}
+
+    /**
+     * * 重载，对顶点应用变换矩阵
+     * @param _tran 要对顶点进行的变换矩阵
+     * @return 结果
+     */
+    [[nodiscard]] auto operator*(const matrix4f_t &_tran) const -> vertex_t;
   };
 
   /// @todo 直接保存太浪费内存了
@@ -116,8 +124,8 @@ public:
      * @param _v2 第三个顶点
      * @param _material 材质
      */
-    face_t(const vertex_t &_v0, const vertex_t &_v1, const vertex_t &_v2,
-           material_t _material);
+    explicit face_t(const vertex_t &_v0, const vertex_t &_v1,
+                    const vertex_t &_v2, material_t _material);
 
     /// @name 默认构造/析构函数
     /// @{
@@ -128,6 +136,13 @@ public:
     auto operator=(face_t &&_face) -> face_t & = default;
     ~face_t() = default;
     /// @}
+
+    /**
+     * * 重载，对面应用变换矩阵
+     * @param _tran 要对面进行的变换矩阵
+     * @return 结果
+     */
+    [[nodiscard]] auto operator*(const matrix4f_t &_tran) const -> face_t;
   };
 
   /**
@@ -176,10 +191,10 @@ public:
 
   /**
    * * 重载，对模型应用变换矩阵
-   * @param _tran 另一个 要对模型进行的变换矩阵
+   * @param _tran 要对模型进行的变换矩阵
    * @return 结果
    */
-  auto operator*(const matrix4f_t &_tran) const -> model_t;
+  [[nodiscard]] auto operator*(const matrix4f_t &_tran) const -> model_t;
 
   /**
    * 获取面
@@ -191,7 +206,22 @@ private:
   /// 三角形顶点数
   static constexpr const uint8_t TRIANGLE_FACE_VERTEX_COUNT = 3;
 
-  std::vector<face_t> face;
+  std::vector<face_t> faces;
+
+  /// 体积盒
+  box_t box;
+
+  /**
+   * 计算 model 的体积盒
+   */
+  void set_box();
+
+  /**
+   * 缩放到显示区域较小的 1/2
+   * @param _width 显示区域宽度
+   * @param _height 显示区域高度
+   */
+  void scale_half(size_t _width = WIDTH, size_t _height = HEIGHT);
 };
 
 #endif /* SIMPLERENDER_MODEL_H */
