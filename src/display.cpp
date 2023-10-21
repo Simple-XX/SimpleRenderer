@@ -98,6 +98,8 @@ void display_t::fill(const std::shared_ptr<framebuffer_t> &_framebuffer) {
 auto display_t::loop() -> state_t::status_t {
   while (state->status.load() != state_t::STOP) {
     SDL_Event event = SDL_Event();
+    bool is_mouse_down = false;
+
     while (SDL_PollEvent(&event) != 0) {
       if (event.type == SDL_QUIT) {
         state->status.store(state_t::STOP);
@@ -135,14 +137,25 @@ auto display_t::loop() -> state_t::status_t {
       }
       // 鼠标移动
       case SDL_MOUSEMOTION: {
+        // 鼠标拖动
+        if (is_mouse_down) {
+          SPDLOG_LOGGER_INFO(SRLOG, "鼠标拖动 {} {}", event.motion.xrel,
+                             event.motion.yrel);
+        }
         SPDLOG_LOGGER_DEBUG(SRLOG, "鼠标移动 {} {}", event.motion.xrel,
                             event.motion.yrel);
         break;
       }
-      // 鼠标点击
+      // 鼠标按下
       case SDL_MOUSEBUTTONDOWN: {
+        is_mouse_down = true;
         SPDLOG_LOGGER_DEBUG(SRLOG, "鼠标点击 {} {}", event.button.x,
                             event.button.y);
+        break;
+      }
+        // 鼠标释放
+      case SDL_MOUSEBUTTONUP: {
+        is_mouse_down = false;
         break;
       }
       }
