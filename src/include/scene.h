@@ -24,8 +24,8 @@
 #include "config.h"
 #include "light.h"
 #include "matrix.hpp"
-#include "model.h"
-#include "vector.h"
+#include "model.hpp"
+#include "vector.hpp"
 
 /**
  * 场景抽象

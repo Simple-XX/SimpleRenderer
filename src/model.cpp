@@ -14,7 +14,7 @@
  * </table>
  */
 
-#include "model.h"
+#include "model.hpp"
 
 #include <utility>
 
@@ -32,16 +32,18 @@ model_t::vertex_t::vertex_t(coord_t _coord, normal_t _normal,
 
 auto model_t::vertex_t::operator*(const matrix4f_t &_tran) const
     -> model_t::vertex_t {
-  auto coord_tmp = model_t::vertex_t(*this);
+  auto vertex(*this);
 
   auto coord4 = vector4f_t(coord.x(), coord.y(), coord.z(), 1);
   auto coord3 = _tran * coord4;
 
-  coord_tmp.coord.x() = coord3.x();
-  coord_tmp.coord.y() = coord3.y();
-  coord_tmp.coord.z() = coord3.z();
+  vertex.coord.x() = coord3.x();
+  vertex.coord.y() = coord3.y();
+  vertex.coord.z() = coord3.z();
 
-  return coord_tmp;
+  /// @todo 变换法线
+
+  return vertex;
 }
 
 model_t::face_t::face_t(const model_t::vertex_t &_v0,
@@ -65,10 +67,15 @@ model_t::face_t::face_t(const model_t::vertex_t &_v0,
 
 auto model_t::face_t::operator*(const matrix4f_t &_tran) const
     -> model_t::face_t {
-  auto face = model_t::face_t(*this);
+  auto face(*this);
   face.v0 = face.v0 * _tran;
   face.v1 = face.v1 * _tran;
   face.v2 = face.v2 * _tran;
+
+  /// @todo 通过矩阵变换法线
+  auto v2v0 = face.v2.coord - face.v0.coord;
+  auto v1v0 = face.v1.coord - face.v0.coord;
+  face.normal = (v2v0.cross(v1v0)).normalized();
 
   return face;
 }
@@ -180,7 +187,7 @@ model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path)
 
   // 计算模型包围盒
   set_box();
-  scale_half();
+  normalize();
 }
 
 auto model_t::operator*(const matrix4f_t &_tran) const -> model_t {
@@ -226,28 +233,27 @@ void model_t::set_box() {
   }
   box.min = min;
   box.max = max;
+  center.x() = (max.x() + min.x()) / 2.f;
+  center.y() = (max.y() + min.y()) / 2.f;
+  center.z() = (max.z() + min.z()) / 2.f;
+
+  SPDLOG_LOGGER_INFO(SRLOG, "box: \n{},\ncenter: {}", box, center);
 }
 
-void model_t::scale_half(size_t _width, size_t _height) {
-  // 各分量的长度
-  auto delta_x = (std::abs(box.max.x()) + std::abs(box.min.x()));
-  auto delta_y = (std::abs(box.max.y()) + std::abs(box.min.y()));
-  auto delta_z = (std::abs(box.max.z()) + std::abs(box.min.z()));
-  auto delta_xy_max = std::max(delta_x, delta_y);
-  auto delta_xyz_max = std::max(delta_xy_max, delta_z);
-  SPDLOG_LOGGER_INFO(SRLOG, "delta_xyz_max: {}", delta_xyz_max);
+void model_t::normalize() {
+  auto w = std::abs(box.max.x()) + std::abs(box.min.x());
+  auto h = std::abs(box.max.y()) + std::abs(box.min.y());
+  auto d = std::abs(box.max.z()) + std::abs(box.min.z());
+  auto scale = 2.0f / std::max(w, std::max(h, d));
 
-  // 缩放倍数
-  auto multi = static_cast<float>((_width < _height ? _width : _height) / 2.);
-  // 归一化并乘倍数
-  auto scale = multi / delta_xyz_max;
-
-  // 平移到屏幕中间
+  // 平移
   auto translate_mat = matrix4f_t();
   translate_mat.setIdentity();
-  translate_mat(0, 3) = WIDTH / 2;
-  translate_mat(1, 3) = HEIGHT / 2;
-  translate_mat(2, 3) = 0;
+  translate_mat(0, 3) = -center.x();
+  translate_mat(1, 3) = -center.y();
+  translate_mat(2, 3) = -center.z();
+
+  SPDLOG_LOGGER_INFO(SRLOG, "translate_mat: {}", translate_mat);
 
   // 缩放
   auto scale_mat = matrix4f_t();
@@ -256,12 +262,9 @@ void model_t::scale_half(size_t _width, size_t _height) {
   scale_mat.diagonal()[1] = scale;
   scale_mat.diagonal()[2] = scale;
 
-  auto matrix = matrix4f_t(translate_mat * scale_mat);
+  box.min = vector3f_t(-1, -1, -1);
+  box.max = vector3f_t(1, 1, 1);
+  center = vector3f_t(0, 0, 0);
 
-  SPDLOG_LOGGER_INFO(
-      SRLOG,
-      "multi: {}, scale: {}, translate_mat: {},\n scale_mat: {},\n apply: {}",
-      multi, scale, translate_mat, scale_mat, matrix);
-
-  *this = *this * matrix;
+  *this = *this * scale_mat * translate_mat;
 }

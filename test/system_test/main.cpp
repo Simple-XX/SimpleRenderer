@@ -22,7 +22,7 @@
 #include "config.h"
 #include "exception.hpp"
 #include "framebuffer.h"
-#include "model.h"
+#include "model.hpp"
 #include "render.h"
 #include "scene.h"
 #include "status.h"

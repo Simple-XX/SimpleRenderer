@@ -20,7 +20,7 @@
 #include "cstdint"
 #include "iostream"
 
-#include "vector.h"
+#include "vector.hpp"
 
 /**
  * 32 位颜色 RGBA

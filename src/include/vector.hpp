@@ -1,6 +1,6 @@
 
 /**
- * @file vector.h
+ * @file vector.hpp
  * @brief 向量模版
  * @author Zone.N (Zone.Niuzh@hotmail.com)
  * @version 1.0
@@ -14,10 +14,12 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_VECTOR_H
-#define SIMPLERENDER_VECTOR_H
+#ifndef SIMPLERENDER_VECTOR_HPP
+#define SIMPLERENDER_VECTOR_HPP
 
-#include "Eigen/Dense"
+#include <Eigen/Dense>
+
+#include "log.h"
 
 template <class T> using vector2_t = Eigen::Vector<T, 2>;
 template <class T> using vector3_t = Eigen::Vector<T, 3>;
@@ -27,4 +29,16 @@ using vector2f_t = vector2_t<float>;
 using vector3f_t = vector3_t<float>;
 using vector4f_t = vector4_t<float>;
 
-#endif /* SIMPLERENDER_VECTOR_H */
+/**
+ * spdlog 输出 vector3f_t 实现
+ */
+template <> struct fmt::formatter<vector3f_t> : fmt::formatter<std::string> {
+  auto format(vector3f_t _vector, format_context &_format_context) const
+      -> decltype(_format_context.out()) {
+    std::stringstream buf;
+    buf << _vector;
+    return format_to(_format_context.out(), "\n{}", buf.str());
+  }
+};
+
+#endif /* SIMPLERENDER_VECTOR_HPP */

@@ -1,6 +1,6 @@
 
 /**
- * @file model.h
+ * @file model.hpp
  * @brief 模型抽象
  * @author Zone.N (Zone.Niuzh@hotmail.com)
  * @version 1.0
@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_MODEL_H
-#define SIMPLERENDER_MODEL_H
+#ifndef SIMPLERENDER_MODEL_HPP
+#define SIMPLERENDER_MODEL_HPP
 
 #include <string>
 #include <vector>
@@ -24,8 +24,9 @@
 
 #include "color.h"
 #include "config.h"
+#include "log.h"
 #include "matrix.hpp"
-#include "vector.h"
+#include "vector.hpp"
 
 /**
  * 模型
@@ -211,17 +212,30 @@ private:
   /// 体积盒
   box_t box;
 
+  /// 模型的中心点
+  coord_t center;
+
   /**
    * 计算 model 的体积盒
    */
   void set_box();
 
   /**
-   * 缩放到显示区域较小的 1/2
-   * @param _width 显示区域宽度
-   * @param _height 显示区域高度
+   * 将模型归一化
    */
-  void scale_half(size_t _width = WIDTH, size_t _height = HEIGHT);
+  void normalize();
 };
 
-#endif /* SIMPLERENDER_MODEL_H */
+/**
+ * spdlog 输出 box_t 实现
+ */
+template <>
+struct fmt::formatter<model_t::box_t> : fmt::formatter<std::string> {
+  auto format(model_t::box_t _box, format_context &_format_context) const
+      -> decltype(_format_context.out()) {
+    return format_to(_format_context.out(), "max: {},\nmin: {}", _box.max,
+                     _box.min);
+  }
+};
+
+#endif /* SIMPLERENDER_MODEL_HPP */

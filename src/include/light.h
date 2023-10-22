@@ -21,7 +21,7 @@
 #include <string>
 
 #include "color.h"
-#include "vector.h"
+#include "vector.hpp"
 
 /**
  * 光照抽象

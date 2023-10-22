@@ -18,8 +18,8 @@
 #define SIMPLERENDER_SHADER_H
 
 #include "matrix.hpp"
-#include "model.h"
-#include "vector.h"
+#include "model.hpp"
+#include "vector.hpp"
 
 /**
  * 顶点着色器输入数据
@@ -162,11 +162,11 @@ public:
 class shader_data_t {
 public:
   /// 模型变换矩阵
-  matrix4f_t model_matrix;
+  matrix4f_t model_matrix = matrix4f_t().setIdentity();
   /// 视图变换矩阵
-  matrix4f_t view_matrix;
+  matrix4f_t view_matrix = matrix4f_t().setIdentity();
   /// 正交变换矩阵
-  matrix4f_t project_matrix;
+  matrix4f_t project_matrix = matrix4f_t().setIdentity();
 
   /**
    * 构造函数

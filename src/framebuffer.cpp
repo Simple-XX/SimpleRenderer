@@ -133,14 +133,6 @@ void framebuffer_t::line(float _x0, float _y0, float _x1, float _y1,
   auto p0_y = static_cast<int32_t>(_y0);
   auto p1_x = static_cast<int32_t>(_x1);
   auto p1_y = static_cast<int32_t>(_y1);
-  if (p0_x >= static_cast<int32_t>(WIDTH) ||
-      p0_y >= static_cast<int32_t>(HEIGHT) ||
-      p1_x >= static_cast<int32_t>(WIDTH) ||
-      p1_y >= static_cast<int32_t>(HEIGHT)) {
-    SPDLOG_LOGGER_WARN(
-        SRLOG, "WIDTH: {}, HEIGHT: {}, p0_x: {}, p0_y: {}, p1_x: {}, p1_y: {}",
-        WIDTH, HEIGHT, p0_x, p0_y, p1_x, p1_y);
-  }
 
   auto steep = false;
   if (std::abs(p0_x - p1_x) < std::abs(p0_y - p1_y)) {
@@ -166,12 +158,20 @@ void framebuffer_t::line(float _x0, float _y0, float _x1, float _y1,
     if (steep) {
       /// @todo 这里要用裁剪替换掉
       if ((unsigned)y >= width || (unsigned)x >= height) {
+        SPDLOG_LOGGER_WARN(SRLOG,
+                           "WIDTH: {}, HEIGHT: {}, p0_x: {}, p0_y: {}, p1_x: "
+                           "{}, p1_y: {}, x: {}, y: {}",
+                           WIDTH, HEIGHT, p0_x, p0_y, p1_x, p1_y, x, y);
         continue;
       }
       pixel(y, x, _color);
     } else {
       /// @todo 这里要用裁剪替换掉
       if ((unsigned)x >= width || (unsigned)y >= height) {
+        SPDLOG_LOGGER_WARN(SRLOG,
+                           "WIDTH: {}, HEIGHT: {}, p0_x: {}, p0_y: {}, p1_x: "
+                           "{}, p1_y: {}, x: {}, y: {}",
+                           WIDTH, HEIGHT, p0_x, p0_y, p1_x, p1_y, x, y);
         continue;
       }
       pixel(x, y, _color);
@@ -279,11 +279,30 @@ void framebuffer_t::model(const shader_base_t &_shader, const light_t &_light,
   }
 }
 
+static uint32_t rotate = 0;
+
 void framebuffer_t::scene(const shader_base_t &_shader, const scene_t &_scene,
                           uint32_t _obj_index, bool _draw_line,
                           bool _draw_triangle) {
   const auto &light = _scene.get_light();
-  const auto &model = _scene.get_models().at(_obj_index);
+  auto model = _scene.get_models().at(_obj_index);
+
+  //  // 旋转
+  //  rotate = (rotate + 1) % 360;
+  //  Eigen::AngleAxis<float> vec(rotate / M_PI, Eigen::Vector3f(0, 1, 0));
+  //  auto mat = vec.matrix();
+  //  auto rotation = matrix4f_t();
+  //  rotation.setIdentity();
+  //  rotation.block<3, 3>(0, 0) = mat;
+  //
+  //  // 平移到屏幕中间
+  //  auto translate_mat = matrix4f_t();
+  //  translate_mat.setIdentity();
+  //  translate_mat(0, 3) = WIDTH / 2;
+  //  translate_mat(1, 3) = HEIGHT / 2;
+  //  translate_mat(2, 3) = 0;
+  //
+  //  model = model * rotation * translate_mat;
   this->model(_shader, light, model, _draw_line, _draw_triangle);
 }
 

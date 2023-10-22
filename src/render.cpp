@@ -58,9 +58,27 @@ auto render_t::loop() -> state_t::status_t {
         i->line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, color_t::WHITE);
 
         // 设置 mvp 矩阵
-        shader->shader_data.model_matrix = matrix4f_t().setIdentity();
-        shader->shader_data.view_matrix = matrix4f_t().setIdentity();
-        shader->shader_data.project_matrix = matrix4f_t().setIdentity();
+        static uint32_t rotate = 0;
+        // 旋转
+        rotate = (rotate + 1) % 360;
+        Eigen::AngleAxis<float> vec(rotate / M_PI, Eigen::Vector3f(0, 1, 0));
+        auto mat = vec.matrix();
+        auto rotation = matrix4f_t();
+        rotation.setIdentity();
+        rotation.block<3, 3>(0, 0) = mat;
+        // 平移到屏幕中间
+        auto translate_mat = matrix4f_t();
+        translate_mat.setIdentity();
+        translate_mat(0, 3) = WIDTH / 2;
+        translate_mat(1, 3) = HEIGHT / 2;
+        translate_mat(2, 3) = 0;
+        // 缩放
+        auto scale_mat = matrix4f_t();
+        scale_mat.setIdentity();
+        scale_mat.diagonal()[0] = 64;
+        scale_mat.diagonal()[1] = 64;
+        scale_mat.diagonal()[2] = 64;
+        shader->shader_data.model_matrix = translate_mat * rotation * scale_mat;
 
         // 绘制场景
         if (state->obj_index >= scene->get_models().size()) {
