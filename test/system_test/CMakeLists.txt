@@ -14,6 +14,7 @@ enable_language(CXX)
 
 add_executable(system_test
         main.cpp
+        display.cpp
 )
 
 target_compile_options(system_test PRIVATE

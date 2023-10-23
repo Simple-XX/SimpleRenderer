@@ -13,7 +13,6 @@ set(lib_src
         scene.cpp
         shader.cpp
         framebuffer.cpp
-        display.cpp
         default_shader.cpp
         render.cpp
 )
