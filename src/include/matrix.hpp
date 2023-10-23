@@ -21,15 +21,22 @@
 
 #include "log.h"
 
+namespace SimpleRenderer {
+
 template <class T> using matrix4_t = Eigen::Matrix<T, 4, 4>;
 
 using matrix4f_t = matrix4_t<float>;
 
+} // namespace SimpleRenderer
+
 /**
  * spdlog 输出矩阵实现
  */
-template <> struct fmt::formatter<matrix4f_t> : fmt::formatter<std::string> {
-  auto format(matrix4f_t _matrix, format_context &_format_context) const
+template <>
+struct fmt::formatter<SimpleRenderer::matrix4f_t>
+    : fmt::formatter<std::string> {
+  auto format(SimpleRenderer::matrix4f_t _matrix,
+              format_context &_format_context) const
       -> decltype(_format_context.out()) {
     std::stringstream buf;
     buf << _matrix;

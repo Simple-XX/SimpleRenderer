@@ -19,6 +19,8 @@
 
 #include "shader.h"
 
+namespace SimpleRenderer {
+
 /**
  * 默认着色器
  */
@@ -67,5 +69,7 @@ private:
                                 const vector3f_t &_barycentric_coord)
       -> color_t;
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_DEFAULT_SHADER_H */

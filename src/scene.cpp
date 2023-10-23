@@ -18,6 +18,8 @@
 #include "log.h"
 #include "matrix.hpp"
 
+namespace SimpleRenderer {
+
 scene_t::scene_t(const std::string &_name) : name(_name) {}
 
 void scene_t::add_model(const model_t &_model) {
@@ -43,3 +45,5 @@ auto scene_t::tick(uint32_t _delta_time) -> bool {
 auto scene_t::get_light() -> light_t & { return light; }
 
 auto scene_t::get_light() const -> const light_t & { return light; }
+
+} // namespace SimpleRenderer

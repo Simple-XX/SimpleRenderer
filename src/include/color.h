@@ -22,6 +22,8 @@
 
 #include "vector.hpp"
 
+namespace SimpleRenderer {
+
 /**
  * 32 位颜色 RGBA
  * @note 不要进行会影响内存的修改
@@ -145,5 +147,7 @@ private:
   uint8_t channel_a = std::numeric_limits<uint8_t>::max();
   /// @}
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_COLOR_H */

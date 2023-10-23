@@ -16,8 +16,12 @@
 
 #include "light.h"
 
+namespace SimpleRenderer {
+
 const vector3f_t light_t::DEFAULT_POS = vector3f_t(0, 0, 0);
 const vector3f_t light_t::DEFAULT_DIR = vector3f_t(0, 0, -1);
 const color_t light_t::DEFAULT_COLOR = color_t::WHITE;
 
 light_t::light_t(const std::string &_name) : name(_name) {}
+
+} // namespace SimpleRenderer

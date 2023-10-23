@@ -27,6 +27,8 @@
 #include "color.h"
 #include "log.h"
 
+namespace SimpleRenderer {
+
 /**
  * 缓冲区，作为 framebuffer 或 zbuffer 的基类
  * @todo 大小不一样的赋值处理
@@ -136,5 +138,7 @@ private:
   /// 缓冲数组
   std::vector<T_t> buffer = {};
 };
+
+} // namespace SimpleRenderer
 
 #endif /* BUFFER_BASE_HPP */

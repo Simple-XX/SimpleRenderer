@@ -21,6 +21,8 @@
 #include "exception.hpp"
 #include "log.h"
 
+namespace SimpleRenderer {
+
 const color_t color_t::WHITE = color_t((uint8_t)0xFF, 0xFF, 0xFF);
 const color_t color_t::BLACK = color_t((uint8_t)0x00, 0x00, 0x00);
 const color_t color_t::RED = color_t((uint8_t)0xFF, 0x00, 0x00);
@@ -105,3 +107,5 @@ auto color_t::operator*=(float _val) -> color_t & {
 
   return ret;
 }
+
+} // namespace SimpleRenderer

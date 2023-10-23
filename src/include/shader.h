@@ -21,6 +21,8 @@
 #include "model.hpp"
 #include "vector.hpp"
 
+namespace SimpleRenderer {
+
 /**
  * 顶点着色器输入数据
  */
@@ -230,5 +232,7 @@ public:
   fragment(const shader_fragment_in_t &_shader_fragment_in) const
       -> shader_fragment_out_t = 0;
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_SHADER_H */

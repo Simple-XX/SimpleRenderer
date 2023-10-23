@@ -29,6 +29,8 @@
 #include "scene.h"
 #include "shader.h"
 
+namespace SimpleRenderer {
+
 /**
  * 帧缓冲
  * @todo 大小不一样的赋值处理
@@ -259,5 +261,7 @@ private:
   static auto interpolate_depth(float _depth0, float _depth1, float _depth2,
                                 const vector3f_t &_barycentric_coord) -> float;
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_FRAMEBUFFER_H */

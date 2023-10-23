@@ -23,6 +23,8 @@
 #include "color.h"
 #include "vector.hpp"
 
+namespace SimpleRenderer {
+
 /**
  * 光照抽象
  */
@@ -61,5 +63,7 @@ private:
   /// 默认颜色
   static const color_t DEFAULT_COLOR;
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_LIGHT_H */

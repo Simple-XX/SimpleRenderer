@@ -25,6 +25,8 @@
 
 #include "log.h"
 
+namespace SimpleRenderer {
+
 std::shared_ptr<spdlog::logger> SRLOG = nullptr;
 
 /// @note 在 win 下使用时需要在程序结束时使用 `spdlog::shutdown()` 回收资源
@@ -49,3 +51,5 @@ void log_init(void) {
     std::printf("Log initialization failed: %s\n", e.what());
   }
 }
+
+} // namespace SimpleRenderer

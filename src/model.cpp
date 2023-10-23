@@ -24,6 +24,8 @@
 #include "exception.hpp"
 #include "log.h"
 
+namespace SimpleRenderer {
+
 model_t::vertex_t::vertex_t(coord_t _coord, normal_t _normal,
                             texture_coord_t _texture_coord,
                             const color_t &_color)
@@ -268,3 +270,5 @@ void model_t::normalize() {
 
   *this = *this * scale_mat * translate_mat;
 }
+
+} // namespace SimpleRenderer

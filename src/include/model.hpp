@@ -28,6 +28,8 @@
 #include "matrix.hpp"
 #include "vector.hpp"
 
+namespace SimpleRenderer {
+
 /**
  * 模型
  */
@@ -226,12 +228,16 @@ private:
   void normalize();
 };
 
+} // namespace SimpleRenderer
+
 /**
  * spdlog 输出 box_t 实现
  */
 template <>
-struct fmt::formatter<model_t::box_t> : fmt::formatter<std::string> {
-  auto format(model_t::box_t _box, format_context &_format_context) const
+struct fmt::formatter<SimpleRenderer::model_t::box_t>
+    : fmt::formatter<std::string> {
+  auto format(SimpleRenderer::model_t::box_t _box,
+              format_context &_format_context) const
       -> decltype(_format_context.out()) {
     return format_to(_format_context.out(), "max: {},\nmin: {}", _box.max,
                      _box.min);

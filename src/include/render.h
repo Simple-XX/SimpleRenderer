@@ -29,6 +29,8 @@
 #include "shader.h"
 #include "status.h"
 
+namespace SimpleRenderer {
+
 /**
  * 渲染抽象
  */
@@ -78,5 +80,7 @@ private:
    */
   auto loop() -> state_t::status_t;
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_RENDER_H */

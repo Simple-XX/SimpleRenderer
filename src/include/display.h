@@ -26,6 +26,8 @@
 #include "framebuffer.h"
 #include "status.h"
 
+namespace SimpleRenderer {
+
 /**
  * 显示抽象
  */
@@ -92,5 +94,7 @@ private:
    */
   auto loop() -> state_t::status_t;
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_DISPLAY_H */

@@ -19,6 +19,8 @@
 #include "render.h"
 #include "status.h"
 
+namespace SimpleRenderer {
+
 render_t::render_t(
     const std::shared_ptr<state_t> &_state,
     const std::shared_ptr<scene_t> &_scene,
@@ -108,3 +110,5 @@ auto render_t::loop() -> state_t::status_t {
 auto render_t::run() -> std::future<state_t::status_t> {
   return std::async(std::launch::async, &render_t::loop, this);
 }
+
+} // namespace SimpleRenderer

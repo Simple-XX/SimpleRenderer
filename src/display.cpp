@@ -23,6 +23,8 @@
 #include "log.h"
 #include "status.h"
 
+namespace SimpleRenderer {
+
 /// @todo
 display_t::display_t(
     const std::shared_ptr<state_t> &_state,
@@ -177,3 +179,5 @@ auto display_t::loop() -> state_t::status_t {
 auto display_t::run() -> std::future<state_t::status_t> {
   return std::async(std::launch::async, &display_t::loop, this);
 }
+
+} // namespace SimpleRenderer

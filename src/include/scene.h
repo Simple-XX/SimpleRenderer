@@ -27,6 +27,8 @@
 #include "model.hpp"
 #include "vector.hpp"
 
+namespace SimpleRenderer {
+
 /**
  * 场景抽象
  */
@@ -95,5 +97,7 @@ private:
   /// 光照
   light_t light;
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_SCENE_H */

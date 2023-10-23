@@ -16,6 +16,8 @@
 
 #include "default_shader.h"
 
+namespace SimpleRenderer {
+
 auto default_shader_t::interpolate_color(const color_t &_color0,
                                          const color_t &_color1,
                                          const color_t &_color2,
@@ -70,3 +72,5 @@ auto default_shader_t::fragment(const shader_fragment_in_t &_shader_fragment_in)
       intensity;
   return shader_fragment_out_t(is_need_draw, color);
 }
+
+} // namespace SimpleRenderer

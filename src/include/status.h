@@ -19,6 +19,8 @@
 
 #include <atomic>
 
+namespace SimpleRenderer {
+
 /// 运行状态
 struct state_t {
   enum status_t : uint8_t {
@@ -41,5 +43,7 @@ struct state_t {
   /// 当前绘制的 obj 索引
   std::atomic_uint32_t obj_index = 0;
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_STATUS_H */

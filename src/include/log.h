@@ -23,6 +23,8 @@
 
 #include "config.h"
 
+namespace SimpleRenderer {
+
 extern std::shared_ptr<spdlog::logger> SRLOG;
 
 /// @todo 修复 clang-tidy
@@ -42,5 +44,7 @@ inline auto us() {
 }
 
 void log_init(void);
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_LOG_H */

@@ -16,6 +16,8 @@
 
 #include "shader.h"
 
+namespace SimpleRenderer {
+
 shader_vertex_in_t::shader_vertex_in_t(const model_t::face_t &_face)
     : face(_face) {}
 
@@ -40,3 +42,5 @@ shader_data_t::shader_data_t(const matrix4f_t &_model_matrix,
                              const matrix4f_t &_project_matrix)
     : model_matrix(_model_matrix), view_matrix(_view_matrix),
       project_matrix(_project_matrix) {}
+
+} // namespace SimpleRenderer

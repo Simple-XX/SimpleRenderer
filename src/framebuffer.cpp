@@ -20,6 +20,8 @@
 #include "exception.hpp"
 #include "framebuffer.h"
 
+namespace SimpleRenderer {
+
 namespace {
 /// 缓冲区计数，用于设置 id
 size_t count = 0;
@@ -347,3 +349,5 @@ auto framebuffer_t::interpolate_depth(float _depth0, float _depth1,
   depth += _depth2 * _barycentric_coord.z();
   return depth;
 }
+
+} // namespace SimpleRenderer
