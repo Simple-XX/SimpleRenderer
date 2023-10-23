@@ -20,6 +20,8 @@
 #include <string>
 #include <string_view>
 
+namespace SimpleRenderer {
+
 /// obj 文件目录
 static const std::string OBJ_FILE_PATH =
     std::string("@OBJ_FILE_PATH@");
@@ -40,5 +42,7 @@ static const std::string LOG_FILE_PATH =
 static constexpr const size_t LOG_FILE_MAX_SIZE = @LOG_FILE_MAX_SIZE@;
 /// 日志文件数量
 static constexpr const size_t LOG_FILE_MAX_COUNT = @LOG_FILE_MAX_COUNT@;
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_CONFIG_H */
