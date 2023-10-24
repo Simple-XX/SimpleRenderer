@@ -17,9 +17,30 @@
 #ifndef SIMPLERENDER_SIMPLERENDER_H
 #define SIMPLERENDER_SIMPLERENDER_H
 
-#include "framebuffer.h"
-#include "light.h"
-#include "render.h"
-#include "scene.h"
+#include <array>
+#include <cstdint>
+#include <string_view>
+#include <vector>
+
+template <size_t _W, size_t _H> class SimpleRenderer {
+public:
+  explicit SimpleRenderer();
+
+  /// @name 默认构造/析构函数
+  /// @{
+  SimpleRenderer() = default;
+  SimpleRenderer(const SimpleRenderer &_simplerenderer) = default;
+  SimpleRenderer(SimpleRenderer &&_simplerenderer) = default;
+  auto operator=(const SimpleRenderer &_simplerenderer)
+      -> SimpleRenderer & = default;
+  auto operator=(SimpleRenderer &&_simplerenderer)
+      -> SimpleRenderer & = default;
+  virtual ~SimpleRenderer() = default;
+  /// @}
+
+  void add_model(const std::string_view &_obj_path);
+  auto get_buffer() const -> const &std::array<uint32_t, _W * _H>;
+  void loop();
+};
 
 #endif /* SIMPLERENDER_SIMPLERENDER_H */
