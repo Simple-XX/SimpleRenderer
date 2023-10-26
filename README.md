@@ -51,3 +51,5 @@ done
 数字键 1：绘制线框
 数字键 2：绘制三角形
 TAB：切换模型
+
+sudo apt install doxygen cppcheck clang-tidy clang-format lcov libsdl2-dev libspdlog-dev
