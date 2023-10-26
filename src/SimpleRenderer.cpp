@@ -23,6 +23,8 @@
 #include "render.h"
 #include "scene.h"
 
+namespace SimpleRenderer {
+
 static auto state = std::make_shared<state_t>();
 static auto scene = std::make_shared<scene_t>();
 static std::vector<std::shared_ptr<framebuffer_t>> framebuffers;
@@ -63,3 +65,5 @@ template <size_t _W, size_t _H> void SimpleRenderer::loop() {
   auto render_ret = render.run();
   return render_ret.get();
 }
+
+} // namespace SimpleRenderer

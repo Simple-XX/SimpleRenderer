@@ -22,6 +22,8 @@
 #include <string_view>
 #include <vector>
 
+namespace SimpleRenderer {
+
 template <size_t _W, size_t _H> class SimpleRenderer {
 public:
   SimpleRenderer();
@@ -41,5 +43,7 @@ public:
   auto get_buffer() const -> const std::array<uint32_t, _W * _H> &;
   void loop();
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_SIMPLERENDER_H */

@@ -22,11 +22,8 @@
 
 #include <SDL.h>
 
-#include "config.h"
-#include "framebuffer.h"
-#include "status.h"
 
-namespace SimpleRenderer {
+#include "framebuffer.h"
 
 /**
  * 显示抽象
@@ -36,11 +33,10 @@ public:
   /**
    * 构造函数
    * @param _state 运行状态
-   * @param _framebuffers 缓冲区
+   * @param _width 宽度
+   * @param _height 高度
    */
-  explicit display_t(
-      const std::shared_ptr<state_t> &_state,
-      const std::vector<std::shared_ptr<framebuffer_t>> &_framebuffers);
+  explicit display_t(size_t _width, size_t _height);
 
   /**
    * 析构函数
@@ -60,12 +56,12 @@ public:
    * 将 framebuffer 中的数据绘制到屏幕上
    * @param _framebuffer 要绘制的 framebuffer
    */
-  void fill(const std::shared_ptr<framebuffer_t> &_framebuffer);
+  void fill(const std::shared_ptr<SimpleRenderer::framebuffer_t> &_framebuffer);
 
   /**
    * 运行
    */
-  auto run() -> std::future<state_t::status_t>;
+  void run();
 
 private:
   /// 窗口标题
@@ -73,10 +69,6 @@ private:
   /// 默认字体大小
   static constexpr const int32_t DEFAULT_FONT_SIZE = 32;
 
-  /// 状态
-  std::shared_ptr<state_t> state;
-  /// 缓冲
-  std::vector<std::shared_ptr<framebuffer_t>> framebuffers;
   /// 窗口宽度
   size_t width;
   /// 窗口高度
@@ -92,9 +84,7 @@ private:
   /**
    * 显示循环
    */
-  auto loop() -> state_t::status_t;
+  void loop();
 };
-
-} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_DISPLAY_H */

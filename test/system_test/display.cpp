@@ -14,29 +14,19 @@
  * </table>
  */
 
+#include <exception>
 #include <future>
 #include <iostream>
 
-#include "config.h"
 #include "display.h"
-#include "exception.hpp"
-#include "log.h"
-#include "status.h"
-
-namespace SimpleRenderer {
 
 /// @todo
-display_t::display_t(
-    const std::shared_ptr<state_t> &_state,
-    const std::vector<std::shared_ptr<framebuffer_t>> &_framebuffers)
-    : state(_state), framebuffers(_framebuffers),
-      width(_framebuffers.at(0)->get_width()),
-      height(_framebuffers.at(0)->get_height()) {
+display_t::display_t(size_t _width, size_t _height)
+    : width(_width), height(_height) {
   // 初始化 sdl
-
   auto ret = SDL_Init(SDL_INIT_VIDEO);
   if (ret != 0) {
-    throw SimpleRenderer::exception(SDL_GetError());
+    throw std::runtime_error(SDL_GetError());
   }
   // 创建窗口，居中，可见
   sdl_window =
@@ -45,7 +35,7 @@ display_t::display_t(
                        static_cast<int32_t>(height), SDL_WINDOW_SHOWN);
   if (sdl_window == nullptr) {
     SDL_Quit();
-    throw SimpleRenderer::exception(SDL_GetError());
+    throw std::runtime_error(SDL_GetError());
   }
 
   // 创建渲染器
@@ -53,7 +43,7 @@ display_t::display_t(
   if (sdl_renderer == nullptr) {
     SDL_DestroyWindow(sdl_window);
     SDL_Quit();
-    throw SimpleRenderer::exception(SDL_GetError());
+    throw std::runtime_error(SDL_GetError());
   }
   // 设置 alpha 通道有效
   SDL_SetRenderDrawBlendMode(sdl_renderer, SDL_BLENDMODE_BLEND);
@@ -66,7 +56,7 @@ display_t::display_t(
     SDL_DestroyRenderer(sdl_renderer);
     SDL_DestroyWindow(sdl_window);
     SDL_Quit();
-    throw SimpleRenderer::exception(SDL_GetError());
+    throw std::runtime_error(SDL_GetError());
   }
 }
 
@@ -78,19 +68,20 @@ display_t::~display_t() {
   SDL_Quit();
 }
 
-void display_t::fill(const std::shared_ptr<framebuffer_t> &_framebuffer) {
+void display_t::fill(
+    const std::shared_ptr<SimpleRenderer::framebuffer_t> &_framebuffer) {
   // 更新 texture
-  auto res = SDL_UpdateTexture(sdl_texture, nullptr,
-                               _framebuffer->get_color_buffer().data(),
-                               static_cast<int32_t>(width * color_t::bpp()));
+  auto res = SDL_UpdateTexture(
+      sdl_texture, nullptr, _framebuffer->get_color_buffer().data(),
+      static_cast<int32_t>(width * _framebuffer->get_color_buffer().BPP));
   if (res != 0) {
-    throw SimpleRenderer::exception(SDL_GetError());
+    throw std::runtime_error(SDL_GetError());
   }
 
   // 复制到渲染器
   res = SDL_RenderCopy(sdl_renderer, sdl_texture, nullptr, nullptr);
   if (res != 0) {
-    throw SimpleRenderer::exception(SDL_GetError());
+    throw std::runtime_error(SDL_GetError());
   }
 
   // 刷新
@@ -99,14 +90,15 @@ void display_t::fill(const std::shared_ptr<framebuffer_t> &_framebuffer) {
 
 /// @todo 验证 std::condition_variable 的正确性
 /// @todo 保证时序正确
-auto display_t::loop() -> state_t::status_t {
-  while (state->status.load() != state_t::STOP) {
-    SDL_Event event = SDL_Event();
+void display_t::loop() {
+  SDL_Event event = SDL_Event();
+  bool is_exit = false;
+  while (is_exit == false) {
     bool is_mouse_down = false;
 
     while (SDL_PollEvent(&event) != 0) {
       if (event.type == SDL_QUIT) {
-        state->status.store(state_t::STOP);
+        is_exit = true;
       }
       switch (event.type) {
       // 键盘事件
@@ -117,23 +109,23 @@ auto display_t::loop() -> state_t::status_t {
         }
         case SDLK_TAB: {
           state->obj_index++;
-          SPDLOG_LOGGER_INFO(SRLOG, "obj_index: {}", state->obj_index);
+          std::cout << "obj_index: " << state->obj_index << '\n';
           break;
         }
         case SDLK_1: {
           state->draw_line = !state->draw_line;
-          SPDLOG_LOGGER_INFO(SRLOG, "draw_line: {}", state->draw_line);
+          std::cout << "draw_line: " << state->draw_line << '\n';
           break;
         }
         case SDLK_2: {
           state->draw_triangle = !state->draw_triangle;
-          SPDLOG_LOGGER_INFO(SRLOG, "draw_triangle: {}", state->draw_triangle);
+          std::cout << "draw_triangle: " << state->draw_triangle << '\n';
           break;
         }
         default: {
           // 输出按键名
-          SPDLOG_LOGGER_INFO(SRLOG, "key {} down!",
-                             SDL_GetKeyName(event.key.keysym.sym));
+          std::cout << "key " << SDL_GetKeyName(event.key.keysym.sym)
+                    << " down!\n";
           break;
         }
         }
@@ -143,18 +135,18 @@ auto display_t::loop() -> state_t::status_t {
       case SDL_MOUSEMOTION: {
         // 鼠标拖动
         if (is_mouse_down) {
-          SPDLOG_LOGGER_INFO(SRLOG, "鼠标拖动 {} {}", event.motion.xrel,
-                             event.motion.yrel);
+          std::cout << "鼠标拖动 " << event.motion.xrel << " "
+                    << event.motion.yrel << '\n';
         }
-        SPDLOG_LOGGER_DEBUG(SRLOG, "鼠标移动 {} {}", event.motion.xrel,
-                            event.motion.yrel);
+        std::cout << "鼠标移动 " << event.motion.xrel << " "
+                  << event.motion.yrel << '\n';
         break;
       }
       // 鼠标按下
       case SDL_MOUSEBUTTONDOWN: {
         is_mouse_down = true;
-        SPDLOG_LOGGER_DEBUG(SRLOG, "鼠标点击 {} {}", event.button.x,
-                            event.button.y);
+        std::cout << "鼠标点击 " << event.button.x << " " << event.button.y
+                  << '\n';
         break;
       }
         // 鼠标释放
@@ -166,20 +158,17 @@ auto display_t::loop() -> state_t::status_t {
     }
 
     // 等待获取锁
-    for (const auto &i : framebuffers) {
-      while (!i->displayable.load()) {
-        ;
-      }
-      // 填充窗口
-      fill(i);
-      i->displayable = false;
-    }
+    // for (const auto &i : framebuffers) {
+    //   while (!i->displayable.load()) {
+    //     ;
+    //   }
+    //   // 填充窗口
+    //   fill(i);
+    //   i->displayable = false;
+    // }
   }
-  return state_t::STOP;
 }
 
-auto display_t::run() -> std::future<state_t::status_t> {
-  return std::async(std::launch::async, &display_t::loop, this);
+void display_t::run() {
+  std::async(std::launch::async, &display_t::loop, this);
 }
-
-} // namespace SimpleRenderer

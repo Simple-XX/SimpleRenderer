@@ -19,7 +19,9 @@
 #include <string>
 #include <vector>
 
-#include "SimpleRenderer.h"
+#include <SimpleRenderer.h>
+
+#include "display.h"
 
 /// obj 文件目录
 static const std::string OBJ_FILE_PATH =
@@ -74,7 +76,7 @@ auto main(int, char **) -> int {
   //   throw SimpleRenderer::exception("display thread exit with error");
   // }
 
-  SimpleRenderer<WIDTH, HEIGHT> render;
+  SimpleRenderer::SimpleRenderer<WIDTH, HEIGHT> render;
   for (auto &obj : objs) {
     render.add_model(obj);
   }
