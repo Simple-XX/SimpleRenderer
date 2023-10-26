@@ -29,7 +29,7 @@ TEST(model_t_scale_half, 函数测试) {
   EXPECT_FLOAT_EQ(scale, 272.19403);
 
   // 缩放
-  auto scale_mat = matrix4f_t();
+  auto scale_mat = SimpleRenderer::matrix4f_t();
   scale_mat.setIdentity();
   scale_mat.diagonal()[0] = scale;
   scale_mat.diagonal()[1] = scale;
@@ -37,10 +37,10 @@ TEST(model_t_scale_half, 函数测试) {
   std::cout << scale_mat << std::endl;
 
   // 从左上角移动到指定位置
-  auto translate_mat = matrix4f_t();
+  auto translate_mat = SimpleRenderer::matrix4f_t();
   translate_mat.setIdentity();
-  translate_mat(0, 3) = WIDTH / 2;
-  translate_mat(1, 3) = HEIGHT / 2;
+  translate_mat(0, 3) = 1920 / 2;
+  translate_mat(1, 3) = 1080 / 2;
   translate_mat(2, 3) = 0;
   std::cout << translate_mat << std::endl;
 

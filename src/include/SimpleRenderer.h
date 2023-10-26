@@ -24,11 +24,10 @@
 
 template <size_t _W, size_t _H> class SimpleRenderer {
 public:
-  explicit SimpleRenderer();
+  SimpleRenderer();
 
   /// @name 默认构造/析构函数
   /// @{
-  SimpleRenderer() = default;
   SimpleRenderer(const SimpleRenderer &_simplerenderer) = default;
   SimpleRenderer(SimpleRenderer &&_simplerenderer) = default;
   auto operator=(const SimpleRenderer &_simplerenderer)
@@ -39,7 +38,7 @@ public:
   /// @}
 
   void add_model(const std::string_view &_obj_path);
-  auto get_buffer() const -> const &std::array<uint32_t, _W * _H>;
+  auto get_buffer() const -> const std::array<uint32_t, _W * _H> &;
   void loop();
 };
 

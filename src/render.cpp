@@ -49,15 +49,17 @@ auto render_t::loop() -> state_t::status_t {
       if (!i->displayable.load()) {
         // 清空缓冲区
         i->clear();
+        auto height = i->get_height();
+        auto width = i->get_width();
 
         // 右对角线
-        i->line(0, HEIGHT - 1, WIDTH - 1, 0, color_t::WHITE);
+        i->line(0, height - 1, width - 1, 0, color_t::WHITE);
         // 左对角线
-        i->line(WIDTH - 1, HEIGHT - 1, 0, 0, color_t::WHITE);
+        i->line(width - 1, height - 1, 0, 0, color_t::WHITE);
         // 水平平分线
-        i->line(WIDTH - 1, HEIGHT / 2, 0, HEIGHT / 2, color_t::WHITE);
+        i->line(width - 1, height / 2, 0, height / 2, color_t::WHITE);
         // 垂直平分线
-        i->line(WIDTH / 2, 0, WIDTH / 2, HEIGHT - 1, color_t::WHITE);
+        i->line(width / 2, 0, width / 2, height - 1, color_t::WHITE);
 
         // 设置 mvp 矩阵
         static uint32_t rotate = 0;
@@ -71,8 +73,8 @@ auto render_t::loop() -> state_t::status_t {
         // 平移到屏幕中间
         auto translate_mat = matrix4f_t();
         translate_mat.setIdentity();
-        translate_mat(0, 3) = WIDTH / 2;
-        translate_mat(1, 3) = HEIGHT / 2;
+        translate_mat(0, 3) = width / 2;
+        translate_mat(1, 3) = height / 2;
         translate_mat(2, 3) = 0;
         // 缩放
         auto scale_mat = matrix4f_t();

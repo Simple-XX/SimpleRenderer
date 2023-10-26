@@ -22,18 +22,8 @@
 
 namespace SimpleRenderer {
 
-/// obj 文件目录
-static const std::string OBJ_FILE_PATH =
-    std::string("@OBJ_FILE_PATH@");
-
 /// 线程数
 static constexpr const size_t NPROC = @NPROC@;
-
-/// @name 默认大小
-/// @{
-static constexpr const size_t WIDTH = 1920;
-static constexpr const size_t HEIGHT = 1080;
-/// @}
 
 /// 日志文件路径
 static const std::string LOG_FILE_PATH =

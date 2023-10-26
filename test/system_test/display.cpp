@@ -29,7 +29,9 @@ namespace SimpleRenderer {
 display_t::display_t(
     const std::shared_ptr<state_t> &_state,
     const std::vector<std::shared_ptr<framebuffer_t>> &_framebuffers)
-    : state(_state), framebuffers(_framebuffers), width(WIDTH), height(HEIGHT) {
+    : state(_state), framebuffers(_framebuffers),
+      width(_framebuffers.at(0)->get_width()),
+      height(_framebuffers.at(0)->get_height()) {
   // 初始化 sdl
 
   auto ret = SDL_Init(SDL_INIT_VIDEO);

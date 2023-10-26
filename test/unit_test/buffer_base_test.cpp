@@ -19,7 +19,7 @@
 #include "buffer_base.hpp"
 
 TEST(buffer_base_t, 空构造) {
-  buffer_base_t<float> buffer_base0;
+  SimpleRenderer::buffer_base_t<float> buffer_base0;
   EXPECT_EQ(buffer_base0.get_width(), 0);
   EXPECT_EQ(buffer_base0.get_height(), 0);
   EXPECT_EQ(buffer_base0.length(), 0);
@@ -27,14 +27,14 @@ TEST(buffer_base_t, 空构造) {
 }
 
 TEST(buffer_base_t, 拷贝构造) {
-  buffer_base_t<float> buffer_base0((uint32_t)100, 200, 0);
+  SimpleRenderer::buffer_base_t<float> buffer_base0((uint32_t)100, 200, 0);
   EXPECT_EQ(buffer_base0.get_width(), 100);
   EXPECT_EQ(buffer_base0.get_height(), 200);
   EXPECT_EQ(buffer_base0.BPP, sizeof(uint32_t));
   EXPECT_EQ(buffer_base0.length(), 100 * sizeof(uint32_t) * 200);
   EXPECT_NE(buffer_base0.data(), nullptr);
 
-  buffer_base_t<float> buffer_base1;
+  SimpleRenderer::buffer_base_t<float> buffer_base1;
   buffer_base1 = buffer_base0;
   EXPECT_EQ(buffer_base1.get_width(), 100);
   EXPECT_EQ(buffer_base1.get_height(), 200);
@@ -44,7 +44,7 @@ TEST(buffer_base_t, 拷贝构造) {
 }
 
 TEST(buffer_base_t, clear) {
-  buffer_base_t<float> buffer_base0((uint32_t)100, 200, 0);
+  SimpleRenderer::buffer_base_t<float> buffer_base0((uint32_t)100, 200, 0);
   EXPECT_EQ(buffer_base0.get_width(), 100);
   EXPECT_EQ(buffer_base0.get_height(), 200);
   EXPECT_EQ(buffer_base0.BPP, sizeof(uint32_t));
@@ -56,7 +56,7 @@ TEST(buffer_base_t, clear) {
 }
 
 TEST(buffer_base_t, 不同大小的buffer赋值) {
-  buffer_base_t<float> buffer_base;
+  SimpleRenderer::buffer_base_t<float> buffer_base;
   EXPECT_TRUE(buffer_base.get_height() == 0);
   EXPECT_TRUE(buffer_base.get_width() == 0);
 }

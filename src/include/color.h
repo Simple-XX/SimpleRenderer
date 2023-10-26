@@ -17,8 +17,8 @@
 #ifndef SIMPLERENDER_COLOR_H
 #define SIMPLERENDER_COLOR_H
 
-#include "cstdint"
-#include "iostream"
+#include <cstdint>
+#include <iostream>
 
 #include "vector.hpp"
 

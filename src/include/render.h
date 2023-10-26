@@ -23,7 +23,6 @@
 
 #include "config.h"
 #include "default_shader.h"
-#include "display.h"
 #include "framebuffer.h"
 #include "scene.h"
 #include "shader.h"
@@ -68,8 +67,6 @@ private:
   std::shared_ptr<state_t> state;
   /// 场景
   std::shared_ptr<scene_t> scene;
-  /// 显示
-  std::shared_ptr<display_t> display;
   /// 着色器
   std::shared_ptr<shader_base_t> shader = std::make_shared<default_shader_t>();
   /// 缓冲

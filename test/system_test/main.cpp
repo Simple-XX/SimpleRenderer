@@ -21,9 +21,18 @@
 
 #include "SimpleRenderer.h"
 
+/// obj 文件目录
+static const std::string OBJ_FILE_PATH =
+    std::string("/Users/nzh/Documents/SimpleRenderer/obj/");
+
+/// @name 默认大小
+/// @{
+static constexpr const size_t WIDTH = 1920;
+static constexpr const size_t HEIGHT = 1080;
+/// @}
+
 // @todo 不应该出现明确的类型，应该使用模板
 auto main(int, char **) -> int {
-  log_init();
   // obj 路径
   std::vector<std::string> objs;
   objs.emplace_back(OBJ_FILE_PATH + "cube.obj");
@@ -65,7 +74,7 @@ auto main(int, char **) -> int {
   //   throw SimpleRenderer::exception("display thread exit with error");
   // }
 
-  SimpleRenderer render(1920, 1080);
+  SimpleRenderer<WIDTH, HEIGHT> render;
   for (auto &obj : objs) {
     render.add_model(obj);
   }

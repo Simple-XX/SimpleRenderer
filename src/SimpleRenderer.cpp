@@ -49,7 +49,7 @@ void SimpleRenderer::add_model(const std::string_view &_obj_path) {
 
 template <size_t _W, size_t _H>
 auto SimpleRenderer::get_buffer() const
-    -> const &std::array<uint32_t, _W * _H> {
+    -> const std::array<uint32_t, _W * _H> & {
   while (1) {
     for (const auto &i : framebuffers) {
       if (i->displayable == true) {
