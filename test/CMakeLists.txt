@@ -4,58 +4,47 @@
 #
 # CMakeLists.txt for Simple-XX/SimpleRenderer.
 
-# Set CXX flags for debug
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-
-# gtest
-include(FetchContent)
-FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG release-1.12.1
+# 设置项目名与版本
+project(
+        test
+        VERSION 0.0.1
 )
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
-find_package(SDL2 REQUIRED)
-find_package(SDL2_ttf REQUIRED)
-find_package(OpenMP REQUIRED)
-
-# Set include dir
-include_directories(
-        ${SimpleRender_SOURCE_DIR}/src/include
-        ${SimpleRender_SOURCE_DIR}/src/3rd)
-
-set(test_src
-        vector_test.cpp
-        render_test.cpp
-        matrix_test.cpp
-        color_test.cpp
-        ${SimpleRender_SOURCE_DIR}/src/model.cpp
-        ${SimpleRender_SOURCE_DIR}/src/display.cpp
-        ${SimpleRender_SOURCE_DIR}/src/framebuffer.cpp
-        ${SimpleRender_SOURCE_DIR}/src/camera.cpp
-        ${SimpleRender_SOURCE_DIR}/src/shader.cpp
-        ${SimpleRender_SOURCE_DIR}/src/default_shader.cpp
-        ${SimpleRender_SOURCE_DIR}/src/color.cpp
-        ${SimpleRender_SOURCE_DIR}/src/scene.cpp
-        ${SimpleRender_SOURCE_DIR}/src/light.cpp
-        ${SimpleRender_SOURCE_DIR}/src/input.cpp
-        ${SimpleRender_SOURCE_DIR}/src/render.cpp)
 
 enable_testing()
+include(GoogleTest)
 
-# 生成可执行文件
-add_executable(test
-        ${test_src})
+include_directories(
+        ${SimpleRenderer_SOURCE_DIR}/src/include
+)
 
-target_link_libraries(test
+list(APPEND DEFAULT_TEST_COMPILE_OPTIONS
+        ${DEFAULT_COMPILE_OPTIONS}
+        --coverage
+)
+
+list(APPEND DEFAULT_TEST_LINK_OPTIONS
+        --coverage
+        $<$<CXX_COMPILER_ID:GNU>:
+        -fsanitize=leak
+        >
+        -fsanitize=address
+        -fno-omit-frame-pointer
+)
+
+link_libraries(
+        ${DEFAULT_LINK_LIB}
         gtest_main
         ${glog_LIBRARIES}
-        SDL2::Main
-        SDL2::TTF
-        OpenMP::OpenMP_CXX)
+        SimpleRenderer-shared
+)
 
-include(GoogleTest)
-gtest_discover_tests(test)
+add_subdirectory(unit_test)
+#add_subdirectory(integration_test)
+add_subdirectory(system_test)
+
+add_coverage_target(
+        DEPENDS unit_test
+        SOURCE_DIR ${SimpleRenderer_SOURCE_DIR}
+        BINARY_DIR ${SimpleRenderer_BINARY_DIR}
+        EXCLUDE_DIR ${SimpleRenderer_SOURCE_DIR}/3rd/*
+)

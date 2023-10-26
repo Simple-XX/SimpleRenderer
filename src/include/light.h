@@ -17,52 +17,53 @@
 #ifndef SIMPLERENDER_LIGHT_H
 #define SIMPLERENDER_LIGHT_H
 
-#include "cstdint"
+#include <cstdint>
+#include <string>
 
 #include "color.h"
 #include "vector.hpp"
 
+namespace SimpleRenderer {
+
 /**
- * @brief 光照抽象
+ * 光照抽象
  */
 class light_t {
-private:
-    /// @brief 默认位置
-    const vector4f_t DEFAULT_POS   = vector4f_t(0, 0, 0);
-    /// @brief 默认方向，左手系，x 向右，y 向下，z 正方向为屏幕由内向外
-    const vector4f_t DEFAULT_DIR   = vector4f_t(0, 0, -1);
-    /// @brief 默认颜色
-    const color_t    DEFAULT_COLOR = color_t(color_t::WHITE);
-
 public:
-    /// @brief 位置
-    vector4f_t pos;
-    /// @brief 方向
-    vector4f_t dir;
-    /// @brief 颜色
-    color_t    color;
+  /// 光照名称
+  std::string name = "default light name";
+  /// 位置
+  vector3f_t pos = DEFAULT_POS;
+  /// 方向
+  vector3f_t dir = DEFAULT_DIR;
+  /// 颜色
+  color_t color = DEFAULT_COLOR;
 
-    /**
-     * @brief 空构造函数
-     */
-    light_t(void);
+  /**
+   * 构造函数
+   * @param _name 光照名称
+   */
+  explicit light_t(const std::string &_name);
 
-    /**
-     * @brief 构造函数
-     */
-    light_t(const light_t& _light);
+  /// @name 默认构造/析构函数
+  /// @{
+  light_t() = default;
+  light_t(const light_t &_light) = default;
+  light_t(light_t &&_light) = default;
+  auto operator=(const light_t &_light) -> light_t & = default;
+  auto operator=(light_t &&_light) -> light_t & = default;
+  ~light_t() = default;
+  /// @}
 
-    /**
-     * @brief 析构函数
-     */
-    ~light_t(void);
-
-    /**
-     * @brief 赋值
-     * @param  _light            另一个 light
-     * @return light_t&          结果
-     */
-    light_t& operator=(const light_t& _light);
+private:
+  /// 默认位置
+  static const vector3f_t DEFAULT_POS;
+  /// 默认方向，左手系，x 向右，y 向下，z 正方向为屏幕由内向外
+  static const vector3f_t DEFAULT_DIR;
+  /// 默认颜色
+  static const color_t DEFAULT_COLOR;
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_LIGHT_H */

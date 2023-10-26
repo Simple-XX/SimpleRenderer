@@ -1,34 +1,17 @@
-# Prerequisites
-*.d
 
-# Compiled Object files
-*.slo
-*.lo
+# This file is a part of Simple-XX/SimpleRenderer
+# (https://github.com/Simple-XX/SimpleRenderer).
+#
+# .gitignore for Simple-XX/SimpleRenderer.
+
 *.o
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
+.DS_Store
 build
-cmake-build-*
+cmake-build*
+.gdbinit
+tools/opensbi/build
+.vscode
+.idea
+3rd
+Doxyfile
+src/include/config.h

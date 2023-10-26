@@ -1,6 +1,6 @@
 
 /**
- * @file scend.h
+ * @file scene.h
  * @brief 场景抽象
  * @author Zone.N (Zone.Niuzh@hotmail.com)
  * @version 1.0
@@ -17,139 +17,87 @@
 #ifndef SIMPLERENDER_SCENE_H
 #define SIMPLERENDER_SCENE_H
 
-#include "cstdint"
-#include "memory"
-#include "queue"
-#include "vector"
+#include <queue>
+#include <string>
+#include <vector>
 
-#include "camera.h"
 #include "config.h"
 #include "light.h"
 #include "matrix.hpp"
-#include "model.h"
+#include "model.hpp"
 #include "vector.hpp"
 
+namespace SimpleRenderer {
+
 /**
- * @brief 场景抽象
+ * 场景抽象
  */
 class scene_t {
-private:
-    /// @brief 配置文件
-    std::shared_ptr<config_t>  config;
-
-    /// @brief 场景中的摄像机
-    std::vector<camera_base_t> cameras;
-    /// @brief 当前使用的摄像机
-    camera_base_t              current_camera;
-
-    /// @brief 场景中的所有模型
-    std::vector<model_t>       models;
-    /// @brief 场景中的可见模型，即要渲染的模型队列
-    std::queue<model_t>        visible_models;
-
-    /// @brief 场景中的所有光照
-    std::vector<light_t>       lights;
-    /// @brief 场景中的光照合并值
-    light_t                    light;
-
 public:
-    /**
-     * @brief 空构造函数
-     */
-    scene_t(void) = delete;
+  /// 场景名称
+  std::string name = "default scene name";
 
-    /**
-     * @brief 构造函数
-     * @param  _config          配置信息
-     */
-    explicit scene_t(const std::shared_ptr<config_t>& _config);
+  /**
+   * 构造函数
+   * @param _name 场景名称
+   */
+  explicit scene_t(const std::string &_name);
 
-    /**
-     * @brief 构造函数
-     * @param  _scene           另一个 scene
-     */
-    scene_t(const scene_t& _scene);
+  /// @name 默认构造/析构函数
+  /// @{
+  scene_t() = default;
+  scene_t(const scene_t &_scene) = default;
+  scene_t(scene_t &&_scene) = default;
+  auto operator=(const scene_t &_scene) -> scene_t & = default;
+  auto operator=(scene_t &&_scene) -> scene_t & = default;
+  virtual ~scene_t() = default;
+  /// @}
 
-    /**
-     * @brief 析构函数
-     */
-    ~scene_t(void);
+  /**
+   * 将模型添加到场景中，缩放到合适大小，移到屏幕中央
+   * @param _model 要添加的 model
+   */
+  void add_model(const model_t &_model);
 
-    /**
-     * @brief 赋值
-     * @param  _scene           另一个 light
-     * @return scene_t&         结果
-     */
-    scene_t&  operator=(const scene_t& _scene);
+  /**
+   * 获取模型向量
+   * @return 模型向量
+   */
+  [[nodiscard]] auto get_models() const -> const std::vector<model_t> &;
 
-    /**
-     * @brief 将模型添加到场景中，缩放到合适大小，移到屏幕中央
-     * @param  _model           要添加的 model
-     */
-    void      add_model(const model_t& _model);
+  /**
+   * 设置场景光照
+   * @param _light 要设置的 light
+   */
+  void set_light(const light_t &_light);
 
-    /**
-     * @brief 将模型添加到场景中
-     * @param  _model           要添加的 model
-     * @param  _model_matrix    模型变换矩阵变换
-     */
-    void      add_model(const model_t& _model, const matrix4f_t& _model_matrix);
+  /**
+   * 更新场景，根据时间变化更新，返回是否继续运行
+   * @param _delta_time 时间变化
+   * @return 返回 false 时结束运行
+   */
+  auto tick(uint32_t _delta_time) -> bool;
 
-    /**
-     * @brief 将光照添加到场景中
-     * @param  _light           要添加的 light
-     */
-    void      add_light(const light_t& _light);
+  /**
+   * 获取场景的光照
+   * @return 场景的光照信息
+   */
+  [[nodiscard]] auto get_light() -> light_t &;
 
-    /**
-     * @brief 更新场景，根据时间变化更新，返回是否继续运行
-     * @param  _delta_time      时间变化
-     * @return true             运行
-     * @return false            结束
-     */
-    bool      tick(uint32_t _delta_time);
+  /**
+   * 获取场景的光照
+   * @return 场景的配置信息
+   */
+  [[nodiscard]] auto get_light() const -> const light_t &;
 
-    /**
-     * @brief 获取场景的配置信息
-     * @return config_t&        场景的配置信息
-     */
-    config_t& get_config(void);
+private:
+  /// 场景中的所有模型
+  std::vector<model_t> models;
 
-    /**
-     * @brief 获取场景的配置信息
-     * @return const config_t&  场景的配置信息
-     */
-    const config_t&            get_config(void) const;
-
-    /**
-     * @brief 获取当前相机
-     * @return camera_base_t&   要渲染的模型队列
-     */
-    camera_base_t&             get_current_camera(void);
-
-    /**
-     * @brief 获取当前相机
-     * @return const camera_base_t& 要渲染的模型队列
-     */
-    const camera_base_t&       get_current_camera(void) const;
-
-    /**
-     * @brief 获取要渲染的模型队列
-     * @return const std::queue<model_t>&   要渲染的模型队列
-     */
-    const std::queue<model_t>& get_visible_models(void) const;
-
-    /**
-     * @brief 获取场景的光照
-     * @return light_t&         场景的配置信息
-     */
-    light_t&                   get_light(void);
-
-    /**
-     * @brief 获取场景的光照
-     * @return const light_t&   场景的配置信息
-     */
-    const light_t&             get_light(void) const;
+  /// 光照
+  light_t light;
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_SCENE_H */

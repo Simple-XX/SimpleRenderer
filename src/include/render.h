@@ -17,81 +17,67 @@
 #ifndef SIMPLERENDER_RENDER_H
 #define SIMPLERENDER_RENDER_H
 
-#include "cstdint"
-#include "memory"
+#include <cstdint>
+#include <future>
+#include <memory>
 
 #include "config.h"
 #include "default_shader.h"
-#include "display.h"
 #include "framebuffer.h"
-#include "input.h"
 #include "scene.h"
 #include "shader.h"
+#include "status.h"
+
+namespace SimpleRenderer {
 
 /**
- * @brief 渲染抽象
+ * 渲染抽象
  */
 class render_t {
-private:
-    /// @brief 配置信息
-    std::shared_ptr<config_t>                   config;
-    /// @brief 场景
-    std::shared_ptr<scene_t>                    scene;
-    /// @brief 显示
-    std::shared_ptr<display_t>                  display;
-    /// @brief 输入
-    std::shared_ptr<input_t>                    input;
-
-    /// @brief 缓冲
-    std::vector<std::shared_ptr<framebuffer_t>> framebuffer;
-
-    /// @brief 着色器
-    default_shader_t                            shader;
-
-    /// @brief 是否还在运行，为 false 时退出
-    std::atomic_bool                            is_running = true;
-
 public:
-    /**
-     * @brief 空构造函数
-     */
-    render_t(void) = delete;
+  /**
+   * 构造函数
+   * @param _state 运行状态
+   * @param _scene 场景
+   * @param _input 输入
+   * @param _framebuffer 缓冲区
+   */
+  explicit render_t(
+      const std::shared_ptr<state_t> &_state,
+      const std::shared_ptr<scene_t> &_scene,
+      const std::vector<std::shared_ptr<framebuffer_t>> &_framebuffers);
 
-    /**
-     * @brief 构造函数
-     * @param _config           配置信息
-     * @param _scene            场景
-     * @param _display          显示
-     * @param _framebuffer      缓冲区
-     * @param _input            输入
-     */
-    explicit render_t(const std::shared_ptr<config_t>&  _config,
-                      const std::shared_ptr<scene_t>&   _scene,
-                      const std::shared_ptr<display_t>& _display,
-                      const std::shared_ptr<input_t>&   _input);
+  /// @name 默认构造/析构函数
+  /// @{
+  render_t() = default;
+  render_t(const render_t &_render) = default;
+  render_t(render_t &&_render) = default;
+  auto operator=(const render_t &_render) -> render_t & = default;
+  auto operator=(render_t &&_render) -> render_t & = default;
+  ~render_t() = default;
+  /// @}
 
-    /**
-     * @brief 构造函数
-     * @param  _render          另一个 render
-     */
-    render_t(const render_t& _render);
+  /**
+   * 运行
+   */
+  auto run() -> std::future<state_t::status_t>;
 
-    /**
-     * @brief 析构函数
-     */
-    ~render_t(void);
+private:
+  /// 状态
+  std::shared_ptr<state_t> state;
+  /// 场景
+  std::shared_ptr<scene_t> scene;
+  /// 着色器
+  std::shared_ptr<shader_base_t> shader = std::make_shared<default_shader_t>();
+  /// 缓冲
+  std::vector<std::shared_ptr<framebuffer_t>> framebuffers;
 
-    /**
-     * @brief 赋值
-     * @param  _render          另一个 render
-     * @return render_t&        结果
-     */
-    render_t& operator=(const render_t& _render);
-
-    /**
-     * @brief 渲染循环
-     */
-    void      loop(void);
+  /**
+   * 渲染循环
+   */
+  auto loop() -> state_t::status_t;
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_RENDER_H */

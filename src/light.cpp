@@ -16,27 +16,12 @@
 
 #include "light.h"
 
-light_t::light_t(void)
-    : pos(DEFAULT_POS), dir(DEFAULT_DIR), color(DEFAULT_COLOR) {
-    return;
-}
+namespace SimpleRenderer {
 
-light_t::light_t(const light_t& _light) {
-    pos   = _light.pos;
-    dir   = _light.dir;
-    color = _light.color;
+const vector3f_t light_t::DEFAULT_POS = vector3f_t(0, 0, 0);
+const vector3f_t light_t::DEFAULT_DIR = vector3f_t(0, 0, -1);
+const color_t light_t::DEFAULT_COLOR = color_t::WHITE;
 
-    return;
-}
+light_t::light_t(const std::string &_name) : name(_name) {}
 
-light_t::~light_t(void) {
-    return;
-}
-
-light_t& light_t::operator=(const light_t& _light) {
-    pos   = _light.pos;
-    dir   = _light.dir;
-    color = _light.color;
-
-    return *this;
-}
+} // namespace SimpleRenderer

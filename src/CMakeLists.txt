@@ -4,50 +4,75 @@
 #
 # CMakeLists.txt for Simple-XX/SimpleRenderer.
 
-# Set CXX flags for debug
-if (CMAKE_BUILD_TYPE STREQUAL DEBUG)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -ggdb -Wall -Wextra")
-elseif (CMAKE_BUILD_TYPE STREQUAL RELEASE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
-else ()
-    set(CMAKE_BUILD_TYPE DEBUG)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -ggdb -Wall -Wextra")
-endif ()
-
-# Set common flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
-
-message(STATUS "CMAKE_CXX_FLAGS is ${CMAKE_CXX_FLAGS}")
-
-# @todo cmake 警告
-find_package(SDL2 REQUIRED)
-find_package(SDL2_ttf REQUIRED)
-find_package(OpenMP REQUIRED)
-
-# Set include dir
-include_directories(
-        ./include
-        ./3rd)
-
-set(SimpleRender_src
-        main.cpp
-        model.cpp
-        framebuffer.cpp
-        display.cpp
-        camera.cpp
-        shader.cpp
-        default_shader.cpp
+# 生成库需要的源文件
+set(lib_src
+        log.cpp
         color.cpp
-        scene.cpp
+        model.cpp
         light.cpp
-        input.cpp
-        render.cpp)
+        scene.cpp
+        shader.cpp
+        framebuffer.cpp
+        default_shader.cpp
+        render.cpp
+)
 
-# 生成可执行文件
-add_executable(SimpleRender
-        ${SimpleRender_src})
+# 生成动态库
+add_library(${PROJECT_NAME}-shared SHARED
+        ${lib_src}
+)
 
-target_link_libraries(SimpleRender
-        SDL2::Main
-        SDL2::TTF
-        OpenMP::OpenMP_CXX)
+target_include_directories(
+        ${PROJECT_NAME}-shared PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/include>
+        $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
+)
+
+target_compile_options(${PROJECT_NAME}-shared PRIVATE
+        ${DEFAULT_COMPILE_OPTIONS}
+)
+
+target_link_libraries(${PROJECT_NAME}-shared PRIVATE
+        ${DEFAULT_LINK_LIB}
+)
+
+# 生成静态库
+add_library(${PROJECT_NAME}-static STATIC
+        ${lib_src}
+)
+
+target_include_directories(
+        ${PROJECT_NAME}-static PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/include>
+        $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
+)
+
+target_compile_options(${PROJECT_NAME}-static PRIVATE
+        ${DEFAULT_COMPILE_OPTIONS}
+)
+
+target_link_libraries(${PROJECT_NAME}-static PRIVATE
+        ${DEFAULT_LINK_LIB}
+)
+
+# 打包
+# @todo 导出静态库与动态库
+packageProject(
+        # 要导出的 target
+        NAME ${PROJECT_NAME}-shared
+        # 版本
+        VERSION ${PROJECT_VERSION}
+        # 生成文件目录
+        BINARY_DIR ${PROJECT_BINARY_DIR}
+        # 头文件路径
+        INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src/include
+        # 与 target 的 INSTALL_INTERFACE 一致
+        INCLUDE_DESTINATION include/${PROJECT_NAME}-${PROJECT_VERSION}
+        # 头文件过滤
+        INCLUDE_HEADER_PATTERN "*.h"
+        # namespace 名称，不能包含 '::'
+        NAMESPACE ${PROJECT_NAMESPACE}
+        # (optional) option to disable the versioning of install destinations
+        DISABLE_VERSION_SUFFIX YES
+        ARCH_INDEPENDENT YES
+        # 生成 CPack 变量
+        CPACK YES
+)

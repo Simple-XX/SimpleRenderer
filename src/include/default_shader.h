@@ -19,50 +19,57 @@
 
 #include "shader.h"
 
+namespace SimpleRenderer {
+
 /**
- * @brief 默认着色器
+ * 默认着色器
  */
 class default_shader_t : public shader_base_t {
-private:
-    /**
-     * @brief 颜色插值，由重心坐标计算出对应点的颜色
-     * @param  _color0          第一个点的颜色
-     * @param  _color1          第二个点的颜色
-     * @param  _color2          第三个点的颜色
-     * @param  _barycentric_coord   重心坐标
-     * @return color_t          颜色值
-     */
-    static color_t
-    interpolate_color(const color_t& _color0, const color_t& _color1,
-                      const color_t&    _color2,
-                      const vector4f_t& _barycentric_coord);
-
 public:
-    /**
-     * @brief 构造函数
-     */
-    default_shader_t(void);
+  /// @name 默认构造/析构函数
+  /// @{
+  default_shader_t() = default;
+  default_shader_t(const default_shader_t &_default_shader) = default;
+  default_shader_t(default_shader_t &&_default_shader) = default;
+  auto operator=(const default_shader_t &_default_shader)
+      -> default_shader_t & = default;
+  auto operator=(default_shader_t &&_default_shader)
+      -> default_shader_t & = default;
+  ~default_shader_t() override = default;
+  /// @}
 
-    /**
-     * @brief 析构函数
-     */
-    ~default_shader_t(void);
+  /**
+   * 顶点着色器
+   * @param _shader_vertex_in 输入
+   * @return 输出
+   */
+  [[nodiscard]] auto vertex(const shader_vertex_in_t &_shader_vertex_in) const
+      -> shader_vertex_out_t final;
 
-    /**
-     * @brief 顶点着色器
-     * @param  _shader_vertex_in    输入
-     * @return const shader_vertex_out_t    输出
-     */
-    shader_vertex_out_t
-    vertex(const shader_vertex_in_t& _shader_vertex_in) const override final;
+  /**
+   * 片段着色器
+   * @param _shader_fragment_in 输入
+   * @return 输出
+   */
+  [[nodiscard]] auto
+  fragment(const shader_fragment_in_t &_shader_fragment_in) const
+      -> shader_fragment_out_t final;
 
-    /**
-     * @brief 片段着色器
-     * @param  _shader_fragment_in  输入
-     * @return const shader_fragment_out_t  输出
-     */
-    shader_fragment_out_t fragment(
-      const shader_fragment_in_t& _shader_fragment_in) const override final;
+private:
+  /**
+   * 颜色插值，由重心坐标计算出对应点的颜色
+   * @param _color0 第一个点的颜色
+   * @param _color1 第二个点的颜色
+   * @param _color2 第三个点的颜色
+   * @param _barycentric_coord 重心坐标
+   * @return 颜色值
+   */
+  static auto interpolate_color(const color_t &_color0, const color_t &_color1,
+                                const color_t &_color2,
+                                const vector3f_t &_barycentric_coord)
+      -> color_t;
 };
+
+} // namespace SimpleRenderer
 
 #endif /* SIMPLERENDER_DEFAULT_SHADER_H */

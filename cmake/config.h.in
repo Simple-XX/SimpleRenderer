@@ -1,0 +1,38 @@
+
+/**
+ * @file config.h
+ * @brief 项目配置
+ * @author Zone.N (Zone.Niuzh@hotmail.com)
+ * @version 1.0
+ * @date 2023-08-24
+ * @copyright MIT LICENSE
+ * https://github.com/Simple-XX/SimpleRenderer
+ * @par change log:
+ * <table>
+ * <tr><th>Date<th>Author<th>Description
+ * <tr><td>2023-08-24<td>Zone.N<td>创建文件
+ * </table>
+ */
+
+#ifndef SIMPLERENDER_CONFIG_H
+#define SIMPLERENDER_CONFIG_H
+
+#include <string>
+#include <string_view>
+
+namespace SimpleRenderer {
+
+/// 线程数
+static constexpr const size_t NPROC = @NPROC@;
+
+/// 日志文件路径
+static const std::string LOG_FILE_PATH =
+    std::string("@LOG_FILE_PATH@");
+/// 日志文件大小
+static constexpr const size_t LOG_FILE_MAX_SIZE = @LOG_FILE_MAX_SIZE@;
+/// 日志文件数量
+static constexpr const size_t LOG_FILE_MAX_COUNT = @LOG_FILE_MAX_COUNT@;
+
+} // namespace SimpleRenderer
+
+#endif /* SIMPLERENDER_CONFIG_H */
