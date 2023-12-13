@@ -80,6 +80,8 @@ auto main(int, char **) -> int {
   for (auto &obj : objs) {
     render.add_model(obj);
   }
+  
+  render.get_buffer();
 
   return 0;
 }
