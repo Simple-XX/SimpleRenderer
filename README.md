@@ -1,7 +1,7 @@
 [![codecov](https://codecov.io/gh/Simple-XX/SimpleRenderer/graph/badge.svg?token=J7NKK3SBNJ)](https://codecov.io/gh/Simple-XX/SimpleRenderer)
 ![workflow](https://github.com/Simple-XX/SimpleRenderer/actions/workflows/workflow.yml/badge.svg)
 ![commit-activity](https://img.shields.io/github/commit-activity/t/Simple-XX/SimpleRenderer)
-![last-commit-build](https://img.shields.io/github/last-commit/Simple-XX/SimpleRenderer/build)
+![last-commit-main](https://img.shields.io/github/last-commit/Simple-XX/SimpleRenderer/main)
 ![MIT License](https://img.shields.io/github/license/mashape/apistatus.svg)
 [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
