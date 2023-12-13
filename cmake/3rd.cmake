@@ -259,3 +259,33 @@ if (NOT spdlog_FOUND)
     message(FATAL_ERROR "spdlog not found.\n"
             "Following https://github.com/gabime/spdlog to install.")
 endif ()
+
+find_package(GLUT REQUIRED)
+if (NOT GLUT_FOUND)
+    message(FATAL_ERROR "GLUT not found.\n"
+            "Following https://www.opengl.org/resources/libraries/glut/ to install.")
+endif ()
+
+find_package(OpenGL REQUIRED)
+if (NOT OpenGL_FOUND)
+    message(FATAL_ERROR "OpenGL not found.\n"
+            "Following https://www.opengl.org/ to install.")
+endif ()
+
+find_package(VTK REQUIRED)
+if (NOT VTK_FOUND)
+    message(FATAL_ERROR "VTK not found.\n"
+            "Following https://vtk.org/ to install.")
+endif ()
+
+find_package(glm REQUIRED)
+if (NOT glm_FOUND)
+    message(FATAL_ERROR "glm not found.\n"
+            "Following https://github.com/g-truc/glm to install.")
+endif ()
+
+find_package(glfw3 REQUIRED)
+if (NOT glfw3_FOUND)
+    message(FATAL_ERROR "glfw3 not found.\n"
+            "Following https://www.glfw.org to install.")
+endif ()

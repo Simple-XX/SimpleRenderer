@@ -22,11 +22,29 @@
 #include <string_view>
 #include <vector>
 
-namespace SimpleRenderer {
+#include "framebuffer.h"
+#include "light.h"
+#include "render.h"
+#include "scene.h"
 
+namespace SimpleRenderer {
 template <size_t _W, size_t _H> class SimpleRenderer {
 public:
-  SimpleRenderer();
+  SimpleRenderer()
+      : render(std::ref(state), std::ref(scene), std::ref(framebuffers)) {
+    // 初始化日志系统
+    log_init();
+
+    // 添加缓冲区
+    framebuffers.emplace_back(std::make_shared<framebuffer_t>(_W, _H));
+    framebuffers.emplace_back(std::make_shared<framebuffer_t>(_W, _H));
+    framebuffers.emplace_back(std::make_shared<framebuffer_t>(_W, _H));
+    // 设置光照
+    scene->set_light(light_t());
+    // 初始化渲染器
+    // render = render_t(std::ref(state), std::ref(scene),
+    // std::ref(framebuffers));
+  }
 
   /// @name 默认构造/析构函数
   /// @{
@@ -39,9 +57,31 @@ public:
   virtual ~SimpleRenderer() = default;
   /// @}
 
-  void add_model(const std::string_view &_obj_path);
-  auto get_buffer() const -> const std::array<uint32_t, _W * _H> &;
-  void loop();
+  void add_model(const std::string &_obj_path) {
+    auto model = model_t(_obj_path);
+    scene->add_model(model);
+  }
+
+  auto get_buffer() const -> const std::array<uint32_t, _W * _H> & {
+    while (1) {
+      for (const auto &i : framebuffers) {
+        if (i->displayable == true) {
+          return i;
+        }
+      }
+    }
+  }
+
+  void loop() {
+    auto render_ret = render.run();
+    // return render_ret.get();
+  }
+
+private:
+  std::shared_ptr<scene_t> state;
+  std::shared_ptr<scene_t> scene;
+  std::vector<std::shared_ptr<framebuffer_t>> framebuffers;
+  render_t render;
 };
 
 } // namespace SimpleRenderer

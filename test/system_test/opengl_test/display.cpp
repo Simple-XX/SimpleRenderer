@@ -108,18 +108,18 @@ void display_t::loop() {
           break;
         }
         case SDLK_TAB: {
-          state->obj_index++;
-          std::cout << "obj_index: " << state->obj_index << '\n';
+          // state->obj_index++;
+          // std::cout << "obj_index: " << state->obj_index << '\n';
           break;
         }
         case SDLK_1: {
-          state->draw_line = !state->draw_line;
-          std::cout << "draw_line: " << state->draw_line << '\n';
+          // // state->draw_line = !state->draw_line;
+          // std::cout << "draw_line: " << state->draw_line << '\n';
           break;
         }
         case SDLK_2: {
-          state->draw_triangle = !state->draw_triangle;
-          std::cout << "draw_triangle: " << state->draw_triangle << '\n';
+          // // state->draw_triangle = !state->draw_triangle;
+          // std::cout << "draw_triangle: " << state->draw_triangle << '\n';
           break;
         }
         default: {
