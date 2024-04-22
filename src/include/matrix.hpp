@@ -40,7 +40,7 @@ struct fmt::formatter<SimpleRenderer::matrix4f_t>
       -> decltype(_format_context.out()) {
     std::stringstream buf;
     buf << _matrix;
-    return format_to(_format_context.out(), "\n{}", buf.str());
+    return fmt::format_to(_format_context.out(), "\n{}", buf.str());
   }
 };
 

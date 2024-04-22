@@ -19,7 +19,10 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <immintrin.h>
+#if defined(x86_64)
+// #include <immintrin.h>
+#endif
+
 #include <memory>
 #include <mutex>
 #include <type_traits>

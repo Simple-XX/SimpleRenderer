@@ -44,7 +44,7 @@ struct fmt::formatter<SimpleRenderer::vector3f_t>
       -> decltype(_format_context.out()) {
     std::stringstream buf;
     buf << _vector;
-    return format_to(_format_context.out(), "\n{}", buf.str());
+    return fmt::format_to(_format_context.out(), "\n{}", buf.str());
   }
 };
 

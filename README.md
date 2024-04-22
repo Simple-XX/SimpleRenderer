@@ -53,3 +53,8 @@ done
 TAB：切换模型
 
 sudo apt install doxygen cppcheck clang-tidy clang-format lcov libsdl2-dev libspdlog-dev
+
+```shell
+brew install gcc g++ cmake doxygen graphviz cppcheck llvm lcov sdl2 spdlog libomp
+CC=gcc-13 CXX=g++-13 cmake --preset build
+```

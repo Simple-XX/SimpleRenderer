@@ -239,7 +239,7 @@ struct fmt::formatter<SimpleRenderer::model_t::box_t>
   auto format(SimpleRenderer::model_t::box_t _box,
               format_context &_format_context) const
       -> decltype(_format_context.out()) {
-    return format_to(_format_context.out(), "max: {},\nmin: {}", _box.max,
+    return fmt::format_to(_format_context.out(), "max: {},\nmin: {}", _box.max,
                      _box.min);
   }
 };
