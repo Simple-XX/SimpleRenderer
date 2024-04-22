@@ -241,13 +241,6 @@ if (NOT SDL2_FOUND)
             "Following https://github.com/libsdl-org/SDL to install.")
 endif ()
 
-if (APPLE)
-    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include/ -I/opt/homebrew/Cellar/libomp/18.1.4/include")
-    set(OpenMP_C_LIB_NAMES "omp")
-    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include/ -I/opt/homebrew/Cellar/libomp/18.1.4/include")
-    set(OpenMP_CXX_LIB_NAMES "omp")
-    set(OpenMP_omp_LIBRARY /opt/homebrew/Cellar/libomp/18.1.4/lib/libomp.dylib)
-endif ()
 find_package(OpenMP REQUIRED)
 if (NOT OpenMP_FOUND)
     message(FATAL_ERROR "OpenMP not found.\n"

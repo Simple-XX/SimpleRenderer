@@ -7,6 +7,16 @@
   },
   "configurePresets": [
     {
+      "name": "host",
+      "description": "Linux Only",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
       "name": "std",
       "description": "This preset makes sure the project actually builds with at least the specified standard",
       "hidden": true,
@@ -23,6 +33,7 @@
       "name": "configurePresets_base",
       "hidden": true,
       "inherits": [
+        "host",
         "std"
       ],
       "displayName": "configurePresets_base",
