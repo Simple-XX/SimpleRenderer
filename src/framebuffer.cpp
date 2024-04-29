@@ -281,13 +281,13 @@ void framebuffer_t::model(const shader_base_t &_shader, const light_t &_light,
   }
 }
 
-void framebuffer_t::scene(const shader_base_t &_shader, const scene_t &_scene,
-                          uint32_t _obj_index, bool _draw_line,
-                          bool _draw_triangle) {
-  const auto &light = _scene.get_light();
-  auto model = _scene.get_models().at(_obj_index);
-  this->model(_shader, light, model, _draw_line, _draw_triangle);
-}
+//void framebuffer_t::scene(const shader_base_t &_shader, const scene_t &_scene,
+//                          uint32_t _obj_index, bool _draw_line,
+//                          bool _draw_triangle) {
+//  const auto &light = _scene.get_light();
+//  auto model = _scene.get_models().at(_obj_index);
+//  this->model(_shader, light, model, _draw_line, _draw_triangle);
+//}
 
 /// @todo 巨大性能开销
 auto framebuffer_t::get_barycentric_coord(const vector3f_t &_p0,

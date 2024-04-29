@@ -14,7 +14,6 @@ set(lib_src
         shader.cpp
         framebuffer.cpp
         default_shader.cpp
-        render.cpp
 )
 
 # 生成动态库

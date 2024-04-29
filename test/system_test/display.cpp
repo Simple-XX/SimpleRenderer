@@ -88,87 +88,87 @@ void display_t::fill(
   SDL_RenderPresent(sdl_renderer);
 }
 
-/// @todo 验证 std::condition_variable 的正确性
-/// @todo 保证时序正确
-void display_t::loop() {
-  SDL_Event event = SDL_Event();
-  bool is_exit = false;
-  while (is_exit == false) {
-    bool is_mouse_down = false;
-
-    while (SDL_PollEvent(&event) != 0) {
-      if (event.type == SDL_QUIT) {
-        is_exit = true;
-      }
-      switch (event.type) {
-      // 键盘事件
-      case SDL_KEYDOWN: {
-        switch (event.key.keysym.sym) {
-        case SDLK_SPACE: {
-          break;
-        }
-        case SDLK_TAB: {
-          state->obj_index++;
-          std::cout << "obj_index: " << state->obj_index << '\n';
-          break;
-        }
-        case SDLK_1: {
-          state->draw_line = !state->draw_line;
-          std::cout << "draw_line: " << state->draw_line << '\n';
-          break;
-        }
-        case SDLK_2: {
-          state->draw_triangle = !state->draw_triangle;
-          std::cout << "draw_triangle: " << state->draw_triangle << '\n';
-          break;
-        }
-        default: {
-          // 输出按键名
-          std::cout << "key " << SDL_GetKeyName(event.key.keysym.sym)
-                    << " down!\n";
-          break;
-        }
-        }
-        break;
-      }
-      // 鼠标移动
-      case SDL_MOUSEMOTION: {
-        // 鼠标拖动
-        if (is_mouse_down) {
-          std::cout << "鼠标拖动 " << event.motion.xrel << " "
-                    << event.motion.yrel << '\n';
-        }
-        std::cout << "鼠标移动 " << event.motion.xrel << " "
-                  << event.motion.yrel << '\n';
-        break;
-      }
-      // 鼠标按下
-      case SDL_MOUSEBUTTONDOWN: {
-        is_mouse_down = true;
-        std::cout << "鼠标点击 " << event.button.x << " " << event.button.y
-                  << '\n';
-        break;
-      }
-        // 鼠标释放
-      case SDL_MOUSEBUTTONUP: {
-        is_mouse_down = false;
-        break;
-      }
-      }
-    }
-
-    // 等待获取锁
-    // for (const auto &i : framebuffers) {
-    //   while (!i->displayable.load()) {
-    //     ;
-    //   }
-    //   // 填充窗口
-    //   fill(i);
-    //   i->displayable = false;
-    // }
-  }
-}
-
-void display_t::run() {
-  std::async(std::launch::async, &display_t::loop, this);
-}
+///// @todo 验证 std::condition_variable 的正确性
+///// @todo 保证时序正确
+//void display_t::loop() {
+//  SDL_Event event = SDL_Event();
+//  bool is_exit = false;
+//  while (is_exit == false) {
+//    bool is_mouse_down = false;
+//
+//    while (SDL_PollEvent(&event) != 0) {
+//      if (event.type == SDL_QUIT) {
+//        is_exit = true;
+//      }
+//      switch (event.type) {
+//      // 键盘事件
+//      case SDL_KEYDOWN: {
+//        switch (event.key.keysym.sym) {
+//        case SDLK_SPACE: {
+//          break;
+//        }
+//        case SDLK_TAB: {
+//          state->obj_index++;
+//          std::cout << "obj_index: " << state->obj_index << '\n';
+//          break;
+//        }
+//        case SDLK_1: {
+//          state->draw_line = !state->draw_line;
+//          std::cout << "draw_line: " << state->draw_line << '\n';
+//          break;
+//        }
+//        case SDLK_2: {
+//          state->draw_triangle = !state->draw_triangle;
+//          std::cout << "draw_triangle: " << state->draw_triangle << '\n';
+//          break;
+//        }
+//        default: {
+//          // 输出按键名
+//          std::cout << "key " << SDL_GetKeyName(event.key.keysym.sym)
+//                    << " down!\n";
+//          break;
+//        }
+//        }
+//        break;
+//      }
+//      // 鼠标移动
+//      case SDL_MOUSEMOTION: {
+//        // 鼠标拖动
+//        if (is_mouse_down) {
+//          std::cout << "鼠标拖动 " << event.motion.xrel << " "
+//                    << event.motion.yrel << '\n';
+//        }
+//        std::cout << "鼠标移动 " << event.motion.xrel << " "
+//                  << event.motion.yrel << '\n';
+//        break;
+//      }
+//      // 鼠标按下
+//      case SDL_MOUSEBUTTONDOWN: {
+//        is_mouse_down = true;
+//        std::cout << "鼠标点击 " << event.button.x << " " << event.button.y
+//                  << '\n';
+//        break;
+//      }
+//        // 鼠标释放
+//      case SDL_MOUSEBUTTONUP: {
+//        is_mouse_down = false;
+//        break;
+//      }
+//      }
+//    }
+//
+//    // 等待获取锁
+//    // for (const auto &i : framebuffers) {
+//    //   while (!i->displayable.load()) {
+//    //     ;
+//    //   }
+//    //   // 填充窗口
+//    //   fill(i);
+//    //   i->displayable = false;
+//    // }
+//  }
+//}
+//
+//void display_t::run() {
+//  std::async(std::launch::async, &display_t::loop, this);
+//}
