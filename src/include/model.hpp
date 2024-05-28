@@ -56,10 +56,10 @@ class Model {
     /// @name 默认构造/析构函数
     /// @{
     Material() = default;
-    Material(const Material &_material) = default;
-    Material(Material &&_material) = default;
-    auto operator=(const Material &_material) -> Material & = default;
-    auto operator=(Material &&_material) -> Material & = default;
+    Material(const Material &material) = default;
+    Material(Material &&material) = default;
+    auto operator=(const Material &material) -> Material & = default;
+    auto operator=(Material &&material) -> Material & = default;
     ~Material() = default;
     /// @}
   };
@@ -85,30 +85,30 @@ class Model {
 
     /**
      * 构造函数
-     * @param _coord 坐标
-     * @param _normal 法向量
-     * @param _texture_coord 贴图
-     * @param _color 颜色
+     * @param coord 坐标
+     * @param normal 法向量
+     * @param texture_coord 贴图
+     * @param color 颜色
      */
-    explicit Vertex(Coord _coord, Normal _normal, TextureCoord _texture_coord,
-                    const Color &_color);
+    explicit Vertex(Coord coord, Normal normal, TextureCoord texture_coord,
+                    const Color &color);
 
     /// @name 默认构造/析构函数
     /// @{
     Vertex() = default;
-    Vertex(const Vertex &_vertex) = default;
-    Vertex(Vertex &&_vertex) = default;
-    auto operator=(const Vertex &_vertex) -> Vertex & = default;
-    auto operator=(Vertex &&_vertex) -> Vertex & = default;
+    Vertex(const Vertex &vertex) = default;
+    Vertex(Vertex &&vertex) = default;
+    auto operator=(const Vertex &vertex) -> Vertex & = default;
+    auto operator=(Vertex &&vertex) -> Vertex & = default;
     ~Vertex() = default;
     /// @}
 
     /**
      * * 重载，对顶点应用变换矩阵
-     * @param _tran 要对顶点进行的变换矩阵
+     * @param tran 要对顶点进行的变换矩阵
      * @return 结果
      */
-    [[nodiscard]] auto operator*(const Matrix4f &_tran) const -> Vertex;
+    [[nodiscard]] auto operator*(const Matrix4f &tran) const -> Vertex;
   };
 
   /// @todo 直接保存太浪费内存了
@@ -125,30 +125,30 @@ class Model {
 
     /**
      * 构造函数
-     * @param _v0 第一个顶点
-     * @param _v1 第二个顶点
-     * @param _v2 第三个顶点
-     * @param _material 材质
+     * @param v0 第一个顶点
+     * @param v1 第二个顶点
+     * @param v2 第三个顶点
+     * @param material 材质
      */
-    explicit Face(const Vertex &_v0, const Vertex &_v1, const Vertex &_v2,
-                  Material _material);
+    explicit Face(const Vertex &v0, const Vertex &v1, const Vertex &v2,
+                  Material material);
 
     /// @name 默认构造/析构函数
     /// @{
     Face() = default;
-    Face(const Face &_face) = default;
-    Face(Face &&_face) = default;
-    auto operator=(const Face &_face) -> Face & = default;
-    auto operator=(Face &&_face) -> Face & = default;
+    Face(const Face &face) = default;
+    Face(Face &&face) = default;
+    auto operator=(const Face &face) -> Face & = default;
+    auto operator=(Face &&face) -> Face & = default;
     ~Face() = default;
     /// @}
 
     /**
      * * 重载，对面应用变换矩阵
-     * @param _tran 要对面进行的变换矩阵
+     * @param tran 要对面进行的变换矩阵
      * @return 结果
      */
-    [[nodiscard]] auto operator*(const Matrix4f &_tran) const -> Face;
+    [[nodiscard]] auto operator*(const Matrix4f &tran) const -> Face;
   };
 
   /**
@@ -164,54 +164,53 @@ class Model {
     /// @name 默认构造/析构函数
     /// @{
     Box() = default;
-    Box(const Box &_box) = default;
-    Box(Box &&_box) = default;
-    auto operator=(const Box &_box) -> Box & = default;
-    auto operator=(Box &&_box) -> Box & = default;
+    Box(const Box &box) = default;
+    Box(Box &&box) = default;
+    auto operator=(const Box &box) -> Box & = default;
+    auto operator=(Box &&box) -> Box & = default;
     ~Box() = default;
     /// @}
   };
 
   /// obj 文件路径
-  std::string obj_path = "";
+  std::string obj_path_ = "";
   /// mtl 路径
-  std::string mtl_path = "";
+  std::string mtl_path_ = "";
 
   /**
    * 构造函数
-   * @param _obj_path obj 文件路径
-   * @param _mtl_path mtl 文件路径
+   * @param obj_path obj 文件路径
+   * @param mtl_path mtl 文件路径
    * @todo 顶点去重
    */
-  explicit Model(const std::string &_obj_path,
-                 const std::string &_mtl_path = "");
+  explicit Model(const std::string &obj_path, const std::string &mtl_path = "");
 
   /// @name 默认构造/析构函数
   /// @{
   Model() = default;
-  Model(const Model &_model) = default;
-  Model(Model &&_model) = default;
-  auto operator=(const Model &_model) -> Model & = default;
-  auto operator=(Model &&_model) -> Model & = default;
+  Model(const Model &model) = default;
+  Model(Model &&model) = default;
+  auto operator=(const Model &model) -> Model & = default;
+  auto operator=(Model &&model) -> Model & = default;
   ~Model() = default;
   /// @}
 
   /**
    * * 重载，对模型应用变换矩阵
-   * @param _tran 要对模型进行的变换矩阵
+   * @param tran 要对模型进行的变换矩阵
    * @return 结果
    */
-  [[nodiscard]] auto operator*(const Matrix4f &_tran) const -> Model;
+  [[nodiscard]] auto operator*(const Matrix4f &tran) const -> Model;
 
   /**
    * 获取面
    * @return 所有面
    */
-  [[nodiscard]] auto get_face() const -> const std::vector<Face> &;
+  [[nodiscard]] auto GetFace() const -> const std::vector<Face> &;
 
  private:
   /// 三角形顶点数
-  static constexpr const uint8_t TRIANGLE_FACE_VERTEX_COUNT = 3;
+  static constexpr const uint8_t kTriangleFaceVertexCount = 3;
 
   std::vector<Face> faces_;
 
@@ -224,12 +223,12 @@ class Model {
   /**
    * 计算 model 的体积盒
    */
-  void set_box();
+  void SetBox();
 
   /**
    * 将模型归一化
    */
-  void normalize();
+  void Normalize();
 };
 
 }  // namespace simple_renderer
@@ -240,10 +239,10 @@ class Model {
 template <>
 struct fmt::formatter<simple_renderer::Model::Box>
     : fmt::formatter<std::string> {
-  auto format(simple_renderer::Model::Box _box, format_context &_format_context)
-      const -> decltype(_format_context.out()) {
-    return fmt::format_to(_format_context.out(), "max: {},\nmin: {}", _box.max_,
-                          _box.min_);
+  auto format(simple_renderer::Model::Box box, format_context &format_context)
+      const -> decltype(format_context.out()) {
+    return fmt::format_to(format_context.out(), "max: {},\nmin: {}", box.max_,
+                          box.min_);
   }
 };
 

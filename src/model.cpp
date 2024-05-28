@@ -25,18 +25,18 @@
 
 namespace simple_renderer {
 
-Model::Vertex::Vertex(Coord _coord, Normal _normal, TextureCoord _texture_coord,
-                      const Color &_color)
-    : coord_(std::move(_coord)),
-      normal_(std::move(_normal)),
-      texture_coord_(std::move(_texture_coord)),
-      color_(_color) {}
+Model::Vertex::Vertex(Coord coord, Normal normal, TextureCoord texture_coord,
+                      const Color &color)
+    : coord_(std::move(coord)),
+      normal_(std::move(normal)),
+      texture_coord_(std::move(texture_coord)),
+      color_(color) {}
 
-auto Model::Vertex::operator*(const Matrix4f &_tran) const -> Model::Vertex {
+auto Model::Vertex::operator*(const Matrix4f &tran) const -> Model::Vertex {
   auto vertex(*this);
 
   auto coord4 = Vector4f(coord_.x(), coord_.y(), coord_.z(), 1);
-  auto coord3 = _tran * coord4;
+  auto coord3 = tran * coord4;
 
   vertex.coord_.x() = coord3.x();
   vertex.coord_.y() = coord3.y();
@@ -47,29 +47,29 @@ auto Model::Vertex::operator*(const Matrix4f &_tran) const -> Model::Vertex {
   return vertex;
 }
 
-Model::Face::Face(const Model::Vertex &_v0, const Model::Vertex &_v1,
-                  const Model::Vertex &_v2, Material _material)
-    : v0_(_v0), v1_(_v1), v2_(_v2), material_(std::move(_material)) {
+Model::Face::Face(const Model::Vertex &v0, const Model::Vertex &v1,
+                  const Model::Vertex &v2, Material material)
+    : v0_(v0), v1_(v1), v2_(v2), material_(std::move(material)) {
   // 计算法向量
   // 如果 obj 内包含法向量，直接使用即可
-  if (_v0.normal_.norm() != 0 && _v1.normal_.norm() != 0 &&
-      _v2.normal_.norm() != 0) {
-    normal_ = (_v0.normal_ + _v1.normal_ + _v2.normal_).normalized();
+  if (v0.normal_.norm() != 0 && v1.normal_.norm() != 0 &&
+      v2.normal_.norm() != 0) {
+    normal_ = (v0.normal_ + v1.normal_ + v2.normal_).normalized();
   }
   // 手动计算
   else {
     // 两条相临边的叉积
-    auto v2v0 = _v2.coord_ - _v0.coord_;
-    auto v1v0 = _v1.coord_ - _v0.coord_;
+    auto v2v0 = v2.coord_ - v0.coord_;
+    auto v1v0 = v1.coord_ - v0.coord_;
     normal_ = (v2v0.cross(v1v0)).normalized();
   }
 }
 
-auto Model::Face::operator*(const Matrix4f &_tran) const -> Model::Face {
+auto Model::Face::operator*(const Matrix4f &tran) const -> Model::Face {
   auto face(*this);
-  face.v0_ = face.v0_ * _tran;
-  face.v1_ = face.v1_ * _tran;
-  face.v2_ = face.v2_ * _tran;
+  face.v0_ = face.v0_ * tran;
+  face.v1_ = face.v1_ * tran;
+  face.v2_ = face.v2_ * tran;
 
   /// @todo 通过矩阵变换法线
   auto v2v0 = face.v2_.coord_ - face.v0_.coord_;
@@ -79,15 +79,15 @@ auto Model::Face::operator*(const Matrix4f &_tran) const -> Model::Face {
   return face;
 }
 
-Model::Model(const std::string &_obj_path, const std::string &_mtl_path)
-    : obj_path(_obj_path), mtl_path(_mtl_path) {
-  SPDLOG_DEBUG(SRLOG, "_obj_path: {}", _obj_path);
+Model::Model(const std::string &obj_path, const std::string &mtl_path)
+    : obj_path_(obj_path), mtl_path_(mtl_path) {
+  SPDLOG_DEBUG(SRLOG, "obj_path: {}", obj_path_);
 
   tinyobj::ObjReader reader;
   tinyobj::ObjReaderConfig config;
-  config.mtl_search_path = _mtl_path;
+  config.mtl_search_path = mtl_path_;
   // 默认开启三角化
-  auto ret = reader.ParseFromFile(_obj_path, config);
+  auto ret = reader.ParseFromFile(obj_path_, config);
   if (!ret) {
     if (!reader.Error().empty()) {
       throw Exception(reader.Error());
@@ -105,7 +105,7 @@ Model::Model(const std::string &_obj_path, const std::string &_mtl_path)
   SPDLOG_INFO(
       "加载模型: {}, 顶点数: {}, 法线数: {}, 颜色数: {}, UV数: {}, "
       "子模型数: {}, 材质数: {}",
-      _obj_path, attrib.vertices.size() / 3, attrib.normals.size() / 3,
+      obj_path_, attrib.vertices.size() / 3, attrib.normals.size() / 3,
       attrib.colors.size() / 3, attrib.texcoords.size() / 2, shapes.size(),
       materials.size());
 
@@ -120,8 +120,8 @@ Model::Model(const std::string &_obj_path, const std::string &_mtl_path)
       // 由于开启了三角化，所有的 shape 都是由三个点组成的，即 fv == 3
       auto num_face_vertices = size_t(
           shapes[shapes_size].mesh.num_face_vertices[num_face_vertices_size]);
-      if (num_face_vertices != TRIANGLE_FACE_VERTEX_COUNT) {
-        throw Exception("num_face_vertices != TRIANGLE_FACE_VERTEX_COUNT");
+      if (num_face_vertices != kTriangleFaceVertexCount) {
+        throw Exception("num_face_vertices != kTriangleFaceVertexCount");
       }
 
       auto vertexes = std::array<Vertex, 3>();
@@ -185,25 +185,25 @@ Model::Model(const std::string &_obj_path, const std::string &_mtl_path)
   }
 
   // 计算模型包围盒
-  set_box();
-  normalize();
+  SetBox();
+  Normalize();
 }
 
-auto Model::operator*(const Matrix4f &_tran) const -> Model {
+auto Model::operator*(const Matrix4f &tran) const -> Model {
   auto model = Model(*this);
 
   for (auto &i : model.faces_) {
-    i = i * _tran;
+    i = i * tran;
   }
 
   return model;
 }
 
-auto Model::get_face() const -> const std::vector<Model::Face> & {
+auto Model::GetFace() const -> const std::vector<Model::Face> & {
   return faces_;
 }
 
-void Model::set_box() {
+void Model::SetBox() {
   auto max = faces_.at(0).v0_.coord_;
   auto min = faces_.at(0).v0_.coord_;
 
@@ -239,7 +239,7 @@ void Model::set_box() {
   SPDLOG_INFO("box: \n{},\ncenter: {}", box_, center_);
 }
 
-void Model::normalize() {
+void Model::Normalize() {
   auto w = std::abs(box_.max_.x()) + std::abs(box_.min_.x());
   auto h = std::abs(box_.max_.y()) + std::abs(box_.min_.y());
   auto d = std::abs(box_.max_.z()) + std::abs(box_.min_.z());

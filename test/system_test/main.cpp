@@ -25,8 +25,8 @@
 #include <simple_renderer.h>
 
 /// obj 文件目录
-// static const std::string OBJ_FILE_PATH =
-//     std::string("/home/parallels/github/MRNIU/SimpleRenderer/obj/");
+static const std::string OBJ_FILE_PATH =
+    std::string("/home/parallels/github/MRNIU/SimpleRenderer/obj/");
 
 /// @name 默认大小
 /// @{
@@ -50,23 +50,23 @@ int main(int, char **) {
   auto simple_renderer = simple_renderer::SimpleRenderer(1920, 1080, buffer);
 
   // obj 路径
-  // std::vector<std::string> objs;
-  // objs.emplace_back(OBJ_FILE_PATH + "cube.obj");
-  // objs.emplace_back(OBJ_FILE_PATH + "cube2.obj");
-  // objs.emplace_back(OBJ_FILE_PATH + "cube3.obj");
-  // objs.emplace_back(OBJ_FILE_PATH + "cornell_box.obj");
-  // objs.emplace_back(OBJ_FILE_PATH + "helmet.obj");
-  // objs.emplace_back(OBJ_FILE_PATH + "african_head.obj");
-  // objs.emplace_back(OBJ_FILE_PATH + "utah-teapot/utah-teapot.obj");
+  std::vector<std::string> objs;
+  objs.emplace_back(OBJ_FILE_PATH + "cube.obj");
+  objs.emplace_back(OBJ_FILE_PATH + "cube2.obj");
+  objs.emplace_back(OBJ_FILE_PATH + "cube3.obj");
+  objs.emplace_back(OBJ_FILE_PATH + "cornell_box.obj");
+  objs.emplace_back(OBJ_FILE_PATH + "helmet.obj");
+  objs.emplace_back(OBJ_FILE_PATH + "african_head.obj");
+  objs.emplace_back(OBJ_FILE_PATH + "utah-teapot/utah-teapot.obj");
 
   // auto scene = SimpleRenderer::scene_t("default", 1920, 1080, 1000);
 
-  // // 读取模型与材质
-  // for (auto &obj : objs) {
-  //   // 添加到场景中
-  // auto model = SimpleRenderer::model_t(obj);
-  // scene.add_model(model, SimpleRenderer::vector3f_t());
-  // }
+  // 读取模型与材质
+  for (auto &obj : objs) {
+    // 添加到场景中
+    auto model = simple_renderer::Model(obj);
+    // scene.add_model(model, SimpleRenderer::vector3f_t());
+  }
   // 设置光照
   // scene.add_light(SimpleRenderer::light_t());
 
