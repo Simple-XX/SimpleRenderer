@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_SRC_EXCEPTION_HPP_
-#define SIMPLERENDER_SRC_EXCEPTION_HPP_
+#ifndef SIMPLERENDER_SRC_INCLUDE_EXCEPTION_HPP_
+#define SIMPLERENDER_SRC_INCLUDE_EXCEPTION_HPP_
 
 #include <exception>
 #include <string>
@@ -46,4 +46,4 @@ class Exception : public std::exception {
 
 }  // namespace simple_renderer
 
-#endif /* SIMPLERENDER_SRC_EXCEPTION_HPP_ */
+#endif /* SIMPLERENDER_SRC_INCLUDE_EXCEPTION_HPP_ */

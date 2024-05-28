@@ -12,8 +12,9 @@ add_library(${PROJECT_NAME} STATIC
         include/matrix.hpp
         include/exception.hpp
         include/model.hpp
+        include/light.h
         model.cpp
-        # light.cpp
+        light.cpp
         # scene.cpp
         # shader.cpp
         # framebuffer.cpp

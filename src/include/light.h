@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_LIGHT_H
-#define SIMPLERENDER_LIGHT_H
+#ifndef SIMPLERENDER_SRC_INCLUDE_LIGHT_H_
+#define SIMPLERENDER_SRC_INCLUDE_LIGHT_H_
 
 #include <cstdint>
 #include <string>
@@ -23,47 +23,47 @@
 #include "color.h"
 #include "vector.hpp"
 
-namespace SimpleRenderer {
+namespace simple_renderer {
 
 /**
  * 光照抽象
  */
-class light_t {
-public:
+class Light {
+ public:
   /// 光照名称
-  std::string name = "default light name";
+  std::string name_ = "default light name";
   /// 位置
-  vector3f_t pos = DEFAULT_POS;
+  Vector3f pos = kDefaultPos;
   /// 方向
-  vector3f_t dir = DEFAULT_DIR;
+  Vector3f dir = kDefaultDir;
   /// 颜色
-  color_t color = DEFAULT_COLOR;
+  Color color = kDefaultColor;
 
   /**
    * 构造函数
-   * @param _name 光照名称
+   * @param name 光照名称
    */
-  explicit light_t(const std::string &_name);
+  explicit Light(const std::string &name);
 
   /// @name 默认构造/析构函数
   /// @{
-  light_t() = default;
-  light_t(const light_t &_light) = default;
-  light_t(light_t &&_light) = default;
-  auto operator=(const light_t &_light) -> light_t & = default;
-  auto operator=(light_t &&_light) -> light_t & = default;
-  ~light_t() = default;
+  Light() = default;
+  Light(const Light &light) = default;
+  Light(Light &&light) = default;
+  auto operator=(const Light &light) -> Light & = default;
+  auto operator=(Light &&light) -> Light & = default;
+  ~Light() = default;
   /// @}
 
-private:
+ private:
   /// 默认位置
-  static const vector3f_t DEFAULT_POS;
+  static const Vector3f kDefaultPos;
   /// 默认方向，左手系，x 向右，y 向下，z 正方向为屏幕由内向外
-  static const vector3f_t DEFAULT_DIR;
+  static const Vector3f kDefaultDir;
   /// 默认颜色
-  static const color_t DEFAULT_COLOR;
+  static const Color kDefaultColor;
 };
 
-} // namespace SimpleRenderer
+}  // namespace simple_renderer
 
-#endif /* SIMPLERENDER_LIGHT_H */
+#endif /* SIMPLERENDER_SRC_INCLUDE_LIGHT_H_ */

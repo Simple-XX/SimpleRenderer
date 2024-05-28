@@ -16,12 +16,18 @@
 
 #include "light.h"
 
-namespace SimpleRenderer {
+#include "color.h"
+#include "log_system.h"
+#include "vector.hpp"
 
-const vector3f_t light_t::DEFAULT_POS = vector3f_t(0, 0, 0);
-const vector3f_t light_t::DEFAULT_DIR = vector3f_t(0, 0, -1);
-const color_t light_t::DEFAULT_COLOR = color_t::WHITE;
+namespace simple_renderer {
 
-light_t::light_t(const std::string &_name) : name(_name) {}
+const Vector3f Light::kDefaultPos = Vector3f(0, 0, 0);
+const Vector3f Light::kDefaultDir = Vector3f(0, 0, -1);
+const Color Light::kDefaultColor = Color::kWhite;
 
-} // namespace SimpleRenderer
+Light::Light(const std::string &name) : name_(name) {
+  SPDLOG_INFO("Light: {}", name_);
+}
+
+}  // namespace simple_renderer
