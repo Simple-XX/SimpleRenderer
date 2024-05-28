@@ -29,10 +29,10 @@ namespace simple_renderer {
 
 SimpleRenderer::SimpleRenderer(size_t width, size_t height,
                                std::span<uint32_t>& buffer)
-    : log_system_(LogSystem(kLogFilePath, kLogFileMaxSize, kLogFileMaxCount)),
-      height_(height),
+    : height_(height),
       width_(width),
-      buffer_(buffer) {
+      buffer_(buffer),
+      log_system_(LogSystem(kLogFilePath, kLogFileMaxSize, kLogFileMaxCount)) {
   SPDLOG_INFO("SimpleRenderer init with {}, {}, {}", width_, height_,
               buffer_.size());
 }

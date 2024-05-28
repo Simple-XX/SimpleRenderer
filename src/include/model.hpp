@@ -14,52 +14,53 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_MODEL_HPP
-#define SIMPLERENDER_MODEL_HPP
+#ifndef SIMPLERENDER_SRC_INCLUDE_MODEL_HPP_
+#define SIMPLERENDER_SRC_INCLUDE_MODEL_HPP_
+
+#include <tiny_obj_loader.h>
 
 #include <string>
 #include <vector>
 
-#include <tiny_obj_loader.h>
-
 #include "color.h"
 #include "config.h"
-#include "log.h"
+#include "log_system.h"
 #include "matrix.hpp"
 #include "vector.hpp"
 
-namespace SimpleRenderer {
+namespace simple_renderer {
 
 /**
  * 模型
  */
-class model_t {
-public:
+class Model {
+ public:
   /// 顶点坐标
-  using coord_t = vector3f_t;
+  using Coord = Vector3f;
   /// 法向量
-  using normal_t = vector3f_t;
+  using Normal = Vector3f;
   /// 贴图
-  using texture_coord_t = vector2f_t;
+  using TextureCoord = Vector2f;
 
-  struct material_t {
+  class Material {
+   public:
     /// 反光度
     float shininess = 0;
     /// 环境光照
-    vector3f_t ambient;
+    Vector3f ambient;
     /// 漫反射光照
-    vector3f_t diffuse;
+    Vector3f diffuse;
     /// 镜面光照
-    vector3f_t specular;
+    Vector3f specular;
 
     /// @name 默认构造/析构函数
     /// @{
-    material_t() = default;
-    material_t(const material_t &_material) = default;
-    material_t(material_t &&_material) = default;
-    auto operator=(const material_t &_material) -> material_t & = default;
-    auto operator=(material_t &&_material) -> material_t & = default;
-    ~material_t() = default;
+    Material() = default;
+    Material(const Material &_material) = default;
+    Material(Material &&_material) = default;
+    auto operator=(const Material &_material) -> Material & = default;
+    auto operator=(Material &&_material) -> Material & = default;
+    ~Material() = default;
     /// @}
   };
 
@@ -67,19 +68,20 @@ public:
    * obj/mtl 文件的原始数据
    * @todo 直接保存太浪费内存了
    */
-  struct vertex_t {
+  class Vertex {
+   public:
     /// 坐标
-    coord_t coord;
+    Coord coord_;
     /// 法线，顶点 v 的数量与 vn 的数量一样多
-    normal_t normal;
+    Normal normal_;
     /// 贴图(纹理)，范围为 0~1，顶点 v 的个数不一定与纹理坐标 vt
     /// 的个数一样多， 因为有可能很多顶点公用一个纹理坐标的像素。
-    texture_coord_t texture_coord;
+    TextureCoord texture_coord_;
 
     /// 颜色，最终每个三角面的颜色，是由构成这个三角面的三个顶点进行插值计算
     /// 如果 obj 文件中没有指定则设为 1(白色)
     /// 范围 [0, 1]
-    color_t color;
+    Color color_;
 
     /**
      * 构造函数
@@ -88,17 +90,17 @@ public:
      * @param _texture_coord 贴图
      * @param _color 颜色
      */
-    explicit vertex_t(coord_t _coord, normal_t _normal,
-                      texture_coord_t _texture_coord, const color_t &_color);
+    explicit Vertex(Coord _coord, Normal _normal, TextureCoord _texture_coord,
+                    const Color &_color);
 
     /// @name 默认构造/析构函数
     /// @{
-    vertex_t() = default;
-    vertex_t(const vertex_t &_vertex) = default;
-    vertex_t(vertex_t &&_vertex) = default;
-    auto operator=(const vertex_t &_vertex) -> vertex_t & = default;
-    auto operator=(vertex_t &&_vertex) -> vertex_t & = default;
-    ~vertex_t() = default;
+    Vertex() = default;
+    Vertex(const Vertex &_vertex) = default;
+    Vertex(Vertex &&_vertex) = default;
+    auto operator=(const Vertex &_vertex) -> Vertex & = default;
+    auto operator=(Vertex &&_vertex) -> Vertex & = default;
+    ~Vertex() = default;
     /// @}
 
     /**
@@ -106,19 +108,20 @@ public:
      * @param _tran 要对顶点进行的变换矩阵
      * @return 结果
      */
-    [[nodiscard]] auto operator*(const matrix4f_t &_tran) const -> vertex_t;
+    [[nodiscard]] auto operator*(const Matrix4f &_tran) const -> Vertex;
   };
 
   /// @todo 直接保存太浪费内存了
-  struct face_t {
-    vertex_t v0;
-    vertex_t v1;
-    vertex_t v2;
+  class Face {
+   public:
+    Vertex v0_;
+    Vertex v1_;
+    Vertex v2_;
     /// 面的法向量为三个点的法向量矢量和
-    normal_t normal;
+    Normal normal_;
     // 面的颜色为三个点的颜色插值
     /// 材质信息
-    material_t material;
+    Material material_;
 
     /**
      * 构造函数
@@ -127,17 +130,17 @@ public:
      * @param _v2 第三个顶点
      * @param _material 材质
      */
-    explicit face_t(const vertex_t &_v0, const vertex_t &_v1,
-                    const vertex_t &_v2, material_t _material);
+    explicit Face(const Vertex &_v0, const Vertex &_v1, const Vertex &_v2,
+                  Material _material);
 
     /// @name 默认构造/析构函数
     /// @{
-    face_t() = default;
-    face_t(const face_t &_face) = default;
-    face_t(face_t &&_face) = default;
-    auto operator=(const face_t &_face) -> face_t & = default;
-    auto operator=(face_t &&_face) -> face_t & = default;
-    ~face_t() = default;
+    Face() = default;
+    Face(const Face &_face) = default;
+    Face(Face &&_face) = default;
+    auto operator=(const Face &_face) -> Face & = default;
+    auto operator=(Face &&_face) -> Face & = default;
+    ~Face() = default;
     /// @}
 
     /**
@@ -145,26 +148,27 @@ public:
      * @param _tran 要对面进行的变换矩阵
      * @return 结果
      */
-    [[nodiscard]] auto operator*(const matrix4f_t &_tran) const -> face_t;
+    [[nodiscard]] auto operator*(const Matrix4f &_tran) const -> Face;
   };
 
   /**
    * 碰撞盒
    */
-  struct box_t {
+  class Box {
+   public:
     /// 最小点
-    vector3f_t min;
+    Vector3f min_;
     /// 最大点
-    vector3f_t max;
+    Vector3f max_;
 
     /// @name 默认构造/析构函数
     /// @{
-    box_t() = default;
-    box_t(const box_t &_box) = default;
-    box_t(box_t &&_box) = default;
-    auto operator=(const box_t &_box) -> box_t & = default;
-    auto operator=(box_t &&_box) -> box_t & = default;
-    ~box_t() = default;
+    Box() = default;
+    Box(const Box &_box) = default;
+    Box(Box &&_box) = default;
+    auto operator=(const Box &_box) -> Box & = default;
+    auto operator=(Box &&_box) -> Box & = default;
+    ~Box() = default;
     /// @}
   };
 
@@ -179,17 +183,17 @@ public:
    * @param _mtl_path mtl 文件路径
    * @todo 顶点去重
    */
-  explicit model_t(const std::string &_obj_path,
-                   const std::string &_mtl_path = "");
+  explicit Model(const std::string &_obj_path,
+                 const std::string &_mtl_path = "");
 
   /// @name 默认构造/析构函数
   /// @{
-  model_t() = default;
-  model_t(const model_t &_model) = default;
-  model_t(model_t &&_model) = default;
-  auto operator=(const model_t &_model) -> model_t & = default;
-  auto operator=(model_t &&_model) -> model_t & = default;
-  ~model_t() = default;
+  Model() = default;
+  Model(const Model &_model) = default;
+  Model(Model &&_model) = default;
+  auto operator=(const Model &_model) -> Model & = default;
+  auto operator=(Model &&_model) -> Model & = default;
+  ~Model() = default;
   /// @}
 
   /**
@@ -197,25 +201,25 @@ public:
    * @param _tran 要对模型进行的变换矩阵
    * @return 结果
    */
-  [[nodiscard]] auto operator*(const matrix4f_t &_tran) const -> model_t;
+  [[nodiscard]] auto operator*(const Matrix4f &_tran) const -> Model;
 
   /**
    * 获取面
    * @return 所有面
    */
-  [[nodiscard]] auto get_face() const -> const std::vector<face_t> &;
+  [[nodiscard]] auto get_face() const -> const std::vector<Face> &;
 
-private:
+ private:
   /// 三角形顶点数
   static constexpr const uint8_t TRIANGLE_FACE_VERTEX_COUNT = 3;
 
-  std::vector<face_t> faces;
+  std::vector<Face> faces_;
 
   /// 体积盒
-  box_t box;
+  Box box_;
 
   /// 模型的中心点
-  coord_t center;
+  Coord center_;
 
   /**
    * 计算 model 的体积盒
@@ -228,20 +232,19 @@ private:
   void normalize();
 };
 
-} // namespace SimpleRenderer
+}  // namespace simple_renderer
 
 /**
- * spdlog 输出 box_t 实现
+ * spdlog 输出 Box 实现
  */
 template <>
-struct fmt::formatter<SimpleRenderer::model_t::box_t>
+struct fmt::formatter<simple_renderer::Model::Box>
     : fmt::formatter<std::string> {
-  auto format(SimpleRenderer::model_t::box_t _box,
-              format_context &_format_context) const
-      -> decltype(_format_context.out()) {
-    return fmt::format_to(_format_context.out(), "max: {},\nmin: {}", _box.max,
-                     _box.min);
+  auto format(simple_renderer::Model::Box _box, format_context &_format_context)
+      const -> decltype(_format_context.out()) {
+    return fmt::format_to(_format_context.out(), "max: {},\nmin: {}", _box.max_,
+                          _box.min_);
   }
 };
 
-#endif /* SIMPLERENDER_MODEL_HPP */
+#endif /* SIMPLERENDER_SRC_INCLUDE_MODEL_HPP_ */

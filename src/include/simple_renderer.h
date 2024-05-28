@@ -21,6 +21,7 @@
 #include <span>
 
 #include "log_system.h"
+#include "model.hpp"
 
 namespace simple_renderer {
 
@@ -42,8 +43,8 @@ class SimpleRenderer {
  private:
   const size_t height_;
   const size_t width_;
-  LogSystem log_system_;
   std::span<uint32_t> &buffer_;
+  LogSystem log_system_;
 };
 
 }  // namespace simple_renderer
