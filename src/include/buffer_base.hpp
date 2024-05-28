@@ -28,7 +28,6 @@
 #include <type_traits>
 
 #include "color.h"
-#include "log.h"
 
 namespace SimpleRenderer {
 

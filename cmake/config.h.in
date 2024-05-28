@@ -14,25 +14,25 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_CONFIG_H
-#define SIMPLERENDER_CONFIG_H
+#ifndef SIMPLERENDER_SRC_INCLUDE_CONFIG_H_
+#define SIMPLERENDER_SRC_INCLUDE_CONFIG_H_
 
 #include <string>
 #include <string_view>
 
-namespace SimpleRenderer {
+namespace simple_renderer {
 
 /// 线程数
-static constexpr const size_t NPROC = @NPROC@;
+static constexpr const size_t kNProc = @NPROC@;
 
 /// 日志文件路径
-static const std::string LOG_FILE_PATH =
+static const std::string kLogFilePath =
     std::string("@LOG_FILE_PATH@");
 /// 日志文件大小
-static constexpr const size_t LOG_FILE_MAX_SIZE = @LOG_FILE_MAX_SIZE@;
+static constexpr const size_t kLogFileMaxSize = @LOG_FILE_MAX_SIZE@;
 /// 日志文件数量
-static constexpr const size_t LOG_FILE_MAX_COUNT = @LOG_FILE_MAX_COUNT@;
+static constexpr const size_t kLogFileMaxCount = @LOG_FILE_MAX_COUNT@;
 
-} // namespace SimpleRenderer
+} // namespace simple_renderer
 
-#endif /* SIMPLERENDER_CONFIG_H */
+#endif /* SIMPLERENDER_SRC_INCLUDE_CONFIG_H_ */

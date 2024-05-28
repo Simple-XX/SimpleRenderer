@@ -35,7 +35,7 @@ link_libraries(
         ${DEFAULT_LINK_LIB}
         gtest_main
         ${glog_LIBRARIES}
-        SimpleRenderer-shared
+        SimpleRenderer
 )
 
 add_subdirectory(unit_test)

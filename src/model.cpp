@@ -84,6 +84,9 @@ auto model_t::face_t::operator*(const matrix4f_t &_tran) const
 
 model_t::model_t(const std::string &_obj_path, const std::string &_mtl_path)
     : obj_path(_obj_path), mtl_path(_mtl_path) {
+
+  SPDLOG_DEBUG(SRLOG, "_obj_path: {}", _obj_path);
+
   tinyobj::ObjReader reader;
   tinyobj::ObjReaderConfig config;
   config.mtl_search_path = _mtl_path;

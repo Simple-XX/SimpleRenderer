@@ -19,13 +19,13 @@
 #include <string>
 #include <vector>
 
-#include "display.h"
-#include "render.hpp"
-#include <SimpleRenderer.h>
+// #include "display.h"
+// #include "render.hpp"
+#include <simple_renderer.h>
 
 /// obj 文件目录
-static const std::string OBJ_FILE_PATH =
-    std::string("/Users/nzh/Documents/SimpleRenderer/obj/");
+// static const std::string OBJ_FILE_PATH =
+//     std::string("/home/parallels/github/MRNIU/SimpleRenderer/obj/");
 
 /// @name 默认大小
 /// @{
@@ -33,38 +33,42 @@ static constexpr const uint64_t WIDTH = 1920;
 static constexpr const uint64_t HEIGHT = 1080;
 /// @}
 
-static void pixel(uint64_t _x, uint64_t _y,
-                  const SimpleRenderer::color_t &_color,
-                  std::array<SimpleRenderer::color_t, WIDTH * HEIGHT> _buffer) {
-  _buffer[_x + _y * WIDTH] = _color;
-}
+// static void pixel(uint64_t _x, uint64_t _y,
+//                   const SimpleRenderer::color_t &_color,
+//                   std::array<SimpleRenderer::color_t, WIDTH * HEIGHT>
+//                   _buffer) {
+//   _buffer[_x + _y * WIDTH] = _color;
+// }
 
 // @todo 不应该出现明确的类型，应该使用模板
 auto main(int, char **) -> int {
+  auto simple_renderer = simple_renderer::SimpleRenderer(1920, 1080);
+
   // obj 路径
-  std::vector<std::string> objs;
-  objs.emplace_back(OBJ_FILE_PATH + "cube.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "cube2.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "cube3.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "cornell_box.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "helmet.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "african_head.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "utah-teapot/utah-teapot.obj");
+  // std::vector<std::string> objs;
+  // objs.emplace_back(OBJ_FILE_PATH + "cube.obj");
+  // objs.emplace_back(OBJ_FILE_PATH + "cube2.obj");
+  // objs.emplace_back(OBJ_FILE_PATH + "cube3.obj");
+  // objs.emplace_back(OBJ_FILE_PATH + "cornell_box.obj");
+  // objs.emplace_back(OBJ_FILE_PATH + "helmet.obj");
+  // objs.emplace_back(OBJ_FILE_PATH + "african_head.obj");
+  // objs.emplace_back(OBJ_FILE_PATH + "utah-teapot/utah-teapot.obj");
 
-  auto scene = SimpleRenderer::scene_t("default", 1920, 1080, 1000);
+  // auto scene = SimpleRenderer::scene_t("default", 1920, 1080, 1000);
 
-  // 读取模型与材质
-  for (auto &obj : objs) {
-    // 添加到场景中
-    auto model = SimpleRenderer::model_t(obj);
-    scene.add_model(model, SimpleRenderer::vector3f_t());
-  }
+  // // 读取模型与材质
+  // for (auto &obj : objs) {
+  //   // 添加到场景中
+  // auto model = SimpleRenderer::model_t(obj);
+  // scene.add_model(model, SimpleRenderer::vector3f_t());
+  // }
   // 设置光照
-  scene.add_light(SimpleRenderer::light_t());
+  // scene.add_light(SimpleRenderer::light_t());
 
-  auto buffer = std::array<SimpleRenderer::color_t, WIDTH * HEIGHT>();
+  // auto buffer = std::array<SimpleRenderer::color_t, WIDTH * HEIGHT>();
 
-  auto render = SimpleRenderer::render_t<WIDTH, HEIGHT>(scene, buffer, pixel);
+  // auto render = SimpleRenderer::render_t<WIDTH, HEIGHT>(scene, buffer,
+  // pixel);
 
   //  auto display = display_t(std::ref(framebuffers));
 

@@ -19,7 +19,7 @@
 
 #include <Eigen/Dense>
 
-#include "log.h"
+#include "log_system.h"
 
 namespace SimpleRenderer {
 
