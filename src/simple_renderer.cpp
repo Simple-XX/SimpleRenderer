@@ -18,6 +18,7 @@
 
 #include <array>
 #include <cstdint>
+#include <span>
 #include <string_view>
 #include <vector>
 
@@ -26,10 +27,14 @@
 
 namespace simple_renderer {
 
-SimpleRenderer::SimpleRenderer(size_t width, size_t height)
-    : log_system_(LogSystem(kLogFilePath, kLogFileMaxSize, kLogFileMaxCount)) {
-  SPDLOG_INFO("SimpleRenderer init with {}, {}", width, height);
-  ;
+SimpleRenderer::SimpleRenderer(size_t width, size_t height,
+                               std::span<uint32_t>& buffer)
+    : log_system_(LogSystem(kLogFilePath, kLogFileMaxSize, kLogFileMaxCount)),
+      height_(height),
+      width_(width),
+      buffer_(buffer) {
+  SPDLOG_INFO("SimpleRenderer init with {}, {}, {}", width_, height_,
+              buffer_.size());
 }
 
 }  // namespace simple_renderer

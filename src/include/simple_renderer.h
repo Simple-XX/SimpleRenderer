@@ -18,6 +18,7 @@
 #define SIMPLERENDER_SRC_INCLUDE_SIMPLE_RENDER_H_
 
 #include <cstdint>
+#include <span>
 
 #include "log_system.h"
 
@@ -25,7 +26,7 @@ namespace simple_renderer {
 
 class SimpleRenderer {
  public:
-  SimpleRenderer(size_t width, size_t height);
+  SimpleRenderer(size_t width, size_t height, std::span<uint32_t> &buffer);
 
   /// @name 默认构造/析构函数
   /// @{
@@ -39,7 +40,10 @@ class SimpleRenderer {
   /// @}
 
  private:
+  const size_t height_;
+  const size_t width_;
   LogSystem log_system_;
+  std::span<uint32_t> &buffer_;
 };
 
 }  // namespace simple_renderer

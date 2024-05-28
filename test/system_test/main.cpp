@@ -14,6 +14,7 @@
  * </table>
  */
 
+#include <cstdint>
 #include <iostream>
 #include <span>
 #include <string>
@@ -41,8 +42,12 @@ static constexpr const uint64_t HEIGHT = 1080;
 // }
 
 // @todo 不应该出现明确的类型，应该使用模板
-auto main(int, char **) -> int {
-  auto simple_renderer = simple_renderer::SimpleRenderer(1920, 1080);
+int main(int, char **) {
+  auto array = std::shared_ptr<uint32_t[]>(new uint32_t[100],
+                                           std::default_delete<uint32_t[]>());
+
+  auto buffer = std::span<uint32_t>(array.get(), 100);
+  auto simple_renderer = simple_renderer::SimpleRenderer(1920, 1080, buffer);
 
   // obj 路径
   // std::vector<std::string> objs;
