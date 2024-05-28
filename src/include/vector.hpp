@@ -14,32 +14,34 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_VECTOR_HPP
-#define SIMPLERENDER_VECTOR_HPP
+#ifndef SIMPLERENDER_SRC_INCLUDE_VECTOR_HPP_
+#define SIMPLERENDER_SRC_INCLUDE_VECTOR_HPP_
 
 #include <Eigen/Dense>
 
 #include "log_system.h"
 
-namespace SimpleRenderer {
+namespace simple_renderer {
 
-template <class T> using vector2_t = Eigen::Vector<T, 2>;
-template <class T> using vector3_t = Eigen::Vector<T, 3>;
-template <class T> using vector4_t = Eigen::Vector<T, 4>;
+template <class T>
+using Vector2 = Eigen::Vector<T, 2>;
+template <class T>
+using Vector3 = Eigen::Vector<T, 3>;
+template <class T>
+using Vector4 = Eigen::Vector<T, 4>;
 
-using vector2f_t = vector2_t<float>;
-using vector3f_t = vector3_t<float>;
-using vector4f_t = vector4_t<float>;
+using Vector2f = Vector2<float>;
+using Vector3f = Vector3<float>;
+using Vector4f = Vector4<float>;
 
-} // namespace SimpleRenderer
+}  // namespace simple_renderer
 
 /**
- * spdlog 输出 vector3f_t 实现
+ * spdlog 输出 Vector3f 实现
  */
 template <>
-struct fmt::formatter<SimpleRenderer::vector3f_t>
-    : fmt::formatter<std::string> {
-  auto format(SimpleRenderer::vector3f_t _vector,
+struct fmt::formatter<simple_renderer::Vector3f> : fmt::formatter<std::string> {
+  auto format(simple_renderer::Vector3f _vector,
               format_context &_format_context) const
       -> decltype(_format_context.out()) {
     std::stringstream buf;
@@ -48,4 +50,4 @@ struct fmt::formatter<SimpleRenderer::vector3f_t>
   }
 };
 
-#endif /* SIMPLERENDER_VECTOR_HPP */
+#endif /* SIMPLERENDER_SRC_INCLUDE_VECTOR_HPP_ */

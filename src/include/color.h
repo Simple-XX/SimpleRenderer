@@ -14,140 +14,139 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_COLOR_H
-#define SIMPLERENDER_COLOR_H
+#ifndef SIMPLERENDER_SRC_INCLUDE_COLOR_H_
+#define SIMPLERENDER_SRC_INCLUDE_COLOR_H_
 
 #include <cstdint>
 #include <iostream>
+#include <limits>
 
-#include "vector.hpp"
-
-namespace SimpleRenderer {
+namespace simple_renderer {
 
 /**
  * 32 位颜色 RGBA
  * @note 不要进行会影响内存的修改
  */
-class color_t {
-public:
-  enum color_idx_t {
-    COLOR_IDX_R [[maybe_unused]] = 0,
-    COLOR_IDX_G [[maybe_unused]] = 1,
-    COLOR_IDX_B [[maybe_unused]] = 2,
-    COLOR_IDX_A [[maybe_unused]] = 3,
+class Color {
+ public:
+  enum ColorIndex {
+    kColorIndexRed [[maybe_unused]] = 0,
+    kColorIndexGreen [[maybe_unused]] = 1,
+    kColorIndexBlue [[maybe_unused]] = 2,
+    kColorIndexAlpha [[maybe_unused]] = 3,
   };
 
   /// @name 颜色常量
   /// @{
-  static const color_t WHITE;
-  static const color_t BLACK;
-  static const color_t RED;
-  static const color_t GREEN;
-  static const color_t BLUE;
+  static const Color kWhite;
+  static const Color kBlack;
+  static const Color kRed;
+  static const Color kGreen;
+  static const Color kBlue;
   /// @}
 
   /**
    * 构造函数
-   * @param _data 颜色数据
+   * @param data 颜色数据
    */
-  explicit color_t(uint32_t _data);
+  explicit Color(uint32_t data);
 
   /**
    * 构造函数
-   * @param _red 红色
-   * @param _green 绿色
-   * @param _blue 蓝色
-   * @param _alpha alpha
+   * @param red 红色
+   * @param green 绿色
+   * @param blue 蓝色
+   * @param alpha alpha
    */
-  explicit color_t(uint8_t _red, uint8_t _green, uint8_t _blue,
-                   uint8_t _alpha = std::numeric_limits<uint8_t>::max());
+  explicit Color(uint8_t red, uint8_t green, uint8_t blue,
+                 uint8_t alpha = std::numeric_limits<uint8_t>::max());
 
   /**
    * 构造函数，从 [0, 1] 构建
-   * @param _red 红色
-   * @param _green 绿色
-   * @param _blue 蓝色
-   * @param _alpha alpha
+   * @param red 红色
+   * @param green 绿色
+   * @param blue 蓝色
+   * @param alpha alpha
+   * @todo 添加参数检查
    */
-  explicit color_t(float _red, float _green, float _blue,
-                   float _alpha = std::numeric_limits<uint8_t>::max());
+  explicit Color(float red, float green, float blue,
+                 float alpha = std::numeric_limits<uint8_t>::max());
 
   /// @name 默认构造/析构函数
   /// @{
-  color_t() = default;
-  color_t(const color_t &_color) = default;
-  color_t(color_t &&_color) = default;
-  auto operator=(const color_t &_color) -> color_t & = default;
-  auto operator=(color_t &&_color) -> color_t & = default;
-  ~color_t() = default;
+  Color() = default;
+  Color(const Color &color) = default;
+  Color(Color &&color) = default;
+  auto operator=(const Color &color) -> Color & = default;
+  auto operator=(Color &&color) -> Color & = default;
+  ~Color() = default;
   /// @}
 
   /**
    * 下标重载
-   * @param _idx 索引
+   * @param idx 索引
    * @return 对应颜色
    */
-  auto operator[](uint8_t _idx) -> uint8_t &;
+  auto operator[](uint8_t idx) -> uint8_t &;
 
   /**
    * 下标重载
-   * @param _idx 索引
+   * @param idx 索引
    * @return 对应颜色
    */
-  auto operator[](uint8_t _idx) const -> uint8_t;
+  auto operator[](uint8_t idx) const -> uint8_t;
 
   /**
    * float * 重载
-   * @param _val 值
+   * @param val 值
    * @return 颜色
    */
-  auto operator*(float _val) const -> color_t;
+  auto operator*(float val) const -> Color;
 
   /**
    * float *= 重载
-   * @param _val 值
+   * @param val 值
    * @return 颜色
    */
-  auto operator*=(float _val) -> color_t &;
+  auto operator*=(float val) -> Color &;
 
   /**
    * 获取每像素大小
    * @return size_t           像素大小，单位为字节
    */
-  [[maybe_unused]] static auto bpp() -> size_t;
+  [[maybe_unused]] static auto GetBpp() -> size_t;
 
   /**
-   * 转换为 uint32_t
-   * @return uint32_t         结果
+   * uint32_t 类型转换重载
    */
-  [[maybe_unused]] [[nodiscard]] auto to_uint32() const -> uint32_t;
+  operator uint32_t() const;
 
-  friend auto operator<<(std::ostream &_os, const color_t &_color)
-      -> std::ostream & {
+  friend auto operator<<(std::ostream &_os,
+                         const Color &color) -> std::ostream & {
     _os << std::hex;
-    _os << "RGBA[ 0x" << +_color.channel_r << ", 0x" << +_color.channel_g
-        << ", 0x" << +_color.channel_b << ", 0x" << +_color.channel_a << " ]";
+    _os << "RGBA[ 0x" << +color.channel_r_ << ", 0x" << +color.channel_g_
+        << ", 0x" << +color.channel_b_ << ", 0x" << +color.channel_a_ << " ]";
     _os << std::dec;
 
     return _os;
   }
 
-private:
+ private:
   /// 颜色深度
-  static constexpr const uint8_t DEPTH = 4;
+  static constexpr const uint8_t kDepth = 4;
 
   /// 每像素字节数
-  static constexpr const size_t BPP = sizeof(uint8_t) * DEPTH;
+  static constexpr const size_t kBpp = sizeof(uint8_t) * kDepth;
 
   /// @name 颜色数据，rgba
   /// @{
-  uint8_t channel_r = 0;
-  uint8_t channel_g = 0;
-  uint8_t channel_b = 0;
-  uint8_t channel_a = std::numeric_limits<uint8_t>::max();
+  uint8_t channel_r_ = 0;
+  uint8_t channel_g_ = 0;
+  uint8_t channel_b_ = 0;
+  uint8_t channel_a_ = std::numeric_limits<uint8_t>::max();
   /// @}
 };
 
-} // namespace SimpleRenderer
+}  // namespace simple_renderer
 
-#endif /* SIMPLERENDER_COLOR_H */
+#endif /* SIMPLERENDER_SRC_INCLUDE_COLOR_H_ */

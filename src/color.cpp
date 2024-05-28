@@ -14,98 +14,99 @@
  * </table>
  */
 
+#include "color.h"
+
 #include <limits>
 #include <span>
 
-#include "color.h"
 #include "exception.hpp"
-#include "log.h"
+#include "log_system.h"
 
-namespace SimpleRenderer {
+namespace simple_renderer {
 
-const color_t color_t::WHITE = color_t((uint8_t)0xFF, 0xFF, 0xFF);
-const color_t color_t::BLACK = color_t((uint8_t)0x00, 0x00, 0x00);
-const color_t color_t::RED = color_t((uint8_t)0xFF, 0x00, 0x00);
-const color_t color_t::GREEN = color_t((uint8_t)0x00, 0xFF, 0x00);
-const color_t color_t::BLUE = color_t((uint8_t)0x00, 0x00, 0xFF);
+const Color Color::kWhite = Color((uint8_t)0xFF, 0xFF, 0xFF);
+const Color Color::kBlack = Color((uint8_t)0x00, 0x00, 0x00);
+const Color Color::kRed = Color((uint8_t)0xFF, 0x00, 0x00);
+const Color Color::kGreen = Color((uint8_t)0x00, 0xFF, 0x00);
+const Color Color::kBlue = Color((uint8_t)0x00, 0x00, 0xFF);
 
-color_t::color_t(uint32_t _data) {
-  auto data_ptr = std::span(reinterpret_cast<uint8_t *>(&_data), 4);
-  channel_r = data_ptr[0];
-  channel_g = data_ptr[1];
-  channel_b = data_ptr[2];
-  channel_a = data_ptr[3];
+Color::Color(uint32_t data) {
+  auto data_ptr = std::span(reinterpret_cast<uint8_t *>(&data), 4);
+  channel_r_ = data_ptr[0];
+  channel_g_ = data_ptr[1];
+  channel_b_ = data_ptr[2];
+  channel_a_ = data_ptr[3];
 }
 
-color_t::color_t(uint8_t _red, uint8_t _green, uint8_t _blue, uint8_t _alpha)
-    : channel_r(_red), channel_g(_green), channel_b(_blue), channel_a(_alpha) {}
+Color::Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha)
+    : channel_r_(red), channel_g_(green), channel_b_(blue), channel_a_(alpha) {}
 
-color_t::color_t(float _red, float _green, float _blue, float _alpha)
-    : channel_r(uint8_t(_red * std::numeric_limits<uint8_t>::max())),
-      channel_g(uint8_t(_green * std::numeric_limits<uint8_t>::max())),
-      channel_b(uint8_t(_blue * std::numeric_limits<uint8_t>::max())),
-      channel_a(uint8_t(_alpha * std::numeric_limits<uint8_t>::max())) {}
+Color::Color(float red, float green, float blue, float alpha)
+    : channel_r_(uint8_t(red * std::numeric_limits<uint8_t>::max())),
+      channel_g_(uint8_t(green * std::numeric_limits<uint8_t>::max())),
+      channel_b_(uint8_t(blue * std::numeric_limits<uint8_t>::max())),
+      channel_a_(uint8_t(alpha * std::numeric_limits<uint8_t>::max())) {}
 
-auto color_t::operator[](uint8_t _idx) -> uint8_t & {
-  if (_idx > 3) {
-    throw SimpleRenderer::exception("_idx > 3");
+auto Color::operator[](uint8_t idx) -> uint8_t & {
+  if (idx > 3) {
+    throw Exception("idx > 3");
   }
-  if (_idx == 0) {
-    return channel_r;
+  if (idx == 0) {
+    return channel_r_;
   }
-  if (_idx == 1) {
-    return channel_g;
+  if (idx == 1) {
+    return channel_g_;
   }
-  if (_idx == 2) {
-    return channel_b;
+  if (idx == 2) {
+    return channel_b_;
   }
-  return channel_a;
+  return channel_a_;
 }
 
-auto color_t::operator[](uint8_t _idx) const -> uint8_t {
-  if (_idx > 3) {
-    throw SimpleRenderer::exception("_idx > 3");
+auto Color::operator[](uint8_t idx) const -> uint8_t {
+  if (idx > 3) {
+    throw Exception("idx > 3");
   }
-  if (_idx == 0) {
-    return channel_r;
+  if (idx == 0) {
+    return channel_r_;
   }
-  if (_idx == 1) {
-    return channel_g;
+  if (idx == 1) {
+    return channel_g_;
   }
-  if (_idx == 2) {
-    return channel_b;
+  if (idx == 2) {
+    return channel_b_;
   }
-  return channel_a;
+  return channel_a_;
 }
 
-auto color_t::operator*(float _val) const -> color_t {
-  auto red = static_cast<uint8_t>(static_cast<float>(channel_r) * _val);
-  auto green = static_cast<uint8_t>(static_cast<float>(channel_g) * _val);
-  auto blue = static_cast<uint8_t>(static_cast<float>(channel_b) * _val);
-  auto alpha = static_cast<uint8_t>(static_cast<float>(channel_a) * _val);
-  return color_t(red, green, blue, alpha);
+auto Color::operator*(float val) const -> Color {
+  auto red = static_cast<uint8_t>(static_cast<float>(channel_r_) * val);
+  auto green = static_cast<uint8_t>(static_cast<float>(channel_g_) * val);
+  auto blue = static_cast<uint8_t>(static_cast<float>(channel_b_) * val);
+  auto alpha = static_cast<uint8_t>(static_cast<float>(channel_a_) * val);
+  return Color(red, green, blue, alpha);
 }
 
-auto color_t::operator*=(float _val) -> color_t & {
-  channel_r = static_cast<uint8_t>(static_cast<float>(channel_r) * _val);
-  channel_g = static_cast<uint8_t>(static_cast<float>(channel_g) * _val);
-  channel_b = static_cast<uint8_t>(static_cast<float>(channel_b) * _val);
-  channel_a = static_cast<uint8_t>(static_cast<float>(channel_a) * _val);
+auto Color::operator*=(float val) -> Color & {
+  channel_r_ = static_cast<uint8_t>(static_cast<float>(channel_r_) * val);
+  channel_g_ = static_cast<uint8_t>(static_cast<float>(channel_g_) * val);
+  channel_b_ = static_cast<uint8_t>(static_cast<float>(channel_b_) * val);
+  channel_a_ = static_cast<uint8_t>(static_cast<float>(channel_a_) * val);
   return *this;
 }
 
-[[maybe_unused]] auto color_t::bpp() -> size_t { return BPP; }
-
-[[maybe_unused]] auto color_t::to_uint32() const -> uint32_t {
+Color::operator uint32_t() const {
   uint32_t ret = 0;
   auto ret_ptr = std::span(reinterpret_cast<uint8_t *>(&ret), 4);
 
-  ret_ptr[0] = channel_r;
-  ret_ptr[1] = channel_g;
-  ret_ptr[2] = channel_b;
-  ret_ptr[3] = channel_a;
+  ret_ptr[0] = channel_r_;
+  ret_ptr[1] = channel_g_;
+  ret_ptr[2] = channel_b_;
+  ret_ptr[3] = channel_a_;
 
   return ret;
 }
 
-} // namespace SimpleRenderer
+[[maybe_unused]] auto Color::GetBpp() -> size_t { return kBpp; }
+
+}  // namespace simple_renderer

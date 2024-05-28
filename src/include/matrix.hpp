@@ -14,28 +14,28 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_MATRIX_HPP
-#define SIMPLERENDER_MATRIX_HPP
+#ifndef SIMPLERENDER_SRC_INCLUDE_MATRIX_HPP_
+#define SIMPLERENDER_SRC_INCLUDE_MATRIX_HPP_
 
 #include <Eigen/Dense>
 
 #include "log_system.h"
 
-namespace SimpleRenderer {
+namespace simple_renderer {
 
-template <class T> using matrix4_t = Eigen::Matrix<T, 4, 4>;
+template <class T>
+using Matrix4 = Eigen::Matrix<T, 4, 4>;
 
-using matrix4f_t = matrix4_t<float>;
+using Matrix4f = Matrix4<float>;
 
-} // namespace SimpleRenderer
+}  // namespace simple_renderer
 
 /**
  * spdlog 输出矩阵实现
  */
 template <>
-struct fmt::formatter<SimpleRenderer::matrix4f_t>
-    : fmt::formatter<std::string> {
-  auto format(SimpleRenderer::matrix4f_t _matrix,
+struct fmt::formatter<simple_renderer::Matrix4f> : fmt::formatter<std::string> {
+  auto format(simple_renderer::Matrix4f _matrix,
               format_context &_format_context) const
       -> decltype(_format_context.out()) {
     std::stringstream buf;
@@ -44,4 +44,4 @@ struct fmt::formatter<SimpleRenderer::matrix4f_t>
   }
 };
 
-#endif /* SIMPLERENDER_MATRIX_HPP */
+#endif /* SIMPLERENDER_SRC_INCLUDE_MATRIX_HPP_ */

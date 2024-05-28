@@ -7,7 +7,10 @@
 # 生成静态库
 add_library(${PROJECT_NAME} STATIC
         log_system.cpp
-        # color.cpp
+        color.cpp
+        include/vector.hpp
+        include/matrix.hpp
+        include/exception.hpp
         # model.cpp
         # light.cpp
         # scene.cpp

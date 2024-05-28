@@ -14,36 +14,36 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_EXCEPTION_HPP
-#define SIMPLERENDER_EXCEPTION_HPP
+#ifndef SIMPLERENDER_SRC_EXCEPTION_HPP_
+#define SIMPLERENDER_SRC_EXCEPTION_HPP_
 
 #include <exception>
 #include <string>
 
-#include "log.h"
+#include "log_system.h"
 
-namespace SimpleRenderer {
+namespace simple_renderer {
 
-class exception : public std::exception {
-public:
-  exception() : message("") { SRLOG->error(""); }
-  explicit exception(std::string _str) : message(_str) { SRLOG->error(_str); }
+class Exception : public std::exception {
+ public:
+  Exception() : message_("") { SPDLOG_ERROR(""); }
+  explicit Exception(std::string _str) : message_(_str) { SPDLOG_ERROR(_str); }
 
   /// @name 默认构造/析构函数
   /// @{
-  exception(const exception &_color) = default;
-  exception(exception &&_color) = default;
-  auto operator=(const exception &_color) -> exception & = default;
-  auto operator=(exception &&_color) -> exception & = default;
-  ~exception() throw() = default;
+  Exception(const Exception &_color) = default;
+  Exception(Exception &&_color) = default;
+  auto operator=(const Exception &_color) -> Exception & = default;
+  auto operator=(Exception &&_color) -> Exception & = default;
+  ~Exception() throw() = default;
   /// @}
 
-  virtual const char *what() const throw() { return message.c_str(); }
+  virtual const char *what() const throw() { return message_.c_str(); }
 
-private:
-  std::string message;
+ private:
+  std::string message_;
 };
 
-} // namespace SimpleRenderer
+}  // namespace simple_renderer
 
-#endif /* SIMPLERENDER_EXCEPTION_HPP */
+#endif /* SIMPLERENDER_SRC_EXCEPTION_HPP_ */
