@@ -14,12 +14,10 @@ add_library(${PROJECT_NAME} STATIC
         include/model.hpp
         include/shader.h
         include/default_shader.h
-        # include/light.h
+        include/light.h
         model.cpp
         light.cpp
-        # scene.cpp
         shader.cpp
-        # framebuffer.cpp
         default_shader.cpp
         simple_renderer.cpp
 )

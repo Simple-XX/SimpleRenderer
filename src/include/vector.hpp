@@ -41,12 +41,11 @@ using Vector4f = Vector4<float>;
  */
 template <>
 struct fmt::formatter<simple_renderer::Vector3f> : fmt::formatter<std::string> {
-  auto format(simple_renderer::Vector3f _vector,
-              format_context &_format_context) const
-      -> decltype(_format_context.out()) {
+  auto format(simple_renderer::Vector3f vector, format_context &format_context)
+      const -> decltype(format_context.out()) {
     std::stringstream buf;
-    buf << _vector;
-    return fmt::format_to(_format_context.out(), "\n{}", buf.str());
+    buf << vector;
+    return fmt::format_to(format_context.out(), "\n{}", buf.str());
   }
 };
 

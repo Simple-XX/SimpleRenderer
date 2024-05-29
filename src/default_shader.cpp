@@ -18,7 +18,7 @@
 
 namespace simple_renderer {
 
-auto DefaultShader::interpolate_color(
+auto DefaultShader::InterpolateColor(
     const Color &color0, const Color &color1, const Color &color2,
     const Vector3f &barycentric_coord) -> Color {
   return Color(
@@ -64,9 +64,9 @@ auto DefaultShader::Fragment(const ShaderFragmentIn &shader_fragment_in) const
     return ShaderFragmentOut(is_need_draw, Color());
   }
   auto color =
-      interpolate_color(shader_fragment_in.color0_, shader_fragment_in.color1_,
-                        shader_fragment_in.color2_,
-                        shader_fragment_in.barycentric_coord_) *
+      InterpolateColor(shader_fragment_in.color0_, shader_fragment_in.color1_,
+                       shader_fragment_in.color2_,
+                       shader_fragment_in.barycentric_coord_) *
       intensity;
   return ShaderFragmentOut(is_need_draw, color);
 }

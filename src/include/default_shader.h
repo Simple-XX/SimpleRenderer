@@ -39,7 +39,7 @@ class DefaultShader : public ShaderBase {
 
   /**
    * 顶点着色器
-   * @param _shader_vertex_in 输入
+   * @param shader_vertex_in 输入
    * @return 输出
    */
   [[nodiscard]] auto Vertex(const ShaderVertexIn &shader_vertex_in) const
@@ -56,15 +56,15 @@ class DefaultShader : public ShaderBase {
  private:
   /**
    * 颜色插值，由重心坐标计算出对应点的颜色
-   * @param _color0 第一个点的颜色
-   * @param _color1 第二个点的颜色
-   * @param _color2 第三个点的颜色
-   * @param _barycentric_coord 重心坐标
+   * @param color0 第一个点的颜色
+   * @param color1 第二个点的颜色
+   * @param color2 第三个点的颜色
+   * @param barycentric_coord 重心坐标
    * @return 颜色值
    */
-  static auto interpolate_color(const Color &color0, const Color &color1,
-                                const Color &color2,
-                                const Vector3f &barycentric_coord) -> Color;
+  static auto InterpolateColor(const Color &color0, const Color &color1,
+                               const Color &color2,
+                               const Vector3f &barycentric_coord) -> Color;
 };
 
 }  // namespace simple_renderer

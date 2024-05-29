@@ -35,12 +35,12 @@ using Matrix4f = Matrix4<float>;
  */
 template <>
 struct fmt::formatter<simple_renderer::Matrix4f> : fmt::formatter<std::string> {
-  auto format(simple_renderer::Matrix4f _matrix,
-              format_context &_format_context) const
-      -> decltype(_format_context.out()) {
+  auto format(simple_renderer::Matrix4f matrix,
+              format_context &format_context) const
+      -> decltype(format_context.out()) {
     std::stringstream buf;
-    buf << _matrix;
-    return fmt::format_to(_format_context.out(), "\n{}", buf.str());
+    buf << matrix;
+    return fmt::format_to(format_context.out(), "\n{}", buf.str());
   }
 };
 

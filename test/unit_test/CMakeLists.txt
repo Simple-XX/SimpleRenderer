@@ -13,7 +13,7 @@ project(
 enable_language(CXX)
 
 add_executable(unit_test
-        buffer_base_test.cpp
+        model_test.cpp
         matrix_test.cpp
 )
 

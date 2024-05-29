@@ -19,9 +19,10 @@
 #include <utility>
 
 #define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+
 #include "exception.hpp"
 #include "log_system.h"
-#include "tiny_obj_loader.h"
 
 namespace simple_renderer {
 

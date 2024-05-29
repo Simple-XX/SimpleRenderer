@@ -14,6 +14,8 @@
  * </table>
  */
 
+#include <simple_renderer.h>
+
 #include <cstdint>
 #include <iostream>
 #include <span>
@@ -21,8 +23,6 @@
 #include <vector>
 
 #include "display.h"
-// #include "render.hpp"
-#include <simple_renderer.h>
 
 /// obj 文件目录
 static const std::string OBJ_FILE_PATH =

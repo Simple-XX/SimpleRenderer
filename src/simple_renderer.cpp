@@ -54,7 +54,7 @@ bool SimpleRenderer::render(const Model &model) {
 }
 
 void SimpleRenderer::DrawLine(float x0, float y0, float x1, float y1,
-                          const Color &_color) {
+                              const Color &_color) {
   auto p0_x = static_cast<int32_t>(x0);
   auto p0_y = static_cast<int32_t>(y0);
   auto p1_x = static_cast<int32_t>(x1);
@@ -111,8 +111,8 @@ void SimpleRenderer::DrawLine(float x0, float y0, float x1, float y1,
 }
 
 void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
-                              const Model::Normal &normal,
-                              const Model::Face &face) {
+                                  const Model::Normal &normal,
+                                  const Model::Face &face) {
   auto v0 = face.v0_;
   auto v1 = face.v1_;
   auto v2 = face.v2_;
@@ -177,8 +177,8 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
 }
 
 void SimpleRenderer::DrawModel(const ShaderBase &shader, const Light &light,
-                           const Model &model, bool draw_line,
-                           bool draw_triangle) {
+                               const Model &model, bool draw_line,
+                               bool draw_triangle) {
   SPDLOG_INFO("draw {}", model.obj_path_);
 
   if (draw_line) {
@@ -188,11 +188,11 @@ void SimpleRenderer::DrawModel(const ShaderBase &shader, const Light &light,
       /// @todo 巨大性能开销
       auto face = shader.Vertex(ShaderVertexIn(f)).face_;
       DrawLine(face.v0_.coord_.x(), face.v0_.coord_.y(), face.v1_.coord_.x(),
-           face.v1_.coord_.y(), Color::kWhite);
+               face.v1_.coord_.y(), Color::kWhite);
       DrawLine(face.v1_.coord_.x(), face.v1_.coord_.y(), face.v2_.coord_.x(),
-           face.v2_.coord_.y(), Color::kWhite);
+               face.v2_.coord_.y(), Color::kWhite);
       DrawLine(face.v2_.coord_.x(), face.v2_.coord_.y(), face.v0_.coord_.x(),
-           face.v0_.coord_.y(), Color::kWhite);
+               face.v0_.coord_.y(), Color::kWhite);
     }
   }
   if (draw_triangle) {

@@ -38,6 +38,7 @@ class SimpleRenderer {
    * @param width
    * @param height
    * @param buffer 要进行绘制的内存区域，大小为 width*height*sizeof(uint32_t)
+   * @param 
    */
   SimpleRenderer(size_t width, size_t height, std::span<uint32_t> &buffer,
                  DrawPixelFunc draw_pixel_func);
