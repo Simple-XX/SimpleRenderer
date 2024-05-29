@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-// #include "display.h"
+#include "display.h"
 // #include "render.hpp"
 #include <simple_renderer.h>
 
@@ -65,7 +65,8 @@ int main(int, char **) {
     auto ret = simple_renderer.render(model);
   }
 
-  //  auto display = display_t(std::ref(framebuffers));
+  auto display = Display(WIDTH, HEIGHT);
+  display.loop(buffer);
 
   // // 计算线程
   // auto render_ret = render.run();

@@ -14,77 +14,76 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_DISPLAY_H
-#define SIMPLERENDER_DISPLAY_H
-
-#include <cstdint>
-#include <future>
+#ifndef SIMPLERENDER_TEST_SYSTEM_TEST_DISPLAY_H_
+#define SIMPLERENDER_TEST_SYSTEM_TEST_DISPLAY_H_
 
 #include <SDL.h>
 
+#include <cstdint>
+#include <future>
+#include <span>
 
 #include "framebuffer.h"
 
 /**
  * 显示抽象
  */
-class display_t {
-public:
+class Display {
+ public:
   /**
    * 构造函数
-   * @param _state 运行状态
-   * @param _width 宽度
-   * @param _height 高度
+   * @param width 宽度
+   * @param height 高度
    */
-  explicit display_t(size_t _width, size_t _height);
+  explicit Display(size_t width, size_t height);
 
   /**
    * 析构函数
    */
-  ~display_t();
+  ~Display();
 
   /// @name 默认构造/析构函数
   /// @{
-  display_t() = delete;
-  display_t(const display_t &_display) = default;
-  display_t(display_t &&_display) = default;
-  auto operator=(const display_t &_display) -> display_t & = default;
-  auto operator=(display_t &&_display) -> display_t & = default;
+  Display() = delete;
+  Display(const Display &display) = default;
+  Display(Display &&display) = default;
+  auto operator=(const Display &display) -> Display & = default;
+  auto operator=(Display &&display) -> Display & = default;
   /// @}
 
   /**
    * 将 framebuffer 中的数据绘制到屏幕上
    * @param _framebuffer 要绘制的 framebuffer
    */
-  void fill(const std::shared_ptr<SimpleRenderer::framebuffer_t> &_framebuffer);
+  void fill(const std::span<uint32_t> &buffer);
 
   /**
    * 运行
    */
   void run();
 
-private:
-  /// 窗口标题
-  static constexpr const char *WINDOW_TITLE = (char *)"SimpleRenderer";
-  /// 默认字体大小
-  static constexpr const int32_t DEFAULT_FONT_SIZE = 32;
-
-  /// 窗口宽度
-  size_t width;
-  /// 窗口高度
-  size_t height;
-
-  /// sdl 窗口
-  SDL_Window *sdl_window;
-  /// sdl 渲染器
-  SDL_Renderer *sdl_renderer;
-  /// sdl 纹理
-  SDL_Texture *sdl_texture;
-
   /**
    * 显示循环
    */
-  void loop();
+  void loop(const std::span<uint32_t> &buffer);
+
+ private:
+  /// 窗口标题
+  static constexpr const char *kWindowTitle = (char *)"SimpleRenderer";
+  /// 默认字体大小
+  static constexpr const int32_t kDefaultFontSize = 32;
+
+  /// 窗口宽度
+  size_t width_;
+  /// 窗口高度
+  size_t height_;
+
+  /// sdl 窗口
+  SDL_Window *sdl_window_;
+  /// sdl 渲染器
+  SDL_Renderer *sdl_renderer_;
+  /// sdl 纹理
+  SDL_Texture *sdl_texture_;
 };
 
-#endif /* SIMPLERENDER_DISPLAY_H */
+#endif /* SIMPLERENDER_TEST_SYSTEM_TEST_DISPLAY_H_ */
