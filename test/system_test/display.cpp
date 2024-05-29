@@ -85,8 +85,6 @@ void Display::fill(const std::span<uint32_t> &buffer) {
   SDL_RenderPresent(sdl_renderer_);
 }
 
-/// @todo 验证 std::condition_variable 的正确性
-/// @todo 保证时序正确
 void Display::loop(const std::span<uint32_t> &buffer) {
   SDL_Event event = SDL_Event();
   bool is_exit = false;
@@ -116,17 +114,5 @@ void Display::loop(const std::span<uint32_t> &buffer) {
     }
 
     fill(buffer);
-
-    // // 等待获取锁
-    // for (const auto &i : framebuffers) {
-    //   while (!i->displayable.load()) {
-    //     ;
-    //   }
-    //   // 填充窗口
-    //   fill(i);
-    //   i->displayable = false;
-    // }
   }
 }
-
-// void Display::run() { std::async(std::launch::async, &Display::loop, this); }

@@ -30,33 +30,26 @@ static const std::string OBJ_FILE_PATH =
 
 /// @name 默认大小
 /// @{
-static constexpr const size_t WIDTH = 1920;
-static constexpr const size_t HEIGHT = 1080;
+static constexpr const size_t kWidth = 1920;
+static constexpr const size_t kHeight = 1080;
 /// @}
 
 static void pixel(size_t x, size_t y, uint32_t color,
                   std::span<uint32_t> &buffer) {
-  buffer[x + y * WIDTH] = color;
+  buffer[x + y * kWidth] = color;
 }
 
-// @todo 不应该出现明确的类型，应该使用模板
 int main(int, char **) {
-  auto array = std::shared_ptr<uint32_t[]>(new uint32_t[WIDTH * HEIGHT],
+  auto array = std::shared_ptr<uint32_t[]>(new uint32_t[kWidth * kHeight],
                                            std::default_delete<uint32_t[]>());
 
-  auto buffer = std::span<uint32_t>(array.get(), WIDTH * HEIGHT);
+  auto buffer = std::span<uint32_t>(array.get(), kWidth * kHeight);
   auto simple_renderer =
-      simple_renderer::SimpleRenderer(WIDTH, HEIGHT, buffer, pixel);
+      simple_renderer::SimpleRenderer(kWidth, kHeight, buffer, pixel);
 
   // obj 路径
   std::vector<std::string> objs;
   objs.emplace_back(OBJ_FILE_PATH + "cube.obj");
-  // objs.emplace_back(OBJ_FILE_PATH + "cube2.obj");
-  // objs.emplace_back(OBJ_FILE_PATH + "cube3.obj");
-  // objs.emplace_back(OBJ_FILE_PATH + "cornell_box.obj");
-  // objs.emplace_back(OBJ_FILE_PATH + "helmet.obj");
-  // objs.emplace_back(OBJ_FILE_PATH + "african_head.obj");
-  // objs.emplace_back(OBJ_FILE_PATH + "utah-teapot/utah-teapot.obj");
 
   // 读取模型与材质
   for (auto &obj : objs) {
@@ -65,7 +58,7 @@ int main(int, char **) {
     simple_renderer.render(model);
   }
 
-  auto display = Display(WIDTH, HEIGHT);
+  auto display = Display(kWidth, kHeight);
   display.loop(buffer);
 
   return 0;
