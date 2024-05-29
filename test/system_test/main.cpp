@@ -51,34 +51,22 @@ int main(int, char **) {
   // obj 路径
   std::vector<std::string> objs;
   objs.emplace_back(OBJ_FILE_PATH + "cube.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "cube2.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "cube3.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "cornell_box.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "helmet.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "african_head.obj");
-  objs.emplace_back(OBJ_FILE_PATH + "utah-teapot/utah-teapot.obj");
+  // objs.emplace_back(OBJ_FILE_PATH + "cube2.obj");
+  // objs.emplace_back(OBJ_FILE_PATH + "cube3.obj");
+  // objs.emplace_back(OBJ_FILE_PATH + "cornell_box.obj");
+  // objs.emplace_back(OBJ_FILE_PATH + "helmet.obj");
+  // objs.emplace_back(OBJ_FILE_PATH + "african_head.obj");
+  // objs.emplace_back(OBJ_FILE_PATH + "utah-teapot/utah-teapot.obj");
 
   // 读取模型与材质
   for (auto &obj : objs) {
     // 添加到场景中
     auto model = simple_renderer::Model(obj);
-    auto ret = simple_renderer.render(model);
+    simple_renderer.render(model);
   }
 
   auto display = Display(WIDTH, HEIGHT);
   display.loop(buffer);
-
-  // // 计算线程
-  // auto render_ret = render.run();
-  // // 显示线程
-  // auto display_ret = display.run();
-
-  // if (render_ret.get() != state_t::STOP) {
-  //   throw SimpleRenderer::exception("render thread exit with error");
-  // }
-  // if (display_ret.get() != state_t::STOP) {
-  //   throw SimpleRenderer::exception("display thread exit with error");
-  // }
 
   return 0;
 }

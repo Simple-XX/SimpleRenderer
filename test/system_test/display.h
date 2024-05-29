@@ -23,8 +23,6 @@
 #include <future>
 #include <span>
 
-#include "framebuffer.h"
-
 /**
  * 显示抽象
  */
