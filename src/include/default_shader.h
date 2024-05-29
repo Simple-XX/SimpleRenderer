@@ -14,28 +14,27 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_DEFAULT_SHADER_H
-#define SIMPLERENDER_DEFAULT_SHADER_H
+#ifndef SIMPLERENDER_SRC_INCLUDE_DEFAULT_SHADER_H_
+#define SIMPLERENDER_SRC_INCLUDE_DEFAULT_SHADER_H_
 
 #include "shader.h"
 
-namespace SimpleRenderer {
+namespace simple_renderer {
 
 /**
  * 默认着色器
  */
-class default_shader_t : public shader_base_t {
-public:
+class DefaultShader : public ShaderBase {
+ public:
   /// @name 默认构造/析构函数
   /// @{
-  default_shader_t() = default;
-  default_shader_t(const default_shader_t &_default_shader) = default;
-  default_shader_t(default_shader_t &&_default_shader) = default;
-  auto operator=(const default_shader_t &_default_shader)
-      -> default_shader_t & = default;
-  auto operator=(default_shader_t &&_default_shader)
-      -> default_shader_t & = default;
-  ~default_shader_t() override = default;
+  DefaultShader() = default;
+  DefaultShader(const DefaultShader &default_shader) = default;
+  DefaultShader(DefaultShader &&default_shader) = default;
+  auto operator=(const DefaultShader &default_shader) -> DefaultShader & =
+                                                             default;
+  auto operator=(DefaultShader &&default_shader) -> DefaultShader & = default;
+  ~DefaultShader() override = default;
   /// @}
 
   /**
@@ -43,19 +42,18 @@ public:
    * @param _shader_vertex_in 输入
    * @return 输出
    */
-  [[nodiscard]] auto vertex(const shader_vertex_in_t &_shader_vertex_in) const
-      -> shader_vertex_out_t final;
+  [[nodiscard]] auto Vertex(const ShaderVertexIn &shader_vertex_in) const
+      -> ShaderVertexOut final;
 
   /**
    * 片段着色器
    * @param _shader_fragment_in 输入
    * @return 输出
    */
-  [[nodiscard]] auto
-  fragment(const shader_fragment_in_t &_shader_fragment_in) const
-      -> shader_fragment_out_t final;
+  [[nodiscard]] auto Fragment(const ShaderFragmentIn &shader_fragment_in) const
+      -> ShaderFragmentOut final;
 
-private:
+ private:
   /**
    * 颜色插值，由重心坐标计算出对应点的颜色
    * @param _color0 第一个点的颜色
@@ -64,12 +62,11 @@ private:
    * @param _barycentric_coord 重心坐标
    * @return 颜色值
    */
-  static auto interpolate_color(const color_t &_color0, const color_t &_color1,
-                                const color_t &_color2,
-                                const vector3f_t &_barycentric_coord)
-      -> color_t;
+  static auto interpolate_color(const Color &color0, const Color &color1,
+                                const Color &color2,
+                                const Vector3f &barycentric_coord) -> Color;
 };
 
-} // namespace SimpleRenderer
+}  // namespace simple_renderer
 
-#endif /* SIMPLERENDER_DEFAULT_SHADER_H */
+#endif /* SIMPLERENDER_SRC_INCLUDE_DEFAULT_SHADER_H_ */

@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_SCENE_H
-#define SIMPLERENDER_SCENE_H
+#ifndef SIMPLERENDER_SRC_INCLUDE_SCENE_H_
+#define SIMPLERENDER_SRC_INCLUDE_SCENE_H_
 
 #include <queue>
 #include <string>
@@ -28,7 +28,7 @@
 #include "model.hpp"
 #include "vector.hpp"
 
-namespace SimpleRenderer {
+namespace simple_renderer {
 
 /**
  * 场景抽象
@@ -92,4 +92,4 @@ private:
 
 } // namespace SimpleRenderer
 
-#endif /* SIMPLERENDER_SCENE_H */
+#endif /* SIMPLERENDER_SRC_INCLUDE_SCENE_H_ */

@@ -30,24 +30,23 @@ static const std::string OBJ_FILE_PATH =
 
 /// @name 默认大小
 /// @{
-static constexpr const uint64_t WIDTH = 1920;
-static constexpr const uint64_t HEIGHT = 1080;
+static constexpr const size_t WIDTH = 1920;
+static constexpr const size_t HEIGHT = 1080;
 /// @}
 
-// static void pixel(uint64_t _x, uint64_t _y,
-//                   const SimpleRenderer::color_t &_color,
-//                   std::array<SimpleRenderer::color_t, WIDTH * HEIGHT>
-//                   _buffer) {
-//   _buffer[_x + _y * WIDTH] = _color;
-// }
+static void pixel(size_t x, size_t y, uint32_t color,
+                  std::span<uint32_t> &buffer) {
+  buffer[x + y * WIDTH] = color;
+}
 
 // @todo 不应该出现明确的类型，应该使用模板
 int main(int, char **) {
-  auto array = std::shared_ptr<uint32_t[]>(new uint32_t[100],
+  auto array = std::shared_ptr<uint32_t[]>(new uint32_t[WIDTH * HEIGHT],
                                            std::default_delete<uint32_t[]>());
 
-  auto buffer = std::span<uint32_t>(array.get(), 100);
-  auto simple_renderer = simple_renderer::SimpleRenderer(1920, 1080, buffer);
+  auto buffer = std::span<uint32_t>(array.get(), WIDTH * HEIGHT);
+  auto simple_renderer =
+      simple_renderer::SimpleRenderer(WIDTH, HEIGHT, buffer, pixel);
 
   // obj 路径
   std::vector<std::string> objs;
@@ -59,21 +58,12 @@ int main(int, char **) {
   objs.emplace_back(OBJ_FILE_PATH + "african_head.obj");
   objs.emplace_back(OBJ_FILE_PATH + "utah-teapot/utah-teapot.obj");
 
-  // auto scene = SimpleRenderer::scene_t("default", 1920, 1080, 1000);
-
   // 读取模型与材质
   for (auto &obj : objs) {
     // 添加到场景中
     auto model = simple_renderer::Model(obj);
-    // scene.add_model(model, SimpleRenderer::vector3f_t());
+    auto ret = simple_renderer.render(model);
   }
-  // 设置光照
-  // scene.add_light(SimpleRenderer::light_t());
-
-  // auto buffer = std::array<SimpleRenderer::color_t, WIDTH * HEIGHT>();
-
-  // auto render = SimpleRenderer::render_t<WIDTH, HEIGHT>(scene, buffer,
-  // pixel);
 
   //  auto display = display_t(std::ref(framebuffers));
 

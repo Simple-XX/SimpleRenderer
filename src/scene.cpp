@@ -15,10 +15,10 @@
  */
 
 #include "scene.h"
-#include "log.h"
+#include "log_system.h"
 #include "matrix.hpp"
 
-namespace SimpleRenderer {
+namespace simple_renderer {
 
 scene_t::scene_t(const std::string &_name, uint64_t _x, uint64_t _y,
                  uint64_t _z)

@@ -16,31 +16,32 @@
 
 #include "shader.h"
 
-namespace SimpleRenderer {
+namespace simple_renderer {
 
-shader_vertex_in_t::shader_vertex_in_t(const model_t::face_t &_face)
-    : face(_face) {}
+ShaderVertexIn::ShaderVertexIn(const Model::Face &face) : face_(face) {}
 
-shader_vertex_out_t::shader_vertex_out_t(const model_t::face_t &_face)
-    : face(_face) {}
+ShaderVertexOut::ShaderVertexOut(const Model::Face &face) : face_(face) {}
 
-shader_fragment_in_t::shader_fragment_in_t(const vector3f_t &_barycentric_coord,
-                                           const vector3f_t &_normal,
-                                           const vector3f_t &_light,
-                                           const color_t &_color0,
-                                           const color_t &_color1,
-                                           const color_t &_color2)
-    : barycentric_coord(_barycentric_coord), normal(_normal), light(_light),
-      color0(_color0), color1(_color1), color2(_color2) {}
+ShaderFragmentIn::ShaderFragmentIn(const Vector3f &barycentric_coord,
+                                   const Vector3f &normal,
+                                   const Vector3f &light, const Color &color0,
+                                   const Color &color1, const Color &color2)
+    : barycentric_coord_(barycentric_coord),
+      normal_(normal),
+      light_(light),
+      color0_(color0),
+      color1_(color1),
+      color2_(color2) {}
 
-shader_fragment_out_t::shader_fragment_out_t(const bool &_is_need_draw,
-                                             const color_t &_color)
-    : is_need_draw(_is_need_draw), color(_color) {}
+ShaderFragmentOut::ShaderFragmentOut(const bool &is_need_draw,
+                                     const Color &color)
+    : is_need_draw_(is_need_draw), color_(color) {}
 
-shader_data_t::shader_data_t(const matrix4f_t &_model_matrix,
-                             const matrix4f_t &_view_matrix,
-                             const matrix4f_t &_project_matrix)
-    : model_matrix(_model_matrix), view_matrix(_view_matrix),
-      project_matrix(_project_matrix) {}
+ShaderData::ShaderData(const Matrix4f &model_matrix,
+                       const Matrix4f &view_matrix,
+                       const Matrix4f &project_matrix)
+    : model_matrix_(model_matrix),
+      view_matrix_(view_matrix),
+      project_matrix_(project_matrix) {}
 
-} // namespace SimpleRenderer
+}  // namespace simple_renderer

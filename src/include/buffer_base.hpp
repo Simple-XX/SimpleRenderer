@@ -37,8 +37,9 @@ namespace SimpleRenderer {
  * @todo get() 方法能否优化
  * @todo 多线程安全
  */
-template <class T_t> class buffer_base_t {
-public:
+template <class T_t>
+class buffer_base_t {
+ public:
   /// 每个像素的字节数
   static constexpr const size_t BPP = sizeof(T_t);
 
@@ -50,7 +51,8 @@ public:
    */
   explicit buffer_base_t(size_t _width, size_t _height,
                          const T_t &_value = T_t())
-      : width(_width), height(_height),
+      : width(_width),
+        height(_height),
         buffer(std::vector<T_t>(width * height, _value)) {}
 
   virtual ~buffer_base_t() {
@@ -63,10 +65,10 @@ public:
   buffer_base_t() = default;
   buffer_base_t(const buffer_base_t &_buffer_base) = default;
   buffer_base_t(buffer_base_t &&_buffer_base) noexcept = default;
-  auto operator=(const buffer_base_t &_buffer_base)
-      -> buffer_base_t & = default;
-  auto operator=(buffer_base_t &&_buffer_base) noexcept
-      -> buffer_base_t & = default;
+  auto operator=(const buffer_base_t &_buffer_base) -> buffer_base_t & =
+                                                           default;
+  auto operator=(buffer_base_t &&_buffer_base) noexcept -> buffer_base_t & =
+                                                               default;
   /// @}
 
   /**
@@ -128,7 +130,7 @@ public:
    */
   [[nodiscard]] auto length() const -> size_t { return buffer.size() * BPP; }
 
-private:
+ private:
   /// 窗口宽度
   size_t width = 0;
   /// 窗口高度
@@ -141,6 +143,6 @@ private:
   std::vector<T_t> buffer = {};
 };
 
-} // namespace SimpleRenderer
+}  // namespace SimpleRenderer
 
 #endif /* BUFFER_BASE_HPP */

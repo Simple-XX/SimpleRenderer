@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_CAMERA_H
-#define SIMPLERENDER_CAMERA_H
+#ifndef SIMPLERENDER_SRC_INCLUDE_CAMERA_H_
+#define SIMPLERENDER_SRC_INCLUDE_CAMERA_H_
 
 #include <cstdint>
 #include <string>
@@ -23,37 +23,37 @@
 #include "color.h"
 #include "vector.hpp"
 
-namespace SimpleRenderer {
+namespace simple_renderer {
 
 /**
  * camera 抽象
  */
-class camera_t {
-public:
+class Camera {
+ public:
   /// 光照名称
-  std::string name = "default light name";
+  std::string name_ = "default light name";
   /// 位置
-  vector3f_t pos;
+  Vector3f pos_;
   /// 方向
-  vector3f_t dir;
+  Vector3f dir_;
 
   /**
    * 构造函数
    * @param _name camera 名称
    */
-  explicit camera_t(const std::string &_name);
+  explicit Camera(const std::string &_name);
 
   /// @name 默认构造/析构函数
   /// @{
-  camera_t() = default;
-  camera_t(const camera_t &_light) = default;
-  camera_t(camera_t &&_light) = default;
-  auto operator=(const camera_t &_light) -> camera_t & = default;
-  auto operator=(camera_t &&_light) -> camera_t & = default;
-  ~camera_t() = default;
+  Camera() = default;
+  Camera(const Camera &light) = default;
+  Camera(Camera &&light) = default;
+  auto operator=(const Camera &light) -> Camera & = default;
+  auto operator=(Camera &&light) -> Camera & = default;
+  ~Camera() = default;
   /// @}
 };
 
-} // namespace SimpleRenderer
+}  // namespace simple_renderer
 
-#endif /* SIMPLERENDER_CAMERA_H */
+#endif /* SIMPLERENDER_SRC_INCLUDE_CAMERA_H_ */
