@@ -23,16 +23,9 @@
 
 namespace simple_renderer {
 
-template <class T>
-using Vector2 = Eigen::Vector<T, 2>;
-template <class T>
-using Vector3 = Eigen::Vector<T, 3>;
-template <class T>
-using Vector4 = Eigen::Vector<T, 4>;
-
-using Vector2f = Vector2<float>;
-using Vector3f = Vector3<float>;
-using Vector4f = Vector4<float>;
+using Vector2f = Eigen::Vector2f;
+using Vector3f = Eigen::Vector3f;
+using Vector4f = Eigen::Vector4f;
 
 }  // namespace simple_renderer
 
@@ -42,6 +35,19 @@ using Vector4f = Vector4<float>;
 template <>
 struct fmt::formatter<simple_renderer::Vector3f> : fmt::formatter<std::string> {
   auto format(simple_renderer::Vector3f vector, format_context &format_context)
+      const -> decltype(format_context.out()) {
+    std::stringstream buf;
+    buf << vector;
+    return fmt::format_to(format_context.out(), "\n{}", buf.str());
+  }
+};
+
+/**
+ * spdlog 输出 Vector4f 实现
+ */
+template <>
+struct fmt::formatter<simple_renderer::Vector4f> : fmt::formatter<std::string> {
+  auto format(simple_renderer::Vector4f vector, format_context &format_context)
       const -> decltype(format_context.out()) {
     std::stringstream buf;
     buf << vector;

@@ -53,7 +53,7 @@ class Display {
    * 将 framebuffer 中的数据绘制到屏幕上
    * @param _framebuffer 要绘制的 framebuffer
    */
-  void fill(const std::span<uint32_t> &buffer);
+  void fill(const uint32_t *buffer);
 
   /**
    * 运行
@@ -63,7 +63,7 @@ class Display {
   /**
    * 显示循环
    */
-  void loop(const std::span<uint32_t> &buffer);
+  void loop(uint32_t *buffer);
 
  private:
   /// 窗口标题

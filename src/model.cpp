@@ -36,12 +36,12 @@ Model::Vertex::Vertex(Coord coord, Normal normal, TextureCoord texture_coord,
 auto Model::Vertex::operator*(const Matrix4f &tran) const -> Model::Vertex {
   auto vertex(*this);
 
-  auto coord4 = Vector4f(coord_.x(), coord_.y(), coord_.z(), 1);
-  auto coord3 = tran * coord4;
+  auto res4 = Vector4f(coord_.x(), coord_.y(), coord_.z(), 1);
+  auto ret4 = Vector4f(tran * res4);
 
-  vertex.coord_.x() = coord3.x();
-  vertex.coord_.y() = coord3.y();
-  vertex.coord_.z() = coord3.z();
+  vertex.coord_.x() = ret4.x();
+  vertex.coord_.y() = ret4.y();
+  vertex.coord_.z() = ret4.z();
 
   /// @todo 变换法线
 
@@ -185,8 +185,6 @@ Model::Model(const std::string &obj_path, const std::string &mtl_path)
     }
   }
 
-  // 计算模型包围盒
-  SetBox();
   Normalize();
 }
 
@@ -204,7 +202,7 @@ auto Model::GetFace() const -> const std::vector<Model::Face> & {
   return faces_;
 }
 
-void Model::SetBox() {
+std::pair<Model::Coord, Model::Coord> Model::GetMaxMinXYX() {
   auto max = faces_.at(0).v0_.coord_;
   auto min = faces_.at(0).v0_.coord_;
 
@@ -220,53 +218,42 @@ void Model::SetBox() {
     max.y() = curr_max_y > max.y() ? curr_max_y : max.y();
     max.z() = curr_max_z > max.z() ? curr_max_z : max.z();
 
-    auto curr_min_x = std::max(i.v0_.coord_.x(),
-                               std::max(i.v1_.coord_.x(), i.v2_.coord_.x()));
-    auto curr_min_y = std::max(i.v0_.coord_.y(),
-                               std::max(i.v1_.coord_.y(), i.v2_.coord_.y()));
-    auto curr_min_z = std::max(i.v0_.coord_.z(),
-                               std::max(i.v1_.coord_.z(), i.v2_.coord_.z()));
+    auto curr_min_x = std::min(i.v0_.coord_.x(),
+                               std::min(i.v1_.coord_.x(), i.v2_.coord_.x()));
+    auto curr_min_y = std::min(i.v0_.coord_.y(),
+                               std::min(i.v1_.coord_.y(), i.v2_.coord_.y()));
+    auto curr_min_z = std::min(i.v0_.coord_.z(),
+                               std::min(i.v1_.coord_.z(), i.v2_.coord_.z()));
 
     min.x() = curr_min_x < min.x() ? curr_min_x : min.x();
     min.y() = curr_min_y < min.y() ? curr_min_y : min.y();
     min.z() = curr_min_z < min.z() ? curr_min_z : min.z();
   }
-  box_.min_ = min;
-  box_.max_ = max;
-  center_.x() = (max.x() + min.x()) / 2.f;
-  center_.y() = (max.y() + min.y()) / 2.f;
-  center_.z() = (max.z() + min.z()) / 2.f;
-
-  SPDLOG_INFO("box: \n{},\ncenter: {}", box_, center_);
+  return {max, min};
 }
 
 void Model::Normalize() {
-  auto w = std::abs(box_.max_.x()) + std::abs(box_.min_.x());
-  auto h = std::abs(box_.max_.y()) + std::abs(box_.min_.y());
-  auto d = std::abs(box_.max_.z()) + std::abs(box_.min_.z());
-  auto scale = 2.0f / std::max(w, std::max(h, d));
+  auto [max, min] = GetMaxMinXYX();
 
-  // 平移
-  auto translate_mat = Matrix4f();
-  translate_mat.setIdentity();
-  translate_mat(0, 3) = -center_.x();
-  translate_mat(1, 3) = -center_.y();
-  translate_mat(2, 3) = -center_.z();
+  auto x = std::abs(max.x()) + std::abs(min.x());
+  auto y = std::abs(max.y()) + std::abs(min.y());
+  auto z = std::abs(max.z()) + std::abs(min.z());
 
-  SPDLOG_INFO("translate_mat: {}", translate_mat);
+  auto scale = 1.0f / std::max(x, std::max(y, z));
+  auto scale_matrix = Matrix4f(Matrix4f::Identity());
+  scale_matrix.diagonal() << scale, scale, scale, 1;
 
-  // 缩放
-  auto scale_mat = Matrix4f();
-  scale_mat.setIdentity();
-  scale_mat.diagonal()[0] = scale;
-  scale_mat.diagonal()[1] = scale;
-  scale_mat.diagonal()[2] = scale;
+  auto center = Coord((max.x() + min.x()) / 2.f, (max.y() + min.y()) / 2.f,
+                      (max.z() + min.z()) / 2.f);
+  auto translation_matrix = Matrix4f(Matrix4f::Identity());
+  translation_matrix.col(translation_matrix.cols() - 1) << -center.x(),
+      -center.y(), -center.z(), 1;
 
-  box_.min_ = Vector3f(-1, -1, -1);
-  box_.max_ = Vector3f(1, 1, 1);
-  center_ = Vector3f(0, 0, 0);
+  auto matrix = Matrix4f(scale_matrix * translation_matrix);
 
-  *this = *this * scale_mat * translate_mat;
+  SPDLOG_DEBUG("matrix: {}", matrix);
+
+  *this = *this * matrix;
 }
 
 }  // namespace simple_renderer

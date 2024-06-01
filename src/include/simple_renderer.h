@@ -23,14 +23,16 @@
 
 #include "light.h"
 #include "log_system.h"
+#include "matrix.hpp"
 #include "model.hpp"
 #include "shader.h"
+#include "vector.hpp"
 
 namespace simple_renderer {
 
 class SimpleRenderer {
  public:
-  typedef std::function<void(size_t, size_t, uint32_t, std::span<uint32_t> &)>
+  typedef std::function<void(size_t, size_t, uint32_t, uint32_t *)>
       DrawPixelFunc;
 
   /**
@@ -38,9 +40,9 @@ class SimpleRenderer {
    * @param width
    * @param height
    * @param buffer 要进行绘制的内存区域，大小为 width*height*sizeof(uint32_t)
-   * @param 
+   * @param
    */
-  SimpleRenderer(size_t width, size_t height, std::span<uint32_t> &buffer,
+  SimpleRenderer(size_t width, size_t height, uint32_t *buffer,
                  DrawPixelFunc draw_pixel_func);
 
   /// @name 默认构造/析构函数
@@ -63,7 +65,7 @@ class SimpleRenderer {
 
   const size_t height_;
   const size_t width_;
-  std::span<uint32_t> &buffer_;
+  uint32_t *buffer_;
   std::shared_ptr<Depth[]> depth_buffer_;
   DrawPixelFunc draw_pixel_func_;
   LogSystem log_system_;
@@ -77,7 +79,8 @@ class SimpleRenderer {
    * @param _color 直线颜色
    * @todo 多线程支持
    */
-  void DrawLine(float _x0, float _y0, float _x1, float _y1, const Color &_color);
+  void DrawLine(float _x0, float _y0, float _x1, float _y1,
+                const Color &_color);
 
   /**
    * 填充三角形
@@ -88,7 +91,7 @@ class SimpleRenderer {
    * @todo 多线程支持
    */
   void DrawTriangle(const ShaderBase &shader, const Light &light,
-                const Model::Normal &normal, const Model::Face &face);
+                    const Model::Normal &normal, const Model::Face &face);
 
   /**
    * 绘制模型
@@ -98,8 +101,8 @@ class SimpleRenderer {
    * @param draw_line 是否绘制线框
    * @param draw_triangle 是否绘制三角形
    */
-  void DrawModel(const ShaderBase &shader, const Light &light, const Model &model,
-             bool draw_line, bool draw_triangle);
+  void DrawModel(const ShaderBase &shader, const Light &light,
+                 const Model &model, bool draw_line, bool draw_triangle);
 
   /**
    * 计算重心坐标

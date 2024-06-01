@@ -23,10 +23,7 @@
 
 namespace simple_renderer {
 
-template <class T>
-using Matrix4 = Eigen::Matrix<T, 4, 4>;
-
-using Matrix4f = Matrix4<float>;
+using Matrix4f = Eigen::Matrix4f;
 
 }  // namespace simple_renderer
 
@@ -35,9 +32,8 @@ using Matrix4f = Matrix4<float>;
  */
 template <>
 struct fmt::formatter<simple_renderer::Matrix4f> : fmt::formatter<std::string> {
-  auto format(simple_renderer::Matrix4f matrix,
-              format_context &format_context) const
-      -> decltype(format_context.out()) {
+  auto format(simple_renderer::Matrix4f matrix, format_context &format_context)
+      const -> decltype(format_context.out()) {
     std::stringstream buf;
     buf << matrix;
     return fmt::format_to(format_context.out(), "\n{}", buf.str());

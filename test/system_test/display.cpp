@@ -39,7 +39,7 @@ Display::Display(size_t width, size_t height) : width_(width), height_(height) {
   }
 
   // 创建渲染器
-  sdl_renderer_ = SDL_CreateRenderer(sdl_window_, -1, SDL_RENDERER_SOFTWARE);
+  sdl_renderer_ = SDL_CreateRenderer(sdl_window_, -1, SDL_RENDERER_ACCELERATED);
   if (sdl_renderer_ == nullptr) {
     SDL_DestroyWindow(sdl_window_);
     SDL_Quit();
@@ -68,12 +68,15 @@ Display::~Display() {
   SDL_Quit();
 }
 
-void Display::fill(const std::span<uint32_t> &buffer) {
+void Display::fill(const uint32_t *buffer) {
   // 更新 texture
-  auto res = SDL_UpdateTexture(sdl_texture_, nullptr, buffer.data(), 4);
+  auto res = SDL_UpdateTexture(sdl_texture_, nullptr, buffer, width_ * 4);
   if (res != 0) {
     throw std::runtime_error(SDL_GetError());
   }
+
+  // 清除渲染器
+  SDL_RenderClear(sdl_renderer_);
 
   // 复制到渲染器
   res = SDL_RenderCopy(sdl_renderer_, sdl_texture_, nullptr, nullptr);
@@ -85,7 +88,7 @@ void Display::fill(const std::span<uint32_t> &buffer) {
   SDL_RenderPresent(sdl_renderer_);
 }
 
-void Display::loop(const std::span<uint32_t> &buffer) {
+void Display::loop(uint32_t *buffer) {
   SDL_Event event = SDL_Event();
   bool is_exit = false;
   while (is_exit == false) {

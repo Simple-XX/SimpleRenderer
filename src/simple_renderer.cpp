@@ -18,12 +18,14 @@
 
 #include <array>
 #include <cstdint>
+#include <limits>
 #include <span>
 #include <string_view>
 #include <vector>
 
 #include "config.h"
 #include "default_shader.h"
+#include "exception.hpp"
 #include "light.h"
 #include "log_system.h"
 #include "model.hpp"
@@ -31,8 +33,7 @@
 
 namespace simple_renderer {
 
-SimpleRenderer::SimpleRenderer(size_t width, size_t height,
-                               std::span<uint32_t> &buffer,
+SimpleRenderer::SimpleRenderer(size_t width, size_t height, uint32_t *buffer,
                                DrawPixelFunc draw_pixel_func)
     : height_(height),
       width_(width),
@@ -41,15 +42,25 @@ SimpleRenderer::SimpleRenderer(size_t width, size_t height,
                                              std::default_delete<Depth[]>())),
       draw_pixel_func_(draw_pixel_func),
       log_system_(LogSystem(kLogFilePath, kLogFileMaxSize, kLogFileMaxCount)) {
-  SPDLOG_INFO("SimpleRenderer init with {}, {}, {}", width_, height_,
-              buffer_.size());
+  if (buffer_ == nullptr) {
+    throw Exception("buffer_ == nullptr");
+  }
+
+  if (depth_buffer_ == nullptr) {
+    throw Exception("depth_buffer_ == nullptr");
+  }
+
+  std::fill(depth_buffer_.get(), depth_buffer_.get() + width_ * height_,
+            std::numeric_limits<Depth>::lowest());
+
+  SPDLOG_INFO("SimpleRenderer init with {}, {}", width_, height_);
 }
 
 bool SimpleRenderer::render(const Model &model) {
   SPDLOG_INFO("render model: {}", model.obj_path_);
   auto shader = DefaultShader();
   auto light = Light();
-  DrawModel(shader, light, model, 1, 1);
+  DrawModel(shader, light, model, 1, 0);
   return true;
 }
 
@@ -59,6 +70,9 @@ void SimpleRenderer::DrawLine(float x0, float y0, float x1, float y1,
   auto p0_y = static_cast<int32_t>(y0);
   auto p1_x = static_cast<int32_t>(x1);
   auto p1_y = static_cast<int32_t>(y1);
+
+  SPDLOG_DEBUG("x0({}, {}), y0({}, {}), p0({}, {}), p1({}, {})", x0, y0, x1, y1,
+               p0_x, p0_y, p1_x, p1_y);
 
   auto steep = false;
   if (std::abs(p0_x - p1_x) < std::abs(p0_y - p1_y)) {

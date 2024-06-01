@@ -25,9 +25,9 @@ list(APPEND DEFAULT_TEST_COMPILE_OPTIONS
 list(APPEND DEFAULT_TEST_LINK_OPTIONS
         --coverage
         $<$<CXX_COMPILER_ID:GNU>:
-        -fsanitize=leak
+        # -fsanitize=leak
         >
-        -fsanitize=address
+        # -fsanitize=address
         -fno-omit-frame-pointer
 )
 

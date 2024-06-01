@@ -214,19 +214,13 @@ class Model {
 
   std::vector<Face> faces_;
 
-  /// 体积盒
-  Box box_;
-
-  /// 模型的中心点
-  Coord center_;
-
   /**
-   * 计算 model 的体积盒
+   * 获取模型的 xyz 最大值/最小值
    */
-  void SetBox();
+  std::pair<Coord, Coord> GetMaxMinXYX();
 
   /**
-   * 将模型归一化
+   * 将模型归一化，所有坐标在 [-1, 1] 内
    */
   void Normalize();
 };
