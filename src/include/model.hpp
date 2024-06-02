@@ -151,27 +151,6 @@ class Model {
     [[nodiscard]] auto operator*(const Matrix4f &tran) const -> Face;
   };
 
-  /**
-   * 碰撞盒
-   */
-  class Box {
-   public:
-    /// 最小点
-    Vector3f min_;
-    /// 最大点
-    Vector3f max_;
-
-    /// @name 默认构造/析构函数
-    /// @{
-    Box() = default;
-    Box(const Box &box) = default;
-    Box(Box &&box) = default;
-    auto operator=(const Box &box) -> Box & = default;
-    auto operator=(Box &&box) -> Box & = default;
-    ~Box() = default;
-    /// @}
-  };
-
   /// obj 文件路径
   std::string obj_path_ = "";
   /// mtl 路径
@@ -212,6 +191,7 @@ class Model {
   /// 三角形顶点数
   static constexpr const uint8_t kTriangleFaceVertexCount = 3;
 
+  /// 保存模型的所有面
   std::vector<Face> faces_;
 
   /**
@@ -226,18 +206,5 @@ class Model {
 };
 
 }  // namespace simple_renderer
-
-/**
- * spdlog 输出 Box 实现
- */
-template <>
-struct fmt::formatter<simple_renderer::Model::Box>
-    : fmt::formatter<std::string> {
-  auto format(simple_renderer::Model::Box box, format_context &format_context)
-      const -> decltype(format_context.out()) {
-    return fmt::format_to(format_context.out(), "max: {},\nmin: {}", box.max_,
-                          box.min_);
-  }
-};
 
 #endif /* SIMPLERENDER_SRC_INCLUDE_MODEL_HPP_ */

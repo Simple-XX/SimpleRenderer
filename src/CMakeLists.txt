@@ -10,14 +10,13 @@ add_library(${PROJECT_NAME} STATIC
         color.cpp
         include/vector.hpp
         include/matrix.hpp
-        include/exception.hpp
         include/model.hpp
-        include/shader.h
+        include/shader_base.h
         include/default_shader.h
         include/light.h
         model.cpp
         light.cpp
-        shader.cpp
+        shader_base.cpp
         default_shader.cpp
         simple_renderer.cpp
 )

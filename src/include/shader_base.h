@@ -1,7 +1,7 @@
 
 /**
- * @file shader.h
- * @brief 着色器头文件
+ * @file shader_base.h
+ * @brief 着色器基类头文件
  * @author Zone.N (Zone.Niuzh@hotmail.com)
  * @version 1.0
  * @date 2022-10-15
@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_SRC_INCLUDE_SHADER_H_
-#define SIMPLERENDER_SRC_INCLUDE_SHADER_H_
+#ifndef SIMPLERENDER_SRC_INCLUDE_SHADER_BASE_H_
+#define SIMPLERENDER_SRC_INCLUDE_SHADER_BASE_H_
 
 #include "matrix.hpp"
 #include "model.hpp"
@@ -168,9 +168,9 @@ class ShaderData {
 
   /**
    * 构造函数
-   * @param _model_matrix 模型变换矩阵
-   * @param _view_matrix 视图变换矩阵
-   * @param _project_matrix 正交变换矩阵
+   * @param model_matrix 模型变换矩阵
+   * @param view_matrix 视图变换矩阵
+   * @param project_matrix 正交变换矩阵
    */
   explicit ShaderData(const Matrix4f &model_matrix, const Matrix4f &view_matrix,
                       const Matrix4f &project_matrix);
@@ -227,4 +227,4 @@ class ShaderBase {
 
 }  // namespace simple_renderer
 
-#endif /* SIMPLERENDER_SRC_INCLUDE_SHADER_H_ */
+#endif /* SIMPLERENDER_SRC_INCLUDE_SHADER_BASE_H_ */

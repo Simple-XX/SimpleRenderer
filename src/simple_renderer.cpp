@@ -25,11 +25,10 @@
 
 #include "config.h"
 #include "default_shader.h"
-#include "exception.hpp"
 #include "light.h"
 #include "log_system.h"
 #include "model.hpp"
-#include "shader.h"
+#include "shader_base.h"
 
 namespace simple_renderer {
 
@@ -43,11 +42,13 @@ SimpleRenderer::SimpleRenderer(size_t width, size_t height, uint32_t *buffer,
       draw_pixel_func_(draw_pixel_func),
       log_system_(LogSystem(kLogFilePath, kLogFileMaxSize, kLogFileMaxCount)) {
   if (buffer_ == nullptr) {
-    throw Exception("buffer_ == nullptr");
+    SPDLOG_ERROR("buffer_ == nullptr");
+    throw std::invalid_argument("buffer_ == nullptr");
   }
 
   if (depth_buffer_ == nullptr) {
-    throw Exception("depth_buffer_ == nullptr");
+    SPDLOG_ERROR("depth_buffer_ == nullptr");
+    throw std::invalid_argument("depth_buffer_ == nullptr");
   }
 
   std::fill(depth_buffer_.get(), depth_buffer_.get() + width_ * height_,
@@ -202,11 +203,11 @@ void SimpleRenderer::DrawModel(const ShaderBase &shader, const Light &light,
       /// @todo 巨大性能开销
       auto face = shader.Vertex(ShaderVertexIn(f)).face_;
       DrawLine(face.v0_.coord_.x(), face.v0_.coord_.y(), face.v1_.coord_.x(),
-               face.v1_.coord_.y(), Color::kWhite);
+               face.v1_.coord_.y(), Color::kRed);
       DrawLine(face.v1_.coord_.x(), face.v1_.coord_.y(), face.v2_.coord_.x(),
-               face.v2_.coord_.y(), Color::kWhite);
+               face.v2_.coord_.y(), Color::kGreen);
       DrawLine(face.v2_.coord_.x(), face.v2_.coord_.y(), face.v0_.coord_.x(),
-               face.v0_.coord_.y(), Color::kWhite);
+               face.v0_.coord_.y(), Color::kBlue);
     }
   }
   if (draw_triangle) {

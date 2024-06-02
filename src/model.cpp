@@ -21,7 +21,6 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-#include "exception.hpp"
 #include "log_system.h"
 
 namespace simple_renderer {
@@ -91,7 +90,8 @@ Model::Model(const std::string &obj_path, const std::string &mtl_path)
   auto ret = reader.ParseFromFile(obj_path_, config);
   if (!ret) {
     if (!reader.Error().empty()) {
-      throw Exception(reader.Error());
+      SPDLOG_ERROR(reader.Error());
+      throw std::runtime_error(reader.Error());
     }
   }
 
@@ -111,18 +111,21 @@ Model::Model(const std::string &obj_path, const std::string &mtl_path)
       materials.size());
 
   // 遍历所有 shape
-  for (size_t shapes_size = 0; shapes_size < shapes.size(); shapes_size++) {
+  for (size_t shape_index = 0; shape_index < shapes.size(); shape_index++) {
+    auto shape = shapes[shape_index];
     // Loop over faces(polygon)
     size_t index_offset = 0;
     for (size_t num_face_vertices_size = 0;
-         num_face_vertices_size <
-         shapes[shapes_size].mesh.num_face_vertices.size();
+         num_face_vertices_size < shape.mesh.num_face_vertices.size();
          num_face_vertices_size++) {
       // 由于开启了三角化，所有的 shape 都是由三个点组成的，即 fv == 3
-      auto num_face_vertices = size_t(
-          shapes[shapes_size].mesh.num_face_vertices[num_face_vertices_size]);
+      auto num_face_vertices =
+          size_t(shape.mesh.num_face_vertices[num_face_vertices_size]);
       if (num_face_vertices != kTriangleFaceVertexCount) {
-        throw Exception("num_face_vertices != kTriangleFaceVertexCount");
+        SPDLOG_ERROR("num_face_vertices != kTriangleFaceVertexCount: {}, {}",
+                     num_face_vertices, kTriangleFaceVertexCount);
+        throw std::runtime_error(
+            "num_face_vertices != kTriangleFaceVertexCount");
       }
 
       auto vertexes = std::array<Vertex, 3>();
@@ -130,8 +133,7 @@ Model::Model(const std::string &obj_path, const std::string &mtl_path)
       for (size_t num_face_vertices_idx = 0;
            num_face_vertices_idx < num_face_vertices; num_face_vertices_idx++) {
         // 获取索引
-        auto idx = shapes[shapes_size]
-                       .mesh.indices[index_offset + num_face_vertices_idx];
+        auto idx = shape.mesh.indices[index_offset + num_face_vertices_idx];
 
         // 构造顶点信息并保存
         // 每组顶点信息有 xyz 三个分量，因此需要 3*
@@ -169,16 +171,16 @@ Model::Model(const std::string &obj_path, const std::string &mtl_path)
       // 如果材质不为空，加载材质信息
       auto material = Material();
       if (!materials.empty()) {
-        material.shininess = materials[shapes_size].shininess;
-        material.ambient = Vector3f(materials[shapes_size].ambient[0],
-                                    materials[shapes_size].ambient[1],
-                                    materials[shapes_size].ambient[2]);
-        material.diffuse = Vector3f(materials[shapes_size].diffuse[0],
-                                    materials[shapes_size].diffuse[1],
-                                    materials[shapes_size].diffuse[2]);
-        material.specular = Vector3f(materials[shapes_size].specular[0],
-                                     materials[shapes_size].specular[1],
-                                     materials[shapes_size].specular[2]);
+        material.shininess = materials[shape_index].shininess;
+        material.ambient = Vector3f(materials[shape_index].ambient[0],
+                                    materials[shape_index].ambient[1],
+                                    materials[shape_index].ambient[2]);
+        material.diffuse = Vector3f(materials[shape_index].diffuse[0],
+                                    materials[shape_index].diffuse[1],
+                                    materials[shape_index].diffuse[2]);
+        material.specular = Vector3f(materials[shape_index].specular[0],
+                                     materials[shape_index].specular[1],
+                                     materials[shape_index].specular[2]);
       }
       // 添加到 face 中
       faces_.emplace_back(vertexes[0], vertexes[1], vertexes[2], material);
@@ -203,8 +205,12 @@ auto Model::GetFace() const -> const std::vector<Model::Face> & {
 }
 
 std::pair<Model::Coord, Model::Coord> Model::GetMaxMinXYX() {
-  auto max = faces_.at(0).v0_.coord_;
-  auto min = faces_.at(0).v0_.coord_;
+  auto max = Coord(std::numeric_limits<float>::lowest(),
+                   std::numeric_limits<float>::lowest(),
+                   std::numeric_limits<float>::lowest());
+  auto min = Coord(std::numeric_limits<float>::max(),
+                   std::numeric_limits<float>::max(),
+                   std::numeric_limits<float>::max());
 
   for (const auto &i : faces_) {
     auto curr_max_x = std::max(i.v0_.coord_.x(),

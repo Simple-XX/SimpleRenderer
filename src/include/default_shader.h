@@ -17,7 +17,7 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_DEFAULT_SHADER_H_
 #define SIMPLERENDER_SRC_INCLUDE_DEFAULT_SHADER_H_
 
-#include "shader.h"
+#include "shader_base.h"
 
 namespace simple_renderer {
 

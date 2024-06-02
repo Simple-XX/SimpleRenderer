@@ -47,8 +47,8 @@ auto DefaultShader::Vertex(const ShaderVertexIn &shader_vertex_in) const
     -> ShaderVertexOut {
   auto face(shader_vertex_in.face_);
 
-//   face = face * shader_data_.model_matrix_ * shader_data_.view_matrix_ *
-//          shader_data_.project_matrix_;
+  face = face * shader_data_.model_matrix_ * shader_data_.view_matrix_ *
+         shader_data_.project_matrix_;
 
   /// @todo 变换贴图
   return ShaderVertexOut(face);
