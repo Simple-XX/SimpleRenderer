@@ -19,7 +19,6 @@
 #include <limits>
 #include <span>
 
-#include "exception.hpp"
 #include "log_system.h"
 
 namespace simple_renderer {
@@ -49,7 +48,8 @@ Color::Color(float red, float green, float blue, float alpha)
 
 auto Color::operator[](uint8_t idx) -> uint8_t & {
   if (idx > 3) {
-    throw Exception("idx > 3");
+    SPDLOG_ERROR("idx > 3");
+    throw std::invalid_argument("idx > 3");
   }
   if (idx == 0) {
     return channel_r_;
@@ -65,7 +65,8 @@ auto Color::operator[](uint8_t idx) -> uint8_t & {
 
 auto Color::operator[](uint8_t idx) const -> uint8_t {
   if (idx > 3) {
-    throw Exception("idx > 3");
+    SPDLOG_ERROR("idx > 3");
+    throw std::invalid_argument("idx > 3");
   }
   if (idx == 0) {
     return channel_r_;

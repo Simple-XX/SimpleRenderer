@@ -1,7 +1,7 @@
 
 /**
- * @file shader.cpp
- * @brief 着色器实现
+ * @file shader_base.cpp
+ * @brief 着色器基类实现
  * @author Zone.N (Zone.Niuzh@hotmail.com)
  * @version 1.0
  * @date 2022-10-15
@@ -14,7 +14,7 @@
  * </table>
  */
 
-#include "shader.h"
+#include "shader_base.h"
 
 namespace simple_renderer {
 
