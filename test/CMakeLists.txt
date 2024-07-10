@@ -37,6 +37,9 @@ link_libraries(
         gtest_main
         ${glog_LIBRARIES}
         SimpleRenderer
+        glad 
+        glfw 
+        OpenGL::GL
 )
 
 # add_subdirectory(unit_test)

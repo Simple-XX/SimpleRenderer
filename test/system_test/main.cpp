@@ -34,6 +34,9 @@ int main(int argc, char **argv) {
     printf("argv[%d]: %s\n", i, argv[i]);
   }
 
+  // auto buffer = std::shared_ptr<uint32_t[]>(new uint32_t[kWidth * kHeight],
+                                            // std::default_delete<uint32_t[]>());
+
   auto window = Window(kWidth, kHeight, "SimpleRenderer");
   
   // main loop

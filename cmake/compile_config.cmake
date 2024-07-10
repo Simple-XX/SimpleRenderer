@@ -20,5 +20,7 @@ list(APPEND DEFAULT_LINK_LIB
         Eigen
         ${glog_LIBRARIES}
         glfw
+        OpenGL::GL
+        glad
         OpenMP::OpenMP_CXX
 )

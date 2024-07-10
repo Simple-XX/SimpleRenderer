@@ -15,7 +15,6 @@ enable_language(CXX)
 add_executable(system_test
         main.cpp
         window.cpp
-        "${CMAKE_SOURCE_DIR}/test/system_test/glad.c"
 )
 
 target_include_directories(system_test PRIVATE
@@ -29,4 +28,8 @@ target_compile_options(system_test PRIVATE
 
 target_link_options(system_test PRIVATE
         ${DEFAULT_TEST_LINK_OPTIONS}
+)
+
+target_link_libraries(system_test PRIVATE
+        glad glfw OpenGL::GL
 )

@@ -57,22 +57,12 @@ CPMAddPackage(
         "gtest_force_shared_crt ON"
 )
 
-# https://github.com/aminosbh/sdl2-cmake-modules.git
-# CPMAddPackage(
-#         NAME sdl2-cmake-modules
-#         GIT_REPOSITORY https://github.com/aminosbh/sdl2-cmake-modules.git
-#         GIT_TAG ad006a3daae65a612ed87415037e32188b81071e
-#         DOWNLOAD_ONLY True
-# )
-# if (sdl2-cmake-modules_ADDED)
-#     list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
-# endif ()
-
+# Add GLFW package
 CPMAddPackage(
-        NAME glfw
-        GIT_REPOSITORY https://github.com/glfw/glfw.git
-        GIT_TAG 3.4
-        OPTIONS
+    NAME glfw
+    GITHUB_REPOSITORY glfw/glfw
+    GIT_TAG 3.4
+    OPTIONS
         "GLFW_BUILD_DOCS OFF"
         "GLFW_BUILD_TESTS OFF"
         "GLFW_BUILD_EXAMPLES OFF"

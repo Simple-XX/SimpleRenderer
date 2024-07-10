@@ -21,6 +21,9 @@ Window::Window(int width, int height, const char* title)
 }
 
 Window::~Window() {
+    if (m_texture) {
+        destroyRecTexture();
+    }
     if (m_window) {
         glfwDestroyWindow(m_window);
     }
@@ -87,5 +90,41 @@ void Window::setupCallbacks() {
 
 void Window::setInputMode() {
 	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
+void Window::fillWindowWithBufferData(const u_int32_t* buffer) {
+    initRecTexture();
+    updateRecTexture(buffer);
+    drawRecTextureOnWindow();
+    destroyRecTexture();
+}
+
+void Window::initRecTexture() {
+    glGenTextures(1, &m_texture);
+    glBindTexture(GL_TEXTURE_2D, m_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+void Window::updateRecTexture(const u_int32_t* buffer) {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+}
+
+void Window::drawRecTextureOnWindow() {
+
+    // glEnable(GL_TEXTURE_2D);
+    // glBegin(GL_QUADS);
+    // glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f, -1.0f);
+    // glTexCoord2f(1.0f, 0.0f); glVertex2f( 1.0f, -1.0f);
+    // glTexCoord2f(1.0f, 1.0f); glVertex2f( 1.0f,  1.0f);
+    // glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f,  1.0f);
+    // glEnd();
+    // glDisable(GL_TEXTURE_2D);
+}
+
+void Window::destroyRecTexture() {
+    glDeleteTextures(1, &m_texture);
 }
 

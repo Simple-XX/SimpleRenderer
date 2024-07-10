@@ -16,11 +16,11 @@ public:
     GLFWwindow *getGLFWWindow() const;
 
     static void framebufferSizeCallback(GLFWwindow *window, int width, int height);
-	static void cursorPosCallback(GLFWwindow *window, double xpos, double ypos);
-	static void scrollCallback(GLFWwindow *window, double xpos, double ypos);
-	
+
 	void setupCallbacks();
 	void setInputMode();
+
+    void fillWindowWithBufferData(const u_int32_t* buffer);
 
 private:
     void initGLFW();
@@ -28,10 +28,14 @@ private:
     void initGLAD();
     void setWindowHints();
 
+    void initRecTexture();
+    void updateRecTexture(const u_int32_t* buffer);
+    void drawRecTextureOnWindow();
+    void destroyRecTexture();
+
 private:
     int m_width, m_height;
     const char *m_title;
     GLFWwindow *m_window;
-	
-	bool m_guiMode = false;
+    GLuint m_texture;
 };
