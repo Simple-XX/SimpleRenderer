@@ -14,7 +14,13 @@ enable_language(CXX)
 
 add_executable(system_test
         main.cpp
-        display.cpp
+        window.cpp
+        "${CMAKE_SOURCE_DIR}/test/system_test/glad.c"
+)
+
+target_include_directories(system_test PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/include
+        ${CMAKE_SOURCE_DIR}/test/system_test
 )
 
 target_compile_options(system_test PRIVATE

@@ -58,26 +58,28 @@ CPMAddPackage(
 )
 
 # https://github.com/aminosbh/sdl2-cmake-modules.git
-CPMAddPackage(
-        NAME sdl2-cmake-modules
-        GIT_REPOSITORY https://github.com/aminosbh/sdl2-cmake-modules.git
-        GIT_TAG ad006a3daae65a612ed87415037e32188b81071e
-        DOWNLOAD_ONLY True
-)
-if (sdl2-cmake-modules_ADDED)
-    list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
-endif ()
+# CPMAddPackage(
+#         NAME sdl2-cmake-modules
+#         GIT_REPOSITORY https://github.com/aminosbh/sdl2-cmake-modules.git
+#         GIT_TAG ad006a3daae65a612ed87415037e32188b81071e
+#         DOWNLOAD_ONLY True
+# )
+# if (sdl2-cmake-modules_ADDED)
+#     list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
+# endif ()
 
-## https://github.com/freetype/freetype
-#CPMAddPackage(
-#        NAME freetype
-#        GIT_REPOSITORY https://github.com/freetype/freetype.git
-#        GIT_TAG VER-2-13-0
-#        VERSION 2.13.0
-#)
-#if (freetype_ADDED)
-#    add_library(Freetype::Freetype ALIAS freetype)
-#endif ()
+CPMAddPackage(
+        NAME glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG 3.4
+        OPTIONS
+        "GLFW_BUILD_DOCS OFF"
+        "GLFW_BUILD_TESTS OFF"
+        "GLFW_BUILD_EXAMPLES OFF"
+)
+if (glfw_ADDED)
+    link_libraries(glfw)
+endif()
 
 # https://github.com/tinyobjloader/tinyobjloader.git
 CPMAddPackage(
@@ -235,17 +237,60 @@ if (NOT LCOV_EXE)
             "Following https://github.com/linux-test-project/lcov to install.")
 endif ()
 
-find_package(SDL2 REQUIRED)
-if (NOT SDL2_FOUND)
-    message(FATAL_ERROR "sdl2 not found.\n"
-            "Following https://github.com/libsdl-org/SDL to install.")
-endif ()
+# find_package(SDL2 REQUIRED)
+# if (NOT SDL2_FOUND)
+#     message(FATAL_ERROR "sdl2 not found.\n"
+#             "Following https://github.com/libsdl-org/SDL to install.")
+# endif ()
 
-find_package(OpenMP REQUIRED)
-if (NOT OpenMP_FOUND)
-    message(FATAL_ERROR "OpenMP not found.\n"
+# Configure OpenMP on Apple
+if(APPLE)
+    set(OPENMP_LIBRARIES "/opt/homebrew/opt/libomp/lib")
+    set(OPENMP_INCLUDES "/opt/homebrew/opt/libomp/include")
+
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set(OpenMP_C "${CMAKE_C_COMPILER}")
+        set(OpenMP_C_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
+        set(OpenMP_C_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY ${OPENMP_LIBRARIES}/libomp.dylib)
+    endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
+        set(OpenMP_CXX_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
+        set(OpenMP_CXX_LIB_NAMES "omp")
+        set(OpenMP_omp_LIBRARY ${OPENMP_LIBRARIES}/libomp.dylib)
+    endif()
+
+    find_package(OpenMP REQUIRED)
+    if (NOT OpenMP_FOUND)
+        message(FATAL_ERROR "OpenMP not found.\n"
             "Following https://www.openmp.org to install.")
+    endif ()
+    if (OPENMP_FOUND)
+        include_directories("${OPENMP_INCLUDES}")
+        link_directories("${OPENMP_LIBRARIES}")
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+        set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${OPENMP_LIBRARIES} -lomp")
+    endif(OPENMP_FOUND)
+else()
+    find_package(OpenMP REQUIRED)
+    if (NOT OpenMP_FOUND)
+        message(FATAL_ERROR "OpenMP not found.\n"
+            "Following https://www.openmp.org to install.")
+    endif ()
+endif()
+
+# Find OpenGL
+find_package(OpenGL REQUIRED)
+if (NOT OPENGL_FOUND)
+    message(FATAL_ERROR "OpenGL not found.\n"
+            "Please install OpenGL from https://www.opengl.org.")
 endif ()
+if (OPENGL_FOUND)
+    include_directories(${OPENGL_INCLUDE_DIR})
+    link_libraries(${OPENGL_LIBRARIES})
+endif()
 
 find_package(spdlog REQUIRED)
 if (NOT spdlog_FOUND)
