@@ -1,6 +1,9 @@
 #include <glad/glad.h>
 
 #include "Window.hpp"
+#include "VertexArray.hpp"
+#include "VertexBuffer.hpp"
+#include "VertexBufferLayout.hpp"
 
 #include <iostream>
 
@@ -114,14 +117,6 @@ void Window::updateRecTexture(const u_int32_t* buffer) {
 
 void Window::drawRecTextureOnWindow() {
 
-    // glEnable(GL_TEXTURE_2D);
-    // glBegin(GL_QUADS);
-    // glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f, -1.0f);
-    // glTexCoord2f(1.0f, 0.0f); glVertex2f( 1.0f, -1.0f);
-    // glTexCoord2f(1.0f, 1.0f); glVertex2f( 1.0f,  1.0f);
-    // glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f,  1.0f);
-    // glEnd();
-    // glDisable(GL_TEXTURE_2D);
 }
 
 void Window::destroyRecTexture() {

@@ -57,20 +57,6 @@ CPMAddPackage(
         "gtest_force_shared_crt ON"
 )
 
-# Add GLFW package
-CPMAddPackage(
-    NAME glfw
-    GITHUB_REPOSITORY glfw/glfw
-    GIT_TAG 3.4
-    OPTIONS
-        "GLFW_BUILD_DOCS OFF"
-        "GLFW_BUILD_TESTS OFF"
-        "GLFW_BUILD_EXAMPLES OFF"
-)
-if (glfw_ADDED)
-    link_libraries(glfw)
-endif()
-
 # https://github.com/tinyobjloader/tinyobjloader.git
 CPMAddPackage(
         NAME tinyobjloader
@@ -226,12 +212,6 @@ if (NOT LCOV_EXE)
     message(FATAL_ERROR "lcov not found.\n"
             "Following https://github.com/linux-test-project/lcov to install.")
 endif ()
-
-# find_package(SDL2 REQUIRED)
-# if (NOT SDL2_FOUND)
-#     message(FATAL_ERROR "sdl2 not found.\n"
-#             "Following https://github.com/libsdl-org/SDL to install.")
-# endif ()
 
 # Configure OpenMP on Apple
 if(APPLE)

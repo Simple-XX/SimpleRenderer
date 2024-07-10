@@ -19,7 +19,6 @@ list(APPEND DEFAULT_LINK_LIB
         tinyobjloader
         Eigen
         ${glog_LIBRARIES}
-        glfw
         OpenGL::GL
         glad
         OpenMP::OpenMP_CXX

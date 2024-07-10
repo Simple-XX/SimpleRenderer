@@ -31,5 +31,5 @@ target_link_options(system_test PRIVATE
 )
 
 target_link_libraries(system_test PRIVATE
-        glad glfw OpenGL::GL
+        glad OpenGL::GL
 )

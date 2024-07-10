@@ -55,7 +55,6 @@ configure_file(
 )
 
 find_package(OpenGL REQUIRED)
-find_package(glfw3 REQUIRED)
 add_library(glad "${PROJECT_SOURCE_DIR}/src/glad.c")
 target_include_directories(glad PUBLIC "${PROJECT_SOURCE_DIR}/src/include")
 

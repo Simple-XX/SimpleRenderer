@@ -38,7 +38,6 @@ link_libraries(
         ${glog_LIBRARIES}
         SimpleRenderer
         glad 
-        glfw 
         OpenGL::GL
 )
 
