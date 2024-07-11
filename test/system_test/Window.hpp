@@ -17,8 +17,7 @@
 
 class Window {
 public:
-    Window(int width, int height)
-        : m_width(width), m_height(height) {}
+    Window(int width, int height);
 
     ~Window();
 
