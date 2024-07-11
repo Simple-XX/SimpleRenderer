@@ -19,6 +19,7 @@ list(APPEND DEFAULT_LINK_LIB
         tinyobjloader
         Eigen
         ${glog_LIBRARIES}
-        SDL2::Main
+        OpenGL::GL
+        glad
         OpenMP::OpenMP_CXX
 )

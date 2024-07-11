@@ -7,6 +7,10 @@
 # 设置最小 cmake 版本
 cmake_minimum_required(VERSION 3.27 FATAL_ERROR)
 
+# 设置C++标准
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # 设置项目名与版本
 project(SimpleRenderer
         VERSION 0.0.1)
@@ -49,6 +53,10 @@ configure_file(
         "${PROJECT_SOURCE_DIR}/cmake/config.h.in"
         "${PROJECT_SOURCE_DIR}/src/include/config.h"
 )
+
+find_package(OpenGL REQUIRED)
+add_library(glad "${PROJECT_SOURCE_DIR}/src/glad.c")
+target_include_directories(glad PUBLIC "${PROJECT_SOURCE_DIR}/src/include")
 
 # 添加要编译的目录
 add_subdirectory(src)

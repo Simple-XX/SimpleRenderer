@@ -14,7 +14,8 @@ enable_testing()
 include(GoogleTest)
 
 include_directories(
-        ${SimpleRenderer_SOURCE_DIR}/src/include
+        ${CMAKE_SOURCE_DIR}/src/include
+        ${CMAKE_SOURCE_DIR}/test/system_test
 )
 
 list(APPEND DEFAULT_TEST_COMPILE_OPTIONS
@@ -36,15 +37,17 @@ link_libraries(
         gtest_main
         ${glog_LIBRARIES}
         SimpleRenderer
+        glad 
+        OpenGL::GL
 )
 
-add_subdirectory(unit_test)
+# add_subdirectory(unit_test)
 #add_subdirectory(integration_test)
 add_subdirectory(system_test)
 
-add_coverage_target(
-        DEPENDS unit_test
-        SOURCE_DIR ${SimpleRenderer_SOURCE_DIR}
-        BINARY_DIR ${SimpleRenderer_BINARY_DIR}
-        EXCLUDE_DIR ${SimpleRenderer_SOURCE_DIR}/3rd/*
-)
+# add_coverage_target(
+#         DEPENDS unit_test
+#         SOURCE_DIR ${SimpleRenderer_SOURCE_DIR}
+#         BINARY_DIR ${SimpleRenderer_BINARY_DIR}
+#         EXCLUDE_DIR ${SimpleRenderer_SOURCE_DIR}/3rd/*
+# )

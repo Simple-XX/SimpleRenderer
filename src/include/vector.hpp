@@ -1,4 +1,3 @@
-
 /**
  * @file vector.hpp
  * @brief 向量模版
