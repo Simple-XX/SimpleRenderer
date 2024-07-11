@@ -16,35 +16,50 @@
 
 #include "simple_renderer.h"
 
+#include <raylib.h>
+
 #include <cstdint>
 #include <iostream>
-#include <span>
+#include <memory>
 #include <string>
 #include <vector>
 
-#include "Window.hpp"
+#include "window.hpp"
 
-static constexpr const size_t kWidth = 1920;
-static constexpr const size_t kHeight = 1080;
+static constexpr const int kWidth = 1920;
+static constexpr const int kHeight = 1080;
 
+static void pixel(int x, int y, uint32_t color, uint32_t *buffer) {
+    buffer[x + y * kWidth] = color;
+}
 
 int main(int argc, char **argv) {
-  printf("argc: %d\n", argc);
-  for (auto i = 0; i < argc; i++) {
-    printf("argv[%d]: %s\n", i, argv[i]);
-  }
+    // if (argc < 2) {
+    //     std::cerr << "Usage: " << argv[0] << " <obj path>\n";
+    //     return 1;
+    // }
+    // std::string obj_path = argv[1];
+    std::string obj_path = "obj";
 
-  // auto buffer = std::shared_ptr<uint32_t[]>(new uint32_t[kWidth * kHeight],
-                                            // std::default_delete<uint32_t[]>());
+    auto buffer = std::shared_ptr<uint32_t[]>(new uint32_t[kWidth * kHeight],
+        std::default_delete<uint32_t[]>());
+    auto simple_renderer = simple_renderer::SimpleRenderer(kWidth, kHeight, buffer.get(), pixel);
 
-  auto window = Window(kWidth, kHeight, "SimpleRenderer");
-  
-  // main loop
-  while(!window.shouldClose()) {
-    // render .. 
-    window.pollEvents();
-    window.swapBuffers();
-  }
+    std::vector<std::string> objs = {obj_path + "/utah-teapot/utah-teapot.obj"};
+    auto matrix =
+        simple_renderer::Matrix4f(simple_renderer::Matrix4f::Identity());
+    matrix.diagonal() << 500, 500, 500, 1;
+    matrix.col(matrix.cols() - 1) << kWidth / 2, kHeight / 2, 0, 1;
 
-  return 0;
+    for (auto &obj : objs) {
+        auto model = simple_renderer::Model(obj);
+        model = model * matrix;
+        simple_renderer.render(model);
+    }
+
+    Window window(kWidth, kHeight);
+
+    window.Display(buffer.get());
+
+    return 0;
 }

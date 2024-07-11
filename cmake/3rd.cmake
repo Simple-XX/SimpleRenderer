@@ -262,6 +262,13 @@ if (OPENGL_FOUND)
     link_libraries(${OPENGL_LIBRARIES})
 endif()
 
+# Find raylib
+find_package(raylib 3.0 REQUIRED)
+if (NOT raylib_FOUND)
+    message(FATAL_ERROR "raylib not found.\n"
+            "Following install raylib from https://github.com/raysan5/raylib")
+endif ()
+
 find_package(spdlog REQUIRED)
 if (NOT spdlog_FOUND)
     message(FATAL_ERROR "spdlog not found.\n"

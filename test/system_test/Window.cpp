@@ -1,125 +1,26 @@
-#include <glad/glad.h>
-
-#include "Window.hpp"
-#include "VertexArray.hpp"
-#include "VertexBuffer.hpp"
-#include "VertexBufferLayout.hpp"
-
+#include "window.hpp"
+#include <raylib.h>
 #include <iostream>
 
-Window::Window(int width, int height, const char* title) 
-    : m_width(width), m_height(height), m_title(title) {
-    
-    std::cout << "Creating window..." << std::endl;
+Window::Window(int width, int height) : 
+    m_width(width), m_height(height) {
+    InitWindow(width, height, "Simple Renderer");
+    SetTargetFPS(60);
 
-    initGLFW();
-
-    setWindowHints();
-
-    createWindow();
-
-    glfwMakeContextCurrent(m_window);
-
-    initGLAD();
+    m_texture = LoadTextureFromImage(GenImageColor(width, height, BLANK));
 }
 
 Window::~Window() {
-    if (m_texture) {
-        destroyRecTexture();
-    }
-    if (m_window) {
-        glfwDestroyWindow(m_window);
-    }
-    glfwTerminate();
+    UnloadTexture(m_texture);
+    CloseWindow();
 }
 
-void Window::initGLFW() {
-    if (!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
-        exit(EXIT_FAILURE);
+void Window::Display(uint32_t *buffer) {
+    while (!WindowShouldClose()) {
+        UpdateTexture(m_texture, buffer);
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        DrawTexture(m_texture, 0, 0, WHITE);
+        EndDrawing();
     }
 }
-
-void Window::createWindow() {
-    m_window = glfwCreateWindow(m_width, m_height, m_title, nullptr, nullptr);
-    if (!m_window) {
-        std::cerr << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
-}
-
-bool Window::shouldClose() const {
-    return glfwWindowShouldClose(m_window);
-}
-
-void Window::swapBuffers() {
-    glfwSwapBuffers(m_window);
-}
-
-void Window::pollEvents() {
-    glfwPollEvents();
-}
-
-GLFWwindow* Window::getGLFWWindow() const {
-    return m_window;
-}
-
-void Window::setWindowHints() {
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-	glfwWindowHint(GLFW_SAMPLES, 4); // MSAA
-}
-
-void Window::initGLAD() {
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-}
-
-void Window::framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-}
-
-void Window::setupCallbacks() {
-	glfwSetFramebufferSizeCallback(m_window, Window::framebufferSizeCallback);
-}
-
-void Window::setInputMode() {
-	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-}
-
-void Window::fillWindowWithBufferData(const u_int32_t* buffer) {
-    initRecTexture();
-    updateRecTexture(buffer);
-    drawRecTextureOnWindow();
-    destroyRecTexture();
-}
-
-void Window::initRecTexture() {
-    glGenTextures(1, &m_texture);
-    glBindTexture(GL_TEXTURE_2D, m_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-}
-
-void Window::updateRecTexture(const u_int32_t* buffer) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-}
-
-void Window::drawRecTextureOnWindow() {
-
-}
-
-void Window::destroyRecTexture() {
-    glDeleteTextures(1, &m_texture);
-}
-

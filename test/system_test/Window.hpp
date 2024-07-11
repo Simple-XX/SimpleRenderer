@@ -1,41 +1,41 @@
-#pragma once
+/**
+ * @file window.hpp
+ * @author ZzzhHe
+ * @brief A simple display abstraction by Raylib
+ * @version 0.1
+ * @date 2024-07-11
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 
-#include <GLFW/glfw3.h>
-#include <memory>
+#ifndef SIMPLERENDER_TEST_SYSTEM_TEST_DISPLAY_H_
+#define SIMPLERENDER_TEST_SYSTEM_TEST_DISPLAY_H_
+
+#include "raylib.h"
+#include <cstdint>
 
 class Window {
 public:
-    Window(int width, int height, const char *title);
+    Window(int width, int height)
+        : m_width(width), m_height(height) {}
+
     ~Window();
 
-    void swapBuffers();
-    void pollEvents();
+    Window() = delete;
+    Window(const Window &display) = delete;
+    Window(Window &&display) = delete;
+    Window &operator=(const Window &display) = delete;
+    Window &operator=(Window &&display) = delete;
 
-    bool shouldClose() const;
-
-    GLFWwindow *getGLFWWindow() const;
-
-    static void framebufferSizeCallback(GLFWwindow *window, int width, int height);
-
-	void setupCallbacks();
-	void setInputMode();
-
-    void fillWindowWithBufferData(const u_int32_t* buffer);
+    void Display(uint32_t *buffer);
 
 private:
-    void initGLFW();
-    void createWindow();
-    void initGLAD();
-    void setWindowHints();
+    static constexpr const char *kWindowTitle = "SimpleRenderer";
 
-    void initRecTexture();
-    void updateRecTexture(const u_int32_t* buffer);
-    void drawRecTextureOnWindow();
-    void destroyRecTexture();
-
-private:
     int m_width, m_height;
-    const char *m_title;
-    GLFWwindow *m_window;
-    GLuint m_texture;
+
+    Texture2D m_texture;
 };
+
+#endif
