@@ -32,37 +32,42 @@
 
 namespace simple_renderer {
 
-SimpleRenderer::SimpleRenderer(size_t width, size_t height, uint32_t *buffer,
-                               DrawPixelFunc draw_pixel_func)
-    : height_(height),
-      width_(width),
-      buffer_(buffer),
-      depth_buffer_(std::shared_ptr<Depth[]>(new Depth[width_ * height_],
-                                             std::default_delete<Depth[]>())),
-      draw_pixel_func_(draw_pixel_func),
-      log_system_(LogSystem(kLogFilePath, kLogFileMaxSize, kLogFileMaxCount)) {
-  if (buffer_ == nullptr) {
-    SPDLOG_ERROR("buffer_ == nullptr");
-    throw std::invalid_argument("buffer_ == nullptr");
-  }
+SimpleRenderer::SimpleRenderer(std::shared_ptr<Framebuffer> framebuffer,
+                            DrawPixelFunc draw_pixel_func)
+    : framebuffer_(framebuffer),
+        depth_buffer_(std::shared_ptr<Depth[]>(
+        new Depth[framebuffer->width() * framebuffer->height()],
+        std::default_delete<Depth[]>())),
+        draw_pixel_func_(draw_pixel_func)
+		// log_system_(LogSystem(kLogFilePath, kLogFileMaxSize, kLogFileMaxCount))
+		{
 
-  if (depth_buffer_ == nullptr) {
-    SPDLOG_ERROR("depth_buffer_ == nullptr");
-    throw std::invalid_argument("depth_buffer_ == nullptr");
-  }
+    if (framebuffer_ == nullptr) {
+        SPDLOG_ERROR("buffer_ == nullptr");
+        throw std::invalid_argument("buffer_ == nullptr");
+    }
 
-  std::fill(depth_buffer_.get(), depth_buffer_.get() + width_ * height_,
-            std::numeric_limits<Depth>::lowest());
+    if (depth_buffer_ == nullptr) {
+        SPDLOG_ERROR("depth_buffer_ == nullptr");
+        throw std::invalid_argument("depth_buffer_ == nullptr");
+    }
 
-  SPDLOG_INFO("SimpleRenderer init with {}, {}", width_, height_);
+    std::fill(
+        depth_buffer_.get(),
+        depth_buffer_.get() + framebuffer_->width() * framebuffer_->height(),
+        std::numeric_limits<Depth>::lowest());
+
+
+    SPDLOG_INFO("SimpleRenderer init with {}, {}", framebuffer_->width(),
+            framebuffer_->height());
 }
 
 bool SimpleRenderer::render(const Model &model) {
-  SPDLOG_INFO("render model: {}", model.obj_path_);
-  auto shader = DefaultShader();
-  auto light = Light();
-  DrawModel(shader, light, model, 1, 0);
-  return true;
+    SPDLOG_INFO("render model: {}", model.obj_path_);
+    auto shader = DefaultShader();
+    auto light = Light();
+    DrawModel(shader, light, model, 1, 0);
+    return true;
 }
 
 void SimpleRenderer::DrawLine(float x0, float y0, float x1, float y1,
@@ -98,24 +103,28 @@ void SimpleRenderer::DrawLine(float x0, float y0, float x1, float y1,
   for (auto x = p0_x; x <= p1_x; x++) {
     if (steep) {
       /// @todo 这里要用裁剪替换掉
-      if ((unsigned)y >= width_ || (unsigned)x >= height_) {
+      if ((unsigned)y >= framebuffer_->width() ||
+          (unsigned)x >= framebuffer_->height()) {
         SPDLOG_WARN(
             "width: {}, height: {}, p0_x: {}, p0_y: {}, p1_x: "
             "{}, p1_y: {}, x: {}, y: {}",
-            width_, height_, p0_x, p0_y, p1_x, p1_y, x, y);
+            framebuffer_->width(), framebuffer_->height(), p0_x, p0_y, p1_x,
+            p1_y, x, y);
         continue;
       }
-      draw_pixel_func_(y, x, _color, buffer_);
+      draw_pixel_func_(y, x, _color, framebuffer_->data());
     } else {
       /// @todo 这里要用裁剪替换掉
-      if ((unsigned)x >= width_ || (unsigned)y >= height_) {
+      if ((unsigned)x >= framebuffer_->width() ||
+          (unsigned)y >= framebuffer_->height()) {
         SPDLOG_WARN(
             "width: {}, height: {}, p0_x: {}, p0_y: {}, p1_x: "
             "{}, p1_y: {}, x: {}, y: {}",
-            width_, height_, p0_x, p0_y, p1_x, p1_y, x, y);
+            framebuffer_->width(), framebuffer_->height(), p0_x, p0_y, p1_x,
+            p1_y, x, y);
         continue;
       }
-      draw_pixel_func_(x, y, _color, buffer_);
+      draw_pixel_func_(x, y, _color, framebuffer_->data());
     }
     de += std::abs(dy2);
     if (de >= dx2) {
@@ -155,10 +164,13 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
   for (auto x = int32_t(min.x()); x <= int32_t(max.x()); x++) {
     for (auto y = int32_t(min.y()); y <= int32_t(max.y()); y++) {
       /// @todo 这里要用裁剪替换掉
-      if ((unsigned)x >= width_ || (unsigned)y >= height_) {
+      if ((unsigned)x >= framebuffer_->width() ||
+          (unsigned)y >= framebuffer_->height()) {
         continue;
       }
-      auto [is_inside, barycentric_coord] = GetBarycentricCoord(
+      bool is_inside;
+      simple_renderer::Vector3f barycentric_coord;
+      std::tie(is_inside, barycentric_coord) = GetBarycentricCoord(
           v0.coord_, v1.coord_, v2.coord_,
           Vector3f(static_cast<float>(x), static_cast<float>(y), 0));
       // 如果点在三角形内再进行下一步
@@ -169,7 +181,7 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
       auto z = InterpolateDepth(v0.coord_.z(), v1.coord_.z(), v2.coord_.z(),
                                 barycentric_coord);
       // 深度在已有颜色之上
-      if (z < depth_buffer_[y * width_ + x]) {
+      if (z < depth_buffer_[y * framebuffer_->width() + x]) {
         continue;
       }
       // 构造着色器输入
@@ -185,8 +197,8 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
       // 构造颜色
       auto color = Color(shader_fragment_out.color_);
       // 填充像素
-      draw_pixel_func_(x, y, color, buffer_);
-      depth_buffer_[y * width_ + x] = z;
+      draw_pixel_func_(x, y, color, framebuffer_->data());
+      depth_buffer_[y * framebuffer_->width() + x] = z;
     }
   }
 }

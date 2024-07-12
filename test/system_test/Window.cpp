@@ -3,24 +3,24 @@
 #include <iostream>
 
 Window::Window(int width, int height) : 
-    m_width(width), m_height(height) {
+    width_(width), height_(height) {
     InitWindow(width, height, "Simple Renderer");
     SetTargetFPS(60);
 
-    m_texture = LoadTextureFromImage(GenImageColor(width, height, BLANK));
+    texture_ = LoadTextureFromImage(GenImageColor(width, height, BLANK));
 }
 
 Window::~Window() {
-    UnloadTexture(m_texture);
+    UnloadTexture(texture_);
     CloseWindow();
 }
 
 void Window::Display(uint32_t *buffer) {
     while (!WindowShouldClose()) {
-        UpdateTexture(m_texture, buffer);
+        UpdateTexture(texture_, buffer);
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        DrawTexture(m_texture, 0, 0, WHITE);
+        DrawTexture(texture_, 0, 0, WHITE);
         EndDrawing();
     }
 }

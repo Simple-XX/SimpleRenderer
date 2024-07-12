@@ -32,9 +32,9 @@ public:
 private:
     static constexpr const char *kWindowTitle = "SimpleRenderer";
 
-    int m_width, m_height;
+    int width_, height_;
 
-    Texture2D m_texture;
+    Texture2D texture_;
 };
 
 #endif

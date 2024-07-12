@@ -26,8 +26,8 @@
 
 #include "window.hpp"
 
-static constexpr const int kWidth = 1920;
-static constexpr const int kHeight = 1080;
+static constexpr const int kWidth = 800;
+static constexpr const int kHeight = 600;
 
 static void pixel(int x, int y, uint32_t color, uint32_t *buffer) {
     buffer[x + y * kWidth] = color;
@@ -41,11 +41,12 @@ int main(int argc, char **argv) {
     // std::string obj_path = argv[1];
     std::string obj_path = "obj";
 
-    auto buffer = std::shared_ptr<uint32_t[]>(new uint32_t[kWidth * kHeight],
-        std::default_delete<uint32_t[]>());
-    auto simple_renderer = simple_renderer::SimpleRenderer(kWidth, kHeight, buffer.get(), pixel);
+    auto framebuffer = std::make_shared<Framebuffer>(kWidth, kHeight);
+
+    auto simple_renderer = simple_renderer::SimpleRenderer(framebuffer, pixel);
 
     std::vector<std::string> objs = {obj_path + "/utah-teapot/utah-teapot.obj"};
+
     auto matrix =
         simple_renderer::Matrix4f(simple_renderer::Matrix4f::Identity());
     matrix.diagonal() << 500, 500, 500, 1;
@@ -59,7 +60,7 @@ int main(int argc, char **argv) {
 
     Window window(kWidth, kHeight);
 
-    window.Display(buffer.get());
+    window.Display(framebuffer->data());
 
     return 0;
 }

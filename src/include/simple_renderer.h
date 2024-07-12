@@ -27,6 +27,7 @@
 #include "model.hpp"
 #include "shader_base.h"
 #include "vector.hpp"
+#include "framebuffer.hpp"
 
 namespace simple_renderer {
 
@@ -35,25 +36,18 @@ class SimpleRenderer {
   typedef std::function<void(size_t, size_t, uint32_t, uint32_t *)>
       DrawPixelFunc;
 
-  /**
-   * 构造函数
-   * @param width
-   * @param height
-   * @param buffer 要进行绘制的内存区域，大小为 width*height*sizeof(uint32_t)
-   * @param
-   */
-  SimpleRenderer(size_t width, size_t height, uint32_t *buffer,
-                 DrawPixelFunc draw_pixel_func);
+    SimpleRenderer(std::shared_ptr<Framebuffer> framebuffer,
+                  DrawPixelFunc draw_pixel_func);
 
-  /// @name 默认构造/析构函数
-  /// @{
-  SimpleRenderer(const SimpleRenderer &_simplerenderer) = default;
-  SimpleRenderer(SimpleRenderer &&_simplerenderer) = default;
-  auto operator=(const SimpleRenderer &_simplerenderer) -> SimpleRenderer & =
-                                                               default;
-  auto operator=(SimpleRenderer &&_simplerenderer) -> SimpleRenderer & =
-                                                          default;
-  virtual ~SimpleRenderer() = default;
+  // /// @name 默认构造/析构函数
+  // /// @{
+  // // SimpleRenderer(const SimpleRenderer &_simplerenderer) = default;
+  // // SimpleRenderer(SimpleRenderer &&_simplerenderer) = default;
+  // // auto operator=(const SimpleRenderer &_simplerenderer) -> SimpleRenderer & =
+  //                                                             //  default;
+  // // auto operator=(SimpleRenderer &&_simplerenderer) -> SimpleRenderer & =
+  //                                                         // default;
+  // virtual ~SimpleRenderer() = default;
   /// @}
 
   bool render(const Model &model);
@@ -63,12 +57,10 @@ class SimpleRenderer {
   /// @note 不要进行会影响内存的修改
   using Depth = float;
 
-  const size_t height_;
-  const size_t width_;
-  uint32_t *buffer_;
-  std::shared_ptr<Depth[]> depth_buffer_;
-  DrawPixelFunc draw_pixel_func_;
-  LogSystem log_system_;
+    std::shared_ptr<Framebuffer> framebuffer_;
+    std::shared_ptr<Depth[]> depth_buffer_;
+    DrawPixelFunc draw_pixel_func_;
+    // LogSystem log_system_;
 
   /**
    * 画直线 Bresenham 算法
