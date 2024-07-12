@@ -70,6 +70,16 @@ if (stb_ADDED)
     )
 endif ()
 
+CPMAddPackage(
+    NAME raylib 
+    GITHUB_REPOSITORY raysan5/raylib 
+    GIT_TAG 4.5.0 
+    DOWNLOAD_ONLY True)
+if (raylib_ADDED)
+    add_library(raylib INTERFACE IMPORTED)
+    target_include_directories(raylib INTERFACE ${raylib_SOURCE_DIR})
+endif ()
+
 # https://gitlab.com/libeigen/eigen.git
 CPMAddPackage(
         NAME Eigen
