@@ -1,4 +1,4 @@
-#include "Window.hpp"
+#include "window.hpp"
 #include <iostream>
 
 Window::Window(int width, int height) : 

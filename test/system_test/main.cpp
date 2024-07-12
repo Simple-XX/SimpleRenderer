@@ -16,8 +16,6 @@
 
 #include "simple_renderer.h"
 
-#include <raylib.h>
-
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -34,9 +32,11 @@ static void pixel(int x, int y, uint32_t color, uint32_t *buffer) {
 }
 
 int main(int argc, char **argv) {
+	// TODO: need to fix the way to use argc and argv
+    (void) argc;
+    (void) argv;
     // if (argc < 2) {
     //     std::cerr << "Usage: " << argv[0] << " <obj path>\n";
-    //     return 1;
     // }
     // std::string obj_path = argv[1];
     std::string obj_path = "obj";

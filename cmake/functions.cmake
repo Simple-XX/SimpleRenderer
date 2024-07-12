@@ -20,7 +20,8 @@ function(add_coverage_target)
         COMMAND ${CMAKE_CTEST_COMMAND}
     )
 
-    # Generate coverage report after running tests
+    
+    # Replace the add_custom_command with this updated version
     add_custom_command(TARGET coverage
         COMMENT "Generating coverage report ..."
         POST_BUILD

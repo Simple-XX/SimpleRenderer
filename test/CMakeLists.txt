@@ -43,13 +43,13 @@ link_libraries(
 
 # Add subdirectories for different test types
 add_subdirectory(system_test)
-# add_subdirectory(unit_test)
+add_subdirectory(unit_test)
 # add_subdirectory(integration_test)
 
 # Optional coverage target
-# add_coverage_target(
-#     DEPENDS unit_test
-#     SOURCE_DIR ${SimpleRenderer_SOURCE_DIR}
-#     BINARY_DIR ${SimpleRenderer_BINARY_DIR}
-#     EXCLUDE_DIR ${SimpleRenderer_SOURCE_DIR}/3rd/*
-# )
+add_coverage_target(
+    DEPENDS unit_test
+    SOURCE_DIR ${SimpleRenderer_SOURCE_DIR}
+    BINARY_DIR ${SimpleRenderer_BINARY_DIR}
+    EXCLUDE_DIR ${SimpleRenderer_SOURCE_DIR}/3rd/*
+)

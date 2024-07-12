@@ -1,6 +1,6 @@
 mkdir build;
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Coverage;
 cd build;
-cmake ..;
 make;
 cd ..;
 ./build/test/system_test/system_test;
