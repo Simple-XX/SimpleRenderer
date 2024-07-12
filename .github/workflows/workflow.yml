@@ -52,7 +52,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake --preset=build
+          cmake -S . -B build
           cmake --build build --target all
           cmake --build build --target coverage
 
