@@ -18,5 +18,6 @@ list(APPEND DEFAULT_LINK_LIB
     ${glog_LIBRARIES}
     OpenGL::GL
     glad
+    raylib
     OpenMP::OpenMP_CXX
 )

@@ -213,7 +213,7 @@ else ()
 endif ()
 
 # Find raylib
-find_package(raylib 3.0 REQUIRED)
+find_package(raylib REQUIRED)
 if (NOT raylib_FOUND)
     message(FATAL_ERROR "raylib not found. Please install raylib.")
 endif ()
