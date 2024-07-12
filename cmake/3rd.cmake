@@ -73,12 +73,7 @@ endif ()
 CPMAddPackage(
     NAME raylib 
     GITHUB_REPOSITORY raysan5/raylib 
-    GIT_TAG 4.5.0 
-    DOWNLOAD_ONLY True)
-if (raylib_ADDED)
-    add_library(raylib INTERFACE IMPORTED)
-    target_include_directories(raylib INTERFACE ${raylib_SOURCE_DIR})
-endif ()
+    GIT_TAG 5.0 )
 
 # https://gitlab.com/libeigen/eigen.git
 CPMAddPackage(
@@ -210,12 +205,6 @@ if (OPENGL_FOUND)
     link_libraries(${OPENGL_LIBRARIES})
 else ()
     message(FATAL_ERROR "OpenGL not found. Please install OpenGL.")
-endif ()
-
-# Find raylib
-find_package(raylib REQUIRED)
-if (NOT raylib_FOUND)
-    message(FATAL_ERROR "raylib not found. Please install raylib.")
 endif ()
 
 # Find spdlog

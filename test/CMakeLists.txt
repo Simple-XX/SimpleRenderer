@@ -37,6 +37,7 @@ link_libraries(
     ${glog_LIBRARIES}
     SimpleRenderer
     glad 
+    raylib
     OpenGL::GL
 )
 

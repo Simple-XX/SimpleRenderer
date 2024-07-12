@@ -18,6 +18,7 @@ target_include_directories(system_test PRIVATE
     ${CMAKE_SOURCE_DIR}/src/include
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${raylib_INCLUDE_DIRS}
+    ${raylib_SOURCE_DIR}/src
 )
 
 # Compile options

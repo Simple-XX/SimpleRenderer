@@ -49,6 +49,7 @@ configure_file(
 
 # Find and include OpenGL
 find_package(OpenGL REQUIRED)
+find_package(raylib REQUIRED)
 
 # Add glad library
 add_library(glad "${PROJECT_SOURCE_DIR}/src/glad.c")

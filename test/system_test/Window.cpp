@@ -1,5 +1,4 @@
 #include "Window.hpp"
-#include <raylib.h>
 #include <iostream>
 
 Window::Window(int width, int height) : 
