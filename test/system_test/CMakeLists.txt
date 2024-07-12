@@ -17,6 +17,7 @@ add_executable(system_test ${SOURCES})
 target_include_directories(system_test PRIVATE
     ${CMAKE_SOURCE_DIR}/src/include
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${RAYLIB_INCLUDE_DIRS}
 )
 
 # Compile options
