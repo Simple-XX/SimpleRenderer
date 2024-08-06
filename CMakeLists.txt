@@ -7,6 +7,9 @@
 # 设置最小 cmake 版本
 cmake_minimum_required(VERSION 3.27 FATAL_ERROR)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 # 设置项目名与版本
 project(SimpleRenderer
         VERSION 0.0.1)
@@ -39,7 +42,7 @@ set(FONT_FILE_PATH "${wqy_font_SOURCE_DIR}/wqy-zenhei.ttc")
 include(ProcessorCount)
 ProcessorCount(NPROC)
 # 日志文件路径
-set(LOG_FILE_PATH "${EXECUTABLE_OUTPUT_PATH}/logs/SimpleRendererLog.log")
+set(LOG_FILE_PATH "${PROJECT_SOURCE_DIR}/build/logs/SimpleRendererLog.log")
 # 日志文件大小
 set(LOG_FILE_MAX_SIZE 1024*1024*4)
 # 日志文件数量

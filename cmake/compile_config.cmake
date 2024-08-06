@@ -19,6 +19,6 @@ list(APPEND DEFAULT_LINK_LIB
         tinyobjloader
         Eigen
         ${glog_LIBRARIES}
-        SDL2::Main
+        SDL2::SDL2
         OpenMP::OpenMP_CXX
 )

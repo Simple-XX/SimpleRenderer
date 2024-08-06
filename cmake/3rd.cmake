@@ -57,6 +57,21 @@ CPMAddPackage(
         "gtest_force_shared_crt ON"
 )
 
+# SDL2
+
+CPMAddPackage(
+        NAME SDL2
+        GITHUB_REPOSITORY libsdl-org/SDL
+        GIT_TAG release-2.30.6
+        OPTIONS
+        "SDL2_DISABLE_INSTALL ON"
+        "SDL_SHARED OFF"
+        "SDL_STATIC ON"
+        "SDL_STATIC_PIC ON"
+        "SDL_WERROR OFF"
+)
+find_package(SDL2 REQUIRED)
+
 # https://github.com/aminosbh/sdl2-cmake-modules.git
 CPMAddPackage(
         NAME sdl2-cmake-modules
@@ -64,6 +79,10 @@ CPMAddPackage(
         GIT_TAG ad006a3daae65a612ed87415037e32188b81071e
         DOWNLOAD_ONLY True
 )
+if (SDL2_ADDED)
+    add_library(SDL2::SDL2)
+endif()
+
 if (sdl2-cmake-modules_ADDED)
     list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
 endif ()
@@ -93,6 +112,16 @@ if (tinyobjloader_ADDED)
             BASE_DIRS ${tinyobjloader_SOURCE_DIR}
             FILES tiny_obj_loader.h
     )
+endif ()
+
+CPMAddPackage(
+    NAME glm
+    GITHUB_REPOSITORY g-truc/glm
+    GIT_TAG 1.0.1
+)
+if (glm_ADDED)
+    add_library(glm INTERFACE IMPORTED)
+    target_include_directories(glm INTERFACE ${glm_SOURCE_DIR})
 endif ()
 
 # https://github.com/nothings/stb.git
