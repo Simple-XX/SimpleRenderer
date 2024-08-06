@@ -15,6 +15,7 @@
  */
 
 #include "model.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <utility>
 
@@ -32,19 +33,21 @@ Model::Vertex::Vertex(Coord coord, Normal normal, TextureCoord texture_coord,
       texture_coord_(std::move(texture_coord)),
       color_(color) {}
 
-auto Model::Vertex::operator*(const Matrix4f &tran) const -> Model::Vertex {
-  auto vertex(*this);
+auto Model::Vertex::operator*(const glm::mat4 &tran) const -> Model::Vertex {
+    Vertex vertex(*this);
 
-  auto res4 = Vector4f(coord_.x(), coord_.y(), coord_.z(), 1);
-  auto ret4 = Vector4f(tran * res4);
+    // Convert the 3D coordinate to a 4D vector by adding a 1.0 w-component
+    glm::vec4 res4(coord_, 1.0f);
 
-  vertex.coord_.x() = ret4.x();
-  vertex.coord_.y() = ret4.y();
-  vertex.coord_.z() = ret4.z();
+    // Apply the transformation matrix
+    glm::vec4 ret4 = tran * res4;
 
-  /// @todo 变换法线
+    // Update the vertex coordinates with the transformed values
+    vertex.coord_ = glm::vec3(ret4);
 
-  return vertex;
+    /// @todo 变换法线
+
+    return vertex;
 }
 
 Model::Face::Face(const Model::Vertex &v0, const Model::Vertex &v1,
@@ -52,31 +55,31 @@ Model::Face::Face(const Model::Vertex &v0, const Model::Vertex &v1,
     : v0_(v0), v1_(v1), v2_(v2), material_(std::move(material)) {
   // 计算法向量
   // 如果 obj 内包含法向量，直接使用即可
-  if (v0.normal_.norm() != 0 && v1.normal_.norm() != 0 &&
-      v2.normal_.norm() != 0) {
-    normal_ = (v0.normal_ + v1.normal_ + v2.normal_).normalized();
+  if (glm::normalize(v0.normal_) != glm::vec3(0.0f) && glm::normalize(v1.normal_) != glm::vec3(0.0f) &&
+      glm::normalize(v2.normal_) != glm::vec3(0.0f)) {
+    normal_ = glm::normalize((v0.normal_ + v1.normal_ + v2.normal_));
   }
   // 手动计算
   else {
     // 两条相临边的叉积
     auto v2v0 = v2.coord_ - v0.coord_;
     auto v1v0 = v1.coord_ - v0.coord_;
-    normal_ = (v2v0.cross(v1v0)).normalized();
+    normal_ = glm::normalize(glm::cross(v2v0, v1v0));
   }
 }
 
-auto Model::Face::operator*(const Matrix4f &tran) const -> Model::Face {
-  auto face(*this);
-  face.v0_ = face.v0_ * tran;
-  face.v1_ = face.v1_ * tran;
-  face.v2_ = face.v2_ * tran;
+auto Model::Face::operator*(const glm::mat4 &tran) const -> Model::Face {
+    auto face(*this);
+    face.v0_ = face.v0_ * tran;
+    face.v1_ = face.v1_ * tran;
+    face.v2_ = face.v2_ * tran;
 
-  /// @todo 通过矩阵变换法线
-  auto v2v0 = face.v2_.coord_ - face.v0_.coord_;
-  auto v1v0 = face.v1_.coord_ - face.v0_.coord_;
-  face.normal_ = (v2v0.cross(v1v0)).normalized();
+    // Calculate the transformed normal
+    glm::vec3 v2v0 = face.v2_.coord_ - face.v0_.coord_;
+    glm::vec3 v1v0 = face.v1_.coord_ - face.v0_.coord_;
+    face.normal_ = glm::normalize(glm::cross(v2v0, v1v0));
 
-  return face;
+    return face;
 }
 
 Model::Model(const std::string &obj_path, const std::string &mtl_path)
@@ -143,7 +146,7 @@ Model::Model(const std::string &obj_path, const std::string &mtl_path)
 
         // 如果法线索引存在(即 idx.normal_index >= 0)，
         // 则构造并保存，否则设置为 0
-        Normal normal = Normal::Zero();
+        Normal normal = glm::vec3(0.0f);
         if (idx.normal_index >= 0) {
           normal = Normal(attrib.normals[3 * size_t(idx.normal_index) + 0],
                           attrib.normals[3 * size_t(idx.normal_index) + 1],
@@ -152,7 +155,7 @@ Model::Model(const std::string &obj_path, const std::string &mtl_path)
 
         // 如果贴图索引存在(即 idx.texcoord_index >= 0)，
         // 则构造并保存，否则设置为 0
-        TextureCoord texture_coord = TextureCoord::Zero();
+        TextureCoord texture_coord = glm::vec3(0.0f);
         if (idx.texcoord_index >= 0) {
           texture_coord = TextureCoord(
               attrib.texcoords[2 * size_t(idx.texcoord_index) + 0],
@@ -172,13 +175,13 @@ Model::Model(const std::string &obj_path, const std::string &mtl_path)
       auto material = Material();
       if (!materials.empty()) {
         material.shininess = materials[shape_index].shininess;
-        material.ambient = Vector3f(materials[shape_index].ambient[0],
+        material.ambient = glm::vec3(materials[shape_index].ambient[0],
                                     materials[shape_index].ambient[1],
                                     materials[shape_index].ambient[2]);
-        material.diffuse = Vector3f(materials[shape_index].diffuse[0],
+        material.diffuse = glm::vec3(materials[shape_index].diffuse[0],
                                     materials[shape_index].diffuse[1],
                                     materials[shape_index].diffuse[2]);
-        material.specular = Vector3f(materials[shape_index].specular[0],
+        material.specular = glm::vec3(materials[shape_index].specular[0],
                                      materials[shape_index].specular[1],
                                      materials[shape_index].specular[2]);
       }
@@ -190,7 +193,7 @@ Model::Model(const std::string &obj_path, const std::string &mtl_path)
   Normalize();
 }
 
-auto Model::operator*(const Matrix4f &tran) const -> Model {
+auto Model::operator*(const glm::mat4 &tran) const -> Model {
   auto model = Model(*this);
 
   for (auto &i : model.faces_) {
@@ -213,27 +216,27 @@ std::pair<Model::Coord, Model::Coord> Model::GetMaxMinXYX() {
                    std::numeric_limits<float>::max());
 
   for (const auto &i : faces_) {
-    auto curr_max_x = std::max(i.v0_.coord_.x(),
-                               std::max(i.v1_.coord_.x(), i.v2_.coord_.x()));
-    auto curr_max_y = std::max(i.v0_.coord_.y(),
-                               std::max(i.v1_.coord_.y(), i.v2_.coord_.y()));
-    auto curr_max_z = std::max(i.v0_.coord_.z(),
-                               std::max(i.v1_.coord_.z(), i.v2_.coord_.z()));
+    auto curr_max_x = std::max(i.v0_.coord_.x,
+                               std::max(i.v1_.coord_.x, i.v2_.coord_.x));
+    auto curr_max_y = std::max(i.v0_.coord_.y,
+                               std::max(i.v1_.coord_.y, i.v2_.coord_.y));
+    auto curr_max_z = std::max(i.v0_.coord_.z,
+                               std::max(i.v1_.coord_.z, i.v2_.coord_.z));
 
-    max.x() = curr_max_x > max.x() ? curr_max_x : max.x();
-    max.y() = curr_max_y > max.y() ? curr_max_y : max.y();
-    max.z() = curr_max_z > max.z() ? curr_max_z : max.z();
+    max.x = curr_max_x > max.x ? curr_max_x : max.x;
+    max.y = curr_max_y > max.y ? curr_max_y : max.y;
+    max.z = curr_max_z > max.z ? curr_max_z : max.z;
 
-    auto curr_min_x = std::min(i.v0_.coord_.x(),
-                               std::min(i.v1_.coord_.x(), i.v2_.coord_.x()));
-    auto curr_min_y = std::min(i.v0_.coord_.y(),
-                               std::min(i.v1_.coord_.y(), i.v2_.coord_.y()));
-    auto curr_min_z = std::min(i.v0_.coord_.z(),
-                               std::min(i.v1_.coord_.z(), i.v2_.coord_.z()));
+    auto curr_min_x = std::min(i.v0_.coord_.x,
+                               std::min(i.v1_.coord_.x, i.v2_.coord_.x));
+    auto curr_min_y = std::min(i.v0_.coord_.y,
+                               std::min(i.v1_.coord_.y, i.v2_.coord_.y));
+    auto curr_min_z = std::min(i.v0_.coord_.z,
+                               std::min(i.v1_.coord_.z, i.v2_.coord_.z));
 
-    min.x() = curr_min_x < min.x() ? curr_min_x : min.x();
-    min.y() = curr_min_y < min.y() ? curr_min_y : min.y();
-    min.z() = curr_min_z < min.z() ? curr_min_z : min.z();
+    min.x = curr_min_x < min.x ? curr_min_x : min.x;
+    min.y = curr_min_y < min.y ? curr_min_y : min.y;
+    min.z = curr_min_z < min.z ? curr_min_z : min.z;
   }
   return {max, min};
 }
@@ -241,25 +244,31 @@ std::pair<Model::Coord, Model::Coord> Model::GetMaxMinXYX() {
 void Model::Normalize() {
   auto [max, min] = GetMaxMinXYX();
 
-  auto x = std::abs(max.x()) + std::abs(min.x());
-  auto y = std::abs(max.y()) + std::abs(min.y());
-  auto z = std::abs(max.z()) + std::abs(min.z());
+    // Compute the dimensions of the bounding box
+    auto x = std::abs(max.x) + std::abs(min.x);
+    auto y = std::abs(max.y) + std::abs(min.y);
+    auto z = std::abs(max.z) + std::abs(min.z);
 
-  auto scale = 1.0f / std::max(x, std::max(y, z));
-  auto scale_matrix = Matrix4f(Matrix4f::Identity());
-  scale_matrix.diagonal() << scale, scale, scale, 1;
+    // Calculate the scaling factor
+    auto scale = 1.0f / std::max(x, std::max(y, z));
 
-  auto center = Coord((max.x() + min.x()) / 2.f, (max.y() + min.y()) / 2.f,
-                      (max.z() + min.z()) / 2.f);
-  auto translation_matrix = Matrix4f(Matrix4f::Identity());
-  translation_matrix.col(translation_matrix.cols() - 1) << -center.x(),
-      -center.y(), -center.z(), 1;
+    // Create the scaling matrix
+    glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, scale));
 
-  auto matrix = Matrix4f(scale_matrix * translation_matrix);
+    // Calculate the center of the bounding box
+    glm::vec3 center = glm::vec3((max.x + min.x) / 2.0f, (max.y + min.y) / 2.0f, (max.z + min.z) / 2.0f);
 
-  SPDLOG_DEBUG("matrix: {}", matrix);
+    // Create the translation matrix
+    glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), -center);
 
-  *this = *this * matrix;
+    // Combine the scaling and translation matrices
+    glm::mat4 normalization_matrix = scale_matrix * translation_matrix;
+
+    // Debug output
+    SPDLOG_DEBUG("normalization_matrix: \n{}", glm::to_string(normalization_matrix));
+
+    // Apply the normalization matrix to the model
+    *this = *this * normalization_matrix;
 }
 
 }  // namespace simple_renderer

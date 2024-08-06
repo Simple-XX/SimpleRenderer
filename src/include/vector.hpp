@@ -17,15 +17,14 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_VECTOR_HPP_
 #define SIMPLERENDER_SRC_INCLUDE_VECTOR_HPP_
 
-#include <Eigen/Dense>
+#include <glm/glm.hpp>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
 
 #include "log_system.h"
 
 namespace simple_renderer {
-
-using Vector2f = Eigen::Vector2f;
-using Vector3f = Eigen::Vector3f;
-using Vector4f = Eigen::Vector4f;
 
 }  // namespace simple_renderer
 
@@ -33,26 +32,26 @@ using Vector4f = Eigen::Vector4f;
  * spdlog 输出 Vector3f 实现
  */
 template <>
-struct fmt::formatter<simple_renderer::Vector3f> : fmt::formatter<std::string> {
-  auto format(simple_renderer::Vector3f vector, format_context &format_context)
-      const -> decltype(format_context.out()) {
-    std::stringstream buf;
-    buf << vector;
-    return fmt::format_to(format_context.out(), "\n{}", buf.str());
-  }
+struct fmt::formatter<glm::vec3> : fmt::formatter<std::string> {
+    auto format(const glm::vec3 &vector, fmt::format_context &ctx) const -> decltype(ctx.out()) {
+        std::string vector_string = glm::to_string(vector);
+    
+        // Format and output the string
+        return fmt::format_to(ctx.out(), "\n{}", vector_string);
+    }
 };
 
 /**
  * spdlog 输出 Vector4f 实现
  */
 template <>
-struct fmt::formatter<simple_renderer::Vector4f> : fmt::formatter<std::string> {
-  auto format(simple_renderer::Vector4f vector, format_context &format_context)
-      const -> decltype(format_context.out()) {
-    std::stringstream buf;
-    buf << vector;
-    return fmt::format_to(format_context.out(), "\n{}", buf.str());
-  }
+struct fmt::formatter<glm::vec4> : fmt::formatter<std::string> {
+    auto format(const glm::vec4 &vector, fmt::format_context &ctx) const -> decltype(ctx.out()) {
+        std::string vector_string = glm::to_string(vector);
+    
+        // Format and output the string
+        return fmt::format_to(ctx.out(), "\n{}", vector_string);
+    }
 };
 
 #endif /* SIMPLERENDER_SRC_INCLUDE_VECTOR_HPP_ */

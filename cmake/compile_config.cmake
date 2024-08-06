@@ -17,7 +17,7 @@ list(APPEND DEFAULT_LINK_LIB
         spdlog::spdlog
         stb
         tinyobjloader
-        Eigen
+        glm::glm
         ${glog_LIBRARIES}
         SDL2::SDL2
         OpenMP::OpenMP_CXX

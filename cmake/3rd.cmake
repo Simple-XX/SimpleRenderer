@@ -281,3 +281,9 @@ if (NOT spdlog_FOUND)
     message(FATAL_ERROR "spdlog not found.\n"
             "Following https://github.com/gabime/spdlog to install.")
 endif ()
+
+find_package(glm REQUIRED)
+if (NOT glm_FOUND)
+    message(FATAL_ERROR "glm not found.\n"
+            "Following https://github.com/g-truc/glm tp install")
+endif ()
