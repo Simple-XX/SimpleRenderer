@@ -87,17 +87,6 @@ if (sdl2-cmake-modules_ADDED)
     list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
 endif ()
 
-## https://github.com/freetype/freetype
-#CPMAddPackage(
-#        NAME freetype
-#        GIT_REPOSITORY https://github.com/freetype/freetype.git
-#        GIT_TAG VER-2-13-0
-#        VERSION 2.13.0
-#)
-#if (freetype_ADDED)
-#    add_library(Freetype::Freetype ALIAS freetype)
-#endif ()
-
 # https://github.com/tinyobjloader/tinyobjloader.git
 CPMAddPackage(
         NAME tinyobjloader
@@ -119,10 +108,6 @@ CPMAddPackage(
     GITHUB_REPOSITORY g-truc/glm
     GIT_TAG 1.0.1
 )
-if (glm_ADDED)
-    add_library(glm INTERFACE IMPORTED)
-    target_include_directories(glm INTERFACE ${glm_SOURCE_DIR})
-endif ()
 
 # https://github.com/nothings/stb.git
 CPMAddPackage(
@@ -138,19 +123,6 @@ if (stb_ADDED)
             BASE_DIRS ${stb_SOURCE_DIR}
             FILES stb_image.h
     )
-endif ()
-
-# https://gitlab.com/libeigen/eigen.git
-CPMAddPackage(
-        NAME Eigen
-        GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        GIT_TAG 3.4.0
-        VERSION 3.4.0
-        DOWNLOAD_ONLY True
-)
-if (Eigen_ADDED)
-    add_library(Eigen INTERFACE IMPORTED)
-    target_include_directories(Eigen INTERFACE ${Eigen_SOURCE_DIR})
 endif ()
 
 # http://wenq.org/wqy2/index.cgi?ZenHei
