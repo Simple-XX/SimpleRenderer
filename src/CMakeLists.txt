@@ -5,24 +5,14 @@
 # CMakeLists.txt for Simple-XX/SimpleRenderer.
 
 # 生成静态库
-add_library(${PROJECT_NAME} STATIC
-        log_system.cpp
-        color.cpp
-        include/vector.hpp
-        include/matrix.hpp
-        include/model.hpp
-        include/shader_base.h
-        include/default_shader.h
-        include/light.h
-        model.cpp
-        light.cpp
-        shader_base.cpp
-        default_shader.cpp
-        simple_renderer.cpp
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS 
+    "*.cpp"
+    "*.c"
 )
+add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/include>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 

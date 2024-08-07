@@ -14,7 +14,7 @@ enable_testing()
 include(GoogleTest)
 
 include_directories(
-        ${SimpleRenderer_SOURCE_DIR}/src/include
+        ${SimpleRenderer_SOURCE_DIR}/include
 )
 
 list(APPEND DEFAULT_TEST_COMPILE_OPTIONS

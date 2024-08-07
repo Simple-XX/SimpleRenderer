@@ -18,9 +18,9 @@
 
 namespace simple_renderer {
 
-ShaderVertexIn::ShaderVertexIn(const Model::Face &face) : face_(face) {}
+ShaderVertexIn::ShaderVertexIn(const Face &face) : face_(face) {}
 
-ShaderVertexOut::ShaderVertexOut(const Model::Face &face) : face_(face) {}
+ShaderVertexOut::ShaderVertexOut(const Face &face) : face_(face) {}
 
 ShaderFragmentIn::ShaderFragmentIn(const glm::vec3 &barycentric_coord,
                                    const glm::vec3 &normal,

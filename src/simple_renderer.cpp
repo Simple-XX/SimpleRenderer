@@ -58,7 +58,7 @@ SimpleRenderer::SimpleRenderer(size_t width, size_t height, uint32_t *buffer,
 }
 
 bool SimpleRenderer::render(const Model &model) {
-  SPDLOG_INFO("render model: {}", model.obj_path_);
+  SPDLOG_INFO("render model: {}", model.ModelPath());
   auto shader = DefaultShader();
   auto light = Light();
   DrawModel(shader, light, model, 1, 0);
@@ -126,8 +126,8 @@ void SimpleRenderer::DrawLine(float x0, float y0, float x1, float y1,
 }
 
 void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
-                                  const Model::Normal &normal,
-                                  const Model::Face &face) {
+                                  const glm::vec3 &normal,
+                                  const Face &face) {
   auto v0 = face.v0_;
   auto v1 = face.v1_;
   auto v2 = face.v2_;
@@ -194,12 +194,12 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
 void SimpleRenderer::DrawModel(const ShaderBase &shader, const Light &light,
                                const Model &model, bool draw_line,
                                bool draw_triangle) {
-  SPDLOG_INFO("draw {}", model.obj_path_);
+  SPDLOG_INFO("draw {}", model.ModelPath());
 
   if (draw_line) {
 #pragma omp parallel for num_threads(kNProc) default(none) shared(shader) \
     firstprivate(model)
-    for (const auto &f : model.GetFace()) {
+    for (const auto &f : model.GetFaces()) {
       /// @todo 巨大性能开销
       auto face = shader.Vertex(ShaderVertexIn(f)).face_;
       DrawLine(face.v0_.coord_.x, face.v0_.coord_.y, face.v1_.coord_.x,
@@ -213,7 +213,7 @@ void SimpleRenderer::DrawModel(const ShaderBase &shader, const Light &light,
   if (draw_triangle) {
 #pragma omp parallel for num_threads(kNProc) default(none) shared(shader) \
     firstprivate(model, light)
-    for (const auto &f : model.GetFace()) {
+    for (const auto &f : model.GetFaces()) {
       /// @todo 巨大性能开销
       auto face = shader.Vertex(ShaderVertexIn(f)).face_;
       DrawTriangle(shader, light, face.normal_, face);

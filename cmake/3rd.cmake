@@ -46,19 +46,17 @@ endif ()
 include(${CPM_DOWNLOAD_LOCATION})
 # -------- get_cpm.cmake --------
 
-# https://github.com/google/googletest
 CPMAddPackage(
         NAME googletest
-        GITHUB_REPOSITORY google/googletest
-        GIT_TAG v1.14.0
-        VERSION 1.14.0
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG v1.15.2
+        VERSION 1.15.2
         OPTIONS
         "INSTALL_GTEST OFF"
         "gtest_force_shared_crt ON"
 )
 
 # SDL2
-
 CPMAddPackage(
         NAME SDL2
         GITHUB_REPOSITORY libsdl-org/SDL
@@ -72,20 +70,26 @@ CPMAddPackage(
 )
 find_package(SDL2 REQUIRED)
 
-# https://github.com/aminosbh/sdl2-cmake-modules.git
-CPMAddPackage(
-        NAME sdl2-cmake-modules
-        GIT_REPOSITORY https://github.com/aminosbh/sdl2-cmake-modules.git
-        GIT_TAG ad006a3daae65a612ed87415037e32188b81071e
-        DOWNLOAD_ONLY True
-)
-if (SDL2_ADDED)
-    add_library(SDL2::SDL2)
-endif()
+# # https://github.com/aminosbh/sdl2-cmake-modules.git
+# CPMAddPackage(
+#         NAME sdl2-cmake-modules
+#         GIT_REPOSITORY https://github.com/aminosbh/sdl2-cmake-modules.git
+#         DOWNLOAD_ONLY True
+# )
 
-if (sdl2-cmake-modules_ADDED)
-    list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
-endif ()
+# if (sdl2-cmake-modules_ADDED)
+#     list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
+# endif ()
+
+CPMAddPackage(
+        NAME assimp
+        GIT_REPOSITORY https://github.com/assimp/assimp.git
+        GIT_TAG v5.4.1
+        OPTIONS
+        "ASSIMP_BUILD_TESTS OFF"
+        "ASSIMP_BUILD_ASSIMP_TOOLS OFF"
+        "ASSIMP_BUILD_SAMPLES OFF"
+)
 
 # https://github.com/tinyobjloader/tinyobjloader.git
 CPMAddPackage(
@@ -106,7 +110,6 @@ endif ()
 CPMAddPackage(
     NAME glm
     GITHUB_REPOSITORY g-truc/glm
-    GIT_TAG 1.0.1
 )
 
 # https://github.com/nothings/stb.git
@@ -258,4 +261,10 @@ find_package(glm REQUIRED)
 if (NOT glm_FOUND)
     message(FATAL_ERROR "glm not found.\n"
             "Following https://github.com/g-truc/glm tp install")
+endif ()
+
+find_package(assimp REQUIRED)
+if (NOT assimp_FOUND)
+    message(FATAL_ERROR "assimp not found.\n"
+            "Following https://github.com/assimp/assimp to install.")
 endif ()

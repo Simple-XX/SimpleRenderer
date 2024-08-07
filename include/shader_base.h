@@ -29,13 +29,13 @@ namespace simple_renderer {
 class ShaderVertexIn {
  public:
   /// 面信息
-  Model::Face face_;
+  Face face_;
 
   /**
    * 构造函数
    * @param face 面信息
    */
-  explicit ShaderVertexIn(const Model::Face &face);
+  explicit ShaderVertexIn(const Face &face);
 
   /// @name 默认构造/析构函数
   /// @{
@@ -56,13 +56,13 @@ class ShaderVertexIn {
 class ShaderVertexOut {
  public:
   /// 面信息
-  Model::Face face_;
+ Face face_;
 
   /**
    * 构造函数
    * @param face            面信息
    */
-  explicit ShaderVertexOut(const Model::Face &face);
+  explicit ShaderVertexOut(const Face &face);
 
   /// @name 默认构造/析构函数
   /// @{
