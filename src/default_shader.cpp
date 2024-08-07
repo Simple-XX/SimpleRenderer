@@ -20,26 +20,26 @@ namespace simple_renderer {
 
 auto DefaultShader::InterpolateColor(
     const Color &color0, const Color &color1, const Color &color2,
-    const Vector3f &barycentric_coord) -> Color {
+    const glm::vec3 &barycentric_coord) -> Color {
   return Color(
       static_cast<uint8_t>(static_cast<float>(color0[Color::kColorIndexRed]) *
-                               barycentric_coord.x() +
+                               barycentric_coord.x +
                            static_cast<float>(color1[Color::kColorIndexRed]) *
-                               barycentric_coord.y() +
+                               barycentric_coord.y +
                            static_cast<float>(color2[Color::kColorIndexRed]) *
-                               barycentric_coord.z()),
+                               barycentric_coord.z),
       static_cast<uint8_t>(static_cast<float>(color0[Color::kColorIndexGreen]) *
-                               barycentric_coord.x() +
+                               barycentric_coord.x +
                            static_cast<float>(color1[Color::kColorIndexGreen]) *
-                               barycentric_coord.y() +
+                               barycentric_coord.y +
                            static_cast<float>(color2[Color::kColorIndexGreen]) *
-                               barycentric_coord.z()),
+                               barycentric_coord.z),
       static_cast<uint8_t>(static_cast<float>(color0[Color::kColorIndexBlue]) *
-                               barycentric_coord.x() +
+                               barycentric_coord.x +
                            static_cast<float>(color1[Color::kColorIndexBlue]) *
-                               barycentric_coord.y() +
+                               barycentric_coord.y +
                            static_cast<float>(color2[Color::kColorIndexBlue]) *
-                               barycentric_coord.z()));
+                               barycentric_coord.z));
 }
 
 /// @todo 巨大性能开销
@@ -56,7 +56,7 @@ auto DefaultShader::Vertex(const ShaderVertexIn &shader_vertex_in) const
 
 auto DefaultShader::Fragment(const ShaderFragmentIn &shader_fragment_in) const
     -> ShaderFragmentOut {
-  auto intensity = (shader_fragment_in.normal_.dot(shader_fragment_in.light_));
+  auto intensity = glm::dot(shader_fragment_in.normal_,shader_fragment_in.light_);
   auto is_need_draw = true;
   // 光照方向为正，不绘制背面
   if (intensity <= 0) {
