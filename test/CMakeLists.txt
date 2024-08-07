@@ -14,28 +14,28 @@ enable_testing()
 include(GoogleTest)
 
 include_directories(
-        ${SimpleRenderer_SOURCE_DIR}/src/include
+    ${SimpleRenderer_SOURCE_DIR}/include
 )
 
 list(APPEND DEFAULT_TEST_COMPILE_OPTIONS
-        ${DEFAULT_COMPILE_OPTIONS}
-        --coverage
+    ${DEFAULT_COMPILE_OPTIONS}
+    --coverage
 )
 
 list(APPEND DEFAULT_TEST_LINK_OPTIONS
-        --coverage
-        $<$<CXX_COMPILER_ID:GNU>:
-        # -fsanitize=leak
-        >
-        # -fsanitize=address
-        -fno-omit-frame-pointer
+    --coverage
+    $<$<CXX_COMPILER_ID:GNU>:
+    # -fsanitize=leak
+    >
+    # -fsanitize=address
+    -fno-omit-frame-pointer
 )
 
 link_libraries(
-        ${DEFAULT_LINK_LIB}
-        gtest_main
-        ${glog_LIBRARIES}
-        SimpleRenderer
+    ${DEFAULT_LINK_LIB}
+    gtest_main
+    ${glog_LIBRARIES}
+    SimpleRenderer
 )
 
 # Check if the platform is macOS
