@@ -16,7 +16,6 @@ list(APPEND DEFAULT_COMPILE_OPTIONS
 list(APPEND DEFAULT_LINK_LIB
         spdlog::spdlog
         stb
-        tinyobjloader
         glm::glm
         ${glog_LIBRARIES}
         SDL2::SDL2

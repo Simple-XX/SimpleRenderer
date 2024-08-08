@@ -23,9 +23,6 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
-
 #include "log_system.h"
 
 namespace simple_renderer {

@@ -26,8 +26,8 @@
 
 /// @name 默认大小
 /// @{
-static constexpr const size_t kWidth = 1920;
-static constexpr const size_t kHeight = 1080;
+static constexpr const size_t kWidth = 800;
+static constexpr const size_t kHeight = 600;
 /// @}
 
 static void pixel(size_t x, size_t y, uint32_t color, uint32_t *buffer) {

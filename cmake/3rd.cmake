@@ -70,16 +70,6 @@ CPMAddPackage(
 )
 find_package(SDL2 REQUIRED)
 
-# # https://github.com/aminosbh/sdl2-cmake-modules.git
-# CPMAddPackage(
-#         NAME sdl2-cmake-modules
-#         GIT_REPOSITORY https://github.com/aminosbh/sdl2-cmake-modules.git
-#         DOWNLOAD_ONLY True
-# )
-
-# if (sdl2-cmake-modules_ADDED)
-#     list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
-# endif ()
 
 CPMAddPackage(
         NAME assimp
@@ -91,26 +81,10 @@ CPMAddPackage(
         "ASSIMP_BUILD_SAMPLES OFF"
 )
 
-# https://github.com/tinyobjloader/tinyobjloader.git
-CPMAddPackage(
-        NAME tinyobjloader
-        GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
-        GIT_TAG 853f059d778058a43c954850e561a231934b33a7
-        DOWNLOAD_ONLY True
-)
-if (tinyobjloader_ADDED)
-    add_library(tinyobjloader INTERFACE)
-    target_sources(tinyobjloader INTERFACE
-            FILE_SET HEADERS
-            BASE_DIRS ${tinyobjloader_SOURCE_DIR}
-            FILES tiny_obj_loader.h
-    )
-endif ()
-
 CPMAddPackage(
     NAME glm
     GITHUB_REPOSITORY g-truc/glm
-    VERSION 1.0.1
+    GIT_TAG 1.0.1
 )
 
 # https://github.com/nothings/stb.git
