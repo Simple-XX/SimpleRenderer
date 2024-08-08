@@ -25,90 +25,43 @@
 #include "color.h"
 #include "config.h"
 #include "log_system.h"
-#include "matrix.hpp"
-#include "vector.hpp"
+#include "log_math.hpp"
+
+#include "vertex.hpp"
+#include "face.hpp"
 
 namespace simple_renderer {
 
-class Material {
-public:
-    Material() = default;
-    Material(const Material& material) = default;
-    Material(Material&& material) = default;
-    auto operator=(const Material& material) -> Material& = default;
-    auto operator=(Material&& material) -> Material& = default;
-    ~Material() = default;
-
-    float shininess = 0.0f;
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-};
-
-class Vertex {
-public:
-    explicit Vertex(glm::vec3 coord, glm::vec3 normal, glm::vec2 texture_coord, const Color& color);
-    Vertex() = default;
-    Vertex(const Vertex& vertex) = default;
-    Vertex(Vertex&& vertex) = default;
-    auto operator=(const Vertex& vertex) -> Vertex& = default;
-    auto operator=(Vertex&& vertex) -> Vertex& = default;
-    ~Vertex() = default;
-
-    [[nodiscard]] Vertex operator*(const glm::mat4 &tran) const;
-
-    glm::vec3 coord_;
-    glm::vec3 normal_;
-    glm::vec2 texture_coord_;
-    Color color_;
-};
-
-class Face {
-public:
-    explicit Face(const Vertex& v0, const Vertex& v1, const Vertex& v2, Material material);
-    Face() = default;
-    Face(const Face& face) = default;
-    Face(Face&& face) = default;
-    auto operator=(const Face& face) -> Face& = default;
-    auto operator=(Face&& face) -> Face& = default;
-    ~Face() = default;
-
-    [[nodiscard]] Face operator*(const glm::mat4 &tran) const;
-
-    Vertex v0_;
-    Vertex v1_;
-    Vertex v2_;
-    glm::vec3 normal_;
-    Material material_;
-};
-
 class Model {
 public:
-    Model(const std::string &model_path);
+    
+    // Default constructor
     Model() = default;
+    // Default copy constructor
     Model(const Model& model) = default;
+    Model& operator=(const Model& model) = default;
+    // Default move constructor
     Model(Model&& model) = default;
-    auto operator=(const Model& model) -> Model& = default;
-    auto operator=(Model&& model) -> Model& = default;
+    Model& operator=(Model&& model) = default;
     ~Model() = default;
 
-    [[nodiscard]] Model operator*(const glm::mat4 &tran) const;
+    Model(const std::string &model_path);
+
+    void transform(const glm::mat4 &tran);
     
-    const std::vector<Face>& GetFaces() const;
-    const std::string ModelPath() const;
+    const std::vector<Face>& faces() const { return faces_; };
+    const std::string& modelPath() const { return directory_; };
 
 private:
     static constexpr const uint8_t kTriangleFaceVertexCount = 3;
+    std::string directory_;
 
     std::vector<Face> faces_;
-    std::string model_path_ = "";
 
-    std::pair<glm::vec3, glm::vec3> GetMaxMinXYZ() const;
-    
-    void NormalizeModel();
-    void LoadModel(const std::string& path);
-    void ProcessNode(aiNode* node, const aiScene* scene);
-    Face ProcessMesh(aiMesh* mesh, const aiScene* scene);
+    void loadModel(const std::string& path);
+    void processNode(aiNode* node, const aiScene* scene);
+    void processMesh(aiMesh* mesh, const aiScene* scene);
+    Material processMaterial(aiMaterial* material);
 };
 }  // namespace simple_renderer
 

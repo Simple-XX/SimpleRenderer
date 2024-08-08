@@ -58,10 +58,10 @@ SimpleRenderer::SimpleRenderer(size_t width, size_t height, uint32_t *buffer,
 }
 
 bool SimpleRenderer::render(const Model &model) {
-  SPDLOG_INFO("render model: {}", model.ModelPath());
+  SPDLOG_INFO("render model: {}", model.modelPath());
   auto shader = DefaultShader();
   auto light = Light();
-  DrawModel(shader, light, model, 1, 0);
+  DrawModel(shader, light, model, 0, 1);
   return true;
 }
 
@@ -128,24 +128,24 @@ void SimpleRenderer::DrawLine(float x0, float y0, float x1, float y1,
 void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
                                   const glm::vec3 &normal,
                                   const Face &face) {
-  auto v0 = face.v0_;
-  auto v1 = face.v1_;
-  auto v2 = face.v2_;
+  auto v0 = face.vertex(0);
+  auto v1 = face.vertex(1);
+  auto v2 = face.vertex(2);
 
   // 获取三角形的最小 box
-  auto min = v0.coord_;
-  auto max = v1.coord_;
-  auto max_x = std::max(face.v0_.coord_.x,
-                        std::max(face.v1_.coord_.x, face.v2_.coord_.x));
-  auto max_y = std::max(face.v0_.coord_.y,
-                        std::max(face.v1_.coord_.y, face.v2_.coord_.y));
+  auto min = v0.position();
+  auto max = v1.position();
+  auto max_x = std::max(face.vertex(0).position().x,
+                        std::max(face.vertex(1).position().x, face.vertex(2).position().x));
+  auto max_y = std::max(face.vertex(0).position().y,
+                        std::max(face.vertex(1).position().y, face.vertex(2).position().y));
   max.x = max_x > max.x ? max_x : max.x;
   max.y = max_y > max.y ? max_y : max.y;
   max.z = 0;
-  auto min_x = std::min(face.v0_.coord_.x,
-                        std::min(face.v1_.coord_.x, face.v2_.coord_.x));
-  auto min_y = std::min(face.v0_.coord_.y,
-                        std::min(face.v1_.coord_.y, face.v2_.coord_.y));
+  auto min_x = std::min(face.vertex(0).position().x,
+                        std::min(face.vertex(1).position().x, face.vertex(2).position().x));
+  auto min_y = std::min(face.vertex(0).position().y,
+                        std::min(face.vertex(1).position().y, face.vertex(2).position().y));
   min.x = min_x < min.x ? min_x : min.x;
   min.y = min_y < min.y ? min_y : min.y;
   min.z = 0;
@@ -159,14 +159,14 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
         continue;
       }
       auto [is_inside, barycentric_coord] = GetBarycentricCoord(
-          v0.coord_, v1.coord_, v2.coord_,
+          v0.position(), v1.position(), v2.position(),
           glm::vec3(static_cast<float>(x), static_cast<float>(y), 0));
       // 如果点在三角形内再进行下一步
       if (!is_inside) {
         continue;
       }
       // 计算该点的深度，通过重心坐标插值计算
-      auto z = InterpolateDepth(v0.coord_.z, v1.coord_.z, v2.coord_.z,
+      auto z = InterpolateDepth(v0.position().z, v1.position().z, v2.position().z,
                                 barycentric_coord);
       // 深度在已有颜色之上
       if (z < depth_buffer_[y * width_ + x]) {
@@ -174,8 +174,8 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
       }
       // 构造着色器输入
       auto shader_fragment_in =
-          ShaderFragmentIn(barycentric_coord, normal, light.dir, v0.color_,
-                           v1.color_, v2.color_);
+          ShaderFragmentIn(barycentric_coord, normal, light.dir, v0.color(),
+                           v1.color(), v2.color());
       // 计算颜色，颜色为通过 shader 片段着色器计算
       auto shader_fragment_out = shader.Fragment(shader_fragment_in);
       // 如果不需要绘制则跳过
@@ -194,29 +194,29 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
 void SimpleRenderer::DrawModel(const ShaderBase &shader, const Light &light,
                                const Model &model, bool draw_line,
                                bool draw_triangle) {
-  SPDLOG_INFO("draw {}", model.ModelPath());
+  SPDLOG_INFO("draw {}", model.modelPath());
 
   if (draw_line) {
 #pragma omp parallel for num_threads(kNProc) default(none) shared(shader) \
     firstprivate(model)
-    for (const auto &f : model.GetFaces()) {
+    for (const auto &f : model.faces()) {
       /// @todo 巨大性能开销
       auto face = shader.Vertex(ShaderVertexIn(f)).face_;
-      DrawLine(face.v0_.coord_.x, face.v0_.coord_.y, face.v1_.coord_.x,
-               face.v1_.coord_.y, Color::kRed);
-      DrawLine(face.v1_.coord_.x, face.v1_.coord_.y, face.v2_.coord_.x,
-               face.v2_.coord_.y, Color::kGreen);
-      DrawLine(face.v2_.coord_.x, face.v2_.coord_.y, face.v0_.coord_.x,
-               face.v0_.coord_.y, Color::kBlue);
+      DrawLine(face.vertex(0).position().x, face.vertex(0).position().y, face.vertex(1).position().x,
+               face.vertex(1).position().y, Color::kRed);
+      DrawLine(face.vertex(1).position().x, face.vertex(1).position().y, face.vertex(2).position().x,
+               face.vertex(2).position().y, Color::kGreen);
+      DrawLine(face.vertex(2).position().x, face.vertex(2).position().y, face.vertex(0).position().x,
+               face.vertex(0).position().y, Color::kBlue);
     }
   }
   if (draw_triangle) {
 #pragma omp parallel for num_threads(kNProc) default(none) shared(shader) \
     firstprivate(model, light)
-    for (const auto &f : model.GetFaces()) {
+    for (const auto &f : model.faces()) {
       /// @todo 巨大性能开销
       auto face = shader.Vertex(ShaderVertexIn(f)).face_;
-      DrawTriangle(shader, light, face.normal_, face);
+      DrawTriangle(shader, light, face.normal(), face);
     }
   }
 }

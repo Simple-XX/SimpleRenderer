@@ -17,9 +17,8 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_SHADER_BASE_H_
 #define SIMPLERENDER_SRC_INCLUDE_SHADER_BASE_H_
 
-#include "matrix.hpp"
 #include "model.hpp"
-#include "vector.hpp"
+#include "log_math.hpp"
 
 namespace simple_renderer {
 

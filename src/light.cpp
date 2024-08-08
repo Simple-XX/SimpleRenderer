@@ -18,7 +18,7 @@
 
 #include "color.h"
 #include "log_system.h"
-#include "vector.hpp"
+#include "log_math.hpp"
 
 namespace simple_renderer {
 

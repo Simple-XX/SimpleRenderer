@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 
   auto matrix =
       glm::mat4(1.0f);
-  glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(500.0f, 500.0f, 500.0f));
+  glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(10.0f, 10.0f, 10.0f));
 
 // Translation matrix
     glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(kWidth / 2.0f, kHeight / 2.0f, 0.0f));
@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
   for (auto &obj : objs) {
     // 添加到场景中
     auto model = simple_renderer::Model(obj);
-    model = model * matrix;
+    model.transform(matrix);
     simple_renderer.render(model);
   }
 

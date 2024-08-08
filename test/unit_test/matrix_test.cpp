@@ -15,7 +15,7 @@
  * </table>
  */
 
-#include "matrix.hpp"
+#include "log_math.hpp"
 
 #include "gtest/gtest.h"
 

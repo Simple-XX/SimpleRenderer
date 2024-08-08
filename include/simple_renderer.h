@@ -23,10 +23,9 @@
 
 #include "light.h"
 #include "log_system.h"
-#include "matrix.hpp"
 #include "model.hpp"
 #include "shader_base.h"
-#include "vector.hpp"
+#include "log_math.hpp"
 
 namespace simple_renderer {
 
