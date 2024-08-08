@@ -26,8 +26,8 @@
 
 /// @name 默认大小
 /// @{
-static constexpr const size_t kWidth = 1920;
-static constexpr const size_t kHeight = 1080;
+static constexpr const size_t kWidth = 800;
+static constexpr const size_t kHeight = 600;
 /// @}
 
 static void pixel(size_t x, size_t y, uint32_t color, uint32_t *buffer) {
@@ -61,9 +61,14 @@ int main(int argc, char **argv) {
 
 
   auto matrix =
-      simple_renderer::Matrix4f(simple_renderer::Matrix4f::Identity());
-  matrix.diagonal() << 500, 500, 500, 1;
-  matrix.col(matrix.cols() - 1) << kWidth / 2, kHeight / 2, 0, 1;
+      glm::mat4(1.0f);
+  glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(10.0f, 10.0f, 10.0f));
+
+// Translation matrix
+    glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(kWidth / 2.0f, kHeight / 2.0f, 0.0f));
+
+    // Combined transformation matrix
+    matrix = translation_matrix * scale_matrix;
 
   // 矩阵运算的顺序
   // 归一化
@@ -83,7 +88,7 @@ int main(int argc, char **argv) {
   for (auto &obj : objs) {
     // 添加到场景中
     auto model = simple_renderer::Model(obj);
-    model = model * matrix;
+    model.transform(matrix);
     simple_renderer.render(model);
   }
 

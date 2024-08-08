@@ -23,10 +23,9 @@
 
 #include "light.h"
 #include "log_system.h"
-#include "matrix.hpp"
 #include "model.hpp"
 #include "shader_base.h"
-#include "vector.hpp"
+#include "log_math.hpp"
 
 namespace simple_renderer {
 
@@ -91,7 +90,7 @@ class SimpleRenderer {
    * @todo 多线程支持
    */
   void DrawTriangle(const ShaderBase &shader, const Light &light,
-                    const Model::Normal &normal, const Model::Face &face);
+                    const glm::vec3 &normal, const Face &face);
 
   /**
    * 绘制模型
@@ -128,9 +127,9 @@ class SimpleRenderer {
    *     weight_B = s
    *     weight_C = t
    */
-  static auto GetBarycentricCoord(const Vector3f &p0, const Vector3f &p1,
-                                  const Vector3f &p2, const Vector3f &pa)
-      -> std::pair<bool, Vector3f>;
+  static auto GetBarycentricCoord(const glm::vec3 &p0, const glm::vec3 &p1,
+                                  const glm::vec3 &p2, const glm::vec3 &pa)
+      -> std::pair<bool, glm::vec3>;
 
   /**
    * 深度插值，由重心坐标计算出对应点的深度值
@@ -141,7 +140,7 @@ class SimpleRenderer {
    * @return 深度值
    */
   static auto InterpolateDepth(float depth0, float depth1, float depth2,
-                               const Vector3f &barycentric_coord) -> float;
+                               const glm::vec3 &barycentric_coord) -> float;
 };
 
 }  // namespace simple_renderer

@@ -15,251 +15,126 @@
  */
 
 #include "model.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <utility>
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include <tiny_obj_loader.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 #include "log_system.h"
 
 namespace simple_renderer {
 
-Model::Vertex::Vertex(Coord coord, Normal normal, TextureCoord texture_coord,
-                      const Color &color)
-    : coord_(std::move(coord)),
-      normal_(std::move(normal)),
-      texture_coord_(std::move(texture_coord)),
-      color_(color) {}
 
-auto Model::Vertex::operator*(const Matrix4f &tran) const -> Model::Vertex {
-  auto vertex(*this);
-
-  auto res4 = Vector4f(coord_.x(), coord_.y(), coord_.z(), 1);
-  auto ret4 = Vector4f(tran * res4);
-
-  vertex.coord_.x() = ret4.x();
-  vertex.coord_.y() = ret4.y();
-  vertex.coord_.z() = ret4.z();
-
-  /// @todo 变换法线
-
-  return vertex;
+Model::Model(const std::string &model_path) {
+    loadModel(model_path);
 }
 
-Model::Face::Face(const Model::Vertex &v0, const Model::Vertex &v1,
-                  const Model::Vertex &v2, Material material)
-    : v0_(v0), v1_(v1), v2_(v2), material_(std::move(material)) {
-  // 计算法向量
-  // 如果 obj 内包含法向量，直接使用即可
-  if (v0.normal_.norm() != 0 && v1.normal_.norm() != 0 &&
-      v2.normal_.norm() != 0) {
-    normal_ = (v0.normal_ + v1.normal_ + v2.normal_).normalized();
-  }
-  // 手动计算
-  else {
-    // 两条相临边的叉积
-    auto v2v0 = v2.coord_ - v0.coord_;
-    auto v1v0 = v1.coord_ - v0.coord_;
-    normal_ = (v2v0.cross(v1v0)).normalized();
-  }
-}
+void Model::loadModel(const std::string& path) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
-auto Model::Face::operator*(const Matrix4f &tran) const -> Model::Face {
-  auto face(*this);
-  face.v0_ = face.v0_ * tran;
-  face.v1_ = face.v1_ * tran;
-  face.v2_ = face.v2_ * tran;
-
-  /// @todo 通过矩阵变换法线
-  auto v2v0 = face.v2_.coord_ - face.v0_.coord_;
-  auto v1v0 = face.v1_.coord_ - face.v0_.coord_;
-  face.normal_ = (v2v0.cross(v1v0)).normalized();
-
-  return face;
-}
-
-Model::Model(const std::string &obj_path, const std::string &mtl_path)
-    : obj_path_(obj_path), mtl_path_(mtl_path) {
-  SPDLOG_DEBUG(SRLOG, "obj_path: {}", obj_path_);
-
-  tinyobj::ObjReader reader;
-  tinyobj::ObjReaderConfig config;
-  config.mtl_search_path = mtl_path_;
-  // 默认开启三角化
-  auto ret = reader.ParseFromFile(obj_path_, config);
-  if (!ret) {
-    if (!reader.Error().empty()) {
-      SPDLOG_ERROR(reader.Error());
-      throw std::runtime_error(reader.Error());
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+        SPDLOG_ERROR("Assimp Error: {}", importer.GetErrorString());
+        throw std::runtime_error("Failed to load model with Assimp");
     }
-  }
 
-  if (!reader.Warning().empty()) {
-    SPDLOG_WARN("TinyObjReader {}", reader.Warning());
-  }
+    directory_ = path.substr(0, path.find_last_of('/'));
 
-  const auto &attrib = reader.GetAttrib();
-  const auto &shapes = reader.GetShapes();
-  const auto &materials = reader.GetMaterials();
+    SPDLOG_INFO("Loaded model path: {}, Directory: {}, with meshes: {}, materials: {}", path, directory_, scene->mNumMeshes, scene->mNumMaterials);
 
-  SPDLOG_INFO(
-      "加载模型: {}, 顶点数: {}, 法线数: {}, 颜色数: {}, UV数: {}, "
-      "子模型数: {}, 材质数: {}",
-      obj_path_, attrib.vertices.size() / 3, attrib.normals.size() / 3,
-      attrib.colors.size() / 3, attrib.texcoords.size() / 2, shapes.size(),
-      materials.size());
+    processNode(scene->mRootNode, scene);
+}
 
-  // 遍历所有 shape
-  for (size_t shape_index = 0; shape_index < shapes.size(); shape_index++) {
-    auto shape = shapes[shape_index];
-    // Loop over faces(polygon)
-    size_t index_offset = 0;
-    for (size_t num_face_vertices_size = 0;
-         num_face_vertices_size < shape.mesh.num_face_vertices.size();
-         num_face_vertices_size++) {
-      // 由于开启了三角化，所有的 shape 都是由三个点组成的，即 fv == 3
-      auto num_face_vertices =
-          size_t(shape.mesh.num_face_vertices[num_face_vertices_size]);
-      if (num_face_vertices != kTriangleFaceVertexCount) {
-        SPDLOG_ERROR("num_face_vertices != kTriangleFaceVertexCount: {}, {}",
-                     num_face_vertices, kTriangleFaceVertexCount);
-        throw std::runtime_error(
-            "num_face_vertices != kTriangleFaceVertexCount");
-      }
+void Model::processNode(aiNode* node, const aiScene* scene) {
+    for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+        processMesh(mesh, scene);
+    }
 
-      auto vertexes = std::array<Vertex, 3>();
-      // 遍历面上的顶点，这里 fv == 3
-      for (size_t num_face_vertices_idx = 0;
-           num_face_vertices_idx < num_face_vertices; num_face_vertices_idx++) {
-        // 获取索引
-        auto idx = shape.mesh.indices[index_offset + num_face_vertices_idx];
+    for (unsigned int i = 0; i < node->mNumChildren; i++) {
+        processNode(node->mChildren[i], scene);
+    }
+}
 
-        // 构造顶点信息并保存
-        // 每组顶点信息有 xyz 三个分量，因此需要 3*
-        auto coord = Coord(attrib.vertices[3 * size_t(idx.vertex_index) + 0],
-                           attrib.vertices[3 * size_t(idx.vertex_index) + 1],
-                           attrib.vertices[3 * size_t(idx.vertex_index) + 2]);
+void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
+    std::vector<Vertex> vertices;
 
-        // 如果法线索引存在(即 idx.normal_index >= 0)，
-        // 则构造并保存，否则设置为 0
-        Normal normal = Normal::Zero();
-        if (idx.normal_index >= 0) {
-          normal = Normal(attrib.normals[3 * size_t(idx.normal_index) + 0],
-                          attrib.normals[3 * size_t(idx.normal_index) + 1],
-                          attrib.normals[3 * size_t(idx.normal_index) + 2]);
+    // Process vertices
+    for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+        glm::vec3 position(
+            mesh->mVertices[i].x,
+            mesh->mVertices[i].y,
+            mesh->mVertices[i].z
+        );
+        glm::vec3 normal(
+            mesh->mNormals[i].x,
+            mesh->mNormals[i].y,
+            mesh->mNormals[i].z
+        );
+        glm::vec2 texCoords(0.0f, 0.0f);
+        if (mesh->mTextureCoords[0]) { // Check if the mesh contains texture coordinates
+            texCoords = glm::vec2(
+                mesh->mTextureCoords[0][i].x,
+                mesh->mTextureCoords[0][i].y
+            );
         }
 
-        // 如果贴图索引存在(即 idx.texcoord_index >= 0)，
-        // 则构造并保存，否则设置为 0
-        TextureCoord texture_coord = TextureCoord::Zero();
-        if (idx.texcoord_index >= 0) {
-          texture_coord = TextureCoord(
-              attrib.texcoords[2 * size_t(idx.texcoord_index) + 0],
-              attrib.texcoords[2 * size_t(idx.texcoord_index) + 1]);
-        }
+        Color color(255.f, 255.f, 255.f, 255.f);
 
-        // 顶点颜色，如果 obj 文件中没有指定则设为 1(白色)，范围 [0, 1]
-        auto color = Color(attrib.colors[3 * size_t(idx.vertex_index) + 0],
-                           attrib.colors[3 * size_t(idx.vertex_index) + 1],
-                           attrib.colors[3 * size_t(idx.vertex_index) + 2]);
-        vertexes.at(num_face_vertices_idx) =
-            Vertex(coord, normal, texture_coord, color);
-      }
-      index_offset += num_face_vertices;
-
-      // 如果材质不为空，加载材质信息
-      auto material = Material();
-      if (!materials.empty()) {
-        material.shininess = materials[shape_index].shininess;
-        material.ambient = Vector3f(materials[shape_index].ambient[0],
-                                    materials[shape_index].ambient[1],
-                                    materials[shape_index].ambient[2]);
-        material.diffuse = Vector3f(materials[shape_index].diffuse[0],
-                                    materials[shape_index].diffuse[1],
-                                    materials[shape_index].diffuse[2]);
-        material.specular = Vector3f(materials[shape_index].specular[0],
-                                     materials[shape_index].specular[1],
-                                     materials[shape_index].specular[2]);
-      }
-      // 添加到 face 中
-      faces_.emplace_back(vertexes[0], vertexes[1], vertexes[2], material);
+        vertices.emplace_back(glm::vec4(position, 1.0f), normal, texCoords, color);
     }
-  }
+    // Process faces (assuming triangulation, so each face has 3 vertices)
+    for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
+        aiFace face = mesh->mFaces[i];
+        if (face.mNumIndices == 3) {  // Ensure we are working with triangles
+            Vertex v0 = vertices[face.mIndices[0]];
+            Vertex v1 = vertices[face.mIndices[1]];
+            Vertex v2 = vertices[face.mIndices[2]];
 
-  Normalize();
+            Material material = processMaterial(scene->mMaterials[mesh->mMaterialIndex]);
+
+            faces_.emplace_back(v0, v1, v2, std::move(material));
+        }
+    }
 }
 
-auto Model::operator*(const Matrix4f &tran) const -> Model {
-  auto model = Model(*this);
+Material Model::processMaterial(aiMaterial* mat) {
+    Material material;
 
-  for (auto &i : model.faces_) {
-    i = i * tran;
-  }
+    // Extract ambient color
+    aiColor3D ambient(0.0f, 0.0f, 0.0f);
+    if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_AMBIENT, ambient)) {
+        material.ambient = glm::vec3(ambient.r, ambient.g, ambient.b);
+    }
 
-  return model;
+    // Extract diffuse color
+    aiColor3D diffuse(1.0f, 1.0f, 1.0f); // Default to white
+    if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse)) {
+        material.diffuse = glm::vec3(diffuse.r, diffuse.g, diffuse.b);
+    }
+
+    // Extract specular color
+    aiColor3D specular(0.0f, 0.0f, 0.0f);
+    if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_SPECULAR, specular)) {
+        material.specular = glm::vec3(specular.r, specular.g, specular.b);
+    }
+
+    // Extract shininess
+    float shininess = 0.0f;
+    if (AI_SUCCESS == mat->Get(AI_MATKEY_SHININESS, shininess)) {
+        material.shininess = shininess;
+    }
+
+    return material;
 }
 
-auto Model::GetFace() const -> const std::vector<Model::Face> & {
-  return faces_;
-}
-
-std::pair<Model::Coord, Model::Coord> Model::GetMaxMinXYX() {
-  auto max = Coord(std::numeric_limits<float>::lowest(),
-                   std::numeric_limits<float>::lowest(),
-                   std::numeric_limits<float>::lowest());
-  auto min = Coord(std::numeric_limits<float>::max(),
-                   std::numeric_limits<float>::max(),
-                   std::numeric_limits<float>::max());
-
-  for (const auto &i : faces_) {
-    auto curr_max_x = std::max(i.v0_.coord_.x(),
-                               std::max(i.v1_.coord_.x(), i.v2_.coord_.x()));
-    auto curr_max_y = std::max(i.v0_.coord_.y(),
-                               std::max(i.v1_.coord_.y(), i.v2_.coord_.y()));
-    auto curr_max_z = std::max(i.v0_.coord_.z(),
-                               std::max(i.v1_.coord_.z(), i.v2_.coord_.z()));
-
-    max.x() = curr_max_x > max.x() ? curr_max_x : max.x();
-    max.y() = curr_max_y > max.y() ? curr_max_y : max.y();
-    max.z() = curr_max_z > max.z() ? curr_max_z : max.z();
-
-    auto curr_min_x = std::min(i.v0_.coord_.x(),
-                               std::min(i.v1_.coord_.x(), i.v2_.coord_.x()));
-    auto curr_min_y = std::min(i.v0_.coord_.y(),
-                               std::min(i.v1_.coord_.y(), i.v2_.coord_.y()));
-    auto curr_min_z = std::min(i.v0_.coord_.z(),
-                               std::min(i.v1_.coord_.z(), i.v2_.coord_.z()));
-
-    min.x() = curr_min_x < min.x() ? curr_min_x : min.x();
-    min.y() = curr_min_y < min.y() ? curr_min_y : min.y();
-    min.z() = curr_min_z < min.z() ? curr_min_z : min.z();
-  }
-  return {max, min};
-}
-
-void Model::Normalize() {
-  auto [max, min] = GetMaxMinXYX();
-
-  auto x = std::abs(max.x()) + std::abs(min.x());
-  auto y = std::abs(max.y()) + std::abs(min.y());
-  auto z = std::abs(max.z()) + std::abs(min.z());
-
-  auto scale = 1.0f / std::max(x, std::max(y, z));
-  auto scale_matrix = Matrix4f(Matrix4f::Identity());
-  scale_matrix.diagonal() << scale, scale, scale, 1;
-
-  auto center = Coord((max.x() + min.x()) / 2.f, (max.y() + min.y()) / 2.f,
-                      (max.z() + min.z()) / 2.f);
-  auto translation_matrix = Matrix4f(Matrix4f::Identity());
-  translation_matrix.col(translation_matrix.cols() - 1) << -center.x(),
-      -center.y(), -center.z(), 1;
-
-  auto matrix = Matrix4f(scale_matrix * translation_matrix);
-
-  SPDLOG_DEBUG("matrix: {}", matrix);
-
-  *this = *this * matrix;
+void Model::transform(const glm::mat4 &tran) {
+    for (auto& face : faces_) {
+        face.transform(tran);
+    }
 }
 
 }  // namespace simple_renderer

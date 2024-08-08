@@ -17,9 +17,8 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_SHADER_BASE_H_
 #define SIMPLERENDER_SRC_INCLUDE_SHADER_BASE_H_
 
-#include "matrix.hpp"
 #include "model.hpp"
-#include "vector.hpp"
+#include "log_math.hpp"
 
 namespace simple_renderer {
 
@@ -29,13 +28,13 @@ namespace simple_renderer {
 class ShaderVertexIn {
  public:
   /// 面信息
-  Model::Face face_;
+  Face face_;
 
   /**
    * 构造函数
    * @param face 面信息
    */
-  explicit ShaderVertexIn(const Model::Face &face);
+  explicit ShaderVertexIn(const Face &face);
 
   /// @name 默认构造/析构函数
   /// @{
@@ -56,13 +55,13 @@ class ShaderVertexIn {
 class ShaderVertexOut {
  public:
   /// 面信息
-  Model::Face face_;
+ Face face_;
 
   /**
    * 构造函数
    * @param face            面信息
    */
-  explicit ShaderVertexOut(const Model::Face &face);
+  explicit ShaderVertexOut(const Face &face);
 
   /// @name 默认构造/析构函数
   /// @{
@@ -83,11 +82,11 @@ class ShaderVertexOut {
 class ShaderFragmentIn {
  public:
   /// 重心坐标
-  Vector3f barycentric_coord_;
+  glm::vec3 barycentric_coord_;
   /// 法线方向
-  Vector3f normal_;
+  glm::vec3 normal_;
   /// 光照方向
-  Vector3f light_;
+  glm::vec3 light_;
 
   /// @name 三个顶点的颜色
   /// @{
@@ -105,8 +104,8 @@ class ShaderFragmentIn {
    * @param color1 顶点 1 颜色
    * @param color2 顶点 2 颜色
    */
-  explicit ShaderFragmentIn(const Vector3f &_barycentric_coord,
-                            const Vector3f &_normal, const Vector3f &_light,
+  explicit ShaderFragmentIn(const glm::vec3 &_barycentric_coord,
+                            const glm::vec3 &_normal, const glm::vec3 &_light,
                             const Color &_color0, const Color &_color1,
                             const Color &_color2);
 
@@ -160,11 +159,11 @@ class ShaderFragmentOut {
 class ShaderData {
  public:
   /// 模型变换矩阵
-  Matrix4f model_matrix_ = Matrix4f().setIdentity();
+  glm::mat4 model_matrix_ = glm::mat4(1.0f);
   /// 视图变换矩阵
-  Matrix4f view_matrix_ = Matrix4f().setIdentity();
+  glm::mat4 view_matrix_ = glm::mat4(1.0f);
   /// 正交变换矩阵
-  Matrix4f project_matrix_ = Matrix4f().setIdentity();
+  glm::mat4 project_matrix_ = glm::mat4(1.0f);
 
   /**
    * 构造函数
@@ -172,8 +171,8 @@ class ShaderData {
    * @param view_matrix 视图变换矩阵
    * @param project_matrix 正交变换矩阵
    */
-  explicit ShaderData(const Matrix4f &model_matrix, const Matrix4f &view_matrix,
-                      const Matrix4f &project_matrix);
+  explicit ShaderData(const glm::mat4 &model_matrix, const glm::mat4 &view_matrix,
+                      const glm::mat4 &project_matrix);
 
   /// @name 默认构造/析构函数
   /// @{
