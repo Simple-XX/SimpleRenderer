@@ -245,12 +245,6 @@ if (NOT SDL2_FOUND)
             "Following https://github.com/libsdl-org/SDL to install.")
 endif ()
 
-find_package(OpenMP REQUIRED)
-if (NOT OpenMP_FOUND)
-    message(FATAL_ERROR "OpenMP not found.\n"
-            "Following https://www.openmp.org to install.")
-endif ()
-
 find_package(spdlog REQUIRED)
 if (NOT spdlog_FOUND)
     message(FATAL_ERROR "spdlog not found.\n"
