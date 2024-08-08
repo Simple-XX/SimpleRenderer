@@ -110,6 +110,7 @@ endif ()
 CPMAddPackage(
     NAME glm
     GITHUB_REPOSITORY g-truc/glm
+    VERSION 1.0.1
 )
 
 # https://github.com/nothings/stb.git
