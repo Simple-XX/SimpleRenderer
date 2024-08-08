@@ -61,7 +61,7 @@ bool SimpleRenderer::render(const Model &model) {
   SPDLOG_INFO("render model: {}", model.modelPath());
   auto shader = DefaultShader();
   auto light = Light();
-  DrawModel(shader, light, model, 0, 1);
+  DrawModel(shader, light, model, 1, 0);
   return true;
 }
 

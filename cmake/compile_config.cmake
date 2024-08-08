@@ -20,5 +20,6 @@ list(APPEND DEFAULT_LINK_LIB
         glm::glm
         ${glog_LIBRARIES}
         SDL2::SDL2
+        OpenMP::OpenMP_CXX
         assimp
 )
