@@ -1,8 +1,0 @@
-[2024-08-09 15:04:13.936] [simple_renderer.cpp:57 SimpleRenderer] [info] SimpleRenderer init with 1920, 1080
-[2024-08-09 15:04:13.949] [model.cpp:115 Model] [info] 加载模型: obj/utah-teapot/utah-teapot.obj, 顶点数: 2082, 法线数: 2082, 颜色数: 2082, UV数: 1036, 子模型数: 1, 材质数: 1
-[2024-08-09 15:04:13.960] [simple_renderer.cpp:61 render] [info] render model: obj/utah-teapot/utah-teapot.obj
-[2024-08-09 15:04:13.961] [simple_renderer.cpp:197 DrawModel] [info] draw obj/utah-teapot/utah-teapot.obj
-[2024-08-09 15:37:12.808] [simple_renderer.cpp:57 SimpleRenderer] [info] SimpleRenderer init with 1920, 1080
-[2024-08-09 15:37:12.821] [model.cpp:118 Model] [info] 加载模型: obj/utah-teapot/utah-teapot.obj, 顶点数: 2082, 法线数: 2082, 颜色数: 2082, UV数: 1036, 子模型数: 1, 材质数: 1
-[2024-08-09 15:37:12.833] [simple_renderer.cpp:61 render] [info] render model: obj/utah-teapot/utah-teapot.obj
-[2024-08-09 15:37:12.835] [simple_renderer.cpp:197 DrawModel] [info] draw obj/utah-teapot/utah-teapot.obj
