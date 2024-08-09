@@ -103,10 +103,6 @@ CPMAddPackage(
     GITHUB_REPOSITORY g-truc/glm
     GIT_TAG 1.0.1
 )
-if (glm_ADDED)
-    add_library(glm INTERFACE)
-    target_include_directories(glm INTERFACE ${glm_SOURCE_DIR})
-endif ()
 
 # https://github.com/nothings/stb.git
 CPMAddPackage(

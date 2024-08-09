@@ -46,7 +46,7 @@
       }
     },
     {
-      "name": "config-mac",
+      "name": "config-macos",
       "hidden": true,
       "inherits": [ "config-base" ],
       "displayName": "config-base",
@@ -72,20 +72,13 @@
       "description": "build base configurePresets"
     }, 
     {
-      "name": "build-mac",
+      "name": "build-macos",
       "hidden": false,
       "inherits": [
-        "config-mac"
+        "config-macos"
       ],
-      "displayName": "build-mac",
+      "displayName": "build-macos",
       "description": "macOS build configurePresets"
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "build",
-      "displayName": "Build",
-      "configurePreset": "config-base"
     }
   ]
 }
