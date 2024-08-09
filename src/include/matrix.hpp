@@ -17,14 +17,13 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_MATRIX_HPP_
 #define SIMPLERENDER_SRC_INCLUDE_MATRIX_HPP_
 
-#include <Eigen/Dense>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
 
 #include "log_system.h"
 
 namespace simple_renderer {
-
-using Matrix4f = Eigen::Matrix4f;
-
+using Matrix4f = glm::mat4;
 }  // namespace simple_renderer
 
 /**
@@ -32,11 +31,15 @@ using Matrix4f = Eigen::Matrix4f;
  */
 template <>
 struct fmt::formatter<simple_renderer::Matrix4f> : fmt::formatter<std::string> {
-  auto format(simple_renderer::Matrix4f matrix, format_context &format_context)
-      const -> decltype(format_context.out()) {
-    std::stringstream buf;
-    buf << matrix;
-    return fmt::format_to(format_context.out(), "\n{}", buf.str());
+  auto format(const simple_renderer::Matrix4f &matrix,
+              fmt::format_context &ctx) const -> decltype(ctx.out()) {
+    // Convert the Matrix4f to a string using glm::to_string
+    // 转化矩阵为字符串
+    std::string matrix_str = glm::to_string(matrix);
+
+    // Format and output the string
+    // 输出格式化后的字符串
+    return fmt::format_to(ctx.out(), "\n{}", matrix_str);
   }
 };
 

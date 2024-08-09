@@ -160,11 +160,11 @@ class ShaderFragmentOut {
 class ShaderData {
  public:
   /// 模型变换矩阵
-  Matrix4f model_matrix_ = Matrix4f().setIdentity();
+  Matrix4f model_matrix_ = Matrix4f(1.0f);
   /// 视图变换矩阵
-  Matrix4f view_matrix_ = Matrix4f().setIdentity();
+  Matrix4f view_matrix_ = Matrix4f(1.0f);
   /// 正交变换矩阵
-  Matrix4f project_matrix_ = Matrix4f().setIdentity();
+  Matrix4f project_matrix_ = Matrix4f(1.0f);
 
   /**
    * 构造函数

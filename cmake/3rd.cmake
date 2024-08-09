@@ -57,27 +57,29 @@ CPMAddPackage(
         "gtest_force_shared_crt ON"
 )
 
-# https://github.com/aminosbh/sdl2-cmake-modules.git
+# https://github.com/libsdl-org/SDL
 CPMAddPackage(
-        NAME sdl2-cmake-modules
-        GIT_REPOSITORY https://github.com/aminosbh/sdl2-cmake-modules.git
-        GIT_TAG ad006a3daae65a612ed87415037e32188b81071e
-        DOWNLOAD_ONLY True
+        NAME SDL2
+        GITHUB_REPOSITORY libsdl-org/SDL
+        GIT_TAG release-2.30.6
+        OPTIONS
+        "SDL2_DISABLE_INSTALL ON"
+        "SDL_SHARED OFF"
+        "SDL_STATIC ON"
+        "SDL_STATIC_PIC ON"
+        "SDL_WERROR OFF"
 )
-if (sdl2-cmake-modules_ADDED)
-    list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
-endif ()
 
-## https://github.com/freetype/freetype
-#CPMAddPackage(
-#        NAME freetype
-#        GIT_REPOSITORY https://github.com/freetype/freetype.git
-#        GIT_TAG VER-2-13-0
-#        VERSION 2.13.0
-#)
-#if (freetype_ADDED)
-#    add_library(Freetype::Freetype ALIAS freetype)
-#endif ()
+# # https://github.com/aminosbh/sdl2-cmake-modules.git
+# CPMAddPackage(
+#         NAME sdl2-cmake-modules
+#         GIT_REPOSITORY https://github.com/aminosbh/sdl2-cmake-modules.git
+#         GIT_TAG ad006a3daae65a612ed87415037e32188b81071e
+#         DOWNLOAD_ONLY True
+# )
+# if (sdl2-cmake-modules_ADDED)
+#     list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
+# endif ()
 
 # https://github.com/tinyobjloader/tinyobjloader.git
 CPMAddPackage(
@@ -95,6 +97,13 @@ if (tinyobjloader_ADDED)
     )
 endif ()
 
+# https://github.com/g-truc/glm
+CPMAddPackage(
+    NAME glm
+    GITHUB_REPOSITORY g-truc/glm
+    GIT_TAG 1.0.1
+)
+
 # https://github.com/nothings/stb.git
 CPMAddPackage(
         NAME stb
@@ -109,19 +118,6 @@ if (stb_ADDED)
             BASE_DIRS ${stb_SOURCE_DIR}
             FILES stb_image.h
     )
-endif ()
-
-# https://gitlab.com/libeigen/eigen.git
-CPMAddPackage(
-        NAME Eigen
-        GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        GIT_TAG 3.4.0
-        VERSION 3.4.0
-        DOWNLOAD_ONLY True
-)
-if (Eigen_ADDED)
-    add_library(Eigen INTERFACE IMPORTED)
-    target_include_directories(Eigen INTERFACE ${Eigen_SOURCE_DIR})
 endif ()
 
 # http://wenq.org/wqy2/index.cgi?ZenHei
@@ -233,12 +229,6 @@ find_program(LCOV_EXE lcov)
 if (NOT LCOV_EXE)
     message(FATAL_ERROR "lcov not found.\n"
             "Following https://github.com/linux-test-project/lcov to install.")
-endif ()
-
-find_package(SDL2 REQUIRED)
-if (NOT SDL2_FOUND)
-    message(FATAL_ERROR "sdl2 not found.\n"
-            "Following https://github.com/libsdl-org/SDL to install.")
 endif ()
 
 find_package(OpenMP REQUIRED)

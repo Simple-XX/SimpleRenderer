@@ -40,7 +40,7 @@ class Model {
   /// 法向量
   using Normal = Vector3f;
   /// 贴图
-  using TextureCoord = Vector2f;
+  using TextureCoord = glm::vec2;
 
   class Material {
    public:

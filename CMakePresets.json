@@ -2,20 +2,10 @@
   "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 27,
+    "minor": 23,
     "patch": 0
   },
   "configurePresets": [
-    {
-      "name": "host",
-      "description": "Linux Only",
-      "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
-    },
     {
       "name": "std",
       "description": "This preset makes sure the project actually builds with at least the specified standard",
@@ -30,13 +20,10 @@
       }
     },
     {
-      "name": "configurePresets_base",
+      "name": "config-base",
       "hidden": true,
-      "inherits": [
-        "host",
-        "std"
-      ],
-      "displayName": "configurePresets_base",
+      "inherits": [ "std" ],
+      "displayName": "config-base",
       "description": "base configurePresets",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
@@ -59,13 +46,39 @@
       }
     },
     {
+      "name": "config-macos",
+      "hidden": true,
+      "inherits": [ "config-base" ],
+      "displayName": "config-base",
+      "description": "macOS configurePresets",
+      "condition": {
+          "type": "equals",
+          "lhs": "${hostSystemName}",
+          "rhs": "Darwin"
+        },
+        "cacheVariables": {
+          "CMAKE_MACOSX_RPATH": "1",
+          "CMAKE_INSTALL_RPATH": "/Library/Frameworks",
+          "CMAKE_BUILD_WITH_INSTALL_RPATH": "TRUE"
+        }
+    },
+    {
       "name": "build",
       "hidden": false,
       "inherits": [
-        "configurePresets_base"
+        "config-base"
       ],
-      "displayName": "build",
-      "description": "build"
+      "displayName": "build-base",
+      "description": "build base configurePresets"
+    }, 
+    {
+      "name": "build-macos",
+      "hidden": false,
+      "inherits": [
+        "config-macos"
+      ],
+      "displayName": "build-macos",
+      "description": "macOS build configurePresets"
     }
   ]
 }

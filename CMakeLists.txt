@@ -7,6 +7,7 @@
 # 设置最小 cmake 版本
 cmake_minimum_required(VERSION 3.27 FATAL_ERROR)
 
+
 # 设置项目名与版本
 project(SimpleRenderer
         VERSION 0.0.1)
