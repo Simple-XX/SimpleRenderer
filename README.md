@@ -52,7 +52,7 @@ A software renderer
 ## 依赖
 
 ```shell
-sudo apt install doxygen graphviz clang-format clang-tidy cppcheck lcov gcc g++ libsdl2-dev libsdl2-ttf-dev libomp-dev libspdlog-dev cmake vim
+sudo apt install doxygen graphviz clang-format clang-tidy cppcheck lcov gcc g++ libsdl2-dev libsdl2-ttf-dev libomp-dev libspdlog-dev cmake vim libassimp-dev
 ```
 
 ## 使用

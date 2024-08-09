@@ -69,16 +69,6 @@ CPMAddPackage(
         "SDL_WERROR OFF"
 )
 
-CPMAddPackage(
-        NAME assimp
-        GIT_REPOSITORY https://github.com/assimp/assimp.git
-        GIT_TAG v5.4.1
-        OPTIONS
-        "ASSIMP_BUILD_TESTS OFF"
-        "ASSIMP_BUILD_ASSIMP_TOOLS OFF"
-        "ASSIMP_BUILD_SAMPLES OFF"
-)
-
 # https://github.com/g-truc/glm
 CPMAddPackage(
     NAME glm
