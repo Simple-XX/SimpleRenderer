@@ -12,14 +12,14 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
 add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/include>
+    $<INSTALL_INTERFACE:include>
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE
-        ${DEFAULT_COMPILE_OPTIONS}
+    ${DEFAULT_COMPILE_OPTIONS}
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-        ${DEFAULT_LINK_LIB}
+    ${DEFAULT_LINK_LIB}
 )

@@ -18,12 +18,12 @@
 
 #include "color.h"
 #include "log_system.h"
-#include "log_math.hpp"
+#include "math.hpp"
 
 namespace simple_renderer {
 
-const glm::vec3 Light::kDefaultPos = glm::vec3(0, 0, 0);
-const glm::vec3 Light::kDefaultDir = glm::vec3(0, 0, -1);
+const Vector3f Light::kDefaultPos = Vector3f(0, 0, 0);
+const Vector3f Light::kDefaultDir = Vector3f(0, 0, -1);
 const Color Light::kDefaultColor = Color::kWhite;
 
 Light::Light(const std::string &name) : name_(name) {

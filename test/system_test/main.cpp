@@ -59,16 +59,18 @@ int main(int argc, char **argv) {
   // objs.emplace_back(obj_path + "/african_head.obj");
   objs.emplace_back(obj_path + "/utah-teapot/utah-teapot.obj");
 
+  auto matrix = simple_renderer::Matrix4f(1.0f);
+  simple_renderer::Matrix4f scale_matrix =
+      glm::scale(simple_renderer::Matrix4f(1.0f),
+                 simple_renderer::Vector3f(10.0f, 10.0f, 10.0f));
 
-  auto matrix =
-      glm::mat4(1.0f);
-  glm::mat4 scale_matrix = glm::scale(glm::mat4(1.0f), glm::vec3(10.0f, 10.0f, 10.0f));
+  // Translation matrix
+  simple_renderer::Matrix4f translation_matrix = glm::translate(
+      simple_renderer::Matrix4f(1.0f),
+      simple_renderer::Vector3f(kWidth / 2.0f, kHeight / 2.0f, 0.0f));
 
-// Translation matrix
-    glm::mat4 translation_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(kWidth / 2.0f, kHeight / 2.0f, 0.0f));
-
-    // Combined transformation matrix
-    matrix = translation_matrix * scale_matrix;
+  // Combined transformation matrix
+  matrix = translation_matrix * scale_matrix;
 
   // 矩阵运算的顺序
   // 归一化

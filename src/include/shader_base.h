@@ -17,8 +17,8 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_SHADER_BASE_H_
 #define SIMPLERENDER_SRC_INCLUDE_SHADER_BASE_H_
 
+#include "math.hpp"
 #include "model.hpp"
-#include "log_math.hpp"
 
 namespace simple_renderer {
 
@@ -55,7 +55,7 @@ class ShaderVertexIn {
 class ShaderVertexOut {
  public:
   /// 面信息
- Face face_;
+  Face face_;
 
   /**
    * 构造函数
@@ -82,11 +82,11 @@ class ShaderVertexOut {
 class ShaderFragmentIn {
  public:
   /// 重心坐标
-  glm::vec3 barycentric_coord_;
+  Vector3f barycentric_coord_;
   /// 法线方向
-  glm::vec3 normal_;
+  Vector3f normal_;
   /// 光照方向
-  glm::vec3 light_;
+  Vector3f light_;
 
   /// @name 三个顶点的颜色
   /// @{
@@ -104,8 +104,8 @@ class ShaderFragmentIn {
    * @param color1 顶点 1 颜色
    * @param color2 顶点 2 颜色
    */
-  explicit ShaderFragmentIn(const glm::vec3 &_barycentric_coord,
-                            const glm::vec3 &_normal, const glm::vec3 &_light,
+  explicit ShaderFragmentIn(const Vector3f &_barycentric_coord,
+                            const Vector3f &_normal, const Vector3f &_light,
                             const Color &_color0, const Color &_color1,
                             const Color &_color2);
 
@@ -159,11 +159,11 @@ class ShaderFragmentOut {
 class ShaderData {
  public:
   /// 模型变换矩阵
-  glm::mat4 model_matrix_ = glm::mat4(1.0f);
+  Matrix4f model_matrix_ = Matrix4f(1.0f);
   /// 视图变换矩阵
-  glm::mat4 view_matrix_ = glm::mat4(1.0f);
+  Matrix4f view_matrix_ = Matrix4f(1.0f);
   /// 正交变换矩阵
-  glm::mat4 project_matrix_ = glm::mat4(1.0f);
+  Matrix4f project_matrix_ = Matrix4f(1.0f);
 
   /**
    * 构造函数
@@ -171,8 +171,8 @@ class ShaderData {
    * @param view_matrix 视图变换矩阵
    * @param project_matrix 正交变换矩阵
    */
-  explicit ShaderData(const glm::mat4 &model_matrix, const glm::mat4 &view_matrix,
-                      const glm::mat4 &project_matrix);
+  explicit ShaderData(const Matrix4f &model_matrix, const Matrix4f &view_matrix,
+                      const Matrix4f &project_matrix);
 
   /// @name 默认构造/析构函数
   /// @{

@@ -20,7 +20,7 @@ namespace simple_renderer {
 
 auto DefaultShader::InterpolateColor(
     const Color &color0, const Color &color1, const Color &color2,
-    const glm::vec3 &barycentric_coord) -> Color {
+    const Vector3f &barycentric_coord) -> Color {
   return Color(
       static_cast<uint8_t>(static_cast<float>(color0[Color::kColorIndexRed]) *
                                barycentric_coord.x +
@@ -47,10 +47,8 @@ auto DefaultShader::Vertex(const ShaderVertexIn &shader_vertex_in) const
     -> ShaderVertexOut {
   auto face(shader_vertex_in.face_);
 
-    face.transform(
-        shader_data_.project_matrix_ 
-        * shader_data_.view_matrix_ 
-        * shader_data_.model_matrix_);
+  face.transform(shader_data_.project_matrix_ * shader_data_.view_matrix_ *
+                 shader_data_.model_matrix_);
 
   /// @todo 变换贴图
   return ShaderVertexOut(face);
@@ -58,7 +56,8 @@ auto DefaultShader::Vertex(const ShaderVertexIn &shader_vertex_in) const
 
 auto DefaultShader::Fragment(const ShaderFragmentIn &shader_fragment_in) const
     -> ShaderFragmentOut {
-  auto intensity = glm::dot(shader_fragment_in.normal_,shader_fragment_in.light_);
+  auto intensity =
+      glm::dot(shader_fragment_in.normal_, shader_fragment_in.light_);
   auto is_need_draw = true;
   // 光照方向为正，不绘制背面
   if (intensity <= 0) {

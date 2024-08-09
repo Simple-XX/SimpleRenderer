@@ -27,7 +27,7 @@ static constexpr const size_t kNProc = 8;
 
 /// 日志文件路径
 static const std::string kLogFilePath =
-    std::string("/Users/hezhohao/Programming/GitRepo/SimpleRenderer/build/logs/SimpleRendererLog.log");
+    std::string("/Users/hezhohao/Programming/GitRepo/SimpleRenderer/build/bin/logs/SimpleRendererLog.log");
 /// 日志文件大小
 static constexpr const size_t kLogFileMaxSize = 1024*1024*4;
 /// 日志文件数量

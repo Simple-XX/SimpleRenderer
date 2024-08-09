@@ -21,7 +21,7 @@
 #include <string>
 
 #include "color.h"
-#include "log_math.hpp"
+#include "math.hpp"
 
 namespace simple_renderer {
 
@@ -33,9 +33,9 @@ class Camera {
   /// 光照名称
   std::string name_ = "default light name";
   /// 位置
-  glm::vec3 pos_;
+  Vector3f pos_;
   /// 方向
-  glm::vec3 dir_;
+  Vector3f dir_;
 
   /**
    * 构造函数

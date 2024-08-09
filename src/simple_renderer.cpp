@@ -126,8 +126,7 @@ void SimpleRenderer::DrawLine(float x0, float y0, float x1, float y1,
 }
 
 void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
-                                  const glm::vec3 &normal,
-                                  const Face &face) {
+                                  const Vector3f &normal, const Face &face) {
   auto v0 = face.vertex(0);
   auto v1 = face.vertex(1);
   auto v2 = face.vertex(2);
@@ -135,17 +134,21 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
   // 获取三角形的最小 box
   auto min = v0.position();
   auto max = v1.position();
-  auto max_x = std::max(face.vertex(0).position().x,
-                        std::max(face.vertex(1).position().x, face.vertex(2).position().x));
-  auto max_y = std::max(face.vertex(0).position().y,
-                        std::max(face.vertex(1).position().y, face.vertex(2).position().y));
+  auto max_x = std::max(
+      face.vertex(0).position().x,
+      std::max(face.vertex(1).position().x, face.vertex(2).position().x));
+  auto max_y = std::max(
+      face.vertex(0).position().y,
+      std::max(face.vertex(1).position().y, face.vertex(2).position().y));
   max.x = max_x > max.x ? max_x : max.x;
   max.y = max_y > max.y ? max_y : max.y;
   max.z = 0;
-  auto min_x = std::min(face.vertex(0).position().x,
-                        std::min(face.vertex(1).position().x, face.vertex(2).position().x));
-  auto min_y = std::min(face.vertex(0).position().y,
-                        std::min(face.vertex(1).position().y, face.vertex(2).position().y));
+  auto min_x = std::min(
+      face.vertex(0).position().x,
+      std::min(face.vertex(1).position().x, face.vertex(2).position().x));
+  auto min_y = std::min(
+      face.vertex(0).position().y,
+      std::min(face.vertex(1).position().y, face.vertex(2).position().y));
   min.x = min_x < min.x ? min_x : min.x;
   min.y = min_y < min.y ? min_y : min.y;
   min.z = 0;
@@ -160,14 +163,14 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
       }
       auto [is_inside, barycentric_coord] = GetBarycentricCoord(
           v0.position(), v1.position(), v2.position(),
-          glm::vec3(static_cast<float>(x), static_cast<float>(y), 0));
+          Vector3f(static_cast<float>(x), static_cast<float>(y), 0));
       // 如果点在三角形内再进行下一步
       if (!is_inside) {
         continue;
       }
       // 计算该点的深度，通过重心坐标插值计算
-      auto z = InterpolateDepth(v0.position().z, v1.position().z, v2.position().z,
-                                barycentric_coord);
+      auto z = InterpolateDepth(v0.position().z, v1.position().z,
+                                v2.position().z, barycentric_coord);
       // 深度在已有颜色之上
       if (z < depth_buffer_[y * width_ + x]) {
         continue;
@@ -202,12 +205,15 @@ void SimpleRenderer::DrawModel(const ShaderBase &shader, const Light &light,
     for (const auto &f : model.faces()) {
       /// @todo 巨大性能开销
       auto face = shader.Vertex(ShaderVertexIn(f)).face_;
-      DrawLine(face.vertex(0).position().x, face.vertex(0).position().y, face.vertex(1).position().x,
-               face.vertex(1).position().y, Color::kRed);
-      DrawLine(face.vertex(1).position().x, face.vertex(1).position().y, face.vertex(2).position().x,
-               face.vertex(2).position().y, Color::kGreen);
-      DrawLine(face.vertex(2).position().x, face.vertex(2).position().y, face.vertex(0).position().x,
-               face.vertex(0).position().y, Color::kBlue);
+      DrawLine(face.vertex(0).position().x, face.vertex(0).position().y,
+               face.vertex(1).position().x, face.vertex(1).position().y,
+               Color::kRed);
+      DrawLine(face.vertex(1).position().x, face.vertex(1).position().y,
+               face.vertex(2).position().x, face.vertex(2).position().y,
+               Color::kGreen);
+      DrawLine(face.vertex(2).position().x, face.vertex(2).position().y,
+               face.vertex(0).position().x, face.vertex(0).position().y,
+               Color::kBlue);
     }
   }
   if (draw_triangle) {
@@ -222,37 +228,37 @@ void SimpleRenderer::DrawModel(const ShaderBase &shader, const Light &light,
 }
 
 /// @todo 巨大性能开销
-auto SimpleRenderer::GetBarycentricCoord(const glm::vec3 &p0, const glm::vec3 &p1,
-                                         const glm::vec3 &p2, const glm::vec3 &pa)
-    -> std::pair<bool, glm::vec3> {
+auto SimpleRenderer::GetBarycentricCoord(const Vector3f &p0, const Vector3f &p1,
+                                         const Vector3f &p2, const Vector3f &pa)
+    -> std::pair<bool, Vector3f> {
   auto p1p0 = p1 - p0;
   auto p2p0 = p2 - p0;
   auto pap0 = pa - p0;
 
   auto deno = (p1p0.x * p2p0.y - p1p0.y * p2p0.x);
   if (std::abs(deno) < std::numeric_limits<decltype(deno)>::epsilon()) {
-    return std::pair<bool, const glm::vec3>{false, glm::vec3()};
+    return std::pair<bool, const Vector3f>{false, Vector3f()};
   }
 
   auto s = (p2p0.y * pap0.x - p2p0.x * pap0.y) / deno;
   if ((s > 1) || (s < 0)) {
-    return std::pair<bool, const glm::vec3>{false, glm::vec3()};
+    return std::pair<bool, const Vector3f>{false, Vector3f()};
   }
 
   auto t = (p1p0.x * pap0.y - p1p0.y * pap0.x) / deno;
   if ((t > 1) || (t < 0)) {
-    return std::pair<bool, const glm::vec3>{false, glm::vec3()};
+    return std::pair<bool, const Vector3f>{false, Vector3f()};
   }
 
   if ((1 - s - t > 1) || (1 - s - t < 0)) {
-    return std::pair<bool, const glm::vec3>{false, glm::vec3()};
+    return std::pair<bool, const Vector3f>{false, Vector3f()};
   }
 
-  return std::pair<bool, const glm::vec3>{true, glm::vec3(1 - s - t, s, t)};
+  return std::pair<bool, const Vector3f>{true, Vector3f(1 - s - t, s, t)};
 }
 
 auto SimpleRenderer::InterpolateDepth(float depth0, float depth1, float depth2,
-                                      const glm::vec3 &_barycentric_coord)
+                                      const Vector3f &_barycentric_coord)
     -> float {
   auto depth = depth0 * _barycentric_coord.x;
   depth += depth1 * _barycentric_coord.y;

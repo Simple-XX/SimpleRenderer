@@ -1,7 +1,6 @@
-
 /**
  * @file model.cpp
- * @brief 模型抽象
+ * @brief Model abstraction (模型抽象)
  * @author Zone.N (Zone.Niuzh@hotmail.com)
  * @version 1.0
  * @date 2022-06-06
@@ -15,126 +14,148 @@
  */
 
 #include "model.hpp"
-#include <glm/gtc/matrix_transform.hpp>
 
-#include <utility>
-
-#include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+
+#include <assimp/Importer.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <utility>
 
 #include "log_system.h"
 
 namespace simple_renderer {
 
+// Constructor that loads a model from a file path
+// 构造函数从文件路径加载模型
+Model::Model(const std::string& model_path) { loadModel(model_path); }
 
-Model::Model(const std::string &model_path) {
-    loadModel(model_path);
-}
-
+// Load the model using Assimp and process its nodes and meshes
+// 使用 Assimp 加载模型并处理其节点和网格
 void Model::loadModel(const std::string& path) {
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+  Assimp::Importer importer;
+  const aiScene* scene =
+      importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        SPDLOG_ERROR("Assimp Error: {}", importer.GetErrorString());
-        throw std::runtime_error("Failed to load model with Assimp");
-    }
+  // Check for errors in loading the model
+  // 检查加载模型时的错误
+  if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
+      !scene->mRootNode) {
+    SPDLOG_ERROR("Assimp Error: {}", importer.GetErrorString());
+    throw std::runtime_error("Failed to load model with Assimp");
+  }
 
-    directory_ = path.substr(0, path.find_last_of('/'));
+  // Store the directory path of the model
+  // 存储模型的目录路径
+  directory_ = path.substr(0, path.find_last_of('/'));
 
-    SPDLOG_INFO("Loaded model path: {}, Directory: {}, with meshes: {}, materials: {}", path, directory_, scene->mNumMeshes, scene->mNumMaterials);
+  SPDLOG_INFO(
+      "Loaded model path: {}, Directory: {}, with meshes: {}, materials: {}",
+      path, directory_, scene->mNumMeshes, scene->mNumMaterials);
 
-    processNode(scene->mRootNode, scene);
+  // Process the root node recursively
+  // 递归处理根节点
+  processNode(scene->mRootNode, scene);
 }
 
+// Recursively process nodes in the model
+// 递归处理模型中的节点
 void Model::processNode(aiNode* node, const aiScene* scene) {
-    for (unsigned int i = 0; i < node->mNumMeshes; i++) {
-        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        processMesh(mesh, scene);
-    }
+  // Process each mesh in the node
+  // 处理节点中的每个网格
+  for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+    aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+    processMesh(mesh, scene);
+  }
 
-    for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        processNode(node->mChildren[i], scene);
-    }
+  // Recursively process each child node
+  // 递归处理每个子节点
+  for (unsigned int i = 0; i < node->mNumChildren; i++) {
+    processNode(node->mChildren[i], scene);
+  }
 }
 
+// Process a single mesh and extract vertices, normals, and faces
+// 处理单个网格并提取顶点、法线和面
 void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
-    std::vector<Vertex> vertices;
+  std::vector<Vertex> vertices;
 
-    // Process vertices
-    for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-        glm::vec3 position(
-            mesh->mVertices[i].x,
-            mesh->mVertices[i].y,
-            mesh->mVertices[i].z
-        );
-        glm::vec3 normal(
-            mesh->mNormals[i].x,
-            mesh->mNormals[i].y,
-            mesh->mNormals[i].z
-        );
-        glm::vec2 texCoords(0.0f, 0.0f);
-        if (mesh->mTextureCoords[0]) { // Check if the mesh contains texture coordinates
-            texCoords = glm::vec2(
-                mesh->mTextureCoords[0][i].x,
-                mesh->mTextureCoords[0][i].y
-            );
-        }
-
-        Color color(255.f, 255.f, 255.f, 255.f);
-
-        vertices.emplace_back(glm::vec4(position, 1.0f), normal, texCoords, color);
+  // Process vertices
+  // 处理顶点
+  for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+    Vector3f position(mesh->mVertices[i].x, mesh->mVertices[i].y,
+                      mesh->mVertices[i].z);
+    Vector3f normal(mesh->mNormals[i].x, mesh->mNormals[i].y,
+                    mesh->mNormals[i].z);
+    Vector2f texCoords(0.0f, 0.0f);
+    // Check if the mesh has texture coordinates
+    // 检查网格是否有纹理坐标
+    if (mesh->mTextureCoords[0]) {
+      texCoords =
+          Vector2f(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
     }
-    // Process faces (assuming triangulation, so each face has 3 vertices)
-    for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
-        aiFace face = mesh->mFaces[i];
-        if (face.mNumIndices == 3) {  // Ensure we are working with triangles
-            Vertex v0 = vertices[face.mIndices[0]];
-            Vertex v1 = vertices[face.mIndices[1]];
-            Vertex v2 = vertices[face.mIndices[2]];
 
-            Material material = processMaterial(scene->mMaterials[mesh->mMaterialIndex]);
+    Color color(255.f, 255.f, 255.f, 255.f);  // Default color (white)
+                                              // 默认颜色（白色）
 
-            faces_.emplace_back(v0, v1, v2, std::move(material));
-        }
+    vertices.emplace_back(Vector4f(position, 1.0f), normal, texCoords, color);
+  }
+
+  // Process faces (assuming triangulation, so each face has 3 vertices)
+  // 处理面（假设三角化，因此每个面有3个顶点）
+  for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
+    aiFace face = mesh->mFaces[i];
+    if (face.mNumIndices == 3) {  // Triangle, 三角形
+      Vertex v0 = vertices[face.mIndices[0]];
+      Vertex v1 = vertices[face.mIndices[1]];
+      Vertex v2 = vertices[face.mIndices[2]];
+
+      // Process the material associated with this mesh
+      // 处理与此网格关联的材质
+      Material material =
+          processMaterial(scene->mMaterials[mesh->mMaterialIndex]);
+
+      // Create a Face object and store it
+      // 创建一个 Face 对象并存储它
+      faces_.emplace_back(v0, v1, v2, std::move(material));
     }
+  }
 }
 
+// Extract material properties from the Assimp material structure
+// 从 Assimp 材质结构中提取材质属性
 Material Model::processMaterial(aiMaterial* mat) {
-    Material material;
+  Material material;
 
-    // Extract ambient color
-    aiColor3D ambient(0.0f, 0.0f, 0.0f);
-    if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_AMBIENT, ambient)) {
-        material.ambient = glm::vec3(ambient.r, ambient.g, ambient.b);
-    }
+  aiColor3D ambient(0.0f, 0.0f, 0.0f);
+  if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_AMBIENT, ambient)) {
+    material.ambient = Vector3f(ambient.r, ambient.g, ambient.b);
+  }
 
-    // Extract diffuse color
-    aiColor3D diffuse(1.0f, 1.0f, 1.0f); // Default to white
-    if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse)) {
-        material.diffuse = glm::vec3(diffuse.r, diffuse.g, diffuse.b);
-    }
+  aiColor3D diffuse(1.0f, 1.0f, 1.0f);
+  if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse)) {
+    material.diffuse = Vector3f(diffuse.r, diffuse.g, diffuse.b);
+  }
 
-    // Extract specular color
-    aiColor3D specular(0.0f, 0.0f, 0.0f);
-    if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_SPECULAR, specular)) {
-        material.specular = glm::vec3(specular.r, specular.g, specular.b);
-    }
+  aiColor3D specular(0.0f, 0.0f, 0.0f);
+  if (AI_SUCCESS == mat->Get(AI_MATKEY_COLOR_SPECULAR, specular)) {
+    material.specular = Vector3f(specular.r, specular.g, specular.b);
+  }
 
-    // Extract shininess
-    float shininess = 0.0f;
-    if (AI_SUCCESS == mat->Get(AI_MATKEY_SHININESS, shininess)) {
-        material.shininess = shininess;
-    }
+  float shininess = 0.0f;
+  if (AI_SUCCESS == mat->Get(AI_MATKEY_SHININESS, shininess)) {
+    material.shininess = shininess;
+  }
 
-    return material;
+  return material;
 }
 
-void Model::transform(const glm::mat4 &tran) {
-    for (auto& face : faces_) {
-        face.transform(tran);
-    }
+// Apply a transformation matrix to all faces in the model
+// 对模型中的所有面应用变换矩阵
+void Model::transform(const Matrix4f& tran) {
+  for (auto& face : faces_) {
+    face.transform(tran);
+  }
 }
 
 }  // namespace simple_renderer
