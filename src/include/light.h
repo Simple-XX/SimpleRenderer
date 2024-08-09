@@ -33,9 +33,9 @@ class Light {
   /// 光照名称
   std::string name_ = "default light name";
   /// 位置
-  glm::vec3 pos = kDefaultPos;
+  Vector3f pos = kDefaultPos;
   /// 方向
-  glm::vec3 dir = kDefaultDir;
+  Vector3f dir = kDefaultDir;
   /// 颜色
   Color color = kDefaultColor;
 
@@ -57,9 +57,9 @@ class Light {
 
  private:
   /// 默认位置
-  static const glm::vec3 kDefaultPos;
+  static const Vector3f kDefaultPos;
   /// 默认方向，左手系，x 向右，y 向下，z 正方向为屏幕由内向外
-  static const glm::vec3 kDefaultDir;
+  static const Vector3f kDefaultDir;
   /// 默认颜色
   static const Color kDefaultColor;
 };

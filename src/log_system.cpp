@@ -16,20 +16,20 @@
 
 #include "log_system.h"
 
-#include <iostream>
-
 #include <spdlog/async.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
+#include <iostream>
+
 namespace simple_renderer {
 
 LogSystem::LogSystem(const std::string &log_file_path, size_t lig_file_max_size,
                      size_t log_file_max_count) {
   spdlog::init_thread_pool(65536, 1);
-//   std::string log_file_paths = "./logs/simple_renderer.log";
+  //   std::string log_file_paths = "./logs/simple_renderer.log";
   auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
       log_file_path, lig_file_max_size, log_file_max_count);

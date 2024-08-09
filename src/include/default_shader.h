@@ -64,7 +64,7 @@ class DefaultShader : public ShaderBase {
    */
   static auto InterpolateColor(const Color &color0, const Color &color1,
                                const Color &color2,
-                               const glm::vec3 &barycentric_coord) -> Color;
+                               const Vector3f &barycentric_coord) -> Color;
 };
 
 }  // namespace simple_renderer

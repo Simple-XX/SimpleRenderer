@@ -22,9 +22,9 @@ ShaderVertexIn::ShaderVertexIn(const Model::Face &face) : face_(face) {}
 
 ShaderVertexOut::ShaderVertexOut(const Model::Face &face) : face_(face) {}
 
-ShaderFragmentIn::ShaderFragmentIn(const glm::vec3 &barycentric_coord,
-                                   const glm::vec3 &normal,
-                                   const glm::vec3 &light, const Color &color0,
+ShaderFragmentIn::ShaderFragmentIn(const Vector3f &barycentric_coord,
+                                   const Vector3f &normal,
+                                   const Vector3f &light, const Color &color0,
                                    const Color &color1, const Color &color2)
     : barycentric_coord_(barycentric_coord),
       normal_(normal),
@@ -37,9 +37,9 @@ ShaderFragmentOut::ShaderFragmentOut(const bool &is_need_draw,
                                      const Color &color)
     : is_need_draw_(is_need_draw), color_(color) {}
 
-ShaderData::ShaderData(const glm::mat4 &model_matrix,
-                       const glm::mat4 &view_matrix,
-                       const glm::mat4 &project_matrix)
+ShaderData::ShaderData(const Matrix4f &model_matrix,
+                       const Matrix4f &view_matrix,
+                       const Matrix4f &project_matrix)
     : model_matrix_(model_matrix),
       view_matrix_(view_matrix),
       project_matrix_(project_matrix) {}

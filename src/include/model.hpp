@@ -36,9 +36,9 @@ namespace simple_renderer {
 class Model {
  public:
   /// 顶点坐标
-  using Coord = glm::vec3;
+  using Coord = Vector3f;
   /// 法向量
-  using Normal = glm::vec3;
+  using Normal = Vector3f;
   /// 贴图
   using TextureCoord = glm::vec2;
 
@@ -47,11 +47,11 @@ class Model {
     /// 反光度
     float shininess = 0;
     /// 环境光照
-    glm::vec3 ambient;
+    Vector3f ambient;
     /// 漫反射光照
-    glm::vec3 diffuse;
+    Vector3f diffuse;
     /// 镜面光照
-    glm::vec3 specular;
+    Vector3f specular;
 
     /// @name 默认构造/析构函数
     /// @{
@@ -108,7 +108,7 @@ class Model {
      * @param tran 要对顶点进行的变换矩阵
      * @return 结果
      */
-    [[nodiscard]] auto operator*(const glm::mat4 &tran) const -> Vertex;
+    [[nodiscard]] auto operator*(const Matrix4f &tran) const -> Vertex;
   };
 
   /// @todo 直接保存太浪费内存了
@@ -148,7 +148,7 @@ class Model {
      * @param tran 要对面进行的变换矩阵
      * @return 结果
      */
-    [[nodiscard]] auto operator*(const glm::mat4 &tran) const -> Face;
+    [[nodiscard]] auto operator*(const Matrix4f &tran) const -> Face;
   };
 
   /// obj 文件路径
@@ -179,7 +179,7 @@ class Model {
    * @param tran 要对模型进行的变换矩阵
    * @return 结果
    */
-  [[nodiscard]] auto operator*(const glm::mat4 &tran) const -> Model;
+  [[nodiscard]] auto operator*(const Matrix4f &tran) const -> Model;
 
   /**
    * 获取面

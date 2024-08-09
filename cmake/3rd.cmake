@@ -57,8 +57,7 @@ CPMAddPackage(
         "gtest_force_shared_crt ON"
 )
 
-# SDL2
-
+# https://github.com/libsdl-org/SDL
 CPMAddPackage(
         NAME SDL2
         GITHUB_REPOSITORY libsdl-org/SDL
@@ -70,22 +69,17 @@ CPMAddPackage(
         "SDL_STATIC_PIC ON"
         "SDL_WERROR OFF"
 )
-find_package(SDL2 REQUIRED)
 
-# https://github.com/aminosbh/sdl2-cmake-modules.git
-CPMAddPackage(
-        NAME sdl2-cmake-modules
-        GIT_REPOSITORY https://github.com/aminosbh/sdl2-cmake-modules.git
-        GIT_TAG ad006a3daae65a612ed87415037e32188b81071e
-        DOWNLOAD_ONLY True
-)
-if (SDL2_ADDED)
-    add_library(SDL2::SDL2)
-endif()
-
-if (sdl2-cmake-modules_ADDED)
-    list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
-endif ()
+# # https://github.com/aminosbh/sdl2-cmake-modules.git
+# CPMAddPackage(
+#         NAME sdl2-cmake-modules
+#         GIT_REPOSITORY https://github.com/aminosbh/sdl2-cmake-modules.git
+#         GIT_TAG ad006a3daae65a612ed87415037e32188b81071e
+#         DOWNLOAD_ONLY True
+# )
+# if (sdl2-cmake-modules_ADDED)
+#     list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
+# endif ()
 
 # https://github.com/tinyobjloader/tinyobjloader.git
 CPMAddPackage(
@@ -103,11 +97,16 @@ if (tinyobjloader_ADDED)
     )
 endif ()
 
+# https://github.com/g-truc/glm
 CPMAddPackage(
     NAME glm
     GITHUB_REPOSITORY g-truc/glm
     GIT_TAG 1.0.1
 )
+if (glm_ADDED)
+    add_library(glm INTERFACE)
+    target_include_directories(glm INTERFACE ${glm_SOURCE_DIR})
+endif ()
 
 # https://github.com/nothings/stb.git
 CPMAddPackage(
@@ -236,12 +235,6 @@ if (NOT LCOV_EXE)
             "Following https://github.com/linux-test-project/lcov to install.")
 endif ()
 
-find_package(SDL2 REQUIRED)
-if (NOT SDL2_FOUND)
-    message(FATAL_ERROR "sdl2 not found.\n"
-            "Following https://github.com/libsdl-org/SDL to install.")
-endif ()
-
 find_package(OpenMP REQUIRED)
 if (NOT OpenMP_FOUND)
     message(FATAL_ERROR "OpenMP not found.\n"
@@ -252,10 +245,4 @@ find_package(spdlog REQUIRED)
 if (NOT spdlog_FOUND)
     message(FATAL_ERROR "spdlog not found.\n"
             "Following https://github.com/gabime/spdlog to install.")
-endif ()
-
-find_package(glm REQUIRED)
-if (NOT glm_FOUND)
-    message(FATAL_ERROR "glm not found.\n"
-            "Following https://github.com/g-truc/glm tp install")
 endif ()
