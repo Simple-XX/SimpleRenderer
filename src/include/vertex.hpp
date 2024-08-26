@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SIMPLERENDER_SRC_INCLUDE_VERTEX_HPP_
+#define SIMPLERENDER_SRC_INCLUDE_VERTEX_HPP_
 
 #include <math.hpp>
 
@@ -64,3 +65,5 @@ class Vertex {
 };
 
 }  // namespace simple_renderer
+
+#endif

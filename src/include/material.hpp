@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SIMPLERENDER_SRC_INCLUDE_MATERIAL_HPP_
+#define SIMPLERENDER_SRC_INCLUDE_MATERIAL_HPP_
 
 #include <math.hpp>
 
@@ -37,3 +38,5 @@ class Material {
 };
 
 }  // namespace simple_renderer
+
+#endif

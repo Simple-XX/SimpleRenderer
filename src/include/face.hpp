@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SIMPLERENDER_SRC_INCLUDE_FACE_HPP_
+#define SIMPLERENDER_SRC_INCLUDE_FACE_HPP_
 
 #include <array>
 
@@ -76,3 +77,5 @@ class Face {
 };
 
 }  // namespace simple_renderer
+
+#endif

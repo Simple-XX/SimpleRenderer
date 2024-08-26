@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SIMPLERENDER_SRC_INCLUDE_MATH_HPP_
+#define SIMPLERENDER_SRC_INCLUDE_MATH_HPP_
 
 #include <glm/glm.hpp>
 
@@ -56,3 +57,5 @@ struct fmt::formatter<simple_renderer::Matrix4f> : fmt::formatter<std::string> {
     return fmt::format_to(ctx.out(), "\n{}", matrix_str);
   }
 };
+
+#endif
