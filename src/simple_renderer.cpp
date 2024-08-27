@@ -193,15 +193,12 @@ void SimpleRenderer::DrawModel(const ShaderBase &shader, const Light &light,
     for (const auto &f : model.faces()) {
       /// @todo 巨大性能开销
       auto face = shader.Vertex(ShaderVertexIn(f)).face_;
-      DrawLine(face.vertex(0).position().x, face.vertex(0).position().y,
-               face.vertex(1).position().x, face.vertex(1).position().y,
-               Color::kRed);
-      DrawLine(face.vertex(1).position().x, face.vertex(1).position().y,
-               face.vertex(2).position().x, face.vertex(2).position().y,
-               Color::kGreen);
-      DrawLine(face.vertex(2).position().x, face.vertex(2).position().y,
-               face.vertex(0).position().x, face.vertex(0).position().y,
-               Color::kBlue);
+      auto a = face.vertex(0).position();
+      auto b = face.vertex(1).position();
+      auto c = face.vertex(2).position();
+      DrawLine(a.x, a.y, b.x, b.y, Color::kRed);
+      DrawLine(b.x, b.y, c.x, c.y, Color::kGreen);
+      DrawLine(c.x, c.y, a.x, a.y, Color::kBlue);
     }
   }
   if (draw_triangle) {
