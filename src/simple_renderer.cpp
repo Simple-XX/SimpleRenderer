@@ -132,31 +132,19 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
   auto v2 = face.vertex(2);
 
   // 获取三角形的最小 box
-  auto min = v0.position();
-  auto max = v1.position();
-  auto max_x = std::max(
-      face.vertex(0).position().x,
-      std::max(face.vertex(1).position().x, face.vertex(2).position().x));
-  auto max_y = std::max(
-      face.vertex(0).position().y,
-      std::max(face.vertex(1).position().y, face.vertex(2).position().y));
-  max.x = max_x > max.x ? max_x : max.x;
-  max.y = max_y > max.y ? max_y : max.y;
-  max.z = 0;
-  auto min_x = std::min(
-      face.vertex(0).position().x,
-      std::min(face.vertex(1).position().x, face.vertex(2).position().x));
-  auto min_y = std::min(
-      face.vertex(0).position().y,
-      std::min(face.vertex(1).position().y, face.vertex(2).position().y));
-  min.x = min_x < min.x ? min_x : min.x;
-  min.y = min_y < min.y ? min_y : min.y;
-  min.z = 0;
+  Vector2f a = Vector2f(v0.position().x, v0.position().y);
+  Vector2f b = Vector2f(v1.position().x, v1.position().y);
+  Vector2f c = Vector2f(v2.position().x, v2.position().y);
+
+  Vector2f bboxMin =
+      Vector2f{std::min({a.x, b.x, c.x}), std::min({a.y, b.y, c.y})};
+  Vector2f bboxMax =
+      Vector2f{std::max({a.x, b.x, c.x}), std::max({a.y, b.y, c.y})};
 
 #pragma omp parallel for num_threads(kNProc) collapse(2) default(none) \
-    shared(min, max, v0, v1, v2, shader) firstprivate(normal, light)
-  for (auto x = int32_t(min.x); x <= int32_t(max.x); x++) {
-    for (auto y = int32_t(min.y); y <= int32_t(max.y); y++) {
+    shared(bboxMin, bboxMax, v0, v1, v2, shader) firstprivate(normal, light)
+  for (auto x = int32_t(bboxMin.x); x <= int32_t(bboxMax.x); x++) {
+    for (auto y = int32_t(bboxMin.y); y <= int32_t(bboxMax.y); y++) {
       /// @todo 这里要用裁剪替换掉
       if ((unsigned)x >= width_ || (unsigned)y >= height_) {
         continue;
@@ -231,30 +219,18 @@ void SimpleRenderer::DrawModel(const ShaderBase &shader, const Light &light,
 auto SimpleRenderer::GetBarycentricCoord(const Vector3f &p0, const Vector3f &p1,
                                          const Vector3f &p2, const Vector3f &pa)
     -> std::pair<bool, Vector3f> {
-  auto p1p0 = p1 - p0;
-  auto p2p0 = p2 - p0;
-  auto pap0 = pa - p0;
+  Vector3f v0 = Vector3f{p2.x - p0.x, p1.x - p0.x, p0.x - pa.x};
+  Vector3f v1 = Vector3f{p2.y - p0.y, p1.y - p0.y, p0.y - pa.y};
 
-  auto deno = (p1p0.x * p2p0.y - p1p0.y * p2p0.x);
-  if (std::abs(deno) < std::numeric_limits<decltype(deno)>::epsilon()) {
-    return std::pair<bool, const Vector3f>{false, Vector3f()};
+  Vector3f u = glm::cross(v0, v1);
+
+  // 如果 u.z == 0 说明三角形退化
+  if (std::abs(u.z) < 1) {
+    return std::pair<bool, const Vector3f>{false, Vector3f(0, 0, 0)};
   }
 
-  auto s = (p2p0.y * pap0.x - p2p0.x * pap0.y) / deno;
-  if ((s > 1) || (s < 0)) {
-    return std::pair<bool, const Vector3f>{false, Vector3f()};
-  }
-
-  auto t = (p1p0.x * pap0.y - p1p0.y * pap0.x) / deno;
-  if ((t > 1) || (t < 0)) {
-    return std::pair<bool, const Vector3f>{false, Vector3f()};
-  }
-
-  if ((1 - s - t > 1) || (1 - s - t < 0)) {
-    return std::pair<bool, const Vector3f>{false, Vector3f()};
-  }
-
-  return std::pair<bool, const Vector3f>{true, Vector3f(1 - s - t, s, t)};
+  return std::pair<bool, const Vector3f>{
+      true, Vector3f(1.0f - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z)};
 }
 
 auto SimpleRenderer::InterpolateDepth(float depth0, float depth1, float depth2,
