@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 
+#include "buffer.hpp"
 #include "display.h"
 
 /// @name 默认大小
@@ -43,11 +44,10 @@ int main(int argc, char **argv) {
   }
   auto obj_path = std::string(argv[1]);
 
-  auto buffer = std::shared_ptr<uint32_t[]>(new uint32_t[kWidth * kHeight],
-                                            std::default_delete<uint32_t[]>());
+  simple_renderer::Buffer buffer(kWidth, kHeight);
 
-  auto simple_renderer =
-      simple_renderer::SimpleRenderer(kWidth, kHeight, buffer.get(), pixel);
+  auto simple_renderer = simple_renderer::SimpleRenderer(
+      kWidth, kHeight, buffer.framebuffer(), pixel);
 
   // obj 路径
   std::vector<std::string> objs;
@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
   }
 
   auto display = Display(kWidth, kHeight);
-  display.loop(buffer.get());
+  display.loop(buffer);  // add camera info into this buffer??
 
   return 0;
 }

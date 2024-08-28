@@ -88,7 +88,7 @@ void Display::fill(const uint32_t *buffer) {
   SDL_RenderPresent(sdl_renderer_);
 }
 
-void Display::loop(uint32_t *buffer) {
+void Display::loop(simple_renderer::Buffer buffer) {
   SDL_Event event = SDL_Event();
   bool is_exit = false;
   while (is_exit == false) {
@@ -116,6 +116,6 @@ void Display::loop(uint32_t *buffer) {
       }
     }
 
-    fill(buffer);
+    fill(buffer.framebuffer());
   }
 }

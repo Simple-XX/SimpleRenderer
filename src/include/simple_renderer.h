@@ -21,6 +21,7 @@
 #include <functional>
 #include <span>
 
+#include "buffer.hpp"
 #include "light.h"
 #include "log_system.h"
 #include "math.hpp"

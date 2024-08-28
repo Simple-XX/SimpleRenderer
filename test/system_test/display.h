@@ -23,6 +23,8 @@
 #include <future>
 #include <span>
 
+#include "buffer.hpp"
+
 /**
  * 显示抽象
  */
@@ -63,7 +65,7 @@ class Display {
   /**
    * 显示循环
    */
-  void loop(uint32_t *buffer);
+  void loop(simple_renderer::Buffer buffer);
 
  private:
   /// 窗口标题
