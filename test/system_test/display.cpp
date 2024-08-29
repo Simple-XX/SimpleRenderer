@@ -68,7 +68,7 @@ Display::~Display() {
   SDL_Quit();
 }
 
-void Display::fill(const uint32_t *buffer) {
+void Display::fill(const uint32_t* buffer) {
   // 更新 texture
   auto res = SDL_UpdateTexture(sdl_texture_, nullptr, buffer, width_ * 4);
   if (res != 0) {
@@ -88,34 +88,43 @@ void Display::fill(const uint32_t *buffer) {
   SDL_RenderPresent(sdl_renderer_);
 }
 
-void Display::loop(simple_renderer::Buffer buffer) {
-  SDL_Event event = SDL_Event();
-  bool is_exit = false;
-  while (is_exit == false) {
-    while (SDL_PollEvent(&event) != 0) {
-      switch (event.type) {
-        case SDL_QUIT: {
-          is_exit = true;
-          break;
-        }
-        case SDL_KEYDOWN: {
-          switch (event.key.keysym.sym) {
-            case SDLK_ESCAPE: {
-              is_exit = true;
-              break;
-            }
-            default: {
-              // 输出按键名
-              std::cout << "key " << SDL_GetKeyName(event.key.keysym.sym)
-                        << " down!\n";
-              break;
-            }
-          }
-          break;
-        }
-      }
-    }
+void Display::loopBegin() { is_exit_ = false; }
 
-    fill(buffer.framebuffer());
+bool Display::loopShouldClose() { return is_exit_; }
+
+void Display::handleKeyboardEvent(SDL_Event& event) {
+  switch (event.key.keysym.sym) {
+    case SDLK_ESCAPE:
+    case SDLK_q:
+      is_exit_ = true;
+      break;
+    case SDLK_UP:
+      std::cout << "UP" << std::endl;
+      break;
+    case SDLK_DOWN:
+      std::cout << "DOWN" << std::endl;
+      break;
+    case SDLK_LEFT:
+      std::cout << "LEFT" << std::endl;
+      break;
+    case SDLK_RIGHT:
+      std::cout << "RIGHT" << std::endl;
+      break;
+    default:
+      break;
+  }
+}
+
+void Display::handleEvents() {
+  SDL_Event event = SDL_Event();
+  while (SDL_PollEvent(&event) != 0) {
+    switch (event.type) {
+      case SDL_QUIT:
+        is_exit_ = true;
+        break;
+      case SDL_KEYDOWN:
+        handleKeyboardEvent(event);
+        break;
+    }
   }
 }

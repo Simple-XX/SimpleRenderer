@@ -72,8 +72,9 @@ void SimpleRenderer::DrawLine(float x0, float y0, float x1, float y1,
   auto p1_x = static_cast<int32_t>(x1);
   auto p1_y = static_cast<int32_t>(y1);
 
-  SPDLOG_DEBUG("x0({}, {}), y0({}, {}), p0({}, {}), p1({}, {})", x0, y0, x1, y1,
-               p0_x, p0_y, p1_x, p1_y);
+  // SPDLOG_DEBUG("x0({}, {}), y0({}, {}), p0({}, {}), p1({}, {})", x0, y0, x1,
+  // y1,
+  //              p0_x, p0_y, p1_x, p1_y);
 
   auto steep = false;
   if (std::abs(p0_x - p1_x) < std::abs(p0_y - p1_y)) {
@@ -99,20 +100,20 @@ void SimpleRenderer::DrawLine(float x0, float y0, float x1, float y1,
     if (steep) {
       /// @todo 这里要用裁剪替换掉
       if ((unsigned)y >= width_ || (unsigned)x >= height_) {
-        SPDLOG_WARN(
-            "width: {}, height: {}, p0_x: {}, p0_y: {}, p1_x: "
-            "{}, p1_y: {}, x: {}, y: {}",
-            width_, height_, p0_x, p0_y, p1_x, p1_y, x, y);
+        // SPDLOG_WARN(
+        // "width: {}, height: {}, p0_x: {}, p0_y: {}, p1_x: "
+        // "{}, p1_y: {}, x: {}, y: {}",
+        // width_, height_, p0_x, p0_y, p1_x, p1_y, x, y);
         continue;
       }
       draw_pixel_func_(y, x, _color, buffer_);
     } else {
       /// @todo 这里要用裁剪替换掉
       if ((unsigned)x >= width_ || (unsigned)y >= height_) {
-        SPDLOG_WARN(
-            "width: {}, height: {}, p0_x: {}, p0_y: {}, p1_x: "
-            "{}, p1_y: {}, x: {}, y: {}",
-            width_, height_, p0_x, p0_y, p1_x, p1_y, x, y);
+        // SPDLOG_WARN(
+        //     "width: {}, height: {}, p0_x: {}, p0_y: {}, p1_x: "
+        //     "{}, p1_y: {}, x: {}, y: {}",
+        //     width_, height_, p0_x, p0_y, p1_x, p1_y, x, y);
         continue;
       }
       draw_pixel_func_(x, y, _color, buffer_);

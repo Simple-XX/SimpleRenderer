@@ -58,6 +58,11 @@ int main(int argc, char **argv) {
   // objs.emplace_back(obj_path + "/helmet.obj");
   // objs.emplace_back(obj_path + "/african_head.obj");
   objs.emplace_back(obj_path + "/utah-teapot/utah-teapot.obj");
+  // load model
+  std::vector<simple_renderer::Model> models;
+  for (auto &obj : objs) {
+    models.emplace_back(simple_renderer::Model(obj));
+  }
 
   auto matrix = simple_renderer::Matrix4f(1.0f);
   simple_renderer::Matrix4f scale_matrix =
@@ -86,16 +91,18 @@ int main(int argc, char **argv) {
   // 3. 移动到屏幕左上角
   // 4. 缩放物体
 
-  // 读取模型与材质
-  for (auto &obj : objs) {
-    // 添加到场景中
-    auto model = simple_renderer::Model(obj);
+  for (auto &model : models) {
     model.transform(matrix);
     simple_renderer.render(model);
   }
 
   auto display = Display(kWidth, kHeight);
-  display.loop(buffer);  // add camera info into this buffer??
+  display.loopBegin();
+  while (!display.loopShouldClose()) {
+    display.handleEvents();
+
+    display.fill(buffer.framebuffer());
+  }
 
   return 0;
 }

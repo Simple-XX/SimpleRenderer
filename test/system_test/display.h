@@ -65,7 +65,10 @@ class Display {
   /**
    * 显示循环
    */
-  void loop(simple_renderer::Buffer buffer);
+  void loopBegin();
+  void handleKeyboardEvent(SDL_Event &event);
+  void handleEvents();
+  bool loopShouldClose();
 
  private:
   /// 窗口标题
@@ -84,6 +87,9 @@ class Display {
   SDL_Renderer *sdl_renderer_;
   /// sdl 纹理
   SDL_Texture *sdl_texture_;
+
+  // Should Close
+  bool is_exit_;
 };
 
 #endif /* SIMPLERENDER_TEST_SYSTEM_TEST_DISPLAY_H_ */
