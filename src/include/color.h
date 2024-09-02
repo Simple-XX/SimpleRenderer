@@ -131,7 +131,7 @@ class Color {
     return _os;
   }
 
- private:
+ public:  // TODO: 为了方便测试，暂时公开
   /// 颜色深度
   static constexpr const uint8_t kDepth = 4;
 

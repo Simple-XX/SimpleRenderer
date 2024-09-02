@@ -64,6 +64,7 @@ auto DefaultShader::Fragment(const ShaderFragmentIn &shader_fragment_in) const
     is_need_draw = false;
     return ShaderFragmentOut(is_need_draw, Color());
   }
+  intensity *= 255;
   auto color =
       InterpolateColor(shader_fragment_in.color0_, shader_fragment_in.color1_,
                        shader_fragment_in.color2_,
