@@ -223,12 +223,21 @@ auto SimpleRenderer::GetBarycentricCoord(const Vector3f &p0, const Vector3f &p1,
   Vector3f u = glm::cross(v0, v1);
 
   // 如果 u.z == 0 说明三角形退化
-  if (std::abs(u.z) < 1) {
+  const float epsilon = 1e-6f;
+  if (std::abs(u.z) < epsilon) {
     return std::pair<bool, const Vector3f>{false, Vector3f(0, 0, 0)};
   }
 
-  return std::pair<bool, const Vector3f>{
-      true, Vector3f(1.0f - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z)};
+  auto x = 1.0f - (u.x + u.y) / u.z;
+  auto y = u.y / u.z;
+  auto z = u.x / u.z;
+
+  // 如果重心坐标不在 [0, 1] 之间则说明点在三角形外
+  if (x < 0 || y < 0 || z < 0 || x > 1 || y > 1 || z > 1) {
+    return std::pair<bool, const Vector3f>{false, Vector3f(0, 0, 0)};
+  }
+
+  return std::pair<bool, const Vector3f>{true, Vector3f(x, y, z)};
 }
 
 auto SimpleRenderer::InterpolateDepth(float depth0, float depth1, float depth2,

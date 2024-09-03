@@ -18,28 +18,30 @@
 
 namespace simple_renderer {
 
+// 将浮点数转换为 uint8_t
+// 对浮点数进行四舍五入
+uint8_t float_to_uint8_t(float val) {
+  float adjusted_val = val > 0.0f ? val + 0.5f : val - 0.5f;
+  return static_cast<uint8_t>(adjusted_val);
+}
+
 auto DefaultShader::InterpolateColor(
     const Color &color0, const Color &color1, const Color &color2,
     const Vector3f &barycentric_coord) -> Color {
-  return Color(
-      static_cast<uint8_t>(static_cast<float>(color0[Color::kColorIndexRed]) *
-                               barycentric_coord.x +
-                           static_cast<float>(color1[Color::kColorIndexRed]) *
-                               barycentric_coord.y +
-                           static_cast<float>(color2[Color::kColorIndexRed]) *
-                               barycentric_coord.z),
-      static_cast<uint8_t>(static_cast<float>(color0[Color::kColorIndexGreen]) *
-                               barycentric_coord.x +
-                           static_cast<float>(color1[Color::kColorIndexGreen]) *
-                               barycentric_coord.y +
-                           static_cast<float>(color2[Color::kColorIndexGreen]) *
-                               barycentric_coord.z),
-      static_cast<uint8_t>(static_cast<float>(color0[Color::kColorIndexBlue]) *
-                               barycentric_coord.x +
-                           static_cast<float>(color1[Color::kColorIndexBlue]) *
-                               barycentric_coord.y +
-                           static_cast<float>(color2[Color::kColorIndexBlue]) *
-                               barycentric_coord.z));
+  // 插值颜色 (r, g, b)
+  auto color_r = float_to_uint8_t(
+    static_cast<float>(color0[Color::kColorIndexRed]) * barycentric_coord.x +
+    static_cast<float>(color1[Color::kColorIndexRed]) * barycentric_coord.y +
+    static_cast<float>(color2[Color::kColorIndexRed]) * barycentric_coord.z);
+  auto color_g = float_to_uint8_t(
+    static_cast<float>(color0[Color::kColorIndexGreen]) * barycentric_coord.x +
+    static_cast<float>(color1[Color::kColorIndexGreen]) * barycentric_coord.y +
+    static_cast<float>(color2[Color::kColorIndexGreen]) * barycentric_coord.z);
+  auto color_b = float_to_uint8_t(
+    static_cast<float>(color0[Color::kColorIndexBlue]) * barycentric_coord.x +
+    static_cast<float>(color1[Color::kColorIndexBlue]) * barycentric_coord.y +
+    static_cast<float>(color2[Color::kColorIndexBlue]) * barycentric_coord.z);
+  return Color(color_r, color_g, color_b);
 }
 
 /// @todo 巨大性能开销
