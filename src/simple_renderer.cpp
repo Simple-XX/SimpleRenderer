@@ -127,7 +127,7 @@ void SimpleRenderer::DrawLine(float x0, float y0, float x1, float y1,
 }
 
 void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
-                                  const Vector3f &normal, const Face &face) {
+                                  const Face &face) {
   auto v0 = face.vertex(0);
   auto v1 = face.vertex(1);
   auto v2 = face.vertex(2);
@@ -143,7 +143,7 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
       Vector2f{std::max({a.x, b.x, c.x}), std::max({a.y, b.y, c.y})};
 
 #pragma omp parallel for num_threads(kNProc) collapse(2) default(none) \
-    shared(bboxMin, bboxMax, v0, v1, v2, shader) firstprivate(normal, light)
+    shared(bboxMin, bboxMax, v0, v1, v2, shader, face) firstprivate(light)
   for (auto x = int32_t(bboxMin.x); x <= int32_t(bboxMax.x); x++) {
     for (auto y = int32_t(bboxMin.y); y <= int32_t(bboxMax.y); y++) {
       /// @todo 这里要用裁剪替换掉
@@ -166,8 +166,7 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
       }
       // 构造着色器输入
       auto shader_fragment_in =
-          ShaderFragmentIn(barycentric_coord, normal, light.dir, v0.color(),
-                           v1.color(), v2.color());
+          ShaderFragmentIn(barycentric_coord, face, light.dir);
       // 计算颜色，颜色为通过 shader 片段着色器计算
       auto shader_fragment_out = shader.Fragment(shader_fragment_in);
       // 构造颜色
@@ -204,7 +203,7 @@ void SimpleRenderer::DrawModel(const ShaderBase &shader, const Light &light,
     for (const auto &f : model.faces()) {
       /// @todo 巨大性能开销
       auto face = shader.Vertex(ShaderVertexIn(f)).face_;
-      DrawTriangle(shader, light, face.normal(), face);
+      DrawTriangle(shader, light, face);
     }
   }
 }

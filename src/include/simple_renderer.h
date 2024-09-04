@@ -91,7 +91,7 @@ class SimpleRenderer {
    * @todo 多线程支持
    */
   void DrawTriangle(const ShaderBase &shader, const Light &light,
-                    const Vector3f &normal, const Face &face);
+                    const Face &face);
 
   /**
    * 绘制模型

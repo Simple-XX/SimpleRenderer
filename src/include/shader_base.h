@@ -83,31 +83,22 @@ class ShaderFragmentIn {
  public:
   /// 重心坐标
   Vector3f barycentric_coord_;
-  /// 法线方向
-  Vector3f normal_;
+
+  // face
+  // 面信息
+  Face face_;
+
   /// 光照方向
   Vector3f light_;
-
-  /// @name 三个顶点的颜色
-  /// @{
-  Color color0_;
-  Color color1_;
-  Color color2_;
-  /// @}
 
   /**
    * 构造函数
    * @param barycentric_coord 重心坐标
-   * @param normal 法线
+   * @param face 面信息
    * @param light 光照
-   * @param color0 顶点 0 颜色
-   * @param color1 顶点 1 颜色
-   * @param color2 顶点 2 颜色
    */
   explicit ShaderFragmentIn(const Vector3f &_barycentric_coord,
-                            const Vector3f &_normal, const Vector3f &_light,
-                            const Color &_color0, const Color &_color1,
-                            const Color &_color2);
+                            const Face &face, const Vector3f &light);
 
   /// @name 默认构造/析构函数
   /// @{

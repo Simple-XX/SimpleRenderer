@@ -6,6 +6,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
 
+#include "color.h"
 #include "log_system.h"
 
 namespace simple_renderer {
@@ -55,6 +56,24 @@ struct fmt::formatter<simple_renderer::Matrix4f> : fmt::formatter<std::string> {
 
     // Format and output the string
     return fmt::format_to(ctx.out(), "\n{}", matrix_str);
+  }
+};
+
+/**
+ * spdlog 输出颜色实现
+ */
+template <>
+struct fmt::formatter<simple_renderer::Color> : fmt::formatter<std::string> {
+  auto format(const simple_renderer::Color &color,
+              fmt::format_context &ctx) const -> decltype(ctx.out()) {
+    // Convert the Matrix4f to a string using glm::to_string
+    std::string color_str = fmt::format(
+        "({}, {}, {})", color[simple_renderer::Color::kColorIndexRed],
+        color[simple_renderer::Color::kColorIndexGreen],
+        color[simple_renderer::Color::kColorIndexBlue]);
+
+    // Format and output the string
+    return fmt::format_to(ctx.out(), "\n{}", color_str);
   }
 };
 

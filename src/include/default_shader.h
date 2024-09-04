@@ -65,6 +65,14 @@ class DefaultShader : public ShaderBase {
   static auto InterpolateColor(const Color &color0, const Color &color1,
                                const Color &color2,
                                const Vector3f &barycentric_coord) -> Color;
+
+  static auto InterpolateUV(const Vector2f &uv0, const Vector2f &uv1,
+                            const Vector2f &uv2,
+                            const Vector3f &barycentric_coord) -> Vector2f;
+
+  static uint8_t float_to_uint8_t(float val);
+
+  static Color sampleTexture(const Texture &texture, const Vector2f &uv);
 };
 
 }  // namespace simple_renderer

@@ -31,6 +31,8 @@
 
 namespace simple_renderer {
 
+/* * * * * * * * * */
+/* --- Model --- */
 class Model {
  public:
   // Default constructor
@@ -94,6 +96,10 @@ class Model {
   // Process the material of the model
   // 处理模型的材质
   Material processMaterial(aiMaterial* material);
+
+  // Texture cache
+  // 纹理缓存
+  std::unordered_map<std::string, Texture> texture_cache_;
 };
 }  // namespace simple_renderer
 

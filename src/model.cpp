@@ -20,6 +20,7 @@
 
 #include <assimp/Importer.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <string>
 #include <utility>
 
 #include "log_system.h"
@@ -147,6 +148,59 @@ Material Model::processMaterial(aiMaterial* mat) {
     material.shininess = shininess;
   }
 
+  // load textures
+  // 加载纹理
+  if (mat->GetTextureCount(aiTextureType_AMBIENT) > 0) {
+    aiString texture_path;
+    mat->GetTexture(aiTextureType_AMBIENT, 0, &texture_path);
+    std::string fullpath = directory_ + "/" + texture_path.C_Str();
+    if (texture_cache_.find(fullpath) != texture_cache_.end()) {
+      // load from cache
+      // 从缓存加载
+      material.ambient_texture = texture_cache_[fullpath];
+    } else {
+      // first time loading
+      // 第一次加载纹理
+      material.ambient_texture = Texture::loadTextureFromFile(fullpath);
+      texture_cache_[fullpath] = material.ambient_texture;
+    }
+    material.has_ambient_texture = true;
+  }
+
+  if (mat->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
+    aiString texture_path;
+    mat->GetTexture(aiTextureType_DIFFUSE, 0, &texture_path);
+    std::string fullpath = directory_ + "/" + texture_path.C_Str();
+    if (texture_cache_.find(fullpath) != texture_cache_.end()) {
+      // load from cache
+      // 从缓存加载
+      material.diffuse_texture = texture_cache_[fullpath];
+    } else {
+      // first time loading
+      // 第一次加载纹理
+      material.diffuse_texture = Texture::loadTextureFromFile(fullpath);
+      texture_cache_[fullpath] = material.diffuse_texture;
+    }
+    material.has_diffuse_texture = true;
+  }
+
+  if (mat->GetTextureCount(aiTextureType_SPECULAR) > 0) {
+    aiString texture_path;
+    mat->GetTexture(aiTextureType_SPECULAR, 0, &texture_path);
+    std::string fullpath = directory_ + "/" + texture_path.C_Str();
+    if (texture_cache_.find(fullpath) != texture_cache_.end()) {
+      // load from cache
+      // 从缓存加载
+      material.specular_texture = texture_cache_[fullpath];
+    } else {
+      // first time loading
+      // 第一次加载纹理
+      material.specular_texture = Texture::loadTextureFromFile(fullpath);
+      texture_cache_[fullpath] = material.specular_texture;
+    }
+    material.has_specular_texture = true;
+  }
+
   return material;
 }
 
@@ -157,5 +211,4 @@ void Model::transform(const Matrix4f& tran) {
     face.transform(tran);
   }
 }
-
 }  // namespace simple_renderer

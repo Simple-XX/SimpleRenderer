@@ -96,6 +96,18 @@ auto Color::operator*=(float val) -> Color & {
   return *this;
 }
 
+auto Color::operator+(const Color &color) const -> Color {
+  auto red =
+      static_cast<uint8_t>(static_cast<float>(channel_r_) + color.channel_r_);
+  auto green =
+      static_cast<uint8_t>(static_cast<float>(channel_g_) + color.channel_g_);
+  auto blue =
+      static_cast<uint8_t>(static_cast<float>(channel_b_) + color.channel_b_);
+  auto alpha =
+      static_cast<uint8_t>(static_cast<float>(channel_a_) + color.channel_a_);
+  return Color(red, green, blue, alpha);
+}
+
 Color::operator uint32_t() const {
   uint32_t ret = 0;
   auto ret_ptr = std::span(reinterpret_cast<uint8_t *>(&ret), 4);

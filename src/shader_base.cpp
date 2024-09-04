@@ -23,15 +23,10 @@ ShaderVertexIn::ShaderVertexIn(const Face &face) : face_(face) {}
 ShaderVertexOut::ShaderVertexOut(const Face &face) : face_(face) {}
 
 ShaderFragmentIn::ShaderFragmentIn(const Vector3f &barycentric_coord,
-                                   const Vector3f &normal,
-                                   const Vector3f &light, const Color &color0,
-                                   const Color &color1, const Color &color2)
+                                   const Face &face, const Vector3f &light)
     : barycentric_coord_(barycentric_coord),
-      normal_(normal),
-      light_(light),
-      color0_(color0),
-      color1_(color1),
-      color2_(color2) {}
+      face_(face),
+      light_(light) {}  // TODO: normal calculation in the Vertex SHader
 
 ShaderFragmentOut::ShaderFragmentOut(const Color &color) : color_(color) {}
 
