@@ -170,10 +170,6 @@ void SimpleRenderer::DrawTriangle(const ShaderBase &shader, const Light &light,
                            v1.color(), v2.color());
       // 计算颜色，颜色为通过 shader 片段着色器计算
       auto shader_fragment_out = shader.Fragment(shader_fragment_in);
-      // 如果不需要绘制则跳过
-      if (!shader_fragment_out.is_need_draw_) {
-        continue;
-      }
       // 构造颜色
       auto color = Color(shader_fragment_out.color_);
       // 填充像素

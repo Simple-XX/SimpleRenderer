@@ -127,18 +127,14 @@ class ShaderFragmentIn {
  */
 class ShaderFragmentOut {
  public:
-  /// 是否需要绘制
-  bool is_need_draw_ = false;
-
   /// 颜色
   Color color_;
 
   /**
    * 构造函数
-   * @param _is_need_draw        是否需要绘制
    * @param _color               颜色
    */
-  explicit ShaderFragmentOut(const bool &is_need_draw, const Color &color);
+  explicit ShaderFragmentOut(const Color &color);
 
   /// @name 默认构造/析构函数
   /// @{

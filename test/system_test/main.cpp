@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
   // objs.emplace_back(obj_path + "/cornell_box.obj");
   // objs.emplace_back(obj_path + "/helmet.obj");
   // objs.emplace_back(obj_path + "/african_head.obj");
-  objs.emplace_back(obj_path + "/utah-teapot/utah-teapot.obj");
+  objs.emplace_back(obj_path + "/utah-teapot-texture/teapot.obj");
   // load model
   std::vector<simple_renderer::Model> models;
   for (auto &obj : objs) {
@@ -74,8 +74,12 @@ int main(int argc, char **argv) {
       simple_renderer::Matrix4f(1.0f),
       simple_renderer::Vector3f(kWidth / 2.0f, kHeight / 2.0f, 0.0f));
 
+  simple_renderer::Matrix4f rotation_matrix =
+      glm::rotate(simple_renderer::Matrix4f(1.0f), 90.0f,
+                  simple_renderer::Vector3f(1.0f, 0.0f, 0.0f));
+
   // Combined transformation matrix
-  matrix = translation_matrix * scale_matrix;
+  matrix = translation_matrix * scale_matrix * rotation_matrix;
 
   // 矩阵运算的顺序
   // 归一化

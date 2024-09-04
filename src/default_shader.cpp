@@ -30,17 +30,20 @@ auto DefaultShader::InterpolateColor(
     const Vector3f &barycentric_coord) -> Color {
   // 插值颜色 (r, g, b)
   auto color_r = float_to_uint8_t(
-    static_cast<float>(color0[Color::kColorIndexRed]) * barycentric_coord.x +
-    static_cast<float>(color1[Color::kColorIndexRed]) * barycentric_coord.y +
-    static_cast<float>(color2[Color::kColorIndexRed]) * barycentric_coord.z);
-  auto color_g = float_to_uint8_t(
-    static_cast<float>(color0[Color::kColorIndexGreen]) * barycentric_coord.x +
-    static_cast<float>(color1[Color::kColorIndexGreen]) * barycentric_coord.y +
-    static_cast<float>(color2[Color::kColorIndexGreen]) * barycentric_coord.z);
+      static_cast<float>(color0[Color::kColorIndexRed]) * barycentric_coord.x +
+      static_cast<float>(color1[Color::kColorIndexRed]) * barycentric_coord.y +
+      static_cast<float>(color2[Color::kColorIndexRed]) * barycentric_coord.z);
+  auto color_g =
+      float_to_uint8_t(static_cast<float>(color0[Color::kColorIndexGreen]) *
+                           barycentric_coord.x +
+                       static_cast<float>(color1[Color::kColorIndexGreen]) *
+                           barycentric_coord.y +
+                       static_cast<float>(color2[Color::kColorIndexGreen]) *
+                           barycentric_coord.z);
   auto color_b = float_to_uint8_t(
-    static_cast<float>(color0[Color::kColorIndexBlue]) * barycentric_coord.x +
-    static_cast<float>(color1[Color::kColorIndexBlue]) * barycentric_coord.y +
-    static_cast<float>(color2[Color::kColorIndexBlue]) * barycentric_coord.z);
+      static_cast<float>(color0[Color::kColorIndexBlue]) * barycentric_coord.x +
+      static_cast<float>(color1[Color::kColorIndexBlue]) * barycentric_coord.y +
+      static_cast<float>(color2[Color::kColorIndexBlue]) * barycentric_coord.z);
   return Color(color_r, color_g, color_b);
 }
 
@@ -48,6 +51,8 @@ auto DefaultShader::InterpolateColor(
 auto DefaultShader::Vertex(const ShaderVertexIn &shader_vertex_in) const
     -> ShaderVertexOut {
   auto face(shader_vertex_in.face_);
+
+  // texture
 
   face.transform(shader_data_.project_matrix_ * shader_data_.view_matrix_ *
                  shader_data_.model_matrix_);
@@ -58,21 +63,16 @@ auto DefaultShader::Vertex(const ShaderVertexIn &shader_vertex_in) const
 
 auto DefaultShader::Fragment(const ShaderFragmentIn &shader_fragment_in) const
     -> ShaderFragmentOut {
-  auto intensity =
-      glm::dot(shader_fragment_in.normal_, shader_fragment_in.light_);
-  auto is_need_draw = true;
-  // 光照方向为正，不绘制背面
-  if (intensity <= 0) {
-    is_need_draw = false;
-    return ShaderFragmentOut(is_need_draw, Color());
-  }
+  // 只绘制正面，背面intensity为负 = 0
+  auto intensity = std::max(
+      glm::dot(shader_fragment_in.normal_, shader_fragment_in.light_), 0.0f);
   intensity *= 255;
   auto color =
       InterpolateColor(shader_fragment_in.color0_, shader_fragment_in.color1_,
                        shader_fragment_in.color2_,
                        shader_fragment_in.barycentric_coord_) *
       intensity;
-  return ShaderFragmentOut(is_need_draw, color);
+  return ShaderFragmentOut(color);
 }
 
 }  // namespace simple_renderer

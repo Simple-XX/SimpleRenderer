@@ -33,9 +33,7 @@ ShaderFragmentIn::ShaderFragmentIn(const Vector3f &barycentric_coord,
       color1_(color1),
       color2_(color2) {}
 
-ShaderFragmentOut::ShaderFragmentOut(const bool &is_need_draw,
-                                     const Color &color)
-    : is_need_draw_(is_need_draw), color_(color) {}
+ShaderFragmentOut::ShaderFragmentOut(const Color &color) : color_(color) {}
 
 ShaderData::ShaderData(const Matrix4f &model_matrix,
                        const Matrix4f &view_matrix,
