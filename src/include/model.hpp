@@ -61,12 +61,9 @@ class Model {
   // 从文件路径加载模型的构造函数
   Model(const std::string& model_path);
 
-  // Apply a transformation to the model
-  // 对模型应用变换
-  void transform(const Matrix4f& tran);
-
   // Get functions
   // 获取函数
+  const std::vector<Vertex>& vertices() const { return vertices_; };
   const std::vector<Face>& faces() const { return faces_; };
   const std::string& modelPath() const { return directory_; };
 

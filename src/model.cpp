@@ -107,9 +107,9 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
   for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
     aiFace face = mesh->mFaces[i];
     if (face.mNumIndices == 3) {  // Triangle, 三角形
-      Vertex v0 = vertices[face.mIndices[0]];
-      Vertex v1 = vertices[face.mIndices[1]];
-      Vertex v2 = vertices[face.mIndices[2]];
+      size_t v0 = face.mIndices[0];
+      size_t v1 = face.mIndices[1];
+      size_t v2 = face.mIndices[2];
 
       // Process the material associated with this mesh
       // 处理与此网格关联的材质
@@ -118,7 +118,9 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
       // Create a Face object and store it
       // 创建一个 Face 对象并存储它
-      faces_.emplace_back(v0, v1, v2, std::move(material));
+      Face face(v0, v1, v2, std::move(material));
+      face.calculateNormal(vertices);
+      faces_.emplace_back(face);
     }
   }
 }
@@ -202,13 +204,5 @@ Material Model::processMaterial(aiMaterial* mat) {
   }
 
   return material;
-}
-
-// Apply a transformation matrix to all faces in the model
-// 对模型中的所有面应用变换矩阵
-void Model::transform(const Matrix4f& tran) {
-  for (auto& face : faces_) {
-    face.transform(tran);
-  }
 }
 }  // namespace simple_renderer

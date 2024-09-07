@@ -22,6 +22,11 @@
 
 namespace simple_renderer {
 
+/*
+for each face -> *VertexShader* -> DrawTriangle ->
+for each pixel -> *FragmentShader* -> DrawPixel
+*/
+
 /**
  * 顶点着色器输入数据
  */

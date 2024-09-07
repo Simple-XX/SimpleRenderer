@@ -13,6 +13,7 @@ namespace simple_renderer {
 using Vector2f = glm::vec2;
 using Vector3f = glm::vec3;
 using Vector4f = glm::vec4;
+using Matrix3f = glm::mat3;
 using Matrix4f = glm::mat4;
 }  // namespace simple_renderer
 

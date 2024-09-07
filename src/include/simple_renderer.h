@@ -26,7 +26,8 @@
 #include "log_system.h"
 #include "math.hpp"
 #include "model.hpp"
-#include "shader_base.h"
+#include "rasterizer.hpp"
+#include "shader.hpp"
 
 namespace simple_renderer {
 
@@ -56,42 +57,17 @@ class SimpleRenderer {
   virtual ~SimpleRenderer() = default;
   /// @}
 
-  bool render(const Model &model);
+  bool render(const Model &model, const Shader &shader);
 
  private:
-  /// 深度类型
-  /// @note 不要进行会影响内存的修改
-  using Depth = float;
-
   const size_t height_;
   const size_t width_;
   uint32_t *buffer_;
-  std::shared_ptr<Depth[]> depth_buffer_;
   DrawPixelFunc draw_pixel_func_;
   LogSystem log_system_;
 
-  /**
-   * 画直线 Bresenham 算法
-   * @param _x0 第一个点的 x 坐标
-   * @param _y0 第一个点的 y 坐标
-   * @param _x1 第二个点的 x 坐标
-   * @param _y1 第二个点的 y 坐标
-   * @param _color 直线颜色
-   * @todo 多线程支持
-   */
-  void DrawLine(float _x0, float _y0, float _x1, float _y1,
-                const Color &_color);
-
-  /**
-   * 填充三角形
-   * @param shader 要使用的着色器
-   * @param light 光照信息
-   * @param normal 面的法向量
-   * @param face 面
-   * @todo 多线程支持
-   */
-  void DrawTriangle(const ShaderBase &shader, const Light &light,
-                    const Face &face);
+  std::shared_ptr<Shader> shader_;
+  std::shared_ptr<Rasterizer> rasterizer_;
 
   /**
    * 绘制模型
@@ -101,49 +77,8 @@ class SimpleRenderer {
    * @param draw_line 是否绘制线框
    * @param draw_triangle 是否绘制三角形
    */
-  void DrawModel(const ShaderBase &shader, const Light &light,
-                 const Model &model, bool draw_line, bool draw_triangle);
-
-  /**
-   * 计算重心坐标
-   * @param p0 三角形的第一个点
-   * @param p1 三角形的第二个点
-   * @param p2 三角形的第三个点
-   * @param pa 要判断的点
-   * @return std::pair<bool, vector4f_t>
-   *  第一个返回为 _p 是否在三角形内，第二个为重心坐标
-   * @see http://blackpawn.com/texts/pointinpoly/
-   * solve
-   *     P = A + s * AB + t * AC  -->  AP = s * AB + t * AC
-   * then
-   *     s = (AC.y * AP.x - AC.x * AP.y) / (AB.x * AC.y - AB.y * AC.x)
-   *     t = (AB.x * AP.y - AB.y * AP.x) / (AB.x * AC.y - AB.y * AC.x)
-   *
-   * notice
-   *     P = A + s * AB + t * AC
-   *       = A + s * (B - A) + t * (C - A)
-   *       = (1 - s - t) * A + s * B + t * C
-   * then
-   *     weight_A = 1 - s - t
-   *     weight_B = s
-   *     weight_C = t
-   */
-  static auto GetBarycentricCoord(const Vector3f &p0, const Vector3f &p1,
-                                  const Vector3f &p2, const Vector3f &pa)
-      -> std::pair<bool, Vector3f>;
-
-  /**
-   * 深度插值，由重心坐标计算出对应点的深度值
-   * @param depth0 点 1
-   * @param depth1 点 2
-   * @param depth2 点 3
-   * @param barycentric_coord 重心坐标
-   * @return 深度值
-   */
-  static auto InterpolateDepth(float depth0, float depth1, float depth2,
-                               const Vector3f &barycentric_coord) -> float;
+  void DrawModel(const Model &model, const Light &light);
 };
-
 }  // namespace simple_renderer
 
 #endif /* SIMPLERENDER_SRC_INCLUDE_SIMPLE_RENDER_H_ */
