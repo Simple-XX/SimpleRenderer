@@ -46,54 +46,35 @@ endif ()
 include(${CPM_DOWNLOAD_LOCATION})
 # -------- get_cpm.cmake --------
 
-# https://github.com/google/googletest
 CPMAddPackage(
         NAME googletest
-        GITHUB_REPOSITORY google/googletest
-        GIT_TAG v1.14.0
-        VERSION 1.14.0
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG v1.15.2
+        VERSION 1.15.2
         OPTIONS
         "INSTALL_GTEST OFF"
         "gtest_force_shared_crt ON"
 )
 
-# https://github.com/aminosbh/sdl2-cmake-modules.git
+# https://github.com/libsdl-org/SDL
 CPMAddPackage(
-        NAME sdl2-cmake-modules
-        GIT_REPOSITORY https://github.com/aminosbh/sdl2-cmake-modules.git
-        GIT_TAG ad006a3daae65a612ed87415037e32188b81071e
-        DOWNLOAD_ONLY True
+        NAME SDL2
+        GITHUB_REPOSITORY libsdl-org/SDL
+        GIT_TAG release-2.30.6
+        OPTIONS
+        "SDL2_DISABLE_INSTALL ON"
+        "SDL_SHARED OFF"
+        "SDL_STATIC ON"
+        "SDL_STATIC_PIC ON"
+        "SDL_WERROR OFF"
 )
-if (sdl2-cmake-modules_ADDED)
-    list(APPEND CMAKE_MODULE_PATH ${sdl2-cmake-modules_SOURCE_DIR})
-endif ()
 
-## https://github.com/freetype/freetype
-#CPMAddPackage(
-#        NAME freetype
-#        GIT_REPOSITORY https://github.com/freetype/freetype.git
-#        GIT_TAG VER-2-13-0
-#        VERSION 2.13.0
-#)
-#if (freetype_ADDED)
-#    add_library(Freetype::Freetype ALIAS freetype)
-#endif ()
-
-# https://github.com/tinyobjloader/tinyobjloader.git
+# https://github.com/g-truc/glm
 CPMAddPackage(
-        NAME tinyobjloader
-        GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
-        GIT_TAG 853f059d778058a43c954850e561a231934b33a7
-        DOWNLOAD_ONLY True
+    NAME glm
+    GITHUB_REPOSITORY g-truc/glm
+    GIT_TAG 1.0.1
 )
-if (tinyobjloader_ADDED)
-    add_library(tinyobjloader INTERFACE)
-    target_sources(tinyobjloader INTERFACE
-            FILE_SET HEADERS
-            BASE_DIRS ${tinyobjloader_SOURCE_DIR}
-            FILES tiny_obj_loader.h
-    )
-endif ()
 
 # https://github.com/nothings/stb.git
 CPMAddPackage(
@@ -109,19 +90,6 @@ if (stb_ADDED)
             BASE_DIRS ${stb_SOURCE_DIR}
             FILES stb_image.h
     )
-endif ()
-
-# https://gitlab.com/libeigen/eigen.git
-CPMAddPackage(
-        NAME Eigen
-        GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-        GIT_TAG 3.4.0
-        VERSION 3.4.0
-        DOWNLOAD_ONLY True
-)
-if (Eigen_ADDED)
-    add_library(Eigen INTERFACE IMPORTED)
-    target_include_directories(Eigen INTERFACE ${Eigen_SOURCE_DIR})
 endif ()
 
 # http://wenq.org/wqy2/index.cgi?ZenHei
@@ -235,20 +203,24 @@ if (NOT LCOV_EXE)
             "Following https://github.com/linux-test-project/lcov to install.")
 endif ()
 
-find_package(SDL2 REQUIRED)
-if (NOT SDL2_FOUND)
-    message(FATAL_ERROR "sdl2 not found.\n"
-            "Following https://github.com/libsdl-org/SDL to install.")
-endif ()
-
-find_package(OpenMP REQUIRED)
-if (NOT OpenMP_FOUND)
-    message(FATAL_ERROR "OpenMP not found.\n"
-            "Following https://www.openmp.org to install.")
-endif ()
-
 find_package(spdlog REQUIRED)
 if (NOT spdlog_FOUND)
     message(FATAL_ERROR "spdlog not found.\n"
             "Following https://github.com/gabime/spdlog to install.")
+endif ()
+
+find_package(assimp REQUIRED)
+if (NOT assimp_FOUND)
+    message(FATAL_ERROR "assimp not found.\n"
+            "Following https://github.com/assimp/assimp to install.")
+endif () 
+
+find_package(OpenMP REQUIRED)
+if (APPLE)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${OPENMP_LIBRARIES} -lomp")
+endif ()
+if (NOT OpenMP_FOUND)
+    message(FATAL_ERROR "OpenMP not found. Please install OpenMP.")
 endif ()

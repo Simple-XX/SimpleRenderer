@@ -17,9 +17,8 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_SHADER_BASE_H_
 #define SIMPLERENDER_SRC_INCLUDE_SHADER_BASE_H_
 
-#include "matrix.hpp"
+#include "math.hpp"
 #include "model.hpp"
-#include "vector.hpp"
 
 namespace simple_renderer {
 
@@ -29,13 +28,13 @@ namespace simple_renderer {
 class ShaderVertexIn {
  public:
   /// 面信息
-  Model::Face face_;
+  Face face_;
 
   /**
    * 构造函数
    * @param face 面信息
    */
-  explicit ShaderVertexIn(const Model::Face &face);
+  explicit ShaderVertexIn(const Face &face);
 
   /// @name 默认构造/析构函数
   /// @{
@@ -56,13 +55,13 @@ class ShaderVertexIn {
 class ShaderVertexOut {
  public:
   /// 面信息
-  Model::Face face_;
+  Face face_;
 
   /**
    * 构造函数
    * @param face            面信息
    */
-  explicit ShaderVertexOut(const Model::Face &face);
+  explicit ShaderVertexOut(const Face &face);
 
   /// @name 默认构造/析构函数
   /// @{
@@ -160,11 +159,11 @@ class ShaderFragmentOut {
 class ShaderData {
  public:
   /// 模型变换矩阵
-  Matrix4f model_matrix_ = Matrix4f().setIdentity();
+  Matrix4f model_matrix_ = Matrix4f(1.0f);
   /// 视图变换矩阵
-  Matrix4f view_matrix_ = Matrix4f().setIdentity();
+  Matrix4f view_matrix_ = Matrix4f(1.0f);
   /// 正交变换矩阵
-  Matrix4f project_matrix_ = Matrix4f().setIdentity();
+  Matrix4f project_matrix_ = Matrix4f(1.0f);
 
   /**
    * 构造函数

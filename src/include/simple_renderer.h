@@ -23,10 +23,9 @@
 
 #include "light.h"
 #include "log_system.h"
-#include "matrix.hpp"
+#include "math.hpp"
 #include "model.hpp"
 #include "shader_base.h"
-#include "vector.hpp"
 
 namespace simple_renderer {
 
@@ -91,7 +90,7 @@ class SimpleRenderer {
    * @todo 多线程支持
    */
   void DrawTriangle(const ShaderBase &shader, const Light &light,
-                    const Model::Normal &normal, const Model::Face &face);
+                    const Vector3f &normal, const Face &face);
 
   /**
    * 绘制模型

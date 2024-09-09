@@ -21,7 +21,7 @@
 #include <string>
 
 #include "color.h"
-#include "vector.hpp"
+#include "math.hpp"
 
 namespace simple_renderer {
 
