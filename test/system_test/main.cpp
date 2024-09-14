@@ -14,7 +14,7 @@
  * </table>
  */
 
-#include <simple_renderer.h>
+#include <renderer.h>
 
 #include <cstdint>
 #include <iostream>
@@ -80,17 +80,22 @@ int main(int argc, char **argv) {
   matrix = translation_matrix * scale_matrix * rotation_matrix;
 
   simple_renderer::Shader shader;
-  shader.SetUniform("model_matrix", matrix);
-  shader.SetUniform("view_matrix", simple_renderer::Matrix4f(1.0f));
-  shader.SetUniform("projection_matrix", simple_renderer::Matrix4f(1.0f));
+  shader.SetUniform("modelMatrix", matrix);
+  shader.SetUniform("viewMatrix", simple_renderer::Matrix4f(1.0f));
+  shader.SetUniform("projectionMatrix", simple_renderer::Matrix4f(1.0f));
   simple_renderer::Light light;
+  light.dir = simple_renderer::Vector3f(1.0f, 1.0f, -1.0f);
   shader.SetUniform("light", light);
+
+  // TODO: add complete camera system
+  shader.SetUniform("cameraPos", simple_renderer::Vector3f(0.0f, 0.0f, 0.0f));
 
   for (auto &model : models) {
     simple_renderer.render(model, shader);
   }
 
   auto display = Display(kWidth, kHeight);
+  // TODO: support real-time keyboard event
   display.loopBegin();
   while (!display.loopShouldClose()) {
     display.handleEvents();

@@ -2,14 +2,17 @@
 
 namespace simple_renderer {
 
-Vertex Shader::VertexShader(const Vertex& vertex) const {
-  Matrix4f model_matrix = uniformbuffer_.GetUniform<Matrix4f>("model_matrix");
-  Matrix4f view_matrix = uniformbuffer_.GetUniform<Matrix4f>("view_matrix");
+Vertex Shader::VertexShader(const Vertex& vertex) {
+  Matrix4f model_matrix = uniformbuffer_.GetUniform<Matrix4f>("modelMatrix");
+  Matrix4f view_matrix = uniformbuffer_.GetUniform<Matrix4f>("viewMatrix");
   Matrix4f projection_matrix =
-      uniformbuffer_.GetUniform<Matrix4f>("projection_matrix");
+      uniformbuffer_.GetUniform<Matrix4f>("projectionMatrix");
 
   Matrix4f mvp_matrix = projection_matrix * view_matrix * model_matrix;
   // auto normal_matrix = model_matrix.inverse().transpose();
+
+  sharedDataInShader_.fragPos_varying =
+      Vector3f(model_matrix * vertex.GetPosition());
 
   return mvp_matrix * vertex;
 }
@@ -17,22 +20,27 @@ Vertex Shader::VertexShader(const Vertex& vertex) const {
 Color Shader::FragmentShader(const Fragment& fragment) const {
   // interpolate Normal, Color and UV
   Color interpolateColor = fragment.color;
-  Vector3f normal = fragment.normal;
+  Vector3f normal = glm::normalize(fragment.normal);
   Vector2f uv = fragment.uv;
 
   // uniform
   Light light = uniformbuffer_.GetUniform<Light>("light");
   Material material = uniformbuffer_.GetUniform<Material>("material");
 
-  // 只绘制正面，背面intensity为负 = 0
-  auto intensity = std::max(glm::dot(normal, light.dir), 0.0f);
+  // view direction
+  Vector3f view_dir =
+      glm::normalize(sharedDataInShader_.fragPos_varying -
+                     uniformbuffer_.GetUniform<Vector3f>("cameraPos"));
+  Vector3f light_dir = glm::normalize(light.dir);
+
+  auto intensity = std::max(glm::dot(normal, light_dir), 0.0f);
   // texture color
-  Color ambient_color, diffuse_color;
+  Color ambient_color, diffuse_color, specular_color;
   if (material.has_ambient_texture) {
     Color texture_color = SampleTexture(material.ambient_texture, uv);
-    ambient_color = texture_color * intensity;
+    ambient_color = texture_color;
   } else {
-    ambient_color = interpolateColor * intensity;
+    ambient_color = interpolateColor;
   }
 
   if (material.has_diffuse_texture) {
@@ -41,7 +49,19 @@ Color Shader::FragmentShader(const Fragment& fragment) const {
   } else {
     diffuse_color = interpolateColor * intensity;
   }
-  return ambient_color * 0.1f + diffuse_color;
+
+  Vector3f halfVector = glm::normalize(light_dir + view_dir);
+  float spec = std::pow(std::max(glm::dot(normal, halfVector), 0.0f),
+                        material.shininess);
+  if (material.has_specular_texture) {
+    Color texture_color = SampleTexture(material.specular_texture, uv);
+    specular_color = texture_color * spec;
+  } else {
+    specular_color = Color(1.0f, 1.0f, 1.0f) * spec;
+  }
+
+  return ClampColor(ambient_color * 0.1f + diffuse_color +
+                    specular_color * 0.2f);
 }
 
 // 将浮点数转换为 uint8_t
@@ -72,6 +92,20 @@ Color Shader::SampleTexture(const Texture& texture, const Vector2f& uv) const {
   // Get pixel color
   // 获取像素颜色
   return texture.GetPixel(x, y);
+}
+
+Color Shader::ClampColor(const Color color) const {
+  uint8_t red =
+      color[Color::kColorIndexRed] > 255 ? 255 : color[Color::kColorIndexRed];
+  uint8_t green = color[Color::kColorIndexGreen] > 255
+                      ? 255
+                      : color[Color::kColorIndexGreen];
+  uint8_t blue =
+      color[Color::kColorIndexBlue] > 255 ? 255 : color[Color::kColorIndexBlue];
+  uint8_t alpha = color[Color::kColorIndexAlpha] > 255
+                      ? 255
+                      : color[Color::kColorIndexAlpha];
+  return Color(red, green, blue, alpha);
 }
 
 }  // namespace simple_renderer

@@ -16,6 +16,7 @@
 
 #include "color.h"
 
+#include <glm/glm.hpp>
 #include <limits>
 #include <span>
 

@@ -53,6 +53,14 @@ struct Fragment {
 };
 
 /**
+ * @brief Shared Variables 共享变量
+ *
+ */
+struct SharedDataInShader {
+  Vector3f fragPos_varying = Vector3f(0.0f);
+};
+
+/**
  * @brief Shader Class 着色器类
  *
  */
@@ -66,7 +74,7 @@ class Shader {
   virtual ~Shader() = default;
 
   // Input Data -> Vertex Shader -> Screen Space Coordiante
-  Vertex VertexShader(const Vertex &vertex) const;
+  Vertex VertexShader(const Vertex &vertex);
   // Input Data -> Fragment Shader -> Color
   Color FragmentShader(const Fragment &fragment) const;
 
@@ -80,7 +88,12 @@ class Shader {
   // UniformBuffer
   UniformBuffer uniformbuffer_;
 
+  // Shared Variables
+  // 共享变量
+  SharedDataInShader sharedDataInShader_;
+
   Color SampleTexture(const Texture &texture, const Vector2f &uv) const;
+  Color ClampColor(const Color color) const;
 };
 
 uint8_t FloatToUint8_t(float val);

@@ -14,7 +14,7 @@
  * </table>
  */
 
-#include "simple_renderer.h"
+#include "renderer.h"
 
 #include <omp.h>
 

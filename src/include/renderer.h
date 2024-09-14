@@ -14,8 +14,8 @@
  * </table>
  */
 
-#ifndef SIMPLERENDER_SRC_INCLUDE_SIMPLE_RENDER_H_
-#define SIMPLERENDER_SRC_INCLUDE_SIMPLE_RENDER_H_
+#ifndef SIMPLERENDER_SRC_INCLUDE_RENDERER_H_
+#define SIMPLERENDER_SRC_INCLUDE_RENDERER_H_
 
 #include <cstdint>
 #include <functional>
