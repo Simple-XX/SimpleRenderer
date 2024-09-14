@@ -36,7 +36,7 @@ class Texture {
 
   // Load a texture from a file
   // 从文件加载纹理
-  static Texture loadTextureFromFile(const std::string& path);
+  static Texture LoadTextureFromFile(const std::string& path);
 
   // Free the texture data
   // 释放纹理数据
@@ -44,7 +44,7 @@ class Texture {
 
   // get pixel from texture
   // 从纹理获取像素
-  Color getPixel(int x, int y) const;
+  Color GetPixel(int x, int y) const;
 
   // Texture data
   // 纹理数据

@@ -48,14 +48,14 @@ SimpleRenderer::SimpleRenderer(size_t width, size_t height, uint32_t *buffer,
 }
 
 bool SimpleRenderer::render(const Model &model, const Shader &shader) {
-  SPDLOG_INFO("render model: {}", model.modelPath());
+  SPDLOG_INFO("render model: {}", model.GetModelPath());
   shader_ = std::make_shared<Shader>(shader);
   DrawModel(model);
   return true;
 }
 
 void SimpleRenderer::DrawModel(const Model &model) {
-  SPDLOG_INFO("draw {}", model.modelPath());
+  SPDLOG_INFO("draw {}", model.GetModelPath());
   std::vector<Vertex> processedVertex;
 
   std::vector<std::vector<Vertex>> processed_vertices_per_thread(kNProc);
@@ -67,7 +67,7 @@ void SimpleRenderer::DrawModel(const Model &model) {
         processed_vertices_per_thread[thread_id];
 
 #pragma omp for
-    for (const auto &v : model.vertices()) {
+    for (const auto &v : model.GetVertices()) {
       /* * * Vertex Shader * *  */
       auto vertex = shader_->VertexShader(v);
       local_vertices.push_back(vertex);
@@ -79,14 +79,14 @@ void SimpleRenderer::DrawModel(const Model &model) {
                            local_vertices.end());
   }
 
-  for (const auto &f : model.faces()) {
-    auto v0 = processedVertex[f.index(0)];
-    auto v1 = processedVertex[f.index(1)];
-    auto v2 = processedVertex[f.index(2)];
+  for (const auto &f : model.GetFaces()) {
+    auto v0 = processedVertex[f.GetIndex(0)];
+    auto v1 = processedVertex[f.GetIndex(1)];
+    auto v2 = processedVertex[f.GetIndex(2)];
     /* * * Rasterization * * */
-    auto fragments = rasterizer_->rasterize(v0, v1, v2);
+    auto fragments = rasterizer_->Rasterize(v0, v1, v2);
     // material
-    shader_->SetUniform("material", f.material());
+    shader_->SetUniform("material", f.GetMaterial());
     for (const auto &fragment : fragments) {
       size_t x = fragment.screen_coord[0];
       size_t y = fragment.screen_coord[1];

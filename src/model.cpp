@@ -29,11 +29,11 @@ namespace simple_renderer {
 
 // Constructor that loads a model from a file path
 // 构造函数从文件路径加载模型
-Model::Model(const std::string& model_path) { loadModel(model_path); }
+Model::Model(const std::string& model_path) { LoadModel(model_path); }
 
 // Load the model using Assimp and process its nodes and meshes
 // 使用 Assimp 加载模型并处理其节点和网格
-void Model::loadModel(const std::string& path) {
+void Model::LoadModel(const std::string& path) {
   Assimp::Importer importer;
   const aiScene* scene =
       importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -52,7 +52,7 @@ void Model::loadModel(const std::string& path) {
 
   // Process the root node recursively
   // 递归处理根节点
-  processNode(scene->mRootNode, scene);
+  ProcessNode(scene->mRootNode, scene);
 
   SPDLOG_INFO(
       "Loaded model path: {},  with vertices: {}, triangles: {}, "
@@ -63,24 +63,24 @@ void Model::loadModel(const std::string& path) {
 
 // Recursively process nodes in the model
 // 递归处理模型中的节点
-void Model::processNode(aiNode* node, const aiScene* scene) {
+void Model::ProcessNode(aiNode* node, const aiScene* scene) {
   // Process each mesh in the node
   // 处理节点中的每个网格
   for (unsigned int i = 0; i < node->mNumMeshes; i++) {
     aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-    processMesh(mesh, scene);
+    ProcessMesh(mesh, scene);
   }
 
   // Recursively process each child node
   // 递归处理每个子节点
   for (unsigned int i = 0; i < node->mNumChildren; i++) {
-    processNode(node->mChildren[i], scene);
+    ProcessNode(node->mChildren[i], scene);
   }
 }
 
 // Process a single mesh and extract vertices, normals, and faces
 // 处理单个网格并提取顶点、法线和面
-void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
+void Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
   // Process vertices
   // 处理顶点
   for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
@@ -114,7 +114,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
       // Process the material associated with this mesh
       // 处理与此网格关联的材质
       Material material =
-          processMaterial(scene->mMaterials[mesh->mMaterialIndex]);
+          ProcessMaterial(scene->mMaterials[mesh->mMaterialIndex]);
 
       // Create a Face object and store it
       // 创建一个 Face 对象并存储它
@@ -126,7 +126,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 // Extract material properties from the Assimp material structure
 // 从 Assimp 材质结构中提取材质属性
-Material Model::processMaterial(aiMaterial* mat) {
+Material Model::ProcessMaterial(aiMaterial* mat) {
   Material material;
 
   aiColor3D ambient(0.0f, 0.0f, 0.0f);
@@ -162,7 +162,7 @@ Material Model::processMaterial(aiMaterial* mat) {
     } else {
       // first time loading
       // 第一次加载纹理
-      material.ambient_texture = Texture::loadTextureFromFile(fullpath);
+      material.ambient_texture = Texture::LoadTextureFromFile(fullpath);
       texture_cache_[fullpath] = material.ambient_texture;
     }
     material.has_ambient_texture = true;
@@ -179,7 +179,7 @@ Material Model::processMaterial(aiMaterial* mat) {
     } else {
       // first time loading
       // 第一次加载纹理
-      material.diffuse_texture = Texture::loadTextureFromFile(fullpath);
+      material.diffuse_texture = Texture::LoadTextureFromFile(fullpath);
       texture_cache_[fullpath] = material.diffuse_texture;
     }
     material.has_diffuse_texture = true;
@@ -196,7 +196,7 @@ Material Model::processMaterial(aiMaterial* mat) {
     } else {
       // first time loading
       // 第一次加载纹理
-      material.specular_texture = Texture::loadTextureFromFile(fullpath);
+      material.specular_texture = Texture::LoadTextureFromFile(fullpath);
       texture_cache_[fullpath] = material.specular_texture;
     }
     material.has_specular_texture = true;

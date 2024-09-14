@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
   simple_renderer::Buffer buffer(kWidth, kHeight);
 
   auto simple_renderer = simple_renderer::SimpleRenderer(
-      kWidth, kHeight, buffer.framebuffer(), pixel);
+      kWidth, kHeight, buffer.GetFramebuffer(), pixel);
 
   // obj 路径
   std::vector<std::string> objs;
@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
   while (!display.loopShouldClose()) {
     display.handleEvents();
 
-    display.fill(buffer.framebuffer());
+    display.fill(buffer.GetFramebuffer());
   }
 
   return 0;

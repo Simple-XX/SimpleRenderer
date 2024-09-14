@@ -39,7 +39,7 @@ class Buffer {
         framebuffer_(new uint32_t[size_](), std::default_delete<uint32_t[]>()),
         matrix_(1.0f) {}
 
-  uint32_t* framebuffer() { return framebuffer_.get(); }
+  uint32_t* GetFramebuffer() { return framebuffer_.get(); }
 
   uint32_t& operator[](size_t index) {
     if (index >= size_) {
@@ -48,9 +48,9 @@ class Buffer {
     return framebuffer_.get()[index];
   }
 
-  const Matrix4f& matrix() const { return matrix_; }
+  const Matrix4f& GetMatrix() const { return matrix_; }
 
-  void setMatrix(const Matrix4f& matrix) { matrix_ = matrix; }
+  void SetMatrix(const Matrix4f& matrix) { matrix_ = matrix; }
 
  private:
   size_t width_;

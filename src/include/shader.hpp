@@ -25,12 +25,12 @@ class UniformBuffer {
   }
 
   template <typename T>
-  T getUniform(const std::string &name) const {
+  T GetUniform(const std::string &name) const {
     return std::get<T>(uniforms_.at(name));
   }
 
   template <typename T>
-  bool hasUniform(const std::string &name) const {
+  bool HasUniform(const std::string &name) const {
     return uniforms_.find(name) != uniforms_.end();
   }
 
@@ -80,10 +80,10 @@ class Shader {
   // UniformBuffer
   UniformBuffer uniformbuffer_;
 
-  Color sampleTexture(const Texture &texture, const Vector2f &uv) const;
+  Color SampleTexture(const Texture &texture, const Vector2f &uv) const;
 };
 
-uint8_t float_to_uint8_t(float val);
+uint8_t FloatToUint8_t(float val);
 
 }  // namespace simple_renderer
 

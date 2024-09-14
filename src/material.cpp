@@ -3,14 +3,11 @@
 #include <string>
 
 #define STB_IMAGE_IMPLEMENTATION
+#include "log_system.h"
 #include "stb_image.h"
 
-#include "log_system.h"
-
-
-
 namespace simple_renderer {
-Texture Texture::loadTextureFromFile(const std::string& path) {
+Texture Texture::LoadTextureFromFile(const std::string& path) {
   Texture texture;
 
   int width, height, channels;
@@ -35,7 +32,7 @@ void Texture::free() {
   }
 }
 
-Color Texture::getPixel(int x, int y) const {
+Color Texture::GetPixel(int x, int y) const {
   if (!data) {
     SPDLOG_ERROR("Texture data is nullptr");
     throw std::invalid_argument("Texture data is nullptr");

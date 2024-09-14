@@ -41,10 +41,10 @@ class Vertex {
 
   // Getter functions
   // 获取函数
-  [[nodiscard]] Vector4f position() const { return position_; }
-  [[nodiscard]] Vector3f normal() const { return normal_; }
-  [[nodiscard]] Vector2f texCoords() const { return texCoords_; }
-  [[nodiscard]] Color color() const { return color_; }
+  [[nodiscard]] Vector4f GetPosition() const { return position_; }
+  [[nodiscard]] Vector3f GetNormal() const { return normal_; }
+  [[nodiscard]] Vector2f GetTexCoords() const { return texCoords_; }
+  [[nodiscard]] Color GetColor() const { return color_; }
 
  private:
   Vector4f position_;   // 3D position, 3D顶点坐标
@@ -54,8 +54,9 @@ class Vertex {
 };
 
 inline Vertex operator*(const Matrix4f& matrix, const Vertex& vertex) {
-  return Vertex(matrix * vertex.position(), Matrix3f(matrix) * vertex.normal(),
-                vertex.texCoords(), vertex.color());
+  return Vertex(matrix * vertex.GetPosition(),
+                Matrix3f(matrix) * vertex.GetNormal(), vertex.GetTexCoords(),
+                vertex.GetColor());
 }
 
 }  // namespace simple_renderer

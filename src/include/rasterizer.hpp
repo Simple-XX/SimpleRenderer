@@ -17,17 +17,17 @@ class Rasterizer {
 
   Rasterizer(size_t width, size_t height);
 
-  std::vector<Fragment> rasterize(const Vertex& v0, const Vertex& v1,
+  std::vector<Fragment> Rasterize(const Vertex& v0, const Vertex& v1,
                                   const Vertex& v2);
 
  private:
   size_t width_, height_;
 
   template <typename T>
-  T interpolate(const T& v0, const T& v1, const T& v2,
+  T Interpolate(const T& v0, const T& v1, const T& v2,
                 const Vector3f& barycentric_coord);
 
-  Color interpolateColor(const Color& color0, const Color& color1,
+  Color InterpolateColor(const Color& color0, const Color& color1,
                          const Color& color2,
                          const Vector3f& barycentric_coord);
 
@@ -38,7 +38,7 @@ class Rasterizer {
 
   // Calculate the normal vector based on the vertices
   // 根据顶点计算法向量
-  Vector3f calculateNormal(const Vector3f& v0, const Vector3f& v1,
+  Vector3f CalculateNormal(const Vector3f& v0, const Vector3f& v1,
                            const Vector3f& v2);
 };
 

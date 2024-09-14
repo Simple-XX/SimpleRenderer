@@ -63,9 +63,9 @@ class Model {
 
   // Get functions
   // 获取函数
-  const std::vector<Vertex>& vertices() const { return vertices_; };
-  const std::vector<Face>& faces() const { return faces_; };
-  const std::string& modelPath() const { return directory_; };
+  const std::vector<Vertex>& GetVertices() const { return vertices_; };
+  const std::vector<Face>& GetFaces() const { return faces_; };
+  const std::string& GetModelPath() const { return directory_; };
 
  private:
   // Number of vertices per triangle face
@@ -85,19 +85,19 @@ class Model {
 
   // Load the model from the specified file path
   // 从指定的文件路径加载模型
-  void loadModel(const std::string& path);
+  void LoadModel(const std::string& path);
 
   // Process a node in the model
   // 处理模型中的一个节点
-  void processNode(aiNode* node, const aiScene* scene);
+  void ProcessNode(aiNode* node, const aiScene* scene);
 
   // Process a mesh in the model
   // 处理模型中的一个网格
-  void processMesh(aiMesh* mesh, const aiScene* scene);
+  void ProcessMesh(aiMesh* mesh, const aiScene* scene);
 
   // Process the material of the model
   // 处理模型的材质
-  Material processMaterial(aiMaterial* material);
+  Material ProcessMaterial(aiMaterial* material);
 
   // Texture cache
   // 纹理缓存
