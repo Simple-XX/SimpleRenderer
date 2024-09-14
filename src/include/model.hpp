@@ -74,6 +74,11 @@ class Model {
   // Directory where the model is located
   // 模型所在的目录
   std::string directory_;
+
+  // List of vertices that make up the model
+  // 构成模型的顶点列表
+  std::vector<Vertex> vertices_;
+
   // List of faces(triangles) that make up the model
   // 构成模型的面(三角形）列表
   std::vector<Face> faces_;

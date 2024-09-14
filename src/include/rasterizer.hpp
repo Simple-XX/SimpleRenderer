@@ -1,6 +1,7 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_RASTERIZER_HPP_
 #define SIMPLERENDER_SRC_INCLUDE_RASTERIZER_HPP_
 
+#include "config.h"
 #include "shader.hpp"
 
 namespace simple_renderer {
@@ -19,13 +20,8 @@ class Rasterizer {
   std::vector<Fragment> rasterize(const Vertex& v0, const Vertex& v1,
                                   const Vertex& v2);
 
-  void setDepthBuffer(size_t index, float zvalue) {
-    depth_buffer_[index] = zvalue;
-  }
-
  private:
   size_t width_, height_;
-  std::shared_ptr<float[]> depth_buffer_;
 
   template <typename T>
   T interpolate(const T& v0, const T& v1, const T& v2,
@@ -39,6 +35,11 @@ class Rasterizer {
                                                 const Vector3f& p1,
                                                 const Vector3f& p2,
                                                 const Vector3f& pa);
+
+  // Calculate the normal vector based on the vertices
+  // 根据顶点计算法向量
+  Vector3f calculateNormal(const Vector3f& v0, const Vector3f& v1,
+                           const Vector3f& v2);
 };
 
 }  // namespace simple_renderer

@@ -63,6 +63,7 @@ class SimpleRenderer {
   const size_t height_;
   const size_t width_;
   uint32_t *buffer_;
+  std::shared_ptr<float[]> depth_buffer_;
   DrawPixelFunc draw_pixel_func_;
   LogSystem log_system_;
 
@@ -71,13 +72,9 @@ class SimpleRenderer {
 
   /**
    * 绘制模型
-   * @param shader 要使用的着色器
-   * @param light 光照信息
    * @param model 模型
-   * @param draw_line 是否绘制线框
-   * @param draw_triangle 是否绘制三角形
    */
-  void DrawModel(const Model &model, const Light &light);
+  void DrawModel(const Model &model);
 };
 }  // namespace simple_renderer
 

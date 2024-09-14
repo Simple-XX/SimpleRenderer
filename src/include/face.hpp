@@ -41,25 +41,10 @@ class Face {
   // 获取函数
   const std::array<size_t, 3>& indices() const { return indices_; }
   const size_t index(size_t index) const { return indices_[index]; }
-  const Vector3f& normal() const { return normal_; }
   const Material& material() const { return material_; }
-
-  // Calculate the normal vector based on the vertices
-  // 根据顶点计算法向量
-  void calculateNormal(const std::vector<Vertex>& vertices) {
-    Vector3f edge1 = Vector3f(vertices[indices_[1]].position()) -
-                     Vector3f(vertices[indices_[0]].position());
-    Vector3f edge2 = Vector3f(vertices[indices_[2]].position()) -
-                     Vector3f(vertices[indices_[0]].position());
-    normal_ = glm::normalize(
-        // Normalize the cross product to get the
-        // normal 归一化叉积以获得法向量
-        glm::cross(edge1, edge2));
-  }
 
  private:
   std::array<size_t, 3> indices_;
-  Vector3f normal_;
   Material material_;
 };
 }  // namespace simple_renderer

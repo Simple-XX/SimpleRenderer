@@ -1,18 +1,26 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_SHADER_HPP_
 #define SIMPLERENDER_SRC_INCLUDE_SHADER_HPP_
 
+#include "light.h"
 #include "material.hpp"
 #include "vertex.hpp"
 
 namespace simple_renderer {
 
 using UniformValue = std::variant<int, float, Vector2f, Vector3f, Vector4f,
-                                  Matrix3f, Matrix4f, Material>;
+                                  Matrix3f, Matrix4f, Material, Light>;
 
 class UniformBuffer {
  public:
   template <typename T>
   void SetUniform(const std::string &name, const T &value) {
+    static_assert(
+        std::is_same_v<T, int> || std::is_same_v<T, float> ||
+            std::is_same_v<T, Vector2f> || std::is_same_v<T, Vector3f> ||
+            std::is_same_v<T, Vector4f> || std::is_same_v<T, Matrix3f> ||
+            std::is_same_v<T, Matrix4f> || std::is_same_v<T, Material> ||
+            std::is_same_v<T, Light>,
+        "Type not supported by UniformValue");
     uniforms_[name] = value;
   }
 
@@ -41,6 +49,7 @@ struct Fragment {
   Vector3f normal;
   Vector2f uv;
   Color color;
+  float depth;
 };
 
 /**
@@ -50,10 +59,10 @@ struct Fragment {
 class Shader {
  public:
   Shader() = default;
-  Shader(const Shader &shader_base) = default;
-  Shader(Shader &&shader_base) = default;
-  auto operator=(const Shader &shader_base) -> Shader & = default;
-  auto operator=(Shader &&shader_base) -> Shader & = default;
+  Shader(const Shader &shader) = default;
+  Shader(Shader &&shader) = default;
+  auto operator=(const Shader &shader) -> Shader & = default;
+  auto operator=(Shader &&shader) -> Shader & = default;
   virtual ~Shader() = default;
 
   // Input Data -> Vertex Shader -> Screen Space Coordiante
@@ -61,9 +70,14 @@ class Shader {
   // Input Data -> Fragment Shader -> Color
   Color FragmentShader(const Fragment &fragment) const;
 
+  // set uniform value
+  template <typename T>
+  void SetUniform(const std::string &name, const T &value) {
+    uniformbuffer_.SetUniform(name, value);
+  }
+
  private:
   // UniformBuffer
-  // TODO: add setter function and getter function under Shader class level
   UniformBuffer uniformbuffer_;
 
   Color sampleTexture(const Texture &texture, const Vector2f &uv) const;

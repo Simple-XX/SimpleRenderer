@@ -39,17 +39,6 @@ class Vertex {
   // Transform the vertex with a matrix     使用矩阵变换顶点
   void transform(const Matrix4f& matrix) { position_ = matrix * position_; }
 
-  // Perspective divide to convert from clip space to normalized device
-  // coordinates 透视除法，将裁剪空间转换为标准化设备坐标
-  void perspectiveDivide() {
-    if (position_.w != 0) {
-      position_.x /= position_.w;
-      position_.y /= position_.w;
-      position_.z /= position_.w;
-      position_.w = 1.0f;  // Homogenize, 齐次坐标
-    }
-  }
-
   // Getter functions
   // 获取函数
   [[nodiscard]] Vector4f position() const { return position_; }

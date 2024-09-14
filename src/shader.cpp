@@ -21,13 +21,13 @@ Color Shader::FragmentShader(const Fragment& fragment) const {
   Vector2f uv = fragment.uv;
 
   // uniform
-  Vector3f light = uniformbuffer_.getUniform<Vector3f>("light");
+  Light light = uniformbuffer_.getUniform<Light>("light");
   Material material = uniformbuffer_.getUniform<Material>("material");
 
   // 只绘制正面，背面intensity为负 = 0
-  auto intensity = std::max(glm::dot(normal, light), 0.0f);
+  auto intensity = std::max(glm::dot(normal, light.dir), 0.0f);
   // texture color
-  Color final_color, ambient_color, diffuse_color, specular_color;
+  Color ambient_color, diffuse_color;
   if (material.has_ambient_texture) {
     Color texture_color = sampleTexture(material.ambient_texture, uv);
     ambient_color = texture_color * intensity;
@@ -41,6 +41,7 @@ Color Shader::FragmentShader(const Fragment& fragment) const {
   } else {
     diffuse_color = interpolateColor * intensity;
   }
+  return ambient_color * 0.1f + diffuse_color;
 }
 
 // 将浮点数转换为 uint8_t

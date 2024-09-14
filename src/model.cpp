@@ -43,20 +43,22 @@ void Model::loadModel(const std::string& path) {
   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
       !scene->mRootNode) {
     SPDLOG_ERROR("Assimp Error: {}", importer.GetErrorString());
-    throw std::runtime_error("Failed to load model with Assimp");
+    throw std::runtime_error("Failed to load model with Assimp, path: " + path);
   }
 
   // Store the directory path of the model
   // 存储模型的目录路径
   directory_ = path.substr(0, path.find_last_of('/'));
 
-  SPDLOG_INFO(
-      "Loaded model path: {}, Directory: {}, with meshes: {}, materials: {}",
-      path, directory_, scene->mNumMeshes, scene->mNumMaterials);
-
   // Process the root node recursively
   // 递归处理根节点
   processNode(scene->mRootNode, scene);
+
+  SPDLOG_INFO(
+      "Loaded model path: {},  with vertices: {}, triangles: {}, "
+      "meshes: {}, materials: {}",
+      path, static_cast<int>(vertices_.size()), static_cast<int>(faces_.size()),
+      scene->mNumMeshes, scene->mNumMaterials);
 }
 
 // Recursively process nodes in the model
@@ -79,8 +81,6 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 // Process a single mesh and extract vertices, normals, and faces
 // 处理单个网格并提取顶点、法线和面
 void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
-  std::vector<Vertex> vertices;
-
   // Process vertices
   // 处理顶点
   for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
@@ -99,7 +99,7 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     Color color(255.f, 255.f, 255.f, 255.f);  // Default color (white)
                                               // 默认颜色（白色）
 
-    vertices.emplace_back(Vector4f(position, 1.0f), normal, texCoords, color);
+    vertices_.emplace_back(Vector4f(position, 1.0f), normal, texCoords, color);
   }
 
   // Process faces (assuming triangulation, so each face has 3 vertices)
@@ -119,7 +119,6 @@ void Model::processMesh(aiMesh* mesh, const aiScene* scene) {
       // Create a Face object and store it
       // 创建一个 Face 对象并存储它
       Face face(v0, v1, v2, std::move(material));
-      face.calculateNormal(vertices);
       faces_.emplace_back(face);
     }
   }

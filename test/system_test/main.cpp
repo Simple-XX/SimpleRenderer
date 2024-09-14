@@ -43,6 +43,9 @@ int main(int argc, char **argv) {
     printf("argv[%d]: %s\n", i, argv[i]);
   }
   auto obj_path = std::string(argv[1]);
+  // auto obj_path = std::string(
+  // "/Users/hezhohao/Programming/GitRepo/SimpleRenderer/obj");  // just for
+  // debuging
 
   simple_renderer::Buffer buffer(kWidth, kHeight);
 
@@ -51,13 +54,8 @@ int main(int argc, char **argv) {
 
   // obj 路径
   std::vector<std::string> objs;
-  // objs.emplace_back(obj_path + "/cube.obj");
-  // objs.emplace_back(obj_path + "/cube2.obj");
-  // objs.emplace_back(obj_path + "/cube3.obj");
-  // objs.emplace_back(obj_path + "/cornell_box.obj");
-  // objs.emplace_back(obj_path + "/helmet.obj");
-  // objs.emplace_back(obj_path + "/african_head.obj");
   objs.emplace_back(obj_path + "/utah-teapot-texture/teapot.obj");
+  // add more obj .. if you want
   // load model
   std::vector<simple_renderer::Model> models;
   for (auto &obj : objs) {
@@ -81,23 +79,15 @@ int main(int argc, char **argv) {
   // Combined transformation matrix
   matrix = translation_matrix * scale_matrix * rotation_matrix;
 
-  // 矩阵运算的顺序
-  // 归一化
-  // 坐标空间
-
-  /// @todo 旋转
-  // 旋转轴+旋转角度
-  // 四元数
-  // (0.3, 0.2, 0.1) 90
-  // Tran/Scal/rota
-  // 1. 物体原地旋转
-  // 2. 移动到屏幕中央
-  // 3. 移动到屏幕左上角
-  // 4. 缩放物体
+  simple_renderer::Shader shader;
+  shader.SetUniform("model_matrix", matrix);
+  shader.SetUniform("view_matrix", simple_renderer::Matrix4f(1.0f));
+  shader.SetUniform("projection_matrix", simple_renderer::Matrix4f(1.0f));
+  simple_renderer::Light light;
+  shader.SetUniform("light", light);
 
   for (auto &model : models) {
-    model.transform(matrix);
-    simple_renderer.render(model);
+    simple_renderer.render(model, shader);
   }
 
   auto display = Display(kWidth, kHeight);

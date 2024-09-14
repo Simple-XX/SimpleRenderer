@@ -45,6 +45,8 @@ set(LOG_FILE_PATH "${EXECUTABLE_OUTPUT_PATH}/logs/SimpleRendererLog.log")
 set(LOG_FILE_MAX_SIZE 1024*1024*4)
 # 日志文件数量
 set(LOG_FILE_MAX_COUNT 8)
+#Debug Type (for cmake debug)
+set(CMAKE_BUILD_TYPE "Debug") 
 # 生成配置头文件
 configure_file(
         "${PROJECT_SOURCE_DIR}/cmake/config.h.in"
