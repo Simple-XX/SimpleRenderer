@@ -1,6 +1,8 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_SHADER_HPP_
 #define SIMPLERENDER_SRC_INCLUDE_SHADER_HPP_
 
+#include <variant>
+
 #include "light.h"
 #include "material.hpp"
 #include "vertex.hpp"
