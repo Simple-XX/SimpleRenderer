@@ -24,6 +24,7 @@
 #include <span>
 
 #include "buffer.hpp"
+#include "camera.h"
 
 /**
  * 显示抽象
@@ -58,16 +59,11 @@ class Display {
   void fill(const uint32_t *buffer);
 
   /**
-   * 运行
-   */
-  void run();
-
-  /**
    * 显示循环
    */
   void loopBegin();
-  void handleKeyboardEvent(SDL_Event &event);
-  void handleEvents();
+  void handleKeyboardEvent(SDL_Event &event, simple_renderer::Camera &camera);
+  void handleEvents(simple_renderer::Camera &camera);
   bool loopShouldClose();
 
  private:

@@ -1,6 +1,7 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_BUFFER_HPP_
 #define SIMPLERENDER_SRC_INCLUDE_BUFFER_HPP_
 
+#include <algorithm>
 #include <memory>
 
 #include "math.hpp"
@@ -35,29 +36,45 @@ class Buffer {
   Buffer(size_t width, size_t height)
       : width_(width),
         height_(height),
-        size_(width * height),
-        framebuffer_(new uint32_t[size_](), std::default_delete<uint32_t[]>()),
-        matrix_(1.0f) {}
+        size_(width_ * height_),
+        framebuffer_1_(new uint32_t[size_](),
+                       std::default_delete<uint32_t[]>()),
+        framebuffer_2_(new uint32_t[size_](),
+                       std::default_delete<uint32_t[]>()) {
+    ClearBuffer(framebuffer_1_.get());
+    ClearBuffer(framebuffer_2_.get());
+    drawBuffer_ = framebuffer_1_.get();
+    displayBuffer_ = framebuffer_2_.get();
+  }
 
-  uint32_t* GetFramebuffer() { return framebuffer_.get(); }
+  void ClearDrawBuffer(Color color) { ClearBuffer(drawBuffer_, color); }
+
+  void SwapBuffer() { std::swap(drawBuffer_, displayBuffer_); }
+
+  uint32_t* GetDisplayBuffer() { return displayBuffer_; }
+  uint32_t* GetDrawBuffer() { return drawBuffer_; }
 
   uint32_t& operator[](size_t index) {
     if (index >= size_) {
       throw std::out_of_range("Index out of range");
     }
-    return framebuffer_.get()[index];
+    return drawBuffer_[index];
   }
-
-  const Matrix4f& GetMatrix() const { return matrix_; }
-
-  void SetMatrix(const Matrix4f& matrix) { matrix_ = matrix; }
 
  private:
   size_t width_;
   size_t height_;
   size_t size_;
-  std::shared_ptr<uint32_t[]> framebuffer_;
-  Matrix4f matrix_;
+  std::unique_ptr<uint32_t[]> framebuffer_1_;
+  std::unique_ptr<uint32_t[]> framebuffer_2_;
+  uint32_t* drawBuffer_;
+  uint32_t* displayBuffer_;
+
+  void ClearBuffer(uint32_t* buffer, Color color) {
+    std::fill(buffer, buffer + size_, uint32_t(color));
+  }
+
+  void ClearBuffer(uint32_t* buffer) { std::fill(buffer, buffer + size_, 0); }
 };
 
 }  // namespace simple_renderer

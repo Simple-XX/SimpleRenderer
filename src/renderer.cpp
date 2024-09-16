@@ -32,29 +32,31 @@
 
 namespace simple_renderer {
 
-SimpleRenderer::SimpleRenderer(size_t width, size_t height, uint32_t *buffer,
-                               DrawPixelFunc draw_pixel_func)
+SimpleRenderer::SimpleRenderer(size_t width, size_t height)
     : height_(height),
       width_(width),
-      buffer_(buffer),
-      draw_pixel_func_(draw_pixel_func),
       log_system_(LogSystem(kLogFilePath, kLogFileMaxSize, kLogFileMaxCount)) {
   rasterizer_ = std::make_shared<Rasterizer>(width, height);
   // init depth buffer
   depth_buffer_ = std::shared_ptr<float[]>(new float[width * height],
                                            std::default_delete<float[]>());
-  std::fill(depth_buffer_.get(), depth_buffer_.get() + width * height,
-            std::numeric_limits<float>::infinity());
 }
 
-bool SimpleRenderer::render(const Model &model, const Shader &shader) {
+bool SimpleRenderer::Render(const Model &model, const Shader &shader,
+                            uint32_t *buffer) {
   SPDLOG_INFO("render model: {}", model.GetModelPath());
+  ClearDepthBuffer();
   shader_ = std::make_shared<Shader>(shader);
-  DrawModel(model);
+  DrawModel(model, buffer);
   return true;
 }
 
-void SimpleRenderer::DrawModel(const Model &model) {
+void SimpleRenderer::ClearDepthBuffer() {
+  std::fill(depth_buffer_.get(), depth_buffer_.get() + width_ * height_,
+            std::numeric_limits<float>::infinity());
+}
+
+void SimpleRenderer::DrawModel(const Model &model, uint32_t *buffer) {
   SPDLOG_INFO("draw {}", model.GetModelPath());
   std::vector<Vertex> processedVertex;
 
@@ -83,19 +85,26 @@ void SimpleRenderer::DrawModel(const Model &model) {
     auto v0 = processedVertex[f.GetIndex(0)];
     auto v1 = processedVertex[f.GetIndex(1)];
     auto v2 = processedVertex[f.GetIndex(2)];
+
     /* * * Rasterization * * */
     auto fragments = rasterizer_->Rasterize(v0, v1, v2);
-    // material
+
     shader_->SetUniform("material", f.GetMaterial());
+
     for (const auto &fragment : fragments) {
       size_t x = fragment.screen_coord[0];
       size_t y = fragment.screen_coord[1];
+
+      if (x >= width_ || y >= height_) {
+        continue;
+      }
+
       if (fragment.depth < depth_buffer_[x + y * width_]) {
         depth_buffer_[x + y * width_] = fragment.depth;
 
         /* * * Fragment Shader * * */
         auto color = shader_->FragmentShader(fragment);
-        draw_pixel_func_(x, y, color, buffer_);
+        buffer[x + y * width_] = static_cast<uint32_t>(color);
       }
     }
   }

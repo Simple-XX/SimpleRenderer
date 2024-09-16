@@ -92,30 +92,31 @@ void Display::loopBegin() { is_exit_ = false; }
 
 bool Display::loopShouldClose() { return is_exit_; }
 
-void Display::handleKeyboardEvent(SDL_Event& event) {
+void Display::handleKeyboardEvent(SDL_Event& event,
+                                  simple_renderer::Camera& camera) {
   switch (event.key.keysym.sym) {
     case SDLK_ESCAPE:
     case SDLK_q:
       is_exit_ = true;
       break;
     case SDLK_UP:
-      std::cout << "UP" << std::endl;
+      camera.MoveUp(1.0f);
       break;
     case SDLK_DOWN:
-      std::cout << "DOWN" << std::endl;
+      camera.MoveUp(-1.0f);
       break;
     case SDLK_LEFT:
-      std::cout << "LEFT" << std::endl;
+      camera.MoveRight(-1.0f);
       break;
     case SDLK_RIGHT:
-      std::cout << "RIGHT" << std::endl;
+      camera.MoveRight(1.0f);
       break;
     default:
       break;
   }
 }
 
-void Display::handleEvents() {
+void Display::handleEvents(simple_renderer::Camera& camera) {
   SDL_Event event = SDL_Event();
   while (SDL_PollEvent(&event) != 0) {
     switch (event.type) {
@@ -123,7 +124,7 @@ void Display::handleEvents() {
         is_exit_ = true;
         break;
       case SDL_KEYDOWN:
-        handleKeyboardEvent(event);
+        handleKeyboardEvent(event, camera);
         break;
     }
   }

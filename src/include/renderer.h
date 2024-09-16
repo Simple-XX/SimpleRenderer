@@ -33,9 +33,6 @@ namespace simple_renderer {
 
 class SimpleRenderer {
  public:
-  typedef std::function<void(size_t, size_t, uint32_t, uint32_t *)>
-      DrawPixelFunc;
-
   /**
    * 构造函数
    * @param width
@@ -43,8 +40,7 @@ class SimpleRenderer {
    * @param buffer 要进行绘制的内存区域，大小为 width*height*sizeof(uint32_t)
    * @param
    */
-  SimpleRenderer(size_t width, size_t height, uint32_t *buffer,
-                 DrawPixelFunc draw_pixel_func);
+  SimpleRenderer(size_t width, size_t height);
 
   /// @name 默认构造/析构函数
   /// @{
@@ -57,14 +53,12 @@ class SimpleRenderer {
   virtual ~SimpleRenderer() = default;
   /// @}
 
-  bool render(const Model &model, const Shader &shader);
+  bool Render(const Model &model, const Shader &shader, uint32_t *buffer);
 
  private:
   const size_t height_;
   const size_t width_;
-  uint32_t *buffer_;
   std::shared_ptr<float[]> depth_buffer_;
-  DrawPixelFunc draw_pixel_func_;
   LogSystem log_system_;
 
   std::shared_ptr<Shader> shader_;
@@ -74,7 +68,9 @@ class SimpleRenderer {
    * 绘制模型
    * @param model 模型
    */
-  void DrawModel(const Model &model);
+  void DrawModel(const Model &model, uint32_t *buffer);
+
+  void ClearDepthBuffer();
 };
 }  // namespace simple_renderer
 
