@@ -84,34 +84,55 @@ void SimpleRenderer::DrawModel(const Model &model, uint32_t *buffer) {
   /*  *  *  *  *  *  *  */
 
   /* * * Rasterization * * */
-  std::vector<std::vector<Fragment>> fragmentsBuffer(width_ * height_);
+  std::vector<std::vector<std::vector<Fragment>>> fragmentsBuffer_all_thread(
+      kNProc, std::vector<std::vector<Fragment>>(width_ * height_));
 
-  for (const auto &f : model.GetFaces()) {
-    auto v0 = processedVertex[f.GetIndex(0)];
-    auto v1 = processedVertex[f.GetIndex(1)];
-    auto v2 = processedVertex[f.GetIndex(2)];
+#pragma omp parallel num_threads(kNProc) default(none)                       \
+    shared(processedVertex, fragmentsBuffer_all_thread, rasterizer_, width_, \
+               height_) firstprivate(model)
+  {
+    int thread_id = omp_get_thread_num();
+    auto &fragmentsBuffer_per_thread = fragmentsBuffer_all_thread[thread_id];
 
-    const Material *material = &f.GetMaterial();
+#pragma omp for
+    for (const auto &f : model.GetFaces()) {
+      auto v0 = processedVertex[f.GetIndex(0)];
+      auto v1 = processedVertex[f.GetIndex(1)];
+      auto v2 = processedVertex[f.GetIndex(2)];
 
-    auto fragments = rasterizer_->Rasterize(v0, v1, v2);
+      const Material *material = &f.GetMaterial();
 
-    for (auto &fragment : fragments) {
-      fragment.material = material;
+      auto fragments = rasterizer_->Rasterize(v0, v1, v2);
 
-      size_t x = fragment.screen_coord[0];
-      size_t y = fragment.screen_coord[1];
+      for (auto &fragment : fragments) {
+        fragment.material = material;
 
-      if (x >= width_ || y >= height_) {
-        continue;
+        size_t x = fragment.screen_coord[0];
+        size_t y = fragment.screen_coord[1];
+
+        if (x >= width_ || y >= height_) {
+          continue;
+        }
+
+        size_t index = x + y * width_;
+        fragmentsBuffer_per_thread[index].push_back(fragment);
       }
-
-      size_t index = x + y * width_;
-      fragmentsBuffer[index].push_back(fragment);
     }
   }
-  /*  *  *  *  *  *  *  */
 
-  /* * * Fragment Shader * * */
+  // Merge fragments
+  std::vector<std::vector<Fragment>> fragmentsBuffer(width_ * height_);
+  for (const auto &fragmentsBuffer_per_thread : fragmentsBuffer_all_thread) {
+    for (size_t i = 0; i < fragmentsBuffer_per_thread.size(); i++) {
+      fragmentsBuffer[i].insert(fragmentsBuffer[i].end(),
+                                fragmentsBuffer_per_thread[i].begin(),
+                                fragmentsBuffer_per_thread[i].end());
+    }
+  }
+/*  *  *  *  *  *  *  */
+
+/* * * Fragment Shader * * */
+#pragma omp parallel for
   for (size_t i = 0; i < fragmentsBuffer.size(); i++) {
     const auto &fragments = fragmentsBuffer[i];
     if (fragments.empty()) {
