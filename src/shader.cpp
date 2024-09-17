@@ -25,7 +25,7 @@ Color Shader::FragmentShader(const Fragment& fragment) const {
 
   // uniform
   Light light = uniformbuffer_.GetUniform<Light>("light");
-  Material material = uniformbuffer_.GetUniform<Material>("material");
+  Material material = *fragment.material;
 
   // view direction
   Vector3f view_dir =

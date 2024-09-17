@@ -52,6 +52,7 @@ struct Fragment {
   Vector2f uv;
   Color color;
   float depth;
+  const Material *material;
 };
 
 /**

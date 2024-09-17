@@ -58,8 +58,9 @@ void SimpleRenderer::ClearDepthBuffer() {
 
 void SimpleRenderer::DrawModel(const Model &model, uint32_t *buffer) {
   SPDLOG_INFO("draw {}", model.GetModelPath());
-  std::vector<Vertex> processedVertex;
 
+  /* * * Vertex Shader * * */
+  std::vector<Vertex> processedVertex;
   std::vector<std::vector<Vertex>> processed_vertices_per_thread(kNProc);
 #pragma omp parallel num_threads(kNProc) default(none) \
     shared(shader_, processed_vertices_per_thread) firstprivate(model)
@@ -80,18 +81,23 @@ void SimpleRenderer::DrawModel(const Model &model, uint32_t *buffer) {
     processedVertex.insert(processedVertex.end(), local_vertices.begin(),
                            local_vertices.end());
   }
+  /*  *  *  *  *  *  *  */
+
+  /* * * Rasterization * * */
+  std::vector<std::vector<Fragment>> fragmentsBuffer(width_ * height_);
 
   for (const auto &f : model.GetFaces()) {
     auto v0 = processedVertex[f.GetIndex(0)];
     auto v1 = processedVertex[f.GetIndex(1)];
     auto v2 = processedVertex[f.GetIndex(2)];
 
-    /* * * Rasterization * * */
+    const Material *material = &f.GetMaterial();
+
     auto fragments = rasterizer_->Rasterize(v0, v1, v2);
 
-    shader_->SetUniform("material", f.GetMaterial());
+    for (auto &fragment : fragments) {
+      fragment.material = material;
 
-    for (const auto &fragment : fragments) {
       size_t x = fragment.screen_coord[0];
       size_t y = fragment.screen_coord[1];
 
@@ -99,15 +105,32 @@ void SimpleRenderer::DrawModel(const Model &model, uint32_t *buffer) {
         continue;
       }
 
-      if (fragment.depth < depth_buffer_[x + y * width_]) {
-        depth_buffer_[x + y * width_] = fragment.depth;
-
-        /* * * Fragment Shader * * */
-        auto color = shader_->FragmentShader(fragment);
-        buffer[x + y * width_] = static_cast<uint32_t>(color);
-      }
+      size_t index = x + y * width_;
+      fragmentsBuffer[index].push_back(fragment);
     }
   }
-}
+  /*  *  *  *  *  *  *  */
+
+  /* * * Fragment Shader * * */
+  for (size_t i = 0; i < fragmentsBuffer.size(); i++) {
+    const auto &fragments = fragmentsBuffer[i];
+    if (fragments.empty()) {
+      continue;
+    }
+
+    const Fragment *renderFragment = nullptr;
+    for (const auto &fragment : fragments) {
+      if (!renderFragment || fragment.depth < renderFragment->depth) {
+        renderFragment = &fragment;
+      }
+    }
+
+    if (renderFragment) {
+      auto color = shader_->FragmentShader(*renderFragment);
+      buffer[i] = uint32_t(color);
+    }
+  }
+  /*  *  *  *  *  *  *  */
+}  // namespace simple_renderer
 
 }  // namespace simple_renderer

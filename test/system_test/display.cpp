@@ -75,9 +75,6 @@ void Display::fill(const uint32_t* buffer) {
     throw std::runtime_error(SDL_GetError());
   }
 
-  // 清除渲染器
-  SDL_RenderClear(sdl_renderer_);
-
   // 复制到渲染器
   res = SDL_RenderCopy(sdl_renderer_, sdl_texture_, nullptr, nullptr);
   if (res != 0) {
