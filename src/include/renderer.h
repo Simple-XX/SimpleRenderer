@@ -58,7 +58,6 @@ class SimpleRenderer {
  private:
   const size_t height_;
   const size_t width_;
-  std::shared_ptr<float[]> depth_buffer_;
   LogSystem log_system_;
 
   std::shared_ptr<Shader> shader_;
@@ -69,8 +68,7 @@ class SimpleRenderer {
    * @param model 模型
    */
   void DrawModel(const Model &model, uint32_t *buffer);
-
-  void ClearDepthBuffer();
+  void DrawModelSlower(const Model &model, uint32_t *buffer);
 };
 }  // namespace simple_renderer
 

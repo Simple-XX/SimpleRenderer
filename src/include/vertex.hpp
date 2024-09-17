@@ -41,10 +41,10 @@ class Vertex {
 
   // Getter functions
   // 获取函数
-  [[nodiscard]] Vector4f GetPosition() const { return position_; }
-  [[nodiscard]] Vector3f GetNormal() const { return normal_; }
-  [[nodiscard]] Vector2f GetTexCoords() const { return texCoords_; }
-  [[nodiscard]] Color GetColor() const { return color_; }
+  [[nodiscard]] inline Vector4f GetPosition() const { return position_; }
+  [[nodiscard]] inline Vector3f GetNormal() const { return normal_; }
+  [[nodiscard]] inline Vector2f GetTexCoords() const { return texCoords_; }
+  [[nodiscard]] inline Color GetColor() const { return color_; }
 
  private:
   Vector4f position_;   // 3D position, 3D顶点坐标

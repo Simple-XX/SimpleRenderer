@@ -39,9 +39,9 @@ class Face {
 
   // Get functions
   // 获取函数
-  const std::array<size_t, 3>& GetIndices() const { return indices_; }
-  const size_t GetIndex(size_t index) const { return indices_[index]; }
-  const Material& GetMaterial() const { return material_; }
+  inline const std::array<size_t, 3>& GetIndices() const { return indices_; }
+  inline const size_t GetIndex(size_t index) const { return indices_[index]; }
+  inline const Material& GetMaterial() const { return material_; }
 
  private:
   std::array<size_t, 3> indices_;
