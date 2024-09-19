@@ -42,6 +42,10 @@
           "COVERAGE_OUTPUT_DIR": {
             "type": "STRING",
             "value": "${sourceDir}/build/coverage"
+          },
+          "CMAKE_BUILD_TYPE": {
+            "type": "STRING",
+            "value": "Debug"
           }
         }
       },

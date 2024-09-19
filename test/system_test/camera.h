@@ -43,23 +43,44 @@ class Camera {
   ~Camera() = default;
 
   // Getters and Setters
-  void SetPosition(const glm::vec3& pos) { position_ = pos; }
-  void SetFront(const glm::vec3& frontVec) {
-    front_ = glm::normalize(frontVec);
-  }
-  void SetUp(const glm::vec3& upVec) { up_ = glm::normalize(upVec); }
+  void SetPosition(const Vector3f& pos) { position_ = pos; }
+  void SetFront(const Vector3f& frontVec) { front_ = glm::normalize(frontVec); }
+  void SetUp(const Vector3f& upVec) { up_ = glm::normalize(upVec); }
 
-  glm::vec3 GetPosition() const { return position_; }
-  glm::vec3 GetFront() const { return front_; }
-  glm::vec3 GetUp() const { return up_; }
+  Vector3f GetPosition() const { return position_; }
+  Vector3f GetFront() const { return front_; }
+  Vector3f GetUp() const { return up_; }
+
+  Matrix4f LookAt(const Vector3f& position, const Vector3f& target,
+                  const Vector3f up) {
+    Matrix4f rotationMat = Matrix4f(1.0f);
+    Matrix4f translationMat = Matrix4f(1.0f);
+    Vector3f z = glm::normalize(position - target);
+    Vector3f x = glm::normalize(glm::cross(up, z));
+    Vector3f y = glm::normalize(glm::cross(z, x));
+    rotationMat[0][0] = x.x;
+    rotationMat[1][0] = x.y;
+    rotationMat[2][0] = x.z;
+    rotationMat[0][1] = y.x;
+    rotationMat[1][1] = y.y;
+    rotationMat[2][1] = y.z;
+    rotationMat[0][2] = z.x;
+    rotationMat[1][2] = z.y;
+    rotationMat[2][2] = z.z;
+    translationMat[3][0] = -position.x;
+    translationMat[3][1] = -position.y;
+    translationMat[3][2] = -position.z;
+    return rotationMat * translationMat;
+  }
 
   // Methods to get view and projection matrices
-  glm::mat4 GetViewMatrix() const {
+  Matrix4f GetViewMatrix() {
+    // return LookAt(position_, position_ + front_, up_);
     return glm::lookAt(position_, position_ + front_, up_);
   }
 
-  glm::mat4 GetProjectionMatrix(float fov, float aspectRatio, float nearPlane,
-                                float farPlane) const {
+  Matrix4f GetProjectionMatrix(float fov, float aspectRatio, float nearPlane,
+                               float farPlane) const {
     return glm::perspective(glm::radians(fov), aspectRatio, nearPlane,
                             farPlane);
   }
@@ -74,10 +95,10 @@ class Camera {
   void MoveUp(float distance) { position_ += up_ * distance; }
 
   void Rotate(float yaw, float pitch) {
-    glm::vec3 newFront;
-    newFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    newFront.y = sin(glm::radians(pitch));
-    newFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    Vector3f newFront;
+    newFront.x = std::cos(glm::radians(yaw)) * std::cos(glm::radians(pitch));
+    newFront.y = std::sin(glm::radians(pitch));
+    newFront.z = std::sin(glm::radians(yaw)) * std::cos(glm::radians(pitch));
     front_ = glm::normalize(newFront);
   }
 
