@@ -90,6 +90,8 @@ if (stb_ADDED)
             BASE_DIRS ${stb_SOURCE_DIR}
             FILES stb_image.h
     )
+    add_library(stb_image INTERFACE)
+    target_include_directories(stb_image INTERFACE ${stb_SOURCE_DIR})
 endif ()
 
 # http://wenq.org/wqy2/index.cgi?ZenHei

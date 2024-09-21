@@ -68,15 +68,12 @@ Display::~Display() {
   SDL_Quit();
 }
 
-void Display::fill(const uint32_t *buffer) {
+void Display::fill(const uint32_t* buffer) {
   // 更新 texture
   auto res = SDL_UpdateTexture(sdl_texture_, nullptr, buffer, width_ * 4);
   if (res != 0) {
     throw std::runtime_error(SDL_GetError());
   }
-
-  // 清除渲染器
-  SDL_RenderClear(sdl_renderer_);
 
   // 复制到渲染器
   res = SDL_RenderCopy(sdl_renderer_, sdl_texture_, nullptr, nullptr);
@@ -88,34 +85,44 @@ void Display::fill(const uint32_t *buffer) {
   SDL_RenderPresent(sdl_renderer_);
 }
 
-void Display::loop(uint32_t *buffer) {
-  SDL_Event event = SDL_Event();
-  bool is_exit = false;
-  while (is_exit == false) {
-    while (SDL_PollEvent(&event) != 0) {
-      switch (event.type) {
-        case SDL_QUIT: {
-          is_exit = true;
-          break;
-        }
-        case SDL_KEYDOWN: {
-          switch (event.key.keysym.sym) {
-            case SDLK_ESCAPE: {
-              is_exit = true;
-              break;
-            }
-            default: {
-              // 输出按键名
-              std::cout << "key " << SDL_GetKeyName(event.key.keysym.sym)
-                        << " down!\n";
-              break;
-            }
-          }
-          break;
-        }
-      }
-    }
+void Display::loopBegin() { is_exit_ = false; }
 
-    fill(buffer);
+bool Display::loopShouldClose() { return is_exit_; }
+
+void Display::handleKeyboardEvent(SDL_Event& event,
+                                  simple_renderer::Camera& camera) {
+  switch (event.key.keysym.sym) {
+    case SDLK_ESCAPE:
+    case SDLK_q:
+      is_exit_ = true;
+      break;
+    case SDLK_UP:
+      camera.MoveUp(1.0f);
+      break;
+    case SDLK_DOWN:
+      camera.MoveUp(-1.0f);
+      break;
+    case SDLK_LEFT:
+      camera.MoveRight(-1.0f);
+      break;
+    case SDLK_RIGHT:
+      camera.MoveRight(1.0f);
+      break;
+    default:
+      break;
+  }
+}
+
+void Display::handleEvents(simple_renderer::Camera& camera) {
+  SDL_Event event = SDL_Event();
+  while (SDL_PollEvent(&event) != 0) {
+    switch (event.type) {
+      case SDL_QUIT:
+        is_exit_ = true;
+        break;
+      case SDL_KEYDOWN:
+        handleKeyboardEvent(event, camera);
+        break;
+    }
   }
 }

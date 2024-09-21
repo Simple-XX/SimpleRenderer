@@ -39,23 +39,12 @@ class Vertex {
   // Transform the vertex with a matrix     使用矩阵变换顶点
   void transform(const Matrix4f& matrix) { position_ = matrix * position_; }
 
-  // Perspective divide to convert from clip space to normalized device
-  // coordinates 透视除法，将裁剪空间转换为标准化设备坐标
-  void perspectiveDivide() {
-    if (position_.w != 0) {
-      position_.x /= position_.w;
-      position_.y /= position_.w;
-      position_.z /= position_.w;
-      position_.w = 1.0f;  // Homogenize, 齐次坐标
-    }
-  }
-
-  // Get functions
+  // Getter functions
   // 获取函数
-  Vector4f position() const { return position_; }
-  Vector3f normal() const { return normal_; }
-  Vector2f texCoords() const { return texCoords_; }
-  Color color() const { return color_; }
+  [[nodiscard]] inline Vector4f GetPosition() const { return position_; }
+  [[nodiscard]] inline Vector3f GetNormal() const { return normal_; }
+  [[nodiscard]] inline Vector2f GetTexCoords() const { return texCoords_; }
+  [[nodiscard]] inline Color GetColor() const { return color_; }
 
  private:
   Vector4f position_;   // 3D position, 3D顶点坐标
@@ -63,6 +52,12 @@ class Vertex {
   Vector2f texCoords_;  // Texture coordinates, 顶点纹理坐标
   Color color_;
 };
+
+inline Vertex operator*(const Matrix4f& matrix, const Vertex& vertex) {
+  return Vertex(matrix * vertex.GetPosition(),
+                Matrix3f(matrix) * vertex.GetNormal(), vertex.GetTexCoords(),
+                vertex.GetColor());
+}
 
 }  // namespace simple_renderer
 

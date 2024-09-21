@@ -23,6 +23,9 @@
 #include <future>
 #include <span>
 
+#include "buffer.hpp"
+#include "camera.h"
+
 /**
  * 显示抽象
  */
@@ -56,14 +59,12 @@ class Display {
   void fill(const uint32_t *buffer);
 
   /**
-   * 运行
-   */
-  void run();
-
-  /**
    * 显示循环
    */
-  void loop(uint32_t *buffer);
+  void loopBegin();
+  void handleKeyboardEvent(SDL_Event &event, simple_renderer::Camera &camera);
+  void handleEvents(simple_renderer::Camera &camera);
+  bool loopShouldClose();
 
  private:
   /// 窗口标题
@@ -82,6 +83,9 @@ class Display {
   SDL_Renderer *sdl_renderer_;
   /// sdl 纹理
   SDL_Texture *sdl_texture_;
+
+  // Should Close
+  bool is_exit_;
 };
 
 #endif /* SIMPLERENDER_TEST_SYSTEM_TEST_DISPLAY_H_ */

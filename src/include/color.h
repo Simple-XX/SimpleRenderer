@@ -111,6 +111,13 @@ class Color {
   auto operator*=(float val) -> Color &;
 
   /**
+   * 颜色相加
+   * @param color 颜色
+   * @return 颜色
+   */
+  auto operator+(const Color &color) const -> Color;
+
+  /**
    * 获取每像素大小
    * @return size_t           像素大小，单位为字节
    */
