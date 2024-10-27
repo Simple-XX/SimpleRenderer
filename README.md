@@ -11,141 +11,195 @@
 [![cn](https://img.shields.io/badge/language-cn-red.svg)](https://github.com/Simple-XX/SimpleRenderer/blob/main/README-cn.md)
 [![en](https://img.shields.io/badge/language-en-blue.svg)]((https://github.com/Simple-XX/SimpleRenderer/blob/main/README.md))
 
-A C++ software renderer designed for rendering 3D models with soft rasterization techniques. 
-    
+An educational C++ software renderer designed to help developers understand the inner workings of rendering pipelines and how OpenGL operates behind the scenes.
+
 ## Overview
 
-SimpleRenderer is a software renderer built with a focus on fine control over the rendering pipeline, including vertex transformations, shading, and pixel rasterization. Its GPU-independent nature makes it suitable for educational purposes, real-time simulation, and platforms where dedicated graphics hardware is unavailable.
+SimpleRenderer is a software renderer built with the primary goal of educating developers about the fundamentals of 3D rendering and graphics pipelines. By providing a simplified yet functional rendering framework, it demystifies the complex processes involved in rendering graphics, mirroring how OpenGL and other graphics APIs work under the hood.
 
-### Features
+### Purpose
 
-- **Customizable Shaders**: Vertex and fragment shaders are implemented to achieve high control over the rendering process.
-- **Cross-platform Compatibility**: Compatible with Linux and macOS, with specific build configurations for each.
-- **Realistic Lighting Models**: Supports directional, point, and ambient lighting with Phong shading and other shading models.
-- **Extensive Testing**: Includes unit and system tests to ensure robust performance and accurate rendering.
+- **Educational Focus**: Designed to teach the core concepts of rendering, including vertex processing, rasterization, shading, and transformations.
+- **Demystifying OpenGL**: Offers insights into how OpenGL and GPU-based rendering pipelines function internally.
+- **Hands-On Learning**: Allows developers to experiment with rendering algorithms and observe the effects of various techniques in real-time.
 
-### Core Rendering Pipeline
+### Key Features
 
-SimpleRenderer’s rendering pipeline comprises multiple stages, as detailed in `src/rasterizer.cpp` and `src/renderer.cpp`:
+- **Customizable Shaders**: Implemented vertex and fragment shaders to demonstrate how shading works at a fundamental level.
+- **Simplified Rendering Pipeline**: Breaks down the rendering process into understandable stages, mirroring the OpenGL pipeline.
+- **Cross-Platform Compatibility**: Compatible with Linux and macOS, facilitating learning across different environments.
+- **Extensive Documentation**: Provides detailed explanations of each component to aid learning and comprehension.
 
-1. **Vertex Processing and Transformations**:
-   - **Vertex Shader**: Each vertex undergoes transformations in the vertex shader, which projects it from model space to screen space.
-   - **Transformation Matrices**:
-     - **Model Matrix**: Applies object transformations such as rotation, translation, and scaling.
-     - **View Matrix**: Transforms world coordinates into camera coordinates.
-     - **Projection Matrix**: Applies perspective projection to simulate depth and perspective.
-     - The combination of these matrices forms the **Model-View-Projection (MVP) Matrix**, which is essential for converting 3D coordinates into 2D screen space.
+### Learning Objectives
 
-2. **Primitive Assembly and Clipping**:
-   - **Triangle Assembly**: Vertices are assembled into triangles, the fundamental drawing primitive in SimpleRenderer.
-   - **Frustum Clipping**: Triangles outside the camera's view frustum are clipped to optimize rendering.
+By exploring SimpleRenderer, you will learn:
 
-3. **Rasterization and Fragment Processing**:
-   - **Barycentric Interpolation**: Rasterization interpolates pixel values across the triangle surface using barycentric coordinates to accurately compute colors, textures, and depth.
-   - **Depth Buffering (Z-Buffering)**: Manages depth information to correctly render overlapping objects, ensuring only the closest surfaces are visible.
-   - **Fragment Shader**: Computes pixel colors based on lighting and surface properties, applying shading models such as Phong shading for realistic lighting.
+- How vertices are transformed from 3D space to 2D screen coordinates.
+- The process of assembling primitives (triangles) and performing clipping.
+- How rasterization converts vector information into pixels.
+- The fundamentals of shading models, including lighting calculations.
+- How depth buffering and backface culling optimize rendering.
 
-4. **Lighting and Shading Models**:
-   - **Phong Lighting Model**: Simulates realistic lighting by calculating ambient, diffuse, and specular components based on surface normals and light direction.
-   - **Multiple Light Sources**: Supports point lights, directional lights, and ambient light, each adding depth and realism to the scene.
-   - **Shader Customization**: Shaders can be customized to create various visual effects, including realistic materials and textures.
+---
 
-5. **Optimization Techniques**:
-   - **Backface Culling**: Eliminates faces that are not visible to the camera, reducing the number of fragments processed.
-   - **Screen-Space Optimization**: Reduces unnecessary computations for off-screen objects.
+## Getting Started
 
-### Build and Run Instructions
+### Prerequisites
 
-#### Prerequisites
-
-Install the following dependencies on your system:
+Ensure you have the following dependencies installed:
 
 ```bash
 sudo apt install doxygen graphviz clang-format clang-tidy cppcheck lcov gcc g++ libsdl2-dev libsdl2-ttf-dev libomp-dev libspdlog-dev cmake libassimp-dev
 ```
 
-On macOS, use [Homebrew](https://brew.sh/) for dependencies:
+For macOS users, install dependencies using Homebrew:
 
 ```bash
 brew install doxygen graphviz clang-format clang-tidy cppcheck lcov gcc sdl2 sdl2_ttf libomp spdlog cmake assimp
 ```
 
-#### Building the Project
+### Building the Project
 
-##### 1. Default Build (Linux/Windows)
+#### 1. Clone the Repository
 
-1. **Clone the Repository:**
+```bash
+git clone https://github.com/Simple-XX/SimpleRenderer.git
+cd SimpleRenderer
+```
 
-   ```bash
-   git clone https://github.com/Simple-XX/SimpleRenderer.git
-   cd SimpleRenderer
-   ```
+#### 2. Configure and Build Using CMake Presets
 
-2. **Configure and Build Using CMake Presets:**
+For a standard build:
 
-   ```bash
-   cmake --preset=build
-   cmake --build build --target all
-   ```
+```bash
+cmake --preset=build
+cmake --build build --target all
+```
 
-3. **Run System Tests**:
+For macOS:
 
-   ```bash
-   ./build/bin/system_test ../obj
-   ```
+```bash
+cmake --preset=build-macos
+cmake --build build-macos --target all
+```
 
-##### 2. macOS Build
+#### 3. Run the Example Application
 
-Use the macOS-specific preset to include RPATH configurations:
+```bash
+./build/bin/system_test ../obj
+```
 
-1. **Configure and Build Using macOS Preset**:
+---
 
-   ```bash
-   cmake --preset=build-macos
-   cmake --build build --target all
-   ```
+## Understanding the Renderer
 
-2. **Run System Tests**:
+### Core Rendering Pipeline
 
-   ```bash
-   ./build/bin/system_test ../obj
-   ```
+The rendering pipeline in SimpleRenderer is designed to mirror the stages of a typical GPU-based pipeline, providing a clear view of how each component contributes to the final rendered image.
 
-### Example Usage and Controls
+1. **Vertex Processing and Transformations**
 
-1. **Run the Renderer**:
-   
-   ```bash
-   ./build/bin/system_test ../obj
-   ```
+   - **Objective**: Understand how 3D models are projected onto a 2D screen.
+   - **Key Concepts**:
+     - **Model Matrix**: Positions and orients models in the world.
+     - **View Matrix**: Represents the camera's position and orientation.
+     - **Projection Matrix**: Defines the camera's lens (field of view, aspect ratio).
 
-2. **Controls**:
-   - **Arrow Keys**: Move the camera.
-   - **TAB**: Switch between different models.
-   - **Number Keys**: Switch rendering modes (e.g., wireframe, filled triangles).
+2. **Primitive Assembly and Clipping**
+
+   - **Objective**: Learn how individual vertices form triangles and how off-screen parts are handled.
+   - **Key Concepts**:
+     - **Triangle Assembly**: Grouping vertices into drawable primitives.
+     - **Clipping**: Discarding or adjusting primitives outside the view frustum.
+
+3. **Rasterization and Fragment Processing**
+
+   - **Objective**: Discover how triangles are converted into pixel data.
+   - **Key Concepts**:
+     - **Barycentric Coordinates**: Used for interpolating vertex attributes across a triangle.
+     - **Depth Buffering**: Ensures correct rendering of overlapping objects.
+     - **Fragment Shaders**: Calculate the color and other attributes of each pixel.
+
+4. **Shading and Lighting Models**
+
+   - **Objective**: Explore how lighting affects the appearance of surfaces.
+   - **Key Concepts**:
+     - **Phong Shading Model**: Simulates realistic lighting with ambient, diffuse, and specular components.
+     - **Surface Normals**: Determine how light interacts with surfaces.
+     - **Light Sources**: Understand different types of lights (directional, point, ambient).
+
+5. **Optimization Techniques**
+
+   - **Objective**: Learn methods to improve rendering efficiency.
+   - **Key Concepts**:
+     - **Backface Culling**: Eliminates faces not visible to the camera.
+     - **Spatial Partitioning**: Organizes objects to reduce rendering workload.
 
 ### Code Structure
 
-- **src/rasterizer.cpp**: Implements core rasterization techniques, including vertex and fragment shading, triangle assembly, and depth buffering.
-- **src/renderer.cpp**: Manages the rendering pipeline, including camera setup, model loading, lighting, and shader management.
-- **src/include/**: Header files defining the core classes and structures used across the renderer.
-- **test/system_test/**: System tests demonstrating rendering with basic models.
-- **test/unit_test/**: Unit tests for individual components.
+- **src/rasterizer.cpp**
 
-### Generating Documentation
+  Focuses on the rasterization process, converting vector data into raster images. Key learning points include:
 
-Generate and view the documentation for detailed code insights:
+  - Implementing barycentric interpolation.
+  - Managing depth buffering.
+  - Handling edge cases in rasterization.
 
-```bash
+- **src/renderer.cpp**
+
+  Orchestrates the rendering process. Highlights include:
+
+  - Setting up transformation matrices.
+  - Managing the rendering loop.
+  - Integrating shaders and handling user input.
+
+- **src/include/**
+
+  Contains header files with detailed comments explaining the purpose and functionality of classes and methods.
+
+---
+
+## Experimentation and Learning
+
+To maximize learning, consider the following steps:
+
+- **Modify Shaders**
+
+  Experiment with the shader code to see how changes affect rendering.
+
+- **Adjust Transformations**
+
+  Play with the model, view, and projection matrices to understand their impact on the scene.
+
+- **Implement New Features**
+
+  Try adding new lighting models, textures, or shading techniques.
+
+---
+
+## Documentation
+
+Generate the documentation to delve deeper into the codebase:
+
+````bash
 cmake --build build --target doc
 xdg-open doc/html/index.html
-```
+````
 
-### Contributions
+The documentation provides detailed explanations and diagrams to enhance understanding.
 
-We welcome contributions! Please feel free to submit issues or pull requests to help improve SimpleRenderer.
+---
 
-### License
+## Contributions
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+Your contributions can help others learn. Feel free to:
 
+- Submit pull requests with improvements or new educational features.
+- Report issues or suggest enhancements.
+- Share your learning experiences.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for more information.

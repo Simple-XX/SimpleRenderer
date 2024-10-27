@@ -8,142 +8,197 @@
 
 # SimpleRenderer
 
-[![cn](https://img.shields.io/badge/language-cn-red.svg)](https://github.com/Simple-XX/SimpleRenderer/blob/main/README.md)
-[![en](https://img.shields.io/badge/language-en-blue.svg)]((https://github.com/Simple-XX/SimpleRenderer/blob/main/README.en.md))
+[![cn](https://img.shields.io/badge/language-cn-red.svg)](https://github.com/Simple-XX/SimpleRenderer/blob/main/README-cn.md)
+[![en](https://img.shields.io/badge/language-en-blue.svg)]((https://github.com/Simple-XX/SimpleRenderer/blob/main/README.md))
 
 
-## 简介
+## 概述
 
-SimpleRenderer 是一个专注于渲染管道细致控制的软件渲染器，包括顶点变换、着色和像素光栅化。由于不依赖 GPU，它非常适合教育用途、实时仿真以及不具备专用图形硬件的平台。
+SimpleRenderer 是一个软件渲染器，主要目标是教育开发者了解 3D 渲染和图形管道的基本原理。通过提供一个简化但功能完善的渲染框架，它揭示了渲染图形过程中涉及的复杂过程，模拟了 OpenGL 和其他图形 API 的内部工作方式。
 
-### 功能
+### 目的
 
-- **可定制的着色器**：实现了顶点和片段着色器，以实现对渲染过程的高控制力。
-- **跨平台兼容**：兼容 Linux 和 macOS，并为每个平台提供了特定的构建配置。
-- **真实感的光照模型**：支持方向光、点光源和环境光，并包含 Phong 着色和其他着色模型。
-- **广泛测试**：包括单元测试和系统测试，以确保稳定的性能和精确的渲染。
+- **教育重点**：旨在教授渲染的核心概念，包括顶点处理、光栅化、着色和变换。
+- **解密 OpenGL**：提供对 OpenGL 和基于 GPU 的渲染管道内部工作方式的深入了解。
+- **动手学习**：允许开发者实验渲染算法并实时观察各种技术的效果。
 
-### 核心渲染管道
+### 主要功能
 
-SimpleRenderer 的渲染管道包括多个阶段，如 `src/rasterizer.cpp` 和 `src/renderer.cpp` 中详细描述：
+- **可定制的着色器**：实现了顶点和片段着色器，展示着色的基本工作原理。
+- **简化的渲染管道**：将渲染过程分解为易于理解的阶段，模拟 OpenGL 管道。
+- **跨平台兼容性**：兼容 Linux 和 macOS，方便在不同环境中学习。
+- **详尽的文档**：提供每个组件的详细解释，辅助学习和理解。
 
-1. **顶点处理和变换**：
-   - **顶点着色器**：每个顶点在顶点着色器中进行变换，从模型空间投影到屏幕空间。
-   - **变换矩阵**：
-     - **模型矩阵**：应用旋转、平移和缩放等对象变换。
-     - **视图矩阵**：将世界坐标转换为相机坐标。
-     - **投影矩阵**：应用透视投影以模拟深度和视角。
-     - 这些矩阵的组合形成了**模型视图投影（MVP）矩阵**，这是将 3D 坐标转换为 2D 屏幕空间的关键。
+### 学习目标
 
-2. **图元组装和裁剪**：
-   - **三角形组装**：顶点被组装成三角形，这是 SimpleRenderer 中的基本绘图图元。
-   - **视锥体裁剪**：裁剪在相机视锥体外的三角形，以优化渲染。
+通过探索 SimpleRenderer，您将学习：
 
-3. **光栅化和片段处理**：
-   - **重心插值**：光栅化使用重心坐标在三角形表面上插值像素值，以准确计算颜色、纹理和深度。
-   - **深度缓冲（Z 缓冲）**：管理深度信息，以正确渲染重叠对象，确保只有离相机最近的表面可见。
-   - **片段着色器**：基于光照和表面属性计算像素颜色，应用如 Phong 着色的着色模型实现真实感光照。
+- 如何将顶点从 3D 空间转换为 2D 屏幕坐标。
+- 组装图元（三角形）和执行裁剪的过程。
+- 光栅化如何将矢量信息转换为像素。
+- 着色模型的基础知识，包括光照计算。
+- 深度缓冲和背面剔除如何优化渲染。
 
-4. **光照和着色模型**：
-   - **Phong 光照模型**：通过基于表面法线和光方向计算环境、漫反射和镜面反射分量，模拟真实的光照。
-   - **多光源支持**：支持点光源、方向光和环境光，每种光源为场景增加了深度和真实感。
-   - **着色器定制**：可以定制着色器，以创建各种视觉效果，包括真实的材质和纹理。
+---
 
-5. **优化技术**：
-   - **背面剔除**：剔除相机不可见的面，减少片段处理数量。
-   - **屏幕空间优化**：减少对屏幕外对象的不必要计算。
+## 快速开始
 
-### 构建和运行说明
+### 前置条件
 
-#### 先决条件
-
-在您的系统上安装以下依赖项：
+确保您已安装以下依赖项：
 
 ```bash
 sudo apt install doxygen graphviz clang-format clang-tidy cppcheck lcov gcc g++ libsdl2-dev libsdl2-ttf-dev libomp-dev libspdlog-dev cmake libassimp-dev
 ```
 
-在 macOS 上，使用 [Homebrew](https://brew.sh/) 安装依赖项：
+对于 macOS 用户，使用 Homebrew 安装依赖项：
 
 ```bash
 brew install doxygen graphviz clang-format clang-tidy cppcheck lcov gcc sdl2 sdl2_ttf libomp spdlog cmake assimp
 ```
 
-#### 构建项目
+### 构建项目
 
-##### 1. 默认构建 (Linux/Windows)
+#### 1. 克隆仓库
 
-1. **克隆仓库**：
+```bash
+git clone https://github.com/Simple-XX/SimpleRenderer.git
+cd SimpleRenderer
+```
 
-   ```bash
-   git clone https://github.com/Simple-XX/SimpleRenderer.git
-   cd SimpleRenderer
-   ```
+#### 2. 使用 CMake 预设配置和构建
 
-2. **使用 CMake 预设配置和构建**：
+标准构建：
 
-   ```bash
-   cmake --preset=build
-   cmake --build build --target all
-   ```
+```bash
+cmake --preset=build
+cmake --build build --target all
+```
 
-3. **运行系统测试**：
+对于 macOS：
 
-   ```bash
-   ./build/bin/system_test ../obj
-   ```
+```bash
+cmake --preset=build-macos
+cmake --build build-macos --target all
+```
 
-##### 2. macOS 构建
+#### 3. 运行示例应用程序
 
-使用 macOS 特定的预设以包含 RPATH 配置：
+```bash
+./build/bin/system_test ../obj
+```
 
-1. **使用 macOS 预设配置和构建**：
+---
 
-   ```bash
-   cmake --preset=build-macos
-   cmake --build build --target all
-   ```
+## 理解渲染器
 
-2. **运行系统测试**：
+### 核心渲染管道
 
-   ```bash
-   ./build/bin/system_test ../obj
-   ```
+SimpleRenderer 的渲染管道旨在模拟典型的基于 GPU 的管道阶段，提供每个组件如何贡献于最终渲染图像的清晰视图。
 
-### 示例用法和控件
+1. **顶点处理和变换**
 
-1. **运行渲染器**：
-   
-   ```bash
-   ./build/bin/system_test ../obj
-   ```
+   - **目标**：理解 3D 模型如何投影到 2D 屏幕。
+   - **关键概念**：
+     - **模型矩阵**：定位和定向世界中的模型。
+     - **视图矩阵**：表示相机的位置和方向。
+     - **投影矩阵**：定义相机的镜头（视野、纵横比）。
 
-2. **控件**：
-   - **方向键**：移动相机。
-   - **TAB**：切换不同模型。
-   - **数字键**：切换渲染模式（例如，线框、填充三角形）。
+2. **图元组装和裁剪**
+
+   - **目标**：了解单个顶点如何形成三角形以及如何处理屏幕外的部分。
+   - **关键概念**：
+     - **三角形组装**：将顶点分组为可绘制的图元。
+     - **裁剪**：丢弃或调整视锥体外的图元。
+
+3. **光栅化和片段处理**
+
+   - **目标**：发现三角形如何转换为像素数据。
+   - **关键概念**：
+     - **重心坐标**：用于在三角形上插值顶点属性。
+     - **深度缓冲**：确保正确渲染重叠对象。
+     - **片段着色器**：计算每个像素的颜色和其他属性。
+
+4. **着色和光照模型**
+
+   - **目标**：探索光照如何影响表面的外观。
+   - **关键概念**：
+     - **Phong 着色模型**：通过环境光、漫反射和镜面反射分量模拟真实光照。
+     - **表面法线**：确定光线如何与表面交互。
+     - **光源**：了解不同类型的光（方向光、点光源、环境光）。
+
+5. **优化技术**
+
+   - **目标**：学习提高渲染效率的方法。
+   - **关键概念**：
+     - **背面剔除**：消除相机不可见的面。
+     - **空间划分**：组织对象以减少渲染工作负载。
 
 ### 代码结构
 
-- **src/rasterizer.cpp**：实现了核心光栅化技术，包括顶点和片段着色、三角形组装和深度缓冲。
-- **src/renderer.cpp**：管理渲染管道，包括相机设置、模型加载、光照和着色器管理。
-- **src/include/**：定义渲染器中使用的核心类和结构的头文件。
-- **test/system_test/**：展示使用基础模型的系统测试。
-- **test/unit_test/**：各组件的单元测试。
+- **src/rasterizer.cpp**
 
-### 生成文档
+  关注光栅化过程，将矢量数据转换为光栅图像。主要学习点包括：
 
-生成并查看文档以获取详细的代码信息：
+  - 实现重心插值。
+  - 管理深度缓冲。
+  - 处理光栅化中的边缘情况。
+
+- **src/renderer.cpp**
+
+  协调渲染过程。亮点包括：
+
+  - 设置变换矩阵。
+  - 管理渲染循环。
+  - 集成着色器和处理用户输入。
+
+- **src/include/**
+
+  包含头文件，详细注释解释类和方法的目的和功能。
+
+---
+
+## 实验和学习
+
+为最大化学习效果，考虑以下步骤：
+
+- **修改着色器**
+
+  实验着色器代码，观察更改如何影响渲染。
+
+- **调整变换**
+
+  修改模型、视图和投影矩阵，理解它们对场景的影响。
+
+- **实现新功能**
+
+  尝试添加新的光照模型、纹理或着色技术。
+
+---
+
+## 文档
+
+生成文档以深入了解代码库：
 
 ```bash
 cmake --build build --target doc
 xdg-open doc/html/index.html
 ```
 
-### 贡献
+文档提供详细的解释和图表，增强理解。
 
-我们欢迎您的贡献！请随时提交问题或拉取请求，以帮助改进 SimpleRenderer。
+---
 
-### 许可证
+## 贡献
 
-该项目基于 MIT 许可证发布。详情请参阅 `LICENSE` 文件。
+您的贡献可以帮助他人学习。欢迎您：
+
+- 提交改进或新的教育功能的拉取请求。
+- 报告问题或提出建议。
+- 分享您的学习体验。
+
+---
+
+## 许可证
+
+该项目基于 MIT 许可证。有关详细信息，请参阅 `LICENSE` 文件。
