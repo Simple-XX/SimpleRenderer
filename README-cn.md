@@ -8,8 +8,8 @@
 
 # SimpleRenderer
 
-[![cn](https://img.shields.io/badge/language-cn-red.svg)](https://github.com/Simple-XX/SimpleRenderer/blob/main/README-cn.md)
-[![en](https://img.shields.io/badge/language-en-blue.svg)](https://github.com/Simple-XX/SimpleRenderer/blob/main/README.md)
+[![cn](https://img.shields.io/badge/language-Chinese-pink.svg)](https://github.com/Simple-XX/SimpleRenderer/blob/main/README-cn.md)
+[![en](https://img.shields.io/badge/language-English-lightblue.svg)](https://github.com/Simple-XX/SimpleRenderer/blob/main/README.md)
 
 
 ## 概述
