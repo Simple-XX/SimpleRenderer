@@ -116,7 +116,7 @@ std::pair<bool, Vector3f> Rasterizer::GetBarycentricCoord(const Vector3f& p0,
 
   return std::pair<bool, const Vector3f>{true, Vector3f(x, y, z)};
 }
-
+ 
 template <typename T>
 T Rasterizer::Interpolate(const T& v0, const T& v1, const T& v2,
                           const Vector3f& barycentric_coord) {

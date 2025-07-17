@@ -31,6 +31,27 @@
 
 namespace simple_renderer {
 
+// 渲染模式枚举
+enum class RenderingMode {
+  TRADITIONAL,  // 传统光栅化模式 - 立即深度测试
+  TILE_BASED,   // Tile-based光栅化模式 - 移动GPU架构
+  DEFERRED      // 延迟渲染模式 - 经典GPU管线教学模拟
+};
+
+// Face 只包含顶点索引，不包含实际的顶点数据;
+// Vertex 包含3D坐标，但没有屏幕坐标
+// Fragment 包含屏幕坐标，但它是光栅化的结果，不是输入
+struct TriangleInfo {
+  Vertex v0, v1, v2;
+  const Material *material;
+  size_t face_index;
+  TriangleInfo(const Vertex& vertex0, const Vertex& vertex1, const Vertex& vertex2,
+             const Material* mat, size_t face_idx = 0)
+    : v0(vertex0), v1(vertex1), v2(vertex2), material(mat), face_index(face_idx) {}
+    
+  TriangleInfo() = default;
+};
+
 class SimpleRenderer {
  public:
   /**
@@ -53,22 +74,122 @@ class SimpleRenderer {
   virtual ~SimpleRenderer() = default;
   /// @}
 
-  bool Render(const Model &model, const Shader &shader, uint32_t *buffer);
+  /**
+   * 绘制单个模型
+   * @param model 要绘制的模型
+   * @param shader 用于渲染的着色器
+   * @param buffer 输出缓冲区
+   * @return 绘制是否成功
+   */
+  bool DrawModel(const Model &model, const Shader &shader, uint32_t *buffer);
+
+  /**
+   * 设置渲染模式
+   * @param mode 渲染模式（传统或基于Tile）
+   */
+  void SetRenderingMode(RenderingMode mode);
+
+  /**
+   * 获取当前渲染模式
+   * @return 当前渲染模式
+   */
+  RenderingMode GetRenderingMode() const;
 
  private:
   const size_t height_;
   const size_t width_;
   LogSystem log_system_;
+  RenderingMode current_mode_;  // 当前渲染模式
 
   std::shared_ptr<Shader> shader_;
   std::shared_ptr<Rasterizer> rasterizer_;
 
   /**
-   * 绘制模型
+   * 执行绘制管线
    * @param model 模型
+   * @param buffer 输出缓冲区
    */
-  void DrawModel(const Model &model, uint32_t *buffer);
-  void DrawModelSlower(const Model &model, uint32_t *buffer);
+  void ExecuteDrawPipeline(const Model &model, uint32_t *buffer);
+  
+
+  /**
+   * 传统光栅化渲染
+   * @param model 模型
+   * @param processedVertices 已处理的顶点
+   * @param buffer 输出缓冲区
+   * @return 渲染统计信息
+   */
+  struct RenderStats {
+    double buffer_alloc_ms;
+    double rasterization_ms;
+    double merge_ms;
+    double total_ms;
+  };
+  
+  RenderStats ExecuteTraditionalPipeline(const Model &model, 
+                                        const std::vector<Vertex> &processedVertices,
+                                        uint32_t *buffer);
+
+  /**
+   * Tile-based光栅化渲染
+   * @param model 模型
+   * @param processedVertices 已处理的顶点
+   * @param buffer 输出缓冲区
+   * @return 渲染统计信息
+   */
+  struct TileRenderStats {
+    double setup_ms;
+    double binning_ms;
+    double buffer_alloc_ms;
+    double rasterization_ms;
+    double merge_ms;
+    double visualization_ms;
+    double total_ms;
+  };
+  
+  /**
+   * 延迟渲染统计信息
+   */
+  struct DeferredRenderStats {
+    double buffer_alloc_ms;
+    double rasterization_ms;
+    double fragment_collection_ms;
+    double fragment_merge_ms;
+    double deferred_shading_ms;
+    double total_ms;
+  };
+  
+  TileRenderStats ExecuteTileBasedPipeline(const Model &model,
+                                          const std::vector<Vertex> &processedVertices,
+                                          uint32_t *buffer);
+
+  /**
+   * 延迟渲染管线
+   * @param model 模型
+   * @param processedVertices 已处理的顶点
+   * @param buffer 输出缓冲区
+   * @return 渲染统计信息
+   */
+  DeferredRenderStats ExecuteDeferredPipeline(const Model &model,
+                                             const std::vector<Vertex> &processedVertices,
+                                             uint32_t *buffer);
+
+  
+private:
+
+  void TriangleTileBinning(
+    const Model &model, 
+    const std::vector<Vertex> &screenVertices,
+    std::vector<std::vector<TriangleInfo>> &tile_triangles,
+    size_t tiles_x, size_t tiles_y, size_t tile_size);
+
+  void RasterizeTile(
+    size_t tile_id,
+    const std::vector<TriangleInfo> &triangles,
+    size_t tiles_x, size_t tiles_y, size_t tile_size,
+    float* tile_depth_buffer, uint32_t* tile_color_buffer,
+    std::unique_ptr<float[]> &global_depth_buffer,
+    std::unique_ptr<uint32_t[]> &global_color_buffer);
 
   
   /**
@@ -84,6 +205,25 @@ class SimpleRenderer {
    * @return 转换后的顶点(屏幕坐标)
    */
   Vertex ViewportTransformation(const Vertex &vertex);
+  /**
+   * Tile可视化调试函数 - 在渲染结果上绘制tile网格和状态
+   * @param buffer 渲染结果缓冲区
+   * @param tile_triangles 每个tile包含的三角形列表
+   * @param tiles_x X方向tile数量
+   * @param tiles_y Y方向tile数量 
+   * @param tile_size 单个tile的像素大小
+   */
+  void DrawTileVisualization(uint32_t* buffer, 
+      const std::vector<std::vector<TriangleInfo>>& tile_triangles, 
+      size_t tiles_x, size_t tiles_y, size_t tile_size);
+
+  /**
+   * 颜色混合函数 - 用于半透明效果
+   * @param base 基础颜色
+   * @param overlay 叠加颜色(包含alpha通道)
+   * @return 混合后的颜色
+   */
+  uint32_t BlendColors(uint32_t base, uint32_t overlay);
 };
 }  // namespace simple_renderer
 

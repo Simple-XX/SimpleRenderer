@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
   }
 
   auto modelMatrix = simple_renderer::Matrix4f(1.0f);
+  
   simple_renderer::Matrix4f scale_matrix =
       glm::scale(simple_renderer::Matrix4f(1.0f),
                  simple_renderer::Vector3f(.02f, .02f, .02f));
@@ -68,8 +69,7 @@ int main(int argc, char **argv) {
       glm::rotate(simple_renderer::Matrix4f(1.0f), glm::radians(-105.0f),
                   simple_renderer::Vector3f(1.0f, 0.0f, 0.0f));
 
-  // Combined transformation matrix
-  modelMatrix = scale_matrix * translation_matrix * rotation_matrix;
+  modelMatrix = scale_matrix* translation_matrix * rotation_matrix ;
 
   simple_renderer::Shader shader;
   shader.SetUniform("modelMatrix", modelMatrix);
@@ -80,6 +80,28 @@ int main(int argc, char **argv) {
 
   simple_renderer::Camera camera(simple_renderer::Vector3f(0.0f, 0.0f, 1.0f));
 
+  // 设置渲染模式（可选：TRADITIONAL、TILE_BASED 或 DEFERRED）
+  simple_renderer.SetRenderingMode(simple_renderer::RenderingMode::DEFERRED);
+  
+  // 输出当前渲染模式
+  std::string current_mode_name;
+  switch(simple_renderer.GetRenderingMode()) {
+    case simple_renderer::RenderingMode::TRADITIONAL:
+      current_mode_name = "TRADITIONAL (传统光栅化)";
+      break;
+    case simple_renderer::RenderingMode::TILE_BASED:
+      current_mode_name = "TILE_BASED (基于Tile光栅化)";
+      break;
+    case simple_renderer::RenderingMode::DEFERRED:
+      current_mode_name = "DEFERRED (模仿GPU的延迟渲染)";
+      break;
+  }
+  SPDLOG_INFO("当前渲染模式: {}", current_mode_name);
+  
+  // 可以在这里添加模式切换的示例：
+  // simple_renderer.SetRenderingMode(simple_renderer::RenderingMode::TILE_BASED);
+  // simple_renderer.SetRenderingMode(simple_renderer::RenderingMode::DEFERRED);
+
   auto display = Display(kWidth, kHeight);
   display.loopBegin();
 
@@ -89,11 +111,11 @@ int main(int argc, char **argv) {
     shader.SetUniform("cameraPos", camera.GetPosition());
     shader.SetUniform("viewMatrix", camera.GetViewMatrix());
     shader.SetUniform("projectionMatrix",
-                      camera.GetProjectionMatrix(60.0f, float(kWidth)/float(kHeight), 0.1f, 100.0f));
+                      camera.GetProjectionMatrix(60.0f, static_cast<float>(kWidth) / static_cast<float>(kHeight), 0.1f, 100.0f));
 
     buffer.ClearDrawBuffer(simple_renderer::Color::kBlack);
     for (auto &model : models) {
-      simple_renderer.Render(model, shader, buffer.GetDrawBuffer());
+      simple_renderer.DrawModel(model, shader, buffer.GetDrawBuffer());
     }
 
     buffer.SwapBuffer();
