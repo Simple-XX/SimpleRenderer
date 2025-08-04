@@ -46,18 +46,36 @@ std::vector<Fragment> Rasterizer::Rasterize(const Vertex& v0, const Vertex& v1,
         if (!is_inside) {
           continue;
         }
-        // 计算该点的深度，通过重心坐标插值计算
+
+        // 透视矫正插值
+        // 1. 获取三个顶点的1/w值
+        float w0_inv = v0.GetPosition().w;
+        float w1_inv = v1.GetPosition().w;  
+        float w2_inv = v2.GetPosition().w;
+        
+        // 2. 插值1/w
+        float w_inv_interpolated = Interpolate(w0_inv, w1_inv, w2_inv, barycentric_coord);
+        
+        // 3. 计算透视矫正的重心坐标
+        Vector3f corrected_bary(
+          barycentric_coord.x * w0_inv / w_inv_interpolated,
+          barycentric_coord.y * w1_inv / w_inv_interpolated,
+          barycentric_coord.z * w2_inv / w_inv_interpolated
+        );
+        
+        // 4. 使用矫正的重心坐标进行插值
         auto z = Interpolate(v0.GetPosition().z, v1.GetPosition().z,
-                             v2.GetPosition().z, barycentric_coord);
+                             v2.GetPosition().z, corrected_bary);
+
 
         Fragment fragment;
         fragment.screen_coord = {x, y};
-        fragment.normal = CalculateNormal(v0.GetPosition(), v1.GetPosition(),
-                                          v2.GetPosition());
+        fragment.normal = Interpolate(v0.GetNormal(), v1.GetNormal(),
+                                      v2.GetNormal(), corrected_bary);
         fragment.uv = Interpolate(v0.GetTexCoords(), v1.GetTexCoords(),
-                                  v2.GetTexCoords(), barycentric_coord);
+                                  v2.GetTexCoords(), corrected_bary);
         fragment.color = InterpolateColor(v0.GetColor(), v1.GetColor(),
-                                          v2.GetColor(), barycentric_coord);
+                                          v2.GetColor(), corrected_bary);
         fragment.depth = z;
 
         local_fragments.push_back(fragment);

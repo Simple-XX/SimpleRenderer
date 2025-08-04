@@ -69,8 +69,16 @@ void SimpleRenderer::DrawModel(const Model &model, uint32_t *buffer) {
 
 #pragma omp for
     for (const auto &v : model.GetVertices()) {
-      auto vertex = shader_->VertexShader(v);
-      processedVertices_per_thread.push_back(vertex);
+      // 顶点着色器：世界坐标 -> 裁剪坐标
+      auto clipSpaceVertex = shader_->VertexShader(v);
+      
+      // 透视除法：裁剪坐标 -> NDC坐标
+      auto ndcVertex = PerspectiveDivision(clipSpaceVertex);
+      
+      // 视口变换：NDC坐标 -> 屏幕坐标
+      auto screenSpaceVertex = ViewportTransformation(ndcVertex);
+      
+      processedVertices_per_thread.push_back(screenSpaceVertex);
     }
   }
 
@@ -192,8 +200,16 @@ void SimpleRenderer::DrawModelSlower(const Model &model, uint32_t *buffer) {
 #pragma omp for
     for (const auto &v : model.GetVertices()) {
       /* * * Vertex Shader * *  */
-      auto vertex = shader_->VertexShader(v);
-      local_vertices.push_back(vertex);
+      // 顶点着色器：世界坐标 -> 裁剪坐标
+      auto clipSpaceVertex = shader_->VertexShader(v);
+      
+      // 透视除法：裁剪坐标 -> NDC坐标
+      auto ndcVertex = PerspectiveDivision(clipSpaceVertex);
+      
+      // 视口变换：NDC坐标 -> 屏幕坐标
+      auto screenSpaceVertex = ViewportTransformation(ndcVertex);
+      
+      local_vertices.push_back(screenSpaceVertex);
     }
   }
 
@@ -272,6 +288,57 @@ void SimpleRenderer::DrawModelSlower(const Model &model, uint32_t *buffer) {
     }
   }
   /*  *  *  *  *  *  *  */
+}
+
+Vertex SimpleRenderer::PerspectiveDivision(const Vertex &vertex) {
+  Vector4f position = vertex.GetPosition();
+  
+  // 检查w分量，避免除零和负数问题
+  if (position.w <= 1e-6f) {
+    SPDLOG_DEBUG("PerspectiveDivision: w <= 1e-6f");
+    Vector4f farPosition(0.0f, 0.0f, 1.0f, 1.0f);
+    return Vertex(farPosition, vertex.GetNormal(), vertex.GetTexCoords(), vertex.GetColor());
+  }
+  
+  // 保存原始w分量用于透视矫正插值
+  float original_w = position.w;
+  
+  // 执行透视除法：(x, y, z, w) -> (x/w, y/w, z/w, 1/w)
+  Vector4f ndcPosition(
+    position.x / position.w,  // x_ndc = x_clip / w_clip
+    position.y / position.w,  // y_ndc = y_clip / w_clip  
+    position.z / position.w,  // z_ndc = z_clip / w_clip
+    1.0f / original_w         // 保存1/w用于透视矫正插值
+  );
+  
+  // 严格限制NDC坐标在标准范围内
+  ndcPosition.x = std::clamp(ndcPosition.x, -1.0f, 1.0f);
+  ndcPosition.y = std::clamp(ndcPosition.y, -1.0f, 1.0f);
+  ndcPosition.z = std::clamp(ndcPosition.z, -1.0f, 1.0f);
+  
+  // 创建新的顶点，保持其他属性不变
+  return Vertex(ndcPosition, vertex.GetNormal(), vertex.GetTexCoords(), vertex.GetColor());
+}
+
+Vertex SimpleRenderer::ViewportTransformation(const Vertex &vertex) {
+  Vector4f ndcPosition = vertex.GetPosition();
+  
+  // 视口变换：将NDC坐标[-1,1]转换为屏幕坐标[0,width]x[0,height]
+  float screen_x = (ndcPosition.x + 1.0f) * width_ / 2.0f;
+  float screen_y = (1.0f - ndcPosition.y) * height_ / 2.0f;
+  
+  // 额外的屏幕坐标边界保护
+  screen_x = std::clamp(screen_x, 0.0f, static_cast<float>(width_ - 1));
+  screen_y = std::clamp(screen_y, 0.0f, static_cast<float>(height_ - 1));
+  
+  Vector4f screenPosition(
+    screen_x,                    // x: 屏幕坐标
+    screen_y,                    // y: 屏幕坐标
+    ndcPosition.z,               // z: NDC坐标用于深度测试
+    ndcPosition.w                // w: 保持1/w用于透视矫正插值
+  );
+  
+  return Vertex(screenPosition, vertex.GetNormal(), vertex.GetTexCoords(), vertex.GetColor());
 }
 
 }  // namespace simple_renderer

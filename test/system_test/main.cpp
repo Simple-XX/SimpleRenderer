@@ -58,15 +58,14 @@ int main(int argc, char **argv) {
   auto modelMatrix = simple_renderer::Matrix4f(1.0f);
   simple_renderer::Matrix4f scale_matrix =
       glm::scale(simple_renderer::Matrix4f(1.0f),
-                 simple_renderer::Vector3f(7.0f, 7.0f, 7.0f));
+                 simple_renderer::Vector3f(.02f, .02f, .02f));
 
-  // Translation matrix
   simple_renderer::Matrix4f translation_matrix =
       glm::translate(simple_renderer::Matrix4f(1.0f),
-                     simple_renderer::Vector3f(30.0f, 30.0f, 0.0f));
+                     simple_renderer::Vector3f(0.0f, -5.0f, 0.0f));
 
   simple_renderer::Matrix4f rotation_matrix =
-      glm::rotate(simple_renderer::Matrix4f(1.0f), 90.0f,
+      glm::rotate(simple_renderer::Matrix4f(1.0f), glm::radians(-105.0f),
                   simple_renderer::Vector3f(1.0f, 0.0f, 0.0f));
 
   // Combined transformation matrix
@@ -90,7 +89,7 @@ int main(int argc, char **argv) {
     shader.SetUniform("cameraPos", camera.GetPosition());
     shader.SetUniform("viewMatrix", camera.GetViewMatrix());
     shader.SetUniform("projectionMatrix",
-                      camera.GetProjectionMatrix(60.0f, 1.0f, 0.1f, 100.0f));
+                      camera.GetProjectionMatrix(60.0f, float(kWidth)/float(kHeight), 0.1f, 100.0f));
 
     buffer.ClearDrawBuffer(simple_renderer::Color::kBlack);
     for (auto &model : models) {

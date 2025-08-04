@@ -69,6 +69,21 @@ class SimpleRenderer {
    */
   void DrawModel(const Model &model, uint32_t *buffer);
   void DrawModelSlower(const Model &model, uint32_t *buffer);
+
+  
+  /**
+   * 透视除法 - 将裁剪空间坐标转换为归一化设备坐标(NDC)
+   * @param vertex 裁剪空间坐标的顶点
+   * @return 转换后的顶点(NDC坐标)
+   */
+  Vertex PerspectiveDivision(const Vertex &vertex);
+
+  /**
+   * 视口变换 - 将NDC坐标转换为屏幕坐标
+   * @param vertex NDC坐标的顶点
+   * @return 转换后的顶点(屏幕坐标)
+   */
+  Vertex ViewportTransformation(const Vertex &vertex);
 };
 }  // namespace simple_renderer
 

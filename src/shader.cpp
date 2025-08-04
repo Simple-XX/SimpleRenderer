@@ -9,12 +9,17 @@ Vertex Shader::VertexShader(const Vertex& vertex) {
       uniformbuffer_.GetUniform<Matrix4f>("projectionMatrix");
 
   Matrix4f mvp_matrix = projection_matrix * view_matrix * model_matrix;
-  // auto normal_matrix = model_matrix.inverse().transpose();
+  
+  Matrix3f normal_matrix = glm::transpose(glm::inverse(Matrix3f(model_matrix)));
+  Vector3f transformed_normal = normal_matrix * vertex.GetNormal();
 
-  sharedDataInShader_.fragPos_varying =
-      Vector3f(model_matrix * vertex.GetPosition());
+  sharedDataInShader_.fragPos_varying = Vector3f(model_matrix * vertex.GetPosition());
 
-  return mvp_matrix * vertex;
+  // 返回变换后的顶点（包含变换后的法向量）
+  return Vertex(mvp_matrix * vertex.GetPosition(), 
+                transformed_normal, 
+                vertex.GetTexCoords(), 
+                vertex.GetColor());
 }
 
 Color Shader::FragmentShader(const Fragment& fragment) const {
