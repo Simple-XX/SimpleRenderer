@@ -15,11 +15,15 @@ Vertex Shader::VertexShader(const Vertex& vertex) {
 
   sharedDataInShader_.fragPos_varying = Vector3f(model_matrix * vertex.GetPosition());
 
-  // 返回变换后的顶点（包含变换后的法向量）
-  return Vertex(mvp_matrix * vertex.GetPosition(), 
+  // 计算裁剪空间坐标
+  Vector4f clip_position = mvp_matrix * vertex.GetPosition();
+  
+  // 返回变换后的顶点（包含变换后的法向量和裁剪坐标）
+  return Vertex(clip_position, 
                 transformed_normal, 
                 vertex.GetTexCoords(), 
-                vertex.GetColor());
+                vertex.GetColor(),
+                clip_position);  // 同时保存裁剪空间坐标用于后续裁剪
 }
 
 Color Shader::FragmentShader(const Fragment& fragment) const {

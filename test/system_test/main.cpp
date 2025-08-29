@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
   simple_renderer::Camera camera(simple_renderer::Vector3f(0.0f, 0.0f, 1.0f));
 
   // 设置渲染模式（可选：TRADITIONAL、TILE_BASED 或 DEFERRED）
-  simple_renderer.SetRenderingMode(simple_renderer::RenderingMode::DEFERRED);
+  simple_renderer.SetRenderingMode(simple_renderer::RenderingMode::TILE_BASED);
   
   // 输出当前渲染模式
   std::string current_mode_name;
@@ -97,10 +97,6 @@ int main(int argc, char **argv) {
       break;
   }
   SPDLOG_INFO("当前渲染模式: {}", current_mode_name);
-  
-  // 可以在这里添加模式切换的示例：
-  // simple_renderer.SetRenderingMode(simple_renderer::RenderingMode::TILE_BASED);
-  // simple_renderer.SetRenderingMode(simple_renderer::RenderingMode::DEFERRED);
 
   auto display = Display(kWidth, kHeight);
   display.loopBegin();

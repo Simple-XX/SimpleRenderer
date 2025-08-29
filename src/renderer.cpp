@@ -37,7 +37,7 @@ SimpleRenderer::SimpleRenderer(size_t width, size_t height)
     : height_(height),
       width_(width),
       log_system_(LogSystem(kLogFilePath, kLogFileMaxSize, kLogFileMaxCount)),
-      current_mode_(RenderingMode::TRADITIONAL) {  // 默认使用传统渲染模式
+      current_mode_(RenderingMode::TILE_BASED) {
   rasterizer_ = std::make_shared<Rasterizer>(width, height);
 }
 
@@ -207,10 +207,12 @@ SimpleRenderer::DeferredRenderStats SimpleRenderer::ExecuteDeferredPipeline(
     uint32_t *buffer) {
     
   DeferredRenderStats stats;
+  auto total_start_time = std::chrono::high_resolution_clock::now();
   SPDLOG_INFO("execute deferred pipeline for {}", model.GetModelPath());
   /*  *  *  *  *  *  *  */
 
-  /* * * Rasterization * * */
+  /* * * Buffer Allocation * * */
+  auto buffer_alloc_start_time = std::chrono::high_resolution_clock::now();
   std::vector<std::vector<std::vector<Fragment>>> fragmentsBuffer_all_thread(
       kNProc, std::vector<std::vector<Fragment>>(width_ * height_));
 
@@ -220,8 +222,13 @@ SimpleRenderer::DeferredRenderStats SimpleRenderer::ExecuteDeferredPipeline(
   for (const auto &f : model.GetFaces()) {
     material_cache.push_back(f.GetMaterial()); // 值拷贝
   }
+  auto buffer_alloc_end_time = std::chrono::high_resolution_clock::now();
+  auto buffer_alloc_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+      buffer_alloc_end_time - buffer_alloc_start_time);
   SPDLOG_INFO("cached {} materials for deferred rendering", material_cache.size());
 
+  /* * * Rasterization * * */
+  auto rasterization_start_time = std::chrono::high_resolution_clock::now();
 #pragma omp parallel num_threads(kNProc) default(none)                       \
     shared(processedVertices, fragmentsBuffer_all_thread, rasterizer_, width_, \
                height_, material_cache) firstprivate(model)
@@ -255,8 +262,13 @@ SimpleRenderer::DeferredRenderStats SimpleRenderer::ExecuteDeferredPipeline(
       }
     }
   }
+  auto rasterization_end_time = std::chrono::high_resolution_clock::now();
+  auto rasterization_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+      rasterization_end_time - rasterization_start_time);
+  /*  *  *  *  *  *  *  */
 
-  // Merge fragments
+  /* * * Fragment Collection * * */
+  auto fragment_collection_start_time = std::chrono::high_resolution_clock::now();
   std::vector<std::vector<Fragment>> fragmentsBuffer(width_ * height_);
   for (const auto &fragmentsBuffer_per_thread : fragmentsBuffer_all_thread) {
     for (size_t i = 0; i < fragmentsBuffer_per_thread.size(); i++) {
@@ -265,10 +277,17 @@ SimpleRenderer::DeferredRenderStats SimpleRenderer::ExecuteDeferredPipeline(
                                 fragmentsBuffer_per_thread[i].end());
     }
   }
-/*  *  *  *  *  *  *  */
+  auto fragment_collection_end_time = std::chrono::high_resolution_clock::now();
+  auto fragment_collection_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+      fragment_collection_end_time - fragment_collection_start_time);
+  /*  *  *  *  *  *  *  */
 
-/* * * Fragment Shader * * */
-// #pragma omp parallel for
+  /* * * Fragment Merge & Deferred Shading * * */
+  auto fragment_merge_start_time = std::chrono::high_resolution_clock::now();
+  
+  // Fragment Merge阶段：深度测试选择最近片段
+  std::vector<const Fragment*> selected_fragments(width_ * height_, nullptr);
+  #pragma omp parallel for
   for (size_t i = 0; i < fragmentsBuffer.size(); i++) {
     const auto &fragments = fragmentsBuffer[i];
     if (fragments.empty()) {
@@ -281,7 +300,17 @@ SimpleRenderer::DeferredRenderStats SimpleRenderer::ExecuteDeferredPipeline(
         renderFragment = &fragment;
       }
     }
-
+    selected_fragments[i] = renderFragment;
+  }
+  auto fragment_merge_end_time = std::chrono::high_resolution_clock::now();
+  auto fragment_merge_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+      fragment_merge_end_time - fragment_merge_start_time);
+  
+  // Deferred Shading阶段：执行片段着色器
+  auto deferred_shading_start_time = std::chrono::high_resolution_clock::now();
+#pragma omp parallel for
+  for (size_t i = 0; i < selected_fragments.size(); i++) {
+    const Fragment *renderFragment = selected_fragments[i];
     if (renderFragment) {
       // 添加Material指针有效性检查
       if (renderFragment->material == nullptr) {
@@ -292,15 +321,22 @@ SimpleRenderer::DeferredRenderStats SimpleRenderer::ExecuteDeferredPipeline(
       buffer[i] = uint32_t(color);
     }
   }
+  auto deferred_shading_end_time = std::chrono::high_resolution_clock::now();
+  auto deferred_shading_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+      deferred_shading_end_time - deferred_shading_start_time);
   /*  *  *  *  *  *  *  */
   
-  // 填充基本统计信息（延迟渲染模式主要用于教学演示）
-  stats.buffer_alloc_ms = 0.0;
-  stats.rasterization_ms = 0.0;
-  stats.fragment_collection_ms = 0.0;
-  stats.fragment_merge_ms = 0.0;
-  stats.deferred_shading_ms = 0.0;
-  stats.total_ms = 0.0;
+  auto total_end_time = std::chrono::high_resolution_clock::now();
+  auto total_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+      total_end_time - total_start_time);
+  
+  // 填充统计信息
+  stats.buffer_alloc_ms = buffer_alloc_duration.count() / 1000.0;
+  stats.rasterization_ms = rasterization_duration.count() / 1000.0;
+  stats.fragment_collection_ms = fragment_collection_duration.count() / 1000.0;
+  stats.fragment_merge_ms = fragment_merge_duration.count() / 1000.0;
+  stats.deferred_shading_ms = deferred_shading_duration.count() / 1000.0;
+  stats.total_ms = total_duration.count() / 1000.0;
   
   return stats;
 }
@@ -329,8 +365,12 @@ Vertex SimpleRenderer::PerspectiveDivision(const Vertex &vertex) {
   // 这些坐标在后续的视口变换和裁剪阶段会被正确处理
   ndcPosition.z = std::clamp(ndcPosition.z, -1.0f, 1.0f);
   
-  // 创建新的顶点，保持其他属性不变
-  return Vertex(ndcPosition, vertex.GetNormal(), vertex.GetTexCoords(), vertex.GetColor());
+  // 创建新的顶点，保持其他属性和裁剪空间坐标不变
+  if (vertex.HasClipPosition()) {
+    return Vertex(ndcPosition, vertex.GetNormal(), vertex.GetTexCoords(), vertex.GetColor(), vertex.GetClipPosition());
+  } else {
+    return Vertex(ndcPosition, vertex.GetNormal(), vertex.GetTexCoords(), vertex.GetColor());
+  }
 }
 
 Vertex SimpleRenderer::ViewportTransformation(const Vertex &vertex) {
@@ -365,6 +405,10 @@ void SimpleRenderer::TriangleTileBinning(
     size_t clipped_triangles = 0;
     size_t triangles_with_clipped_vertices = 0;
     
+    // 裁剪统计
+    size_t frustum_culled = 0;
+    size_t backface_culled = 0;
+    
     SPDLOG_INFO("Starting triangle-tile binning for {} triangles", total_triangles);
     SPDLOG_INFO("Screen dimensions: {}x{}, Tile size: {}, Tiles: {}x{}", 
                 width_, height_, tile_size, tiles_x, tiles_y);
@@ -375,10 +419,48 @@ void SimpleRenderer::TriangleTileBinning(
         auto v1 = screenVertices[f.GetIndex(1)];
         auto v2 = screenVertices[f.GetIndex(2)];
         
+        // 视锥体裁剪 (裁剪空间)
+        if (v0.HasClipPosition()) {
+            Vector4f c0 = v0.GetClipPosition();
+            Vector4f c1 = v1.GetClipPosition(); 
+            Vector4f c2 = v2.GetClipPosition();
+            
+            // 保守视锥体裁剪：只有当整个三角形都在视锥体外同一侧时才裁剪
+            bool frustum_cull = 
+                (c0.x > c0.w && c1.x > c1.w && c2.x > c2.w) ||  // 右平面外
+                (c0.x < -c0.w && c1.x < -c1.w && c2.x < -c2.w) || // 左平面外  
+                (c0.y > c0.w && c1.y > c1.w && c2.y > c2.w) ||  // 上平面外
+                (c0.y < -c0.w && c1.y < -c1.w && c2.y < -c2.w) || // 下平面外
+                (c0.z > c0.w && c1.z > c1.w && c2.z > c2.w) ||  // 远平面外
+                (c0.z < -c0.w && c1.z < -c1.w && c2.z < -c2.w);  // 近平面外
+                
+            // if (frustum_cull) {
+            //     frustum_culled++;
+            //     continue;
+            // }
+        }
+        
         // 获取屏幕空间坐标（现在已经是屏幕坐标了）
         Vector4f pos0 = v0.GetPosition();
         Vector4f pos1 = v1.GetPosition();
         Vector4f pos2 = v2.GetPosition();
+        
+        // 背面剔除 (屏幕空间)
+        Vector2f screen0(pos0.x, pos0.y);
+        Vector2f screen1(pos1.x, pos1.y);  
+        Vector2f screen2(pos2.x, pos2.y);
+        
+        // 计算屏幕空间叉积判断朝向
+        Vector2f edge1 = screen1 - screen0;
+        Vector2f edge2 = screen2 - screen0;
+        float cross_product = edge1.x * edge2.y - edge1.y * edge2.x;
+        
+        // 背面剔除：NDC空间中叉积为负表示顺时针，即背面。
+        // 从NDC到屏幕空间中，会发生Y轴翻转，对应叉积应为正。
+        if (cross_product > 0.0f) {
+            backface_culled++;
+            continue;
+        }
         
         // 检查三角形是否有被裁剪的顶点（坐标为-1000的表示被裁剪）
         bool has_clipped_vertex = (pos0.x == -1000.0f || pos1.x == -1000.0f || pos2.x == -1000.0f);
@@ -465,6 +547,8 @@ void SimpleRenderer::TriangleTileBinning(
     SPDLOG_INFO("  Triangles with clipped vertices: {}", triangles_with_clipped_vertices);
     SPDLOG_INFO("  Processed triangles: {}", processed_triangles);
     SPDLOG_INFO("  Clipped by screen bounds: {}", clipped_triangles);
+    SPDLOG_INFO("  Frustum culled: {}", frustum_culled);
+    SPDLOG_INFO("  Backface culled: {}", backface_culled);
     
     size_t total_triangle_refs = 0;
     size_t non_empty_tiles = 0;
