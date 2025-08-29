@@ -97,10 +97,7 @@ void SimpleRenderer::ExecuteDrawPipeline(const Model &model, uint32_t *buffer) {
     return;
   }
   
-  // === PERFORMANCE TIMING ===
-  auto total_start_time = std::chrono::high_resolution_clock::now();
-
-  /* * * Vertex Shader * * */
+  /* * * Vertex Transformation * * */
   auto vertex_shader_start_time = std::chrono::high_resolution_clock::now();
   std::vector<Vertex> processedVertices;
   std::vector<std::vector<Vertex>> processed_vertices_all_thread(kNProc);
@@ -402,7 +399,6 @@ void SimpleRenderer::TriangleTileBinning(
     
     size_t total_triangles = model.GetFaces().size();
     size_t processed_triangles = 0;
-    size_t clipped_triangles = 0;
     size_t triangles_with_clipped_vertices = 0;
     
     // 裁剪统计
@@ -434,10 +430,10 @@ void SimpleRenderer::TriangleTileBinning(
                 (c0.z > c0.w && c1.z > c1.w && c2.z > c2.w) ||  // 远平面外
                 (c0.z < -c0.w && c1.z < -c1.w && c2.z < -c2.w);  // 近平面外
                 
-            // if (frustum_cull) {
-            //     frustum_culled++;
-            //     continue;
-            // }
+            if (frustum_cull) {
+                frustum_culled++;
+                continue;
+            }
         }
         
         // 获取屏幕空间坐标（现在已经是屏幕坐标了）
@@ -445,12 +441,10 @@ void SimpleRenderer::TriangleTileBinning(
         Vector4f pos1 = v1.GetPosition();
         Vector4f pos2 = v2.GetPosition();
         
-        // 背面剔除 (屏幕空间)
+        // 计算屏幕空间叉积判断朝向
         Vector2f screen0(pos0.x, pos0.y);
         Vector2f screen1(pos1.x, pos1.y);  
         Vector2f screen2(pos2.x, pos2.y);
-        
-        // 计算屏幕空间叉积判断朝向
         Vector2f edge1 = screen1 - screen0;
         Vector2f edge2 = screen2 - screen0;
         float cross_product = edge1.x * edge2.y - edge1.y * edge2.x;
@@ -489,24 +483,6 @@ void SimpleRenderer::TriangleTileBinning(
         float min_y = std::min({screen_y0, screen_y1, screen_y2});
         float max_y = std::max({screen_y0, screen_y1, screen_y2});
         
-        // 调试前几个有效三角形的坐标范围
-        if (processed_triangles < 3) {
-            SPDLOG_INFO("Triangle {} coordinates:", tri_idx);
-            SPDLOG_INFO("  Screen coords: ({:.1f},{:.1f}) ({:.1f},{:.1f}) ({:.1f},{:.1f})", 
-                       screen_x0, screen_y0, screen_x1, screen_y1, screen_x2, screen_y2);
-            SPDLOG_INFO("  BBox: min({:.1f},{:.1f}) max({:.1f},{:.1f})", 
-                       min_x, min_y, max_x, max_y);
-        }
-        
-        // 临时：大幅放宽屏幕边界检查，让超出屏幕的三角形也能处理
-        if (max_x < -5000.0f || min_x >= width_ + 5000.0f || 
-            max_y < -5000.0f || min_y >= height_ + 5000.0f) {
-            clipped_triangles++;
-            if (processed_triangles < 3) {
-                SPDLOG_INFO("  -> CLIPPED by screen bounds");
-            }
-            continue;
-        }
         
         // 计算影响的tile范围
         int start_tile_x = std::max(0, static_cast<int>(min_x) / static_cast<int>(tile_size));
@@ -528,27 +504,8 @@ void SimpleRenderer::TriangleTileBinning(
             }
             processed_triangles++;
             
-            // 输出前几个成功添加的三角形信息
-            if (processed_triangles <= 3) {
-                SPDLOG_INFO("  -> SUCCESSFULLY ADDED to tiles x[{}..{}] y[{}..{}]", 
-                           start_tile_x, end_tile_x, start_tile_y, end_tile_y);
-            }
-        } else {
-            if (processed_triangles < 3) {
-                SPDLOG_INFO("  -> FAILED tile calculation: x[{}..{}] y[{}..{}]", 
-                           start_tile_x, end_tile_x, start_tile_y, end_tile_y);
-            }
         }
     }
-    
-    // 输出统计信息
-    SPDLOG_INFO("Triangle-Tile binning completed:");
-    SPDLOG_INFO("  Total triangles: {}", total_triangles);
-    SPDLOG_INFO("  Triangles with clipped vertices: {}", triangles_with_clipped_vertices);
-    SPDLOG_INFO("  Processed triangles: {}", processed_triangles);
-    SPDLOG_INFO("  Clipped by screen bounds: {}", clipped_triangles);
-    SPDLOG_INFO("  Frustum culled: {}", frustum_culled);
-    SPDLOG_INFO("  Backface culled: {}", backface_culled);
     
     size_t total_triangle_refs = 0;
     size_t non_empty_tiles = 0;
@@ -627,76 +584,6 @@ void SimpleRenderer::RasterizeTile(
       }
     }
   }
-}
-
-// Tile可视化调试函数，这里用于固定大小的tiles
-void SimpleRenderer::DrawTileVisualization(uint32_t* buffer, 
-    const std::vector<std::vector<TriangleInfo>>& tile_triangles, 
-    size_t tiles_x, size_t tiles_y, size_t tile_size) {
-    
-    SPDLOG_INFO("=== TILE VISUALIZATION DEBUG ===");
-    SPDLOG_INFO("Drawing tile grid overlay for debugging");
-    
-    // 颜色定义 (ABGR格式)
-    const uint32_t GRID_COLOR = 0xFF00FF00;      // 绿色网格线
-    const uint32_t NONEMPTY_COLOR = 0x4000FFFF;  // 半透明黄色背景 (非空tile)
-    const uint32_t EMPTY_COLOR = 0x20FF0000;     // 半透明蓝色背景 (空tile)
-    
-    // 1. 为非空tiles添加背景色
-    for (size_t tile_y = 0; tile_y < tiles_y; tile_y++) {
-        for (size_t tile_x = 0; tile_x < tiles_x; tile_x++) {
-            size_t tile_id = tile_y * tiles_x + tile_x;
-            bool is_empty = tile_triangles[tile_id].empty();
-            
-            // 计算tile在屏幕上的像素范围
-            size_t pixel_start_x = tile_x * tile_size;
-            size_t pixel_end_x = std::min(pixel_start_x + tile_size, static_cast<size_t>(width_));
-            size_t pixel_start_y = tile_y * tile_size;
-            size_t pixel_end_y = std::min(pixel_start_y + tile_size, static_cast<size_t>(height_));
-            
-            uint32_t bg_color = is_empty ? EMPTY_COLOR : NONEMPTY_COLOR;
-            
-            // 给tile添加半透明背景
-            for (size_t y = pixel_start_y; y < pixel_end_y; y++) {
-                for (size_t x = pixel_start_x; x < pixel_end_x; x++) {
-                    size_t pixel_idx = y * static_cast<size_t>(width_) + x;
-                    // 简单的alpha混合：将背景色与原色混合
-                    uint32_t original = buffer[pixel_idx];
-                    buffer[pixel_idx] = BlendColors(original, bg_color);
-                }
-            }
-            
-            // 记录非空tile的信息
-            if (!is_empty) {
-                SPDLOG_INFO("Non-empty Tile[{},{}] (ID:{}): {} triangles", 
-                           tile_x, tile_y, tile_id, tile_triangles[tile_id].size());
-            }
-        }
-    }
-    
-    // 2. 绘制网格线
-    // 垂直线
-    for (size_t tile_x = 0; tile_x <= tiles_x; tile_x++) {
-        size_t pixel_x = tile_x * tile_size;
-        if (pixel_x < static_cast<size_t>(width_)) {
-            for (size_t y = 0; y < static_cast<size_t>(height_); y++) {
-                buffer[y * static_cast<size_t>(width_) + pixel_x] = GRID_COLOR;
-            }
-        }
-    }
-    
-    // 水平线
-    for (size_t tile_y = 0; tile_y <= tiles_y; tile_y++) {
-        size_t pixel_y = tile_y * tile_size;
-        if (pixel_y < static_cast<size_t>(height_)) {
-            for (size_t x = 0; x < static_cast<size_t>(width_); x++) {
-                buffer[pixel_y * static_cast<size_t>(width_) + x] = GRID_COLOR;
-            }
-        }
-    }
-    
-    SPDLOG_INFO("Tile visualization completed - Green:Grid, Yellow:NonEmpty, Blue:Empty");
-    SPDLOG_INFO("=====================================");
 }
 
 // 简单的颜色混合函数 (alpha blending)
@@ -944,13 +831,6 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
     auto merge_duration = std::chrono::duration_cast<std::chrono::microseconds>(
         merge_end_time - merge_start_time);
     
-    // 6. Tile可视化调试
-    auto visualization_start_time = std::chrono::high_resolution_clock::now();
-    DrawTileVisualization(buffer, tile_triangles, tiles_x, tiles_y, TILE_SIZE);
-    auto visualization_end_time = std::chrono::high_resolution_clock::now();
-    auto visualization_duration = std::chrono::duration_cast<std::chrono::microseconds>(
-        visualization_end_time - visualization_start_time);
-    
     auto total_end_time = std::chrono::high_resolution_clock::now();
     auto total_duration = std::chrono::duration_cast<std::chrono::microseconds>(
         total_end_time - total_start_time);
@@ -961,7 +841,6 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
     stats.buffer_alloc_ms = buffer_alloc_duration.count() / 1000.0;
     stats.rasterization_ms = rasterization_duration.count() / 1000.0;
     stats.merge_ms = merge_duration.count() / 1000.0;
-    stats.visualization_ms = visualization_duration.count() / 1000.0;
     stats.total_ms = total_duration.count() / 1000.0;
     
     return stats;
