@@ -401,10 +401,6 @@ void SimpleRenderer::TriangleTileBinning(
     size_t processed_triangles = 0;
     size_t triangles_with_clipped_vertices = 0;
     
-    // 裁剪统计
-    size_t frustum_culled = 0;
-    size_t backface_culled = 0;
-    
     SPDLOG_INFO("Starting triangle-tile binning for {} triangles", total_triangles);
     SPDLOG_INFO("Screen dimensions: {}x{}, Tile size: {}, Tiles: {}x{}", 
                 width_, height_, tile_size, tiles_x, tiles_y);
@@ -431,7 +427,6 @@ void SimpleRenderer::TriangleTileBinning(
                 (c0.z < -c0.w && c1.z < -c1.w && c2.z < -c2.w);  // 近平面外
                 
             if (frustum_cull) {
-                frustum_culled++;
                 continue;
             }
         }
@@ -452,7 +447,6 @@ void SimpleRenderer::TriangleTileBinning(
         // 背面剔除：NDC空间中叉积为负表示顺时针，即背面。
         // 从NDC到屏幕空间中，会发生Y轴翻转，对应叉积应为正。
         if (cross_product > 0.0f) {
-            backface_culled++;
             continue;
         }
         
@@ -540,7 +534,7 @@ void SimpleRenderer::RasterizeTile(
   size_t tile_width = screen_x_end - screen_x_start;
   size_t tile_height = screen_y_end - screen_y_start;
   std::fill_n(tile_depth_buffer, tile_width * tile_height,
-              std::numeric_limits<float>::infinity());
+              1.0f);  // 初始化为最远深度（标准深度缓冲范围[0,1]）
   std::fill_n(tile_color_buffer, tile_width * tile_height, 0);
     
   // 在tile内光栅化所有三角形
@@ -651,6 +645,22 @@ SimpleRenderer::RenderStats SimpleRenderer::ExecuteTraditionalPipeline(
             auto v0 = processedVertices[f.GetIndex(0)];
             auto v1 = processedVertices[f.GetIndex(1)];
             auto v2 = processedVertices[f.GetIndex(2)];
+
+            // 获取屏幕空间坐标
+            Vector2f screen0(v0.GetPosition().x, v0.GetPosition().y);
+            Vector2f screen1(v1.GetPosition().x, v1.GetPosition().y);  
+            Vector2f screen2(v2.GetPosition().x, v2.GetPosition().y);
+            
+            // 计算屏幕空间叉积判断朝向
+            Vector2f edge1 = screen1 - screen0;
+            Vector2f edge2 = screen2 - screen0;
+            float cross_product = edge1.x * edge2.y - edge1.y * edge2.x;
+            
+            // 背面剔除：NDC空间中叉积为负表示顺时针，即背面。
+            // 从NDC到屏幕空间中，会发生Y轴翻转，对应叉积应为正。
+            if (cross_product > 0.0f) {
+                continue;
+            }
 
             const Material *material = &f.GetMaterial();
             auto fragments = rasterizer_->Rasterize(v0, v1, v2);
