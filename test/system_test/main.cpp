@@ -16,12 +16,10 @@
 
 #include <renderer.h>
 
-#include <chrono>
 #include <cstdint>
 #include <iostream>
 #include <span>
 #include <string>
-#include <thread>
 #include <vector>
 
 #include "buffer.hpp"
@@ -83,7 +81,7 @@ int main(int argc, char **argv) {
   simple_renderer::Camera camera(simple_renderer::Vector3f(0.0f, 0.0f, 1.0f));
 
   // 设置渲染模式（可选：TRADITIONAL、TILE_BASED 或 DEFERRED）
-  simple_renderer.SetRenderingMode(simple_renderer::RenderingMode::TRADITIONAL);
+  simple_renderer.SetRenderingMode(simple_renderer::RenderingMode::TILE_BASED);
   
   // 输出当前渲染模式
   std::string current_mode_name;
@@ -103,11 +101,9 @@ int main(int argc, char **argv) {
   auto display = Display(kWidth, kHeight);
   display.loopBegin();
 
-  // 调试模式：固定相机状态，只渲染一帧
-  bool debug_mode = true;
-  
-  if (debug_mode) {
-    // 固定相机参数进行调试
+  while (!display.loopShouldClose()) {
+    display.handleEvents(camera);
+
     shader.SetUniform("cameraPos", camera.GetPosition());
     shader.SetUniform("viewMatrix", camera.GetViewMatrix());
     shader.SetUniform("projectionMatrix",
@@ -119,29 +115,8 @@ int main(int argc, char **argv) {
     }
 
     buffer.SwapBuffer();
+
     display.fill(buffer.GetDisplayBuffer());
-    
-    // 调试模式下等待几秒让我们看到结果
-    std::this_thread::sleep_for(std::chrono::seconds(3));
-  } else {
-    // 正常渲染循环
-    while (!display.loopShouldClose()) {
-      display.handleEvents(camera);
-
-      shader.SetUniform("cameraPos", camera.GetPosition());
-      shader.SetUniform("viewMatrix", camera.GetViewMatrix());
-      shader.SetUniform("projectionMatrix",
-                        camera.GetProjectionMatrix(60.0f, static_cast<float>(kWidth) / static_cast<float>(kHeight), 0.1f, 100.0f));
-
-      buffer.ClearDrawBuffer(simple_renderer::Color::kBlack);
-      for (auto &model : models) {
-        simple_renderer.DrawModel(model, shader, buffer.GetDrawBuffer());
-      }
-
-      buffer.SwapBuffer();
-
-      display.fill(buffer.GetDisplayBuffer());
-    }
   }
 
   return 0;
