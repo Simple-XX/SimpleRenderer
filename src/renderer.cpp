@@ -37,7 +37,8 @@ SimpleRenderer::SimpleRenderer(size_t width, size_t height)
     : height_(height),
       width_(width),
       log_system_(LogSystem(kLogFilePath, kLogFileMaxSize, kLogFileMaxCount)),
-      current_mode_(RenderingMode::TILE_BASED) {
+      current_mode_(RenderingMode::TILE_BASED),
+      early_z_enabled_(true) {
   rasterizer_ = std::make_shared<Rasterizer>(width, height);
 }
 
@@ -162,7 +163,6 @@ void SimpleRenderer::ExecuteDrawPipeline(const Model &model, uint32_t *buffer) {
       SPDLOG_INFO("Buffer Alloc:     {:8.3f} ms ({:5.1f}%)", stats.buffer_alloc_ms, stats.buffer_alloc_ms/total_ms*100);
       SPDLOG_INFO("Rasterization:    {:8.3f} ms ({:5.1f}%)", stats.rasterization_ms, stats.rasterization_ms/total_ms*100);
       SPDLOG_INFO("Merge:            {:8.3f} ms ({:5.1f}%)", stats.merge_ms, stats.merge_ms/total_ms*100);
-      SPDLOG_INFO("Visualization:    {:8.3f} ms ({:5.1f}%)", stats.visualization_ms, stats.visualization_ms/total_ms*100);
       SPDLOG_INFO("Total:            {:8.3f} ms", total_ms);
       SPDLOG_INFO("==========================================");
       break;
@@ -521,7 +521,8 @@ void SimpleRenderer::RasterizeTile(
     size_t tiles_x, size_t tiles_y, size_t tile_size,
     float* tile_depth_buffer, uint32_t* tile_color_buffer,
     std::unique_ptr<float[]> &global_depth_buffer,
-    std::unique_ptr<uint32_t[]> &global_color_buffer) {
+    std::unique_ptr<uint32_t[]> &global_color_buffer,
+    bool use_early_z) {
   // 计算tile在屏幕空间的范围
   size_t tile_x = tile_id % tiles_x;
   size_t tile_y = tile_id / tiles_x;
@@ -556,11 +557,18 @@ void SimpleRenderer::RasterizeTile(
         size_t tile_index = tile_local_x + tile_local_y * tile_width;
                 
         // tile内深度测试
-        if (fragment.depth < tile_depth_buffer[tile_index]) {
-          tile_depth_buffer[tile_index] = fragment.depth;
-                    
+        if (use_early_z) { // Early-Z模式：深度测试在Fragment Shader之前
+          if (fragment.depth < tile_depth_buffer[tile_index]) {
+            auto color = shader_->FragmentShader(fragment);
+            tile_depth_buffer[tile_index] = fragment.depth;
+            tile_color_buffer[tile_index] = uint32_t(color);
+          }
+        } else { // Late-Z模式：Fragment Shader在深度测试之前
           auto color = shader_->FragmentShader(fragment);
-          tile_color_buffer[tile_index] = uint32_t(color);
+          if (fragment.depth < tile_depth_buffer[tile_index]) {
+            tile_depth_buffer[tile_index] = fragment.depth;
+            tile_color_buffer[tile_index] = uint32_t(color);
+          }
         }
           }
     }
@@ -580,26 +588,6 @@ void SimpleRenderer::RasterizeTile(
   }
 }
 
-// 简单的颜色混合函数 (alpha blending)
-uint32_t SimpleRenderer::BlendColors(uint32_t base, uint32_t overlay) {
-    // 提取RGBA通道 (假设是ABGR格式)
-    uint8_t base_r = (base >> 16) & 0xFF;
-    uint8_t base_g = (base >> 8) & 0xFF;
-    uint8_t base_b = base & 0xFF;
-    
-    uint8_t overlay_r = (overlay >> 16) & 0xFF;
-    uint8_t overlay_g = (overlay >> 8) & 0xFF;
-    uint8_t overlay_b = overlay & 0xFF;
-    uint8_t overlay_a = (overlay >> 24) & 0xFF;
-    
-    // 简单的alpha混合
-    float alpha = overlay_a / 255.0f;
-    uint8_t result_r = (uint8_t)(base_r * (1.0f - alpha) + overlay_r * alpha);
-    uint8_t result_g = (uint8_t)(base_g * (1.0f - alpha) + overlay_g * alpha);
-    uint8_t result_b = (uint8_t)(base_b * (1.0f - alpha) + overlay_b * alpha);
-    
-    return 0xFF000000 | (result_r << 16) | (result_g << 8) | result_b;
-}
 
 // 传统光栅化管线实现
 SimpleRenderer::RenderStats SimpleRenderer::ExecuteTraditionalPipeline(
@@ -784,7 +772,8 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
     auto rasterization_start_time = std::chrono::high_resolution_clock::now();
 #pragma omp parallel num_threads(kNProc) default(none) \
     shared(tile_triangles, rasterizer_, shader_, width_, height_, \
-           depthBuffer_all_thread, colorBuffer_all_thread, tiles_x, tiles_y, total_tiles)
+           depthBuffer_all_thread, colorBuffer_all_thread, tiles_x, tiles_y, total_tiles, \
+           early_z_enabled_)
     {
         int thread_id = omp_get_thread_num();
         auto &depthBuffer_per_thread = depthBuffer_all_thread[thread_id];
@@ -802,7 +791,8 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
             RasterizeTile(tile_id, tile_triangles[tile_id], 
                          tiles_x, tiles_y, TILE_SIZE,
                          tile_depth_buffer.get(), tile_color_buffer.get(),
-                         depthBuffer_per_thread, colorBuffer_per_thread);
+                         depthBuffer_per_thread, colorBuffer_per_thread,
+                         early_z_enabled_);
         }
     }
     auto rasterization_end_time = std::chrono::high_resolution_clock::now();

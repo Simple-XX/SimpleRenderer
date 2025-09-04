@@ -100,6 +100,7 @@ class SimpleRenderer {
   const size_t width_;
   LogSystem log_system_;
   RenderingMode current_mode_;  // 当前渲染模式
+  bool early_z_enabled_;        // Early-Z优化开关
 
   std::shared_ptr<Shader> shader_;
   std::shared_ptr<Rasterizer> rasterizer_;
@@ -143,7 +144,6 @@ class SimpleRenderer {
     double buffer_alloc_ms;
     double rasterization_ms;
     double merge_ms;
-    double visualization_ms;
     double total_ms;
   };
   
@@ -189,7 +189,8 @@ private:
     size_t tiles_x, size_t tiles_y, size_t tile_size,
     float* tile_depth_buffer, uint32_t* tile_color_buffer,
     std::unique_ptr<float[]> &global_depth_buffer,
-    std::unique_ptr<uint32_t[]> &global_color_buffer);
+    std::unique_ptr<uint32_t[]> &global_color_buffer,
+    bool use_early_z = false);
 
   
   /**
@@ -205,25 +206,7 @@ private:
    * @return 转换后的顶点(屏幕坐标)
    */
   Vertex ViewportTransformation(const Vertex &vertex);
-  /**
-   * Tile可视化调试函数 - 在渲染结果上绘制tile网格和状态
-   * @param buffer 渲染结果缓冲区
-   * @param tile_triangles 每个tile包含的三角形列表
-   * @param tiles_x X方向tile数量
-   * @param tiles_y Y方向tile数量 
-   * @param tile_size 单个tile的像素大小
-   */
-  void DrawTileVisualization(uint32_t* buffer, 
-      const std::vector<std::vector<TriangleInfo>>& tile_triangles, 
-      size_t tiles_x, size_t tiles_y, size_t tile_size);
-
-  /**
-   * 颜色混合函数 - 用于半透明效果
-   * @param base 基础颜色
-   * @param overlay 叠加颜色(包含alpha通道)
-   * @return 混合后的颜色
-   */
-  uint32_t BlendColors(uint32_t base, uint32_t overlay);
+  
 };
 }  // namespace simple_renderer
 
