@@ -405,6 +405,86 @@ void SimpleRenderer::TriangleTileBinning(
     SPDLOG_INFO("Screen dimensions: {}x{}, Tile size: {}, Tiles: {}x{}", 
                 width_, height_, tile_size, tiles_x, tiles_y);
     
+    // 第一遍：仅统计每个 tile 的三角形数量以便预分配，避免 push_back 扩容
+    std::vector<size_t> tile_counts(tiles_x * tiles_y, 0);
+    for (size_t tri_idx = 0; tri_idx < model.GetFaces().size(); tri_idx++) {
+        const auto &f = model.GetFaces()[tri_idx];
+        auto v0 = screenVertices[f.GetIndex(0)];
+        auto v1 = screenVertices[f.GetIndex(1)];
+        auto v2 = screenVertices[f.GetIndex(2)];
+
+        if (v0.HasClipPosition()) {
+            Vector4f c0 = v0.GetClipPosition();
+            Vector4f c1 = v1.GetClipPosition(); 
+            Vector4f c2 = v2.GetClipPosition();
+            bool frustum_cull = 
+                (c0.x > c0.w && c1.x > c1.w && c2.x > c2.w) ||
+                (c0.x < -c0.w && c1.x < -c0.w && c2.x < -c0.w) ||
+                (c0.y > c0.w && c1.y > c1.w && c2.y > c2.w) ||
+                (c0.y < -c0.w && c1.y < -c0.w && c2.y < -c0.w) ||
+                (c0.z > c0.w && c1.z > c1.w && c2.z > c2.w) ||
+                (c0.z < -c0.w && c1.z < -c0.w && c2.z < -c0.w);
+            if (frustum_cull) {
+                continue;
+            }
+        }
+
+        Vector4f pos0 = v0.GetPosition();
+        Vector4f pos1 = v1.GetPosition();
+        Vector4f pos2 = v2.GetPosition();
+
+        Vector2f screen0(pos0.x, pos0.y);
+        Vector2f screen1(pos1.x, pos1.y);  
+        Vector2f screen2(pos2.x, pos2.y);
+        Vector2f edge1 = screen1 - screen0;
+        Vector2f edge2 = screen2 - screen0;
+        float cross_product = edge1.x * edge2.y - edge1.y * edge2.x;
+        if (cross_product > 0.0f) {
+            continue;
+        }
+
+        bool has_clipped_vertex = (pos0.x == -1000.0f || pos1.x == -1000.0f || pos2.x == -1000.0f);
+        if (has_clipped_vertex) {
+            continue;
+        }
+
+        float screen_x0 = pos0.x;
+        float screen_y0 = pos0.y;
+        float screen_x1 = pos1.x;
+        float screen_y1 = pos1.y;
+        float screen_x2 = pos2.x;
+        float screen_y2 = pos2.y;
+
+        float min_x = std::min({screen_x0, screen_x1, screen_x2});
+        float max_x = std::max({screen_x0, screen_x1, screen_x2});
+        float min_y = std::min({screen_y0, screen_y1, screen_y2});
+        float max_y = std::max({screen_y0, screen_y1, screen_y2});
+
+        int start_tile_x = std::max(0, static_cast<int>(min_x) / static_cast<int>(tile_size));
+        int end_tile_x = std::min(static_cast<int>(tiles_x - 1), 
+                                 static_cast<int>(max_x) / static_cast<int>(tile_size));
+        int start_tile_y = std::max(0, static_cast<int>(min_y) / static_cast<int>(tile_size));
+        int end_tile_y = std::min(static_cast<int>(tiles_y - 1), 
+                                 static_cast<int>(max_y) / static_cast<int>(tile_size));
+
+        if (start_tile_x > end_tile_x || start_tile_y > end_tile_y) {
+            continue;
+        }
+
+        for (int ty = start_tile_y; ty <= end_tile_y; ++ty) {
+            for (int tx = start_tile_x; tx <= end_tile_x; ++tx) {
+                size_t tile_id = ty * tiles_x + tx;
+                tile_counts[tile_id]++;
+            }
+        }
+    }
+
+    // 依据统计结果进行容量预留
+    for (size_t tile_id = 0; tile_id < tile_triangles.size(); ++tile_id) {
+        if (tile_counts[tile_id] > 0) {
+            tile_triangles[tile_id].reserve(tile_counts[tile_id]);
+        }
+    }
     for (size_t tri_idx = 0; tri_idx < model.GetFaces().size(); tri_idx++) {
         const auto &f = model.GetFaces()[tri_idx];
         auto v0 = screenVertices[f.GetIndex(0)];
@@ -522,7 +602,8 @@ void SimpleRenderer::RasterizeTile(
     float* tile_depth_buffer, uint32_t* tile_color_buffer,
     std::unique_ptr<float[]> &global_depth_buffer,
     std::unique_ptr<uint32_t[]> &global_color_buffer,
-    bool use_early_z) {
+    bool use_early_z,
+    std::vector<Fragment>* scratch_fragments) {
   // 计算tile在屏幕空间的范围
   size_t tile_x = tile_id % tiles_x;
   size_t tile_y = tile_id / tiles_x;
@@ -539,38 +620,69 @@ void SimpleRenderer::RasterizeTile(
   std::fill_n(tile_color_buffer, tile_width * tile_height, 0);
     
   // 在tile内光栅化所有三角形
+  (void)tiles_y; // 避免未使用参数告警
   for (const auto &triangle : triangles) {
-    auto fragments = rasterizer_->Rasterize(triangle.v0, triangle.v1, triangle.v2);
-        
-    for (auto &fragment : fragments) {
-      fragment.material = triangle.material;
-            
-      size_t screen_x = fragment.screen_coord[0];
-      size_t screen_y = fragment.screen_coord[1];
-            
-      // 检查fragment是否在当前tile内
-      if (screen_x >= screen_x_start && screen_x < screen_x_end &&
-          screen_y >= screen_y_start && screen_y < screen_y_end) {
-                
-        size_t tile_local_x = screen_x - screen_x_start;
-        size_t tile_local_y = screen_y - screen_y_start;
-        size_t tile_index = tile_local_x + tile_local_y * tile_width;
-                
-        // tile内深度测试
-        if (use_early_z) { // Early-Z模式：深度测试在Fragment Shader之前
-          if (fragment.depth < tile_depth_buffer[tile_index]) {
+    // 复用线程本地 scratch 容器，限制在 tile 边界内栅格化
+    if (scratch_fragments) { // 提供scratch容器
+      scratch_fragments->clear();
+      if (scratch_fragments->capacity() < tile_width * tile_height) { // 二次确认，为日后可能的可变tile进行设计
+        scratch_fragments->reserve(tile_width * tile_height);
+      }
+      rasterizer_->RasterizeTo(triangle.v0, triangle.v1, triangle.v2,
+                               static_cast<int>(screen_x_start), static_cast<int>(screen_y_start),
+                               static_cast<int>(screen_x_end),   static_cast<int>(screen_y_end),
+                               *scratch_fragments);
+
+      for (auto &fragment : *scratch_fragments) {
+        fragment.material = triangle.material;
+        size_t screen_x = fragment.screen_coord[0];
+        size_t screen_y = fragment.screen_coord[1];
+        if (screen_x >= screen_x_start && screen_x < screen_x_end &&
+            screen_y >= screen_y_start && screen_y < screen_y_end) {
+          size_t tile_local_x = screen_x - screen_x_start;
+          size_t tile_local_y = screen_y - screen_y_start;
+          size_t tile_index = tile_local_x + tile_local_y * tile_width;
+          if (use_early_z) {
+            if (fragment.depth < tile_depth_buffer[tile_index]) {
+              auto color = shader_->FragmentShader(fragment);
+              tile_depth_buffer[tile_index] = fragment.depth;
+              tile_color_buffer[tile_index] = uint32_t(color);
+            }
+          } else {
             auto color = shader_->FragmentShader(fragment);
-            tile_depth_buffer[tile_index] = fragment.depth;
-            tile_color_buffer[tile_index] = uint32_t(color);
-          }
-        } else { // Late-Z模式：Fragment Shader在深度测试之前
-          auto color = shader_->FragmentShader(fragment);
-          if (fragment.depth < tile_depth_buffer[tile_index]) {
-            tile_depth_buffer[tile_index] = fragment.depth;
-            tile_color_buffer[tile_index] = uint32_t(color);
+            if (fragment.depth < tile_depth_buffer[tile_index]) {
+              tile_depth_buffer[tile_index] = fragment.depth;
+              tile_color_buffer[tile_index] = uint32_t(color);
+            }
           }
         }
+      }
+    } else { // 不提供scratch容器的版本
+      auto fragments = rasterizer_->Rasterize(triangle.v0, triangle.v1, triangle.v2);
+      for (auto &fragment : fragments) {
+        fragment.material = triangle.material;
+        size_t screen_x = fragment.screen_coord[0];
+        size_t screen_y = fragment.screen_coord[1];
+        if (screen_x >= screen_x_start && screen_x < screen_x_end &&
+            screen_y >= screen_y_start && screen_y < screen_y_end) {
+          size_t tile_local_x = screen_x - screen_x_start;
+          size_t tile_local_y = screen_y - screen_y_start;
+          size_t tile_index = tile_local_x + tile_local_y * tile_width;
+          if (use_early_z) {
+            if (fragment.depth < tile_depth_buffer[tile_index]) {
+              auto color = shader_->FragmentShader(fragment);
+              tile_depth_buffer[tile_index] = fragment.depth;
+              tile_color_buffer[tile_index] = uint32_t(color);
+            }
+          } else {
+            auto color = shader_->FragmentShader(fragment);
+            if (fragment.depth < tile_depth_buffer[tile_index]) {
+              tile_depth_buffer[tile_index] = fragment.depth;
+              tile_color_buffer[tile_index] = uint32_t(color);
+            }
           }
+        }
+      }
     }
   }
     
@@ -785,14 +897,18 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
         std::unique_ptr<uint32_t[]> tile_color_buffer = 
             std::make_unique<uint32_t[]>(TILE_SIZE * TILE_SIZE);
 
+        // 线程本地片段 scratch 容器（复用），容量按单 tile 上限预估
+        std::vector<Fragment> scratch_fragments;
+        scratch_fragments.reserve(TILE_SIZE * TILE_SIZE);
+
 #pragma omp for
         for (size_t tile_id = 0; tile_id < total_tiles; tile_id++) {
-            // 按照tile进行光栅化
+            // 按照tile进行光栅化，每个Tile进行区域限制+scratch复用，区域限制避免了可能的数据竞争
             RasterizeTile(tile_id, tile_triangles[tile_id], 
                          tiles_x, tiles_y, TILE_SIZE,
                          tile_depth_buffer.get(), tile_color_buffer.get(),
                          depthBuffer_per_thread, colorBuffer_per_thread,
-                         early_z_enabled_);
+                         early_z_enabled_, &scratch_fragments);
         }
     }
     auto rasterization_end_time = std::chrono::high_resolution_clock::now();

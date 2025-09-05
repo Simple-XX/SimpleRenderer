@@ -20,6 +20,13 @@ class Rasterizer {
   std::vector<Fragment> Rasterize(const Vertex& v0, const Vertex& v1,
                                   const Vertex& v2);
 
+  // 非分配版本：将片段直接写入调用方提供的容器
+  // 可选的裁剪区域为半开区间 [x0, x1) × [y0, y1)
+  // 用于 TBR：将光栅化限制在 tile 边界内，便于复用外部 scratch 容器
+  void RasterizeTo(const Vertex& v0, const Vertex& v1, const Vertex& v2,
+                   int x0, int y0, int x1, int y1,
+                   std::vector<Fragment>& out);
+
  private:
   size_t width_, height_;
 

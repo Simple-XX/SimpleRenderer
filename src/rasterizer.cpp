@@ -1,6 +1,8 @@
 #include "rasterizer.hpp"
 
 #include <omp.h>
+#include <algorithm>
+#include <cmath>
 
 namespace simple_renderer {
 
@@ -88,6 +90,72 @@ std::vector<Fragment> Rasterizer::Rasterize(const Vertex& v0, const Vertex& v1,
                      local_fragments.end());
   }
   return fragments;
+}
+
+void Rasterizer::RasterizeTo(const Vertex& v0, const Vertex& v1, const Vertex& v2,
+                             int x0, int y0, int x1, int y1,
+                             std::vector<Fragment>& out) {
+  // 获取三角形的最小 box（屏幕空间）
+  Vector2f a = Vector2f(v0.GetPosition().x, v0.GetPosition().y);
+  Vector2f b = Vector2f(v1.GetPosition().x, v1.GetPosition().y);
+  Vector2f c = Vector2f(v2.GetPosition().x, v2.GetPosition().y);
+
+  Vector2f bboxMin =
+      Vector2f{std::min({a.x, b.x, c.x}), std::min({a.y, b.y, c.y})};
+  Vector2f bboxMax =
+      Vector2f{std::max({a.x, b.x, c.x}), std::max({a.y, b.y, c.y})};
+
+  // Clamp 到屏幕尺寸
+  float minx = std::max(0.0f, bboxMin.x);
+  float miny = std::max(0.0f, bboxMin.y);
+  float maxx = std::min(float(width_ - 1), bboxMax.x);
+  float maxy = std::min(float(height_ - 1), bboxMax.y);
+
+  // 与外部提供的裁剪区域（半开区间）相交，转成闭区间扫描
+  int sx = std::max(x0, int(std::floor(minx)));
+  int sy = std::max(y0, int(std::floor(miny)));
+  int ex = std::min(x1 - 1, int(std::floor(maxx)));
+  int ey = std::min(y1 - 1, int(std::floor(maxy)));
+
+  if (sx > ex || sy > ey) {
+    return;  // 与裁剪区域无交
+  }
+
+  // 透视矫正插值使用与 Rasterize 相同逻辑，但单线程写入 out
+  float w0_inv = v0.GetPosition().w;
+  float w1_inv = v1.GetPosition().w;
+  float w2_inv = v2.GetPosition().w;
+
+  for (int x = sx; x <= ex; ++x) {
+    for (int y = sy; y <= ey; ++y) {
+      auto [is_inside, barycentric_coord] = GetBarycentricCoord(
+          v0.GetPosition(), v1.GetPosition(), v2.GetPosition(),
+          Vector3f(static_cast<float>(x), static_cast<float>(y), 0));
+      if (!is_inside) continue;
+
+      // 插值 1/w 并进行透视矫正
+      float w_inv_interpolated = Interpolate(w0_inv, w1_inv, w2_inv, barycentric_coord);
+      Vector3f corrected_bary(
+          barycentric_coord.x * w0_inv / w_inv_interpolated,
+          barycentric_coord.y * w1_inv / w_inv_interpolated,
+          barycentric_coord.z * w2_inv / w_inv_interpolated);
+
+      auto z = Interpolate(v0.GetPosition().z, v1.GetPosition().z,
+                           v2.GetPosition().z, corrected_bary);
+
+      Fragment fragment;
+      fragment.screen_coord = {x, y};
+      fragment.normal = Interpolate(v0.GetNormal(), v1.GetNormal(),
+                                    v2.GetNormal(), corrected_bary);
+      fragment.uv = Interpolate(v0.GetTexCoords(), v1.GetTexCoords(),
+                                v2.GetTexCoords(), corrected_bary);
+      fragment.color = InterpolateColor(v0.GetColor(), v1.GetColor(),
+                                        v2.GetColor(), corrected_bary);
+      fragment.depth = z;
+
+      out.push_back(fragment);
+    }
+  }
 }
 
 std::pair<bool, Vector3f> Rasterizer::GetBarycentricCoord(const Vector3f& p0,

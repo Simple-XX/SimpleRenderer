@@ -190,7 +190,8 @@ private:
     float* tile_depth_buffer, uint32_t* tile_color_buffer,
     std::unique_ptr<float[]> &global_depth_buffer,
     std::unique_ptr<uint32_t[]> &global_color_buffer,
-    bool use_early_z = false);
+    bool use_early_z = false,
+    std::vector<Fragment>* scratch_fragments = nullptr);
 
   
   /**
