@@ -38,18 +38,12 @@ enum class RenderingMode {
   DEFERRED      // 延迟渲染模式 - 经典GPU管线教学模拟
 };
 
-// Face 只包含顶点索引，不包含实际的顶点数据;
-// Vertex 包含3D坐标，但没有屏幕坐标
-// Fragment 包含屏幕坐标，但它是光栅化的结果，不是输入
-struct TriangleInfo {
-  Vertex v0, v1, v2;
-  const Material *material;
-  size_t face_index;
-  TriangleInfo(const Vertex& vertex0, const Vertex& vertex1, const Vertex& vertex2,
-             const Material* mat, size_t face_idx = 0)
-    : v0(vertex0), v1(vertex1), v2(vertex2), material(mat), face_index(face_idx) {}
-    
-  TriangleInfo() = default;
+
+// SoA 版 tile 列表中的三角形引用（仅存索引与材质指针）
+struct TriangleRef {
+  size_t i0, i1, i2;
+  const Material* material = nullptr;
+  size_t face_index = 0;
 };
 
 class SimpleRenderer {
@@ -158,10 +152,9 @@ class SimpleRenderer {
     double deferred_shading_ms;
     double total_ms;
   };
-  
   TileRenderStats ExecuteTileBasedPipeline(const Model &model,
-                                          const std::vector<Vertex> &processedVertices,
-                                          uint32_t *buffer);
+                                              const VertexSoA &soa,
+                                              uint32_t *buffer);
 
   /**
    * 延迟渲染管线
@@ -177,19 +170,24 @@ class SimpleRenderer {
   
 private:
 
+
+  // SoA 版本的 Triangle-Tile binning（两遍计数 + reserve）
   void TriangleTileBinning(
-    const Model &model, 
-    const std::vector<Vertex> &screenVertices,
-    std::vector<std::vector<TriangleInfo>> &tile_triangles,
+    const Model &model,
+    const VertexSoA &soa,
+    std::vector<std::vector<TriangleRef>> &tile_triangles,
     size_t tiles_x, size_t tiles_y, size_t tile_size);
 
+
+  // SoA 版本的 tile 光栅化
   void RasterizeTile(
     size_t tile_id,
-    const std::vector<TriangleInfo> &triangles,
+    const std::vector<TriangleRef> &triangles,
     size_t tiles_x, size_t tiles_y, size_t tile_size,
     float* tile_depth_buffer, uint32_t* tile_color_buffer,
     std::unique_ptr<float[]> &global_depth_buffer,
     std::unique_ptr<uint32_t[]> &global_color_buffer,
+    const VertexSoA &soa,
     bool use_early_z = false,
     std::vector<Fragment>* scratch_fragments = nullptr);
 

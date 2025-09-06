@@ -100,25 +100,42 @@ void SimpleRenderer::ExecuteDrawPipeline(const Model &model, uint32_t *buffer) {
   
   /* * * Vertex Transformation * * */
   auto vertex_shader_start_time = std::chrono::high_resolution_clock::now();
-  std::vector<Vertex> processedVertices;
   const auto &input_vertices = model.GetVertices();
-  processedVertices.resize(input_vertices.size()); // 根据顶点总数量进行预分配
+  std::vector<Vertex> processedVertices;  // 非 TBR
+  VertexSoA processedSoA;                 // TBR 专用
 
-// 并行过程保持连续分块，避免false sharing
-#pragma omp parallel for num_threads(kNProc) schedule(static) \ 
+  if (current_mode_ == RenderingMode::TILE_BASED) {
+    processedSoA.resize(input_vertices.size());
+    // schedule(static)使并行过程保持连续分块，避免 false sharing
+#pragma omp parallel for num_threads(kNProc) schedule(static) \
+    shared(shader_, processedSoA, input_vertices)
+    for (size_t i = 0; i < input_vertices.size(); ++i) { // 按索引并行处理
+      const auto &v = input_vertices[i];
+      // 顶点着色器：世界坐标 -> 裁剪坐标
+      auto clipSpaceVertex = shader_->VertexShader(v);
+      // 保存裁剪空间坐标用于后续视锥体裁剪
+      processedSoA.pos_clip[i] = clipSpaceVertex.GetPosition();
+      auto ndcVertex = PerspectiveDivision(clipSpaceVertex);
+      auto screenSpaceVertex = ViewportTransformation(ndcVertex);
+
+      // 填充为SoA数据结构，用于优化缓存局部性
+      processedSoA.pos_screen[i] = screenSpaceVertex.GetPosition();
+      processedSoA.normal[i]     = screenSpaceVertex.GetNormal();
+      processedSoA.uv[i]         = screenSpaceVertex.GetTexCoords();
+      processedSoA.color[i]      = screenSpaceVertex.GetColor();
+    }
+  } else { // Tradition或Deffer管线
+    processedVertices.resize(input_vertices.size()); // 根据顶点总数量进行预分配
+    // 并行过程保持连续分块，避免false sharing
+#pragma omp parallel for num_threads(kNProc) schedule(static) \
     shared(shader_, processedVertices, input_vertices)
-  for (size_t i = 0; i < input_vertices.size(); ++i) { // 按索引并行处理
-    const auto &v = input_vertices[i];
-    // 顶点着色器：世界坐标 -> 裁剪坐标
-    auto clipSpaceVertex = shader_->VertexShader(v);
-
-    // 透视除法：裁剪坐标 -> NDC坐标
-    auto ndcVertex = PerspectiveDivision(clipSpaceVertex);
-
-    // 视口变换：NDC坐标 -> 屏幕坐标
-    auto screenSpaceVertex = ViewportTransformation(ndcVertex);
-
-    processedVertices[i] = screenSpaceVertex;
+    for (size_t i = 0; i < input_vertices.size(); ++i) { // 按索引并行处理
+      const auto &v = input_vertices[i];
+      auto clipSpaceVertex = shader_->VertexShader(v);
+      auto ndcVertex = PerspectiveDivision(clipSpaceVertex);
+      auto screenSpaceVertex = ViewportTransformation(ndcVertex);
+      processedVertices[i] = screenSpaceVertex;
+    }
   }
   auto vertex_shader_end_time = std::chrono::high_resolution_clock::now();
   auto vertex_shader_duration = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -143,7 +160,7 @@ void SimpleRenderer::ExecuteDrawPipeline(const Model &model, uint32_t *buffer) {
     }
     
     case RenderingMode::TILE_BASED: {
-      auto stats = ExecuteTileBasedPipeline(model, processedVertices, buffer);
+      auto stats = ExecuteTileBasedPipeline(model, processedSoA, buffer);
       double total_ms = vertex_ms + stats.total_ms;
       
       SPDLOG_INFO("=== TILE-BASED RENDERING PERFORMANCE ===");
@@ -379,309 +396,193 @@ Vertex SimpleRenderer::ViewportTransformation(const Vertex &vertex) {
 
 
 
-
-// Triangle-Tile binning函数 - 修正版本
+// SoA优化的Binning：两遍计数 + 预留 + 填充 TriangleRef
 void SimpleRenderer::TriangleTileBinning(
-    const Model &model, 
-    const std::vector<Vertex> &screenVertices,
-    std::vector<std::vector<TriangleInfo>> &tile_triangles,
+    const Model &model,
+    const VertexSoA &soa,
+    std::vector<std::vector<TriangleRef>> &tile_triangles,
     size_t tiles_x, size_t tiles_y, size_t tile_size) {
-    
-    size_t total_triangles = model.GetFaces().size();
-    size_t processed_triangles = 0;
-    size_t triangles_with_clipped_vertices = 0;
-    
-    SPDLOG_INFO("Starting triangle-tile binning for {} triangles", total_triangles);
-    SPDLOG_INFO("Screen dimensions: {}x{}, Tile size: {}, Tiles: {}x{}", 
-                width_, height_, tile_size, tiles_x, tiles_y);
-    
-    // 第一遍：仅统计每个 tile 的三角形数量以便预分配，避免 push_back 扩容
-    std::vector<size_t> tile_counts(tiles_x * tiles_y, 0);
-    for (size_t tri_idx = 0; tri_idx < model.GetFaces().size(); tri_idx++) {
-        const auto &f = model.GetFaces()[tri_idx];
-        auto v0 = screenVertices[f.GetIndex(0)];
-        auto v1 = screenVertices[f.GetIndex(1)];
-        auto v2 = screenVertices[f.GetIndex(2)];
+  const size_t total_triangles = model.GetFaces().size();
 
-        if (v0.HasClipPosition()) {
-            Vector4f c0 = v0.GetClipPosition();
-            Vector4f c1 = v1.GetClipPosition(); 
-            Vector4f c2 = v2.GetClipPosition();
-            bool frustum_cull = 
-                (c0.x > c0.w && c1.x > c1.w && c2.x > c2.w) ||
-                (c0.x < -c0.w && c1.x < -c0.w && c2.x < -c0.w) ||
-                (c0.y > c0.w && c1.y > c1.w && c2.y > c2.w) ||
-                (c0.y < -c0.w && c1.y < -c0.w && c2.y < -c0.w) ||
-                (c0.z > c0.w && c1.z > c1.w && c2.z > c2.w) ||
-                (c0.z < -c0.w && c1.z < -c0.w && c2.z < -c0.w);
-            if (frustum_cull) {
-                continue;
-            }
-        }
+  SPDLOG_INFO("Starting triangle-tile binning (SoA) for {} triangles", total_triangles);
+  SPDLOG_INFO("Screen dimensions: {}x{}, Tile size: {}, Tiles: {}x{}",
+              width_, height_, tile_size, tiles_x, tiles_y);
 
-        Vector4f pos0 = v0.GetPosition();
-        Vector4f pos1 = v1.GetPosition();
-        Vector4f pos2 = v2.GetPosition();
+  std::vector<size_t> tile_counts(tiles_x * tiles_y, 0);
 
-        Vector2f screen0(pos0.x, pos0.y);
-        Vector2f screen1(pos1.x, pos1.y);  
-        Vector2f screen2(pos2.x, pos2.y);
-        Vector2f edge1 = screen1 - screen0;
-        Vector2f edge2 = screen2 - screen0;
-        float cross_product = edge1.x * edge2.y - edge1.y * edge2.x;
-        if (cross_product > 0.0f) {
-            continue;
-        }
+  auto process_triangle = [&](size_t tri_idx, bool count_only) {
+    const auto &f = model.GetFaces()[tri_idx];
+    size_t i0 = f.GetIndex(0);
+    size_t i1 = f.GetIndex(1);
+    size_t i2 = f.GetIndex(2);
 
-        bool has_clipped_vertex = (pos0.x == -1000.0f || pos1.x == -1000.0f || pos2.x == -1000.0f);
-        if (has_clipped_vertex) {
-            continue;
-        }
-
-        float screen_x0 = pos0.x;
-        float screen_y0 = pos0.y;
-        float screen_x1 = pos1.x;
-        float screen_y1 = pos1.y;
-        float screen_x2 = pos2.x;
-        float screen_y2 = pos2.y;
-
-        float min_x = std::min({screen_x0, screen_x1, screen_x2});
-        float max_x = std::max({screen_x0, screen_x1, screen_x2});
-        float min_y = std::min({screen_y0, screen_y1, screen_y2});
-        float max_y = std::max({screen_y0, screen_y1, screen_y2});
-
-        int start_tile_x = std::max(0, static_cast<int>(min_x) / static_cast<int>(tile_size));
-        int end_tile_x = std::min(static_cast<int>(tiles_x - 1), 
-                                 static_cast<int>(max_x) / static_cast<int>(tile_size));
-        int start_tile_y = std::max(0, static_cast<int>(min_y) / static_cast<int>(tile_size));
-        int end_tile_y = std::min(static_cast<int>(tiles_y - 1), 
-                                 static_cast<int>(max_y) / static_cast<int>(tile_size));
-
-        if (start_tile_x > end_tile_x || start_tile_y > end_tile_y) {
-            continue;
-        }
-
-        for (int ty = start_tile_y; ty <= end_tile_y; ++ty) {
-            for (int tx = start_tile_x; tx <= end_tile_x; ++tx) {
-                size_t tile_id = ty * tiles_x + tx;
-                tile_counts[tile_id]++;
-            }
-        }
+    // 视锥体裁剪 (裁剪空间)
+    // 保守视锥体裁剪：只有当整个三角形都在视锥体外同一侧时才裁剪
+    const Vector4f &c0 = soa.pos_clip[i0];
+    const Vector4f &c1 = soa.pos_clip[i1];
+    const Vector4f &c2 = soa.pos_clip[i2];
+    bool frustum_cull =
+        (c0.x > c0.w && c1.x > c1.w && c2.x > c2.w) ||  // 右平面外
+        (c0.x < -c0.w && c1.x < -c0.w && c2.x < -c0.w) || // 左平面外
+        (c0.y > c0.w && c1.y > c1.w && c2.y > c2.w) ||  // 上平面外
+        (c0.y < -c0.w && c1.y < -c0.w && c2.y < -c0.w) || // 下平面外
+        (c0.z > c0.w && c1.z > c1.w && c2.z > c2.w) ||  // 远平面外
+        (c0.z < -c0.w && c1.z < -c0.w && c2.z < -c0.w);  // 近平面外
+    if (frustum_cull) {
+      return;
     }
 
-    // 依据统计结果进行容量预留
-    for (size_t tile_id = 0; tile_id < tile_triangles.size(); ++tile_id) {
-        if (tile_counts[tile_id] > 0) {
-            tile_triangles[tile_id].reserve(tile_counts[tile_id]);
+    const Vector4f &pos0 = soa.pos_screen[i0];
+    const Vector4f &pos1 = soa.pos_screen[i1];
+    const Vector4f &pos2 = soa.pos_screen[i2];
+
+    // 背面剔除（屏幕空间）
+    // NDC空间中叉积为负表示顺时针，即背面。
+    // 从NDC到屏幕空间中，会发生Y轴翻转，对应叉积应为正。
+
+    Vector2f screen0(pos0.x, pos0.y);
+    Vector2f screen1(pos1.x, pos1.y);
+    Vector2f screen2(pos2.x, pos2.y);
+    Vector2f edge1 = screen1 - screen0;
+    Vector2f edge2 = screen2 - screen0;
+    float cross_product = edge1.x * edge2.y - edge1.y * edge2.x;
+    if (cross_product > 0.0f) return;
+
+    float screen_x0 = pos0.x;
+    float screen_y0 = pos0.y;
+    float screen_x1 = pos1.x;
+    float screen_y1 = pos1.y;
+    float screen_x2 = pos2.x;
+    float screen_y2 = pos2.y;
+
+    // 计算屏幕bbox，用于后续tile划分
+    float min_x = std::min({screen_x0, screen_x1, screen_x2});
+    float max_x = std::max({screen_x0, screen_x1, screen_x2});
+    float min_y = std::min({screen_y0, screen_y1, screen_y2});
+    float max_y = std::max({screen_y0, screen_y1, screen_y2});
+
+    int start_tile_x = std::max(0, static_cast<int>(min_x) / static_cast<int>(tile_size));
+    int end_tile_x   = std::min(static_cast<int>(tiles_x - 1), static_cast<int>(max_x) / static_cast<int>(tile_size));
+    int start_tile_y = std::max(0, static_cast<int>(min_y) / static_cast<int>(tile_size));
+    int end_tile_y   = std::min(static_cast<int>(tiles_y - 1), static_cast<int>(max_y) / static_cast<int>(tile_size));
+    if (start_tile_x > end_tile_x || start_tile_y > end_tile_y) return; // 如果bbox不在任何tile内，直接返回
+
+    if (count_only) { // 第一遍计数，只统计tile内三角形数量
+      for (int ty = start_tile_y; ty <= end_tile_y; ++ty) {
+        for (int tx = start_tile_x; tx <= end_tile_x; ++tx) {
+          size_t tile_id = ty * tiles_x + tx;
+          tile_counts[tile_id]++;
         }
+      }
+    } else { // 第二遍填充，填充TriangleRef
+      TriangleRef tri_ref{ i0, i1, i2, &f.GetMaterial(), tri_idx };
+      for (int ty = start_tile_y; ty <= end_tile_y; ++ty) {
+        for (int tx = start_tile_x; tx <= end_tile_x; ++tx) {
+          size_t tile_id = ty * tiles_x + tx;
+          tile_triangles[tile_id].push_back(tri_ref);
+        }
+      }
     }
-    for (size_t tri_idx = 0; tri_idx < model.GetFaces().size(); tri_idx++) {
-        const auto &f = model.GetFaces()[tri_idx];
-        auto v0 = screenVertices[f.GetIndex(0)];
-        auto v1 = screenVertices[f.GetIndex(1)];
-        auto v2 = screenVertices[f.GetIndex(2)];
-        
-        // 视锥体裁剪 (裁剪空间)
-        if (v0.HasClipPosition()) {
-            Vector4f c0 = v0.GetClipPosition();
-            Vector4f c1 = v1.GetClipPosition(); 
-            Vector4f c2 = v2.GetClipPosition();
-            
-            // 保守视锥体裁剪：只有当整个三角形都在视锥体外同一侧时才裁剪
-            bool frustum_cull = 
-                (c0.x > c0.w && c1.x > c1.w && c2.x > c2.w) ||  // 右平面外
-                (c0.x < -c0.w && c1.x < -c1.w && c2.x < -c2.w) || // 左平面外  
-                (c0.y > c0.w && c1.y > c1.w && c2.y > c2.w) ||  // 上平面外
-                (c0.y < -c0.w && c1.y < -c1.w && c2.y < -c2.w) || // 下平面外
-                (c0.z > c0.w && c1.z > c1.w && c2.z > c2.w) ||  // 远平面外
-                (c0.z < -c0.w && c1.z < -c1.w && c2.z < -c2.w);  // 近平面外
-                
-            if (frustum_cull) {
-                continue;
-            }
-        }
-        
-        // 获取屏幕空间坐标（现在已经是屏幕坐标了）
-        Vector4f pos0 = v0.GetPosition();
-        Vector4f pos1 = v1.GetPosition();
-        Vector4f pos2 = v2.GetPosition();
-        
-        // 计算屏幕空间叉积判断朝向
-        Vector2f screen0(pos0.x, pos0.y);
-        Vector2f screen1(pos1.x, pos1.y);  
-        Vector2f screen2(pos2.x, pos2.y);
-        Vector2f edge1 = screen1 - screen0;
-        Vector2f edge2 = screen2 - screen0;
-        float cross_product = edge1.x * edge2.y - edge1.y * edge2.x;
-        
-        // 背面剔除：NDC空间中叉积为负表示顺时针，即背面。
-        // 从NDC到屏幕空间中，会发生Y轴翻转，对应叉积应为正。
-        if (cross_product > 0.0f) {
-            continue;
-        }
-        
-        // 检查三角形是否有被裁剪的顶点（坐标为-1000的表示被裁剪）
-        bool has_clipped_vertex = (pos0.x == -1000.0f || pos1.x == -1000.0f || pos2.x == -1000.0f);
-        
-        if (has_clipped_vertex) {
-            triangles_with_clipped_vertices++;
-            if (triangles_with_clipped_vertices <= 3) {
-                SPDLOG_INFO("Triangle {} has clipped vertices:", tri_idx);
-                SPDLOG_INFO("  V0: ({:.1f},{:.1f}) V1: ({:.1f},{:.1f}) V2: ({:.1f},{:.1f})", 
-                           pos0.x, pos0.y, pos1.x, pos1.y, pos2.x, pos2.y);
-            }
-            continue;
-        }
-        
-        // 直接使用屏幕空间坐标
-        float screen_x0 = pos0.x;
-        float screen_y0 = pos0.y;
-        float screen_x1 = pos1.x;
-        float screen_y1 = pos1.y;
-        float screen_x2 = pos2.x;
-        float screen_y2 = pos2.y;
-        
-        // 计算bounding box
-        float min_x = std::min({screen_x0, screen_x1, screen_x2});
-        float max_x = std::max({screen_x0, screen_x1, screen_x2});
-        float min_y = std::min({screen_y0, screen_y1, screen_y2});
-        float max_y = std::max({screen_y0, screen_y1, screen_y2});
-        
-        
-        // 计算影响的tile范围
-        int start_tile_x = std::max(0, static_cast<int>(min_x) / static_cast<int>(tile_size));
-        int end_tile_x = std::min(static_cast<int>(tiles_x - 1), 
-                                 static_cast<int>(max_x) / static_cast<int>(tile_size));
-        int start_tile_y = std::max(0, static_cast<int>(min_y) / static_cast<int>(tile_size));
-        int end_tile_y = std::min(static_cast<int>(tiles_y - 1), 
-                                 static_cast<int>(max_y) / static_cast<int>(tile_size));
-        
-        // 添加三角形到相关tiles（多个三角形可能会映射到同一个tile当中，所以谨慎并行化）
-        if (start_tile_x <= end_tile_x && start_tile_y <= end_tile_y) {
-            TriangleInfo triangle_info = {v0, v1, v2, &f.GetMaterial(), processed_triangles};
-            
-            for (int ty = start_tile_y; ty <= end_tile_y; ty++) {
-                for (int tx = start_tile_x; tx <= end_tile_x; tx++) {
-                    size_t tile_id = ty * tiles_x + tx;
-                    tile_triangles[tile_id].push_back(triangle_info); // 可能多个线程同时pushback的话有风险
-                }
-            }
-            processed_triangles++;
-            
-        }
-    }
-    
-    size_t total_triangle_refs = 0;
-    size_t non_empty_tiles = 0;
-    for (const auto& tile : tile_triangles) {
-        total_triangle_refs += tile.size();
-        if (!tile.empty()) non_empty_tiles++;
-    }
-    
-    SPDLOG_INFO("  Total triangle references: {}", total_triangle_refs);
-    SPDLOG_INFO("  Non-empty tiles: {}", non_empty_tiles);
-    SPDLOG_INFO("  Average triangles per tile: {:.2f}", 
-                total_triangle_refs > 0 ? float(total_triangle_refs) / tile_triangles.size() : 0.0f);
+  };
+
+  // 第一遍（count only）：计算每个tile需要容纳多少三角形
+  for (size_t tri_idx = 0; tri_idx < total_triangles; ++tri_idx) {
+    process_triangle(tri_idx, true);
+  }
+
+  // 预分配，避免动态扩容
+  for (size_t tile_id = 0; tile_id < tile_triangles.size(); ++tile_id) {
+    if (tile_counts[tile_id] > 0) tile_triangles[tile_id].reserve(tile_counts[tile_id]);
+  }
+
+  // 第二遍（fill）：按范围填充TriangleRef
+  for (size_t tri_idx = 0; tri_idx < total_triangles; ++tri_idx) {
+    process_triangle(tri_idx, false);
+  }
+
+  size_t total_triangle_refs = 0;
+  size_t non_empty_tiles = 0;
+  for (const auto& tile : tile_triangles) {
+    total_triangle_refs += tile.size();
+    if (!tile.empty()) non_empty_tiles++;
+  }
+  SPDLOG_INFO("  (SoA) Total triangle references: {}", total_triangle_refs);
+  SPDLOG_INFO("  (SoA) Non-empty tiles: {}", non_empty_tiles);
+  SPDLOG_INFO("  (SoA) Average triangles per tile: {:.2f}",
+              total_triangle_refs > 0 ? float(total_triangle_refs) / tile_triangles.size() : 0.0f);
 }
 
-// 单个tile光栅化函数
+// SoA 版：单个 tile 光栅化
 void SimpleRenderer::RasterizeTile(
     size_t tile_id,
-    const std::vector<TriangleInfo> &triangles,
+    const std::vector<TriangleRef> &triangles,
     size_t tiles_x, size_t tiles_y, size_t tile_size,
     float* tile_depth_buffer, uint32_t* tile_color_buffer,
     std::unique_ptr<float[]> &global_depth_buffer,
     std::unique_ptr<uint32_t[]> &global_color_buffer,
+    const VertexSoA &soa,
     bool use_early_z,
     std::vector<Fragment>* scratch_fragments) {
-  // 计算tile在屏幕空间的范围
+  (void)tiles_y;
+  // 计算 tile 屏幕范围
   size_t tile_x = tile_id % tiles_x;
   size_t tile_y = tile_id / tiles_x;
   size_t screen_x_start = tile_x * tile_size;
   size_t screen_y_start = tile_y * tile_size;
   size_t screen_x_end = std::min(screen_x_start + tile_size, width_);
   size_t screen_y_end = std::min(screen_y_start + tile_size, height_);
-    
-  // 初始化tile缓冲区
+
+  // 初始化 tile 局部缓冲
   size_t tile_width = screen_x_end - screen_x_start;
   size_t tile_height = screen_y_end - screen_y_start;
-  std::fill_n(tile_depth_buffer, tile_width * tile_height,
-              1.0f);  // 初始化为最远深度（标准深度缓冲范围[0,1]）
+  std::fill_n(tile_depth_buffer, tile_width * tile_height, 1.0f);
   std::fill_n(tile_color_buffer, tile_width * tile_height, 0);
-    
-  // 在tile内光栅化所有三角形
-  (void)tiles_y; // 避免未使用参数告警
-  for (const auto &triangle : triangles) {
-    // 复用线程本地 scratch 容器，限制在 tile 边界内栅格化
-    if (scratch_fragments) { // 提供scratch容器
-      scratch_fragments->clear();
-      if (scratch_fragments->capacity() < tile_width * tile_height) { // 二次确认，为日后可能的可变tile进行设计
-        scratch_fragments->reserve(tile_width * tile_height);
-      }
-      rasterizer_->RasterizeTo(triangle.v0, triangle.v1, triangle.v2,
-                               static_cast<int>(screen_x_start), static_cast<int>(screen_y_start),
-                               static_cast<int>(screen_x_end),   static_cast<int>(screen_y_end),
-                               *scratch_fragments);
 
-      for (auto &fragment : *scratch_fragments) {
-        fragment.material = triangle.material;
-        size_t screen_x = fragment.screen_coord[0];
-        size_t screen_y = fragment.screen_coord[1];
-        if (screen_x >= screen_x_start && screen_x < screen_x_end &&
-            screen_y >= screen_y_start && screen_y < screen_y_end) {
-          size_t tile_local_x = screen_x - screen_x_start;
-          size_t tile_local_y = screen_y - screen_y_start;
-          size_t tile_index = tile_local_x + tile_local_y * tile_width;
-          if (use_early_z) {
-            if (fragment.depth < tile_depth_buffer[tile_index]) {
-              auto color = shader_->FragmentShader(fragment);
-              tile_depth_buffer[tile_index] = fragment.depth;
-              tile_color_buffer[tile_index] = uint32_t(color);
-            }
-          } else {
+  for (const auto &tri : triangles) { // 用来应对scratch传入nullptr的情况
+    // 始终走 SoA + 限制矩形的光栅化路径；如未提供 scratch，则使用函数内局部容器
+    std::vector<Fragment> local_out;
+    std::vector<Fragment> &out = scratch_fragments ? *scratch_fragments : local_out;
+
+    out.clear();
+    if (out.capacity() < tile_width * tile_height) {
+      out.reserve(tile_width * tile_height);
+    }
+
+    rasterizer_->RasterizeTo(soa, tri.i0, tri.i1, tri.i2,
+                             static_cast<int>(screen_x_start), static_cast<int>(screen_y_start),
+                             static_cast<int>(screen_x_end),   static_cast<int>(screen_y_end),
+                             out);
+
+    for (auto &fragment : out) {
+      fragment.material = tri.material;
+      size_t sx = fragment.screen_coord[0];
+      size_t sy = fragment.screen_coord[1];
+      if (sx >= screen_x_start && sx < screen_x_end && sy >= screen_y_start && sy < screen_y_end) {
+        size_t local_x = sx - screen_x_start;
+        size_t local_y = sy - screen_y_start;
+        size_t idx = local_x + local_y * tile_width;
+        if (use_early_z) {
+          if (fragment.depth < tile_depth_buffer[idx]) {
             auto color = shader_->FragmentShader(fragment);
-            if (fragment.depth < tile_depth_buffer[tile_index]) {
-              tile_depth_buffer[tile_index] = fragment.depth;
-              tile_color_buffer[tile_index] = uint32_t(color);
-            }
+            tile_depth_buffer[idx] = fragment.depth;
+            tile_color_buffer[idx] = uint32_t(color);
           }
-        }
-      }
-    } else { // 不提供scratch容器的版本
-      auto fragments = rasterizer_->Rasterize(triangle.v0, triangle.v1, triangle.v2);
-      for (auto &fragment : fragments) {
-        fragment.material = triangle.material;
-        size_t screen_x = fragment.screen_coord[0];
-        size_t screen_y = fragment.screen_coord[1];
-        if (screen_x >= screen_x_start && screen_x < screen_x_end &&
-            screen_y >= screen_y_start && screen_y < screen_y_end) {
-          size_t tile_local_x = screen_x - screen_x_start;
-          size_t tile_local_y = screen_y - screen_y_start;
-          size_t tile_index = tile_local_x + tile_local_y * tile_width;
-          if (use_early_z) {
-            if (fragment.depth < tile_depth_buffer[tile_index]) {
-              auto color = shader_->FragmentShader(fragment);
-              tile_depth_buffer[tile_index] = fragment.depth;
-              tile_color_buffer[tile_index] = uint32_t(color);
-            }
-          } else {
-            auto color = shader_->FragmentShader(fragment);
-            if (fragment.depth < tile_depth_buffer[tile_index]) {
-              tile_depth_buffer[tile_index] = fragment.depth;
-              tile_color_buffer[tile_index] = uint32_t(color);
-            }
+        } else {
+          auto color = shader_->FragmentShader(fragment);
+          if (fragment.depth < tile_depth_buffer[idx]) {
+            tile_depth_buffer[idx] = fragment.depth;
+            tile_color_buffer[idx] = uint32_t(color);
           }
         }
       }
     }
   }
-    
-  // 将tile结果写入全局缓冲区
+
+  // 写回全局缓冲
   for (size_t y = 0; y < tile_height; y++) {
     for (size_t x = 0; x < tile_width; x++) {
       size_t tile_index = x + y * tile_width;
       size_t global_index = (screen_x_start + x) + (screen_y_start + y) * width_;
-            
       if (tile_depth_buffer[tile_index] < global_depth_buffer[global_index]) {
         global_depth_buffer[global_index] = tile_depth_buffer[tile_index];
         global_color_buffer[global_index] = tile_color_buffer[tile_index];
@@ -690,8 +591,7 @@ void SimpleRenderer::RasterizeTile(
   }
 }
 
-
-// 传统光栅化管线实现
+// 基础光栅化管线实现
 SimpleRenderer::RenderStats SimpleRenderer::ExecuteTraditionalPipeline(
     const Model &model, 
     const std::vector<Vertex> &processedVertices,
@@ -822,46 +722,46 @@ SimpleRenderer::RenderStats SimpleRenderer::ExecuteTraditionalPipeline(
     return stats;
 }
 
-// Tile-based光栅化管线实现
+
+// Tile-based光栅化管线实现（SoA 直连版本，避免 AoS->SoA 拷贝）
 SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
     const Model &model,
-    const std::vector<Vertex> &processedVertices,
+    const VertexSoA &soa,
     uint32_t *buffer) {
-    
     TileRenderStats stats;
     auto total_start_time = std::chrono::high_resolution_clock::now();
-    
+
     // 1. Setup阶段
     auto setup_start_time = std::chrono::high_resolution_clock::now();
     const size_t TILE_SIZE = 64; // 64x64 pixels per tile
     const size_t tiles_x = (width_ + TILE_SIZE - 1) / TILE_SIZE;
     const size_t tiles_y = (height_ + TILE_SIZE - 1) / TILE_SIZE;
     const size_t total_tiles = tiles_x * tiles_y;
-    
-    // 为每个tile创建三角形列表
-    std::vector<std::vector<TriangleInfo>> tile_triangles(total_tiles);
+
+    // 为每个tile创建三角形列表（SoA 引用）
+    std::vector<std::vector<TriangleRef>> tile_triangles(total_tiles);
     auto setup_end_time = std::chrono::high_resolution_clock::now();
     auto setup_duration = std::chrono::duration_cast<std::chrono::microseconds>(
         setup_end_time - setup_start_time);
-    
-    // 2. Triangle-Tile binning阶段
+
+    // 2. Triangle-Tile binning阶段（SoA）
     auto binning_start_time = std::chrono::high_resolution_clock::now();
-    TriangleTileBinning(model, processedVertices, tile_triangles, tiles_x, tiles_y, TILE_SIZE);
+    TriangleTileBinning(model, soa, tile_triangles, tiles_x, tiles_y, TILE_SIZE);
     auto binning_end_time = std::chrono::high_resolution_clock::now();
     auto binning_duration = std::chrono::duration_cast<std::chrono::microseconds>(
         binning_end_time - binning_start_time);
-    
+
     // 3. 为每个线程创建framebuffer
     auto buffer_alloc_start_time = std::chrono::high_resolution_clock::now();
     std::vector<std::unique_ptr<float[]>> depthBuffer_all_thread(kNProc);
     std::vector<std::unique_ptr<uint32_t[]>> colorBuffer_all_thread(kNProc);
-    
+
     for (size_t thread_id = 0; thread_id < kNProc; thread_id++) {
         depthBuffer_all_thread[thread_id] = 
             std::make_unique<float[]>(width_ * height_);
         colorBuffer_all_thread[thread_id] = 
             std::make_unique<uint32_t[]>(width_ * height_);
-            
+
         std::fill_n(depthBuffer_all_thread[thread_id].get(), width_ * height_,
                     std::numeric_limits<float>::infinity());
         std::fill_n(colorBuffer_all_thread[thread_id].get(), width_ * height_, 0);
@@ -869,13 +769,13 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
     auto buffer_alloc_end_time = std::chrono::high_resolution_clock::now();
     auto buffer_alloc_duration = std::chrono::duration_cast<std::chrono::microseconds>(
         buffer_alloc_end_time - buffer_alloc_start_time);
-    
-    // 4. 并行处理每个tile
+
+    // 4. 并行处理每个tile（SoA）
     auto rasterization_start_time = std::chrono::high_resolution_clock::now();
 #pragma omp parallel num_threads(kNProc) default(none) \
     shared(tile_triangles, rasterizer_, shader_, width_, height_, \
            depthBuffer_all_thread, colorBuffer_all_thread, tiles_x, tiles_y, total_tiles, \
-           early_z_enabled_)
+           early_z_enabled_, soa)
     {
         int thread_id = omp_get_thread_num();
         auto &depthBuffer_per_thread = depthBuffer_all_thread[thread_id];
@@ -893,18 +793,18 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
 
 #pragma omp for
         for (size_t tile_id = 0; tile_id < total_tiles; tile_id++) {
-            // 按照tile进行光栅化，每个Tile进行区域限制+scratch复用，区域限制避免了可能的数据竞争
-            RasterizeTile(tile_id, tile_triangles[tile_id], 
-                         tiles_x, tiles_y, TILE_SIZE,
-                         tile_depth_buffer.get(), tile_color_buffer.get(),
-                         depthBuffer_per_thread, colorBuffer_per_thread,
-                         early_z_enabled_, &scratch_fragments);
+            // 按照 tile 进行光栅化（SoA）
+            RasterizeTile(tile_id, tile_triangles[tile_id],
+                             tiles_x, tiles_y, TILE_SIZE,
+                             tile_depth_buffer.get(), tile_color_buffer.get(),
+                             depthBuffer_per_thread, colorBuffer_per_thread,
+                             soa, early_z_enabled_, &scratch_fragments);
         }
     }
     auto rasterization_end_time = std::chrono::high_resolution_clock::now();
     auto rasterization_duration = std::chrono::duration_cast<std::chrono::microseconds>(
         rasterization_end_time - rasterization_start_time);
-    
+
     // 5. 合并所有线程结果
     auto merge_start_time = std::chrono::high_resolution_clock::now();
     std::unique_ptr<float[]> depthBuffer = 
@@ -936,11 +836,11 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
     auto merge_end_time = std::chrono::high_resolution_clock::now();
     auto merge_duration = std::chrono::duration_cast<std::chrono::microseconds>(
         merge_end_time - merge_start_time);
-    
+
     auto total_end_time = std::chrono::high_resolution_clock::now();
     auto total_duration = std::chrono::duration_cast<std::chrono::microseconds>(
         total_end_time - total_start_time);
-    
+
     // 填充统计信息
     stats.setup_ms = setup_duration.count() / 1000.0;
     stats.binning_ms = binning_duration.count() / 1000.0;
@@ -948,7 +848,7 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
     stats.rasterization_ms = rasterization_duration.count() / 1000.0;
     stats.merge_ms = merge_duration.count() / 1000.0;
     stats.total_ms = total_duration.count() / 1000.0;
-    
+
     return stats;
 }
 

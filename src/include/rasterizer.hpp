@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "shader.hpp"
+#include "vertex_soa.hpp"
 
 namespace simple_renderer {
 
@@ -24,6 +25,11 @@ class Rasterizer {
   // 可选的裁剪区域为半开区间 [x0, x1) × [y0, y1)
   // 用于 TBR：将光栅化限制在 tile 边界内，便于复用外部 scratch 容器
   void RasterizeTo(const Vertex& v0, const Vertex& v1, const Vertex& v2,
+                   int x0, int y0, int x1, int y1,
+                   std::vector<Fragment>& out);
+
+  // SoA 版本：按顶点索引从 SoA 读取三角形三顶点
+  void RasterizeTo(const VertexSoA& soa, size_t i0, size_t i1, size_t i2,
                    int x0, int y0, int x1, int y1,
                    std::vector<Fragment>& out);
 

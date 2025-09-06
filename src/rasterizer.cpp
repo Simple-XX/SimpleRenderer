@@ -158,6 +158,67 @@ void Rasterizer::RasterizeTo(const Vertex& v0, const Vertex& v1, const Vertex& v
   }
 }
 
+void Rasterizer::RasterizeTo(const VertexSoA& soa, size_t i0, size_t i1, size_t i2,
+                             int x0, int y0, int x1, int y1,
+                             std::vector<Fragment>& out) {
+  // 读取三顶点的屏幕空间位置
+  const Vector4f& p0 = soa.pos_screen[i0];
+  const Vector4f& p1 = soa.pos_screen[i1];
+  const Vector4f& p2 = soa.pos_screen[i2];
+
+  Vector2f a = Vector2f(p0.x, p0.y);
+  Vector2f b = Vector2f(p1.x, p1.y);
+  Vector2f c = Vector2f(p2.x, p2.y);
+
+  Vector2f bboxMin = Vector2f{std::min({a.x, b.x, c.x}), std::min({a.y, b.y, c.y})};
+  Vector2f bboxMax = Vector2f{std::max({a.x, b.x, c.x}), std::max({a.y, b.y, c.y})};
+
+  // Clamp 到屏幕尺寸
+  float minx = std::max(0.0f, bboxMin.x);
+  float miny = std::max(0.0f, bboxMin.y);
+  float maxx = std::min(float(width_ - 1), bboxMax.x);
+  float maxy = std::min(float(height_ - 1), bboxMax.y);
+
+  // 与外部提供的裁剪区域相交（半开区间） -> 闭区间扫描
+  int sx = std::max(x0, int(std::floor(minx)));
+  int sy = std::max(y0, int(std::floor(miny)));
+  int ex = std::min(x1 - 1, int(std::floor(maxx)));
+  int ey = std::min(y1 - 1, int(std::floor(maxy)));
+  if (sx > ex || sy > ey) return;
+
+  // 透视矫正插值依赖 w
+  float w0_inv = p0.w;
+  float w1_inv = p1.w;
+  float w2_inv = p2.w;
+
+  for (int x = sx; x <= ex; ++x) {
+    for (int y = sy; y <= ey; ++y) {
+      auto [is_inside, bary] = GetBarycentricCoord(
+          Vector3f(p0.x, p0.y, p0.z), Vector3f(p1.x, p1.y, p1.z), Vector3f(p2.x, p2.y, p2.z),
+          Vector3f(static_cast<float>(x), static_cast<float>(y), 0));
+      if (!is_inside) continue;
+
+      float w_inv_interp = Interpolate(w0_inv, w1_inv, w2_inv, bary);
+      Vector3f cb(
+          bary.x * w0_inv / w_inv_interp,
+          bary.y * w1_inv / w_inv_interp,
+          bary.z * w2_inv / w_inv_interp);
+
+      float z = Interpolate(p0.z, p1.z, p2.z, cb);
+
+      Fragment frag;
+      frag.screen_coord = {x, y};
+      frag.normal = Interpolate(soa.normal[i0], soa.normal[i1], soa.normal[i2], cb);
+      frag.uv     = Interpolate(soa.uv[i0],     soa.uv[i1],     soa.uv[i2],     cb);
+      frag.color  = InterpolateColor(soa.color[i0], soa.color[i1], soa.color[i2], cb);
+      frag.depth  = z;
+      // material 指针由调用方填写
+
+      out.push_back(frag);
+    }
+  }
+}
+
 std::pair<bool, Vector3f> Rasterizer::GetBarycentricCoord(const Vector3f& p0,
                                                           const Vector3f& p1,
                                                           const Vector3f& p2,
