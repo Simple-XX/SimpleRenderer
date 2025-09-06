@@ -101,34 +101,24 @@ void SimpleRenderer::ExecuteDrawPipeline(const Model &model, uint32_t *buffer) {
   /* * * Vertex Transformation * * */
   auto vertex_shader_start_time = std::chrono::high_resolution_clock::now();
   std::vector<Vertex> processedVertices;
-  std::vector<std::vector<Vertex>> processed_vertices_all_thread(kNProc);
-#pragma omp parallel num_threads(kNProc) default(none) \
-    shared(shader_, processed_vertices_all_thread) firstprivate(model)
-  {
-    int thread_id = omp_get_thread_num();
-    std::vector<Vertex> &processedVertices_per_thread =
-        processed_vertices_all_thread[thread_id];
+  const auto &input_vertices = model.GetVertices();
+  processedVertices.resize(input_vertices.size()); // 根据顶点总数量进行预分配
 
-#pragma omp for
-    for (const auto &v : model.GetVertices()) {
-      // 顶点着色器：世界坐标 -> 裁剪坐标
-      auto clipSpaceVertex = shader_->VertexShader(v);
-      
-      // 透视除法：裁剪坐标 -> NDC坐标
-      auto ndcVertex = PerspectiveDivision(clipSpaceVertex);
-      
-      // 视口变换：NDC坐标 -> 屏幕坐标
-      auto screenSpaceVertex = ViewportTransformation(ndcVertex);
-      
-      processedVertices_per_thread.push_back(screenSpaceVertex);
-    }
-  }
+// 并行过程保持连续分块，避免false sharing
+#pragma omp parallel for num_threads(kNProc) schedule(static) \ 
+    shared(shader_, processedVertices, input_vertices)
+  for (size_t i = 0; i < input_vertices.size(); ++i) { // 按索引并行处理
+    const auto &v = input_vertices[i];
+    // 顶点着色器：世界坐标 -> 裁剪坐标
+    auto clipSpaceVertex = shader_->VertexShader(v);
 
-  for (const auto &processedVertices_per_thread :
-       processed_vertices_all_thread) {
-    processedVertices.insert(processedVertices.end(),
-                             processedVertices_per_thread.begin(),
-                             processedVertices_per_thread.end());
+    // 透视除法：裁剪坐标 -> NDC坐标
+    auto ndcVertex = PerspectiveDivision(clipSpaceVertex);
+
+    // 视口变换：NDC坐标 -> 屏幕坐标
+    auto screenSpaceVertex = ViewportTransformation(ndcVertex);
+
+    processedVertices[i] = screenSpaceVertex;
   }
   auto vertex_shader_end_time = std::chrono::high_resolution_clock::now();
   auto vertex_shader_duration = std::chrono::duration_cast<std::chrono::microseconds>(
