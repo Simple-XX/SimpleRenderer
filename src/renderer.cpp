@@ -751,21 +751,14 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
     auto binning_duration = std::chrono::duration_cast<std::chrono::microseconds>(
         binning_end_time - binning_start_time);
 
-    // 3. 为每个线程创建framebuffer
+    // 3. 全局 framebuffer（单份）
+    // 直接让每个 tile 写入这份全局缓冲区，避免末端 O(W*H*kNProc) 合并开销
     auto buffer_alloc_start_time = std::chrono::high_resolution_clock::now();
-    std::vector<std::unique_ptr<float[]>> depthBuffer_all_thread(kNProc);
-    std::vector<std::unique_ptr<uint32_t[]>> colorBuffer_all_thread(kNProc);
-
-    for (size_t thread_id = 0; thread_id < kNProc; thread_id++) {
-        depthBuffer_all_thread[thread_id] = 
-            std::make_unique<float[]>(width_ * height_);
-        colorBuffer_all_thread[thread_id] = 
-            std::make_unique<uint32_t[]>(width_ * height_);
-
-        std::fill_n(depthBuffer_all_thread[thread_id].get(), width_ * height_,
-                    std::numeric_limits<float>::infinity());
-        std::fill_n(colorBuffer_all_thread[thread_id].get(), width_ * height_, 0);
-    }
+    std::unique_ptr<float[]> depthBuffer = std::make_unique<float[]>(width_ * height_);
+    std::unique_ptr<uint32_t[]> colorBuffer = std::make_unique<uint32_t[]>(width_ * height_);
+    // 深度初始化为最远值，颜色清零
+    std::fill_n(depthBuffer.get(), width_ * height_, std::numeric_limits<float>::infinity());
+    std::fill_n(colorBuffer.get(), width_ * height_, 0);
     auto buffer_alloc_end_time = std::chrono::high_resolution_clock::now();
     auto buffer_alloc_duration = std::chrono::duration_cast<std::chrono::microseconds>(
         buffer_alloc_end_time - buffer_alloc_start_time);
@@ -774,14 +767,12 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
     auto rasterization_start_time = std::chrono::high_resolution_clock::now();
 #pragma omp parallel num_threads(kNProc) default(none) \
     shared(tile_triangles, rasterizer_, shader_, width_, height_, \
-           depthBuffer_all_thread, colorBuffer_all_thread, tiles_x, tiles_y, total_tiles, \
+           depthBuffer, colorBuffer, tiles_x, tiles_y, total_tiles, \
            early_z_enabled_, soa)
     {
         int thread_id = omp_get_thread_num();
-        auto &depthBuffer_per_thread = depthBuffer_all_thread[thread_id];
-        auto &colorBuffer_per_thread = colorBuffer_all_thread[thread_id];
 
-        // 为当前线程创建tile局部缓冲区
+        // 为当前线程创建 tile 局部缓冲区（避免在全局缓冲上直接逐像素竞争）
         std::unique_ptr<float[]> tile_depth_buffer = 
             std::make_unique<float[]>(TILE_SIZE * TILE_SIZE);
         std::unique_ptr<uint32_t[]> tile_color_buffer = 
@@ -794,48 +785,24 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
 #pragma omp for
         for (size_t tile_id = 0; tile_id < total_tiles; tile_id++) {
             // 按照 tile 进行光栅化（SoA）
+            // 直接写入单份全局 framebuffer；不同 tile 不重叠，无需加锁
             RasterizeTile(tile_id, tile_triangles[tile_id],
-                             tiles_x, tiles_y, TILE_SIZE,
-                             tile_depth_buffer.get(), tile_color_buffer.get(),
-                             depthBuffer_per_thread, colorBuffer_per_thread,
-                             soa, early_z_enabled_, &scratch_fragments);
+                          tiles_x, tiles_y, TILE_SIZE,
+                          tile_depth_buffer.get(), tile_color_buffer.get(),
+                          depthBuffer, colorBuffer,
+                          soa, early_z_enabled_, &scratch_fragments);
         }
     }
     auto rasterization_end_time = std::chrono::high_resolution_clock::now();
     auto rasterization_duration = std::chrono::duration_cast<std::chrono::microseconds>(
         rasterization_end_time - rasterization_start_time);
 
-    // 5. 合并所有线程结果
-    auto merge_start_time = std::chrono::high_resolution_clock::now();
-    std::unique_ptr<float[]> depthBuffer = 
-        std::make_unique<float[]>(width_ * height_);
-    std::unique_ptr<uint32_t[]> colorBuffer = 
-        std::make_unique<uint32_t[]>(width_ * height_);
-
-    std::fill_n(depthBuffer.get(), width_ * height_,
-                std::numeric_limits<float>::infinity());
-    std::fill_n(colorBuffer.get(), width_ * height_, 0);
-
-#pragma omp parallel for
-    for (size_t i = 0; i < width_ * height_; i++) {
-        float min_depth = std::numeric_limits<float>::infinity();
-        uint32_t color = 0;
-
-        for (size_t thread_id = 0; thread_id < kNProc; thread_id++) {
-            float depth = depthBuffer_all_thread[thread_id][i];
-            if (depth < min_depth) {
-                min_depth = depth;
-                color = colorBuffer_all_thread[thread_id][i];
-            }
-        }
-        depthBuffer[i] = min_depth;
-        colorBuffer[i] = color;
-    }
-
+    // 5. 直接将单份全局 colorBuffer 拷贝到输出
+    auto present_start_time = std::chrono::high_resolution_clock::now();
     std::memcpy(buffer, colorBuffer.get(), width_ * height_ * sizeof(uint32_t));
-    auto merge_end_time = std::chrono::high_resolution_clock::now();
-    auto merge_duration = std::chrono::duration_cast<std::chrono::microseconds>(
-        merge_end_time - merge_start_time);
+    auto present_end_time = std::chrono::high_resolution_clock::now();
+    auto present_duration = std::chrono::duration_cast<std::chrono::microseconds>(
+        present_end_time - present_start_time);
 
     auto total_end_time = std::chrono::high_resolution_clock::now();
     auto total_duration = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -846,7 +813,8 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
     stats.binning_ms = binning_duration.count() / 1000.0;
     stats.buffer_alloc_ms = buffer_alloc_duration.count() / 1000.0;
     stats.rasterization_ms = rasterization_duration.count() / 1000.0;
-    stats.merge_ms = merge_duration.count() / 1000.0;
+    // 合并阶段已被消除，仅为拷贝开销
+    stats.merge_ms = present_duration.count() / 1000.0;
     stats.total_ms = total_duration.count() / 1000.0;
 
     return stats;
