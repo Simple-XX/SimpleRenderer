@@ -536,7 +536,7 @@ void SimpleRenderer::RasterizeTile(
   size_t tile_width = screen_x_end - screen_x_start;
   size_t tile_height = screen_y_end - screen_y_start;
   std::fill_n(tile_depth_buffer, tile_width * tile_height, 1.0f);
-  std::fill_n(tile_color_buffer, tile_width * tile_height, 0);
+  std::fill_n(tile_color_buffer, tile_width * tile_height, 0); // 默认背景色为0/黑色
 
   for (const auto &tri : triangles) { // 用来应对scratch传入nullptr的情况
     // 始终走 SoA + 限制矩形的光栅化路径；如未提供 scratch，则使用函数内局部容器
@@ -579,15 +579,21 @@ void SimpleRenderer::RasterizeTile(
   }
 
   // 写回全局缓冲
+  // TBR 下不同 tile 覆盖的屏幕区域互不重叠，且在 tile 内部已通过 Early‑Z
+  // 得出每个像素的最终值。因此可以直接将 tile 行数据拷贝到全局缓冲
   for (size_t y = 0; y < tile_height; y++) {
-    for (size_t x = 0; x < tile_width; x++) {
-      size_t tile_index = x + y * tile_width;
-      size_t global_index = (screen_x_start + x) + (screen_y_start + y) * width_;
-      if (tile_depth_buffer[tile_index] < global_depth_buffer[global_index]) {
-        global_depth_buffer[global_index] = tile_depth_buffer[tile_index];
-        global_color_buffer[global_index] = tile_color_buffer[tile_index];
-      }
-    }
+    const size_t tile_row_off   = y * tile_width;
+    const size_t global_row_off = (screen_y_start + y) * width_ + screen_x_start;
+
+    // 拷贝本行 color 到全局 color
+    std::memcpy(global_color_buffer.get() + global_row_off,
+                tile_color_buffer + tile_row_off,
+                tile_width * sizeof(uint32_t));
+
+    // 拷贝本行 depth 到全局 depth
+    std::memcpy(global_depth_buffer.get() + global_row_off,
+                tile_depth_buffer + tile_row_off,
+                tile_width * sizeof(float));
   }
 }
 
