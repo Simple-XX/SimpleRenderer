@@ -50,24 +50,13 @@ std::vector<Fragment> Rasterizer::Rasterize(const Vertex& v0, const Vertex& v1,
         }
 
         // 透视矫正插值
-        // 1. 获取三个顶点的1/w值
-        float w0_inv = v0.GetPosition().w;
-        float w1_inv = v1.GetPosition().w;  
-        float w2_inv = v2.GetPosition().w;
+        auto perspective_result = PerformPerspectiveCorrection(
+            v0.GetPosition().w, v1.GetPosition().w, v2.GetPosition().w,
+            v0.GetPosition().z, v1.GetPosition().z, v2.GetPosition().z,
+            barycentric_coord);
         
-        // 2. 插值1/w
-        float w_inv_interpolated = Interpolate(w0_inv, w1_inv, w2_inv, barycentric_coord);
-        
-        // 3. 计算透视矫正的重心坐标
-        Vector3f corrected_bary(
-          barycentric_coord.x * w0_inv / w_inv_interpolated,
-          barycentric_coord.y * w1_inv / w_inv_interpolated,
-          barycentric_coord.z * w2_inv / w_inv_interpolated
-        );
-        
-        // 4. 使用矫正的重心坐标进行插值
-        auto z = Interpolate(v0.GetPosition().z, v1.GetPosition().z,
-                             v2.GetPosition().z, corrected_bary);
+        const Vector3f& corrected_bary = perspective_result.corrected_barycentric;
+        float z = perspective_result.interpolated_z;
 
 
         Fragment fragment;
@@ -114,16 +103,11 @@ void Rasterizer::RasterizeTo(const VertexSoA& soa, size_t i0, size_t i1, size_t 
   float maxy = std::min(float(height_ - 1), bboxMax.y);
 
   // 与外部提供的裁剪区域相交（半开区间） -> 闭区间扫描
-  int sx = std::max(x0, int(std::floor(minx)));
-  int sy = std::max(y0, int(std::floor(miny)));
-  int ex = std::min(x1 - 1, int(std::floor(maxx)));
-  int ey = std::min(y1 - 1, int(std::floor(maxy)));
+  int sx = std::max(x0, static_cast<int>(std::floor(minx)));
+  int sy = std::max(y0, static_cast<int>(std::floor(miny)));
+  int ex = std::min(x1 - 1, static_cast<int>(std::floor(maxx)));
+  int ey = std::min(y1 - 1, static_cast<int>(std::floor(maxy)));
   if (sx > ex || sy > ey) return;
-
-  // 透视矫正插值依赖 w
-  float w0_inv = p0.w;
-  float w1_inv = p1.w;
-  float w2_inv = p2.w;
 
   for (int x = sx; x <= ex; ++x) {
     for (int y = sy; y <= ey; ++y) {
@@ -132,21 +116,21 @@ void Rasterizer::RasterizeTo(const VertexSoA& soa, size_t i0, size_t i1, size_t 
           Vector3f(static_cast<float>(x), static_cast<float>(y), 0));
       if (!is_inside) continue;
 
-      float w_inv_interp = Interpolate(w0_inv, w1_inv, w2_inv, bary);
-      Vector3f cb(
-          bary.x * w0_inv / w_inv_interp,
-          bary.y * w1_inv / w_inv_interp,
-          bary.z * w2_inv / w_inv_interp);
+      // 透视矫正插值
+      auto perspective_result = PerformPerspectiveCorrection(
+          p0.w, p1.w, p2.w,
+          p0.z, p1.z, p2.z,
+          bary);
+      
+      const Vector3f& corrected_bary = perspective_result.corrected_barycentric;
+      float z = perspective_result.interpolated_z;
 
-      float z = Interpolate(p0.z, p1.z, p2.z, cb);
-
-      Fragment frag;
+      Fragment frag; // Note: material 指针由调用方填写
       frag.screen_coord = {x, y};
-      frag.normal = Interpolate(soa.normal[i0], soa.normal[i1], soa.normal[i2], cb);
-      frag.uv     = Interpolate(soa.uv[i0],     soa.uv[i1],     soa.uv[i2],     cb);
-      frag.color  = InterpolateColor(soa.color[i0], soa.color[i1], soa.color[i2], cb);
+      frag.normal = Interpolate(soa.normal[i0], soa.normal[i1], soa.normal[i2], corrected_bary);
+      frag.uv     = Interpolate(soa.uv[i0],     soa.uv[i1],     soa.uv[i2],     corrected_bary);
+      frag.color  = InterpolateColor(soa.color[i0], soa.color[i1], soa.color[i2], corrected_bary);
       frag.depth  = z;
-      // material 指针由调用方填写
 
       out.push_back(frag);
     }
@@ -182,14 +166,14 @@ std::pair<bool, Vector3f> Rasterizer::GetBarycentricCoord(const Vector3f& p0,
  
 template <typename T>
 T Rasterizer::Interpolate(const T& v0, const T& v1, const T& v2,
-                          const Vector3f& barycentric_coord) {
+                          const Vector3f& barycentric_coord) const {
   return v0 * barycentric_coord.x + v1 * barycentric_coord.y +
          v2 * barycentric_coord.z;
 }
 
 Color Rasterizer::InterpolateColor(const Color& color0, const Color& color1,
                                    const Color& color2,
-                                   const Vector3f& barycentric_coord) {
+                                   const Vector3f& barycentric_coord) const {
   auto color_r = FloatToUint8_t(
       static_cast<float>(color0[Color::kColorIndexRed]) * barycentric_coord.x +
       static_cast<float>(color1[Color::kColorIndexRed]) * barycentric_coord.y +
@@ -206,6 +190,31 @@ Color Rasterizer::InterpolateColor(const Color& color0, const Color& color1,
       static_cast<float>(color1[Color::kColorIndexBlue]) * barycentric_coord.y +
       static_cast<float>(color2[Color::kColorIndexBlue]) * barycentric_coord.z);
   return Color(color_r, color_g, color_b);
+}
+
+// 透视矫正helper函数：在透视投影下，1/w 在屏幕空间中是线性的// 因此需要先对 1/w 进行插值，再用结果矫正其他属性
+Rasterizer::PerspectiveCorrectionResult Rasterizer::PerformPerspectiveCorrection(
+    float w0, float w1, float w2,
+    float z0, float z1, float z2,
+    const Vector3f& original_barycentric) const {
+    
+  // 1. 插值 1/w （注意：这里传入的w0,w1,w2是原始的w值，需要先求倒数）
+  float w0_inv = 1.0f / w0;
+  float w1_inv = 1.0f / w1;
+  float w2_inv = 1.0f / w2;
+  float w_inv_interpolated = Interpolate(w0_inv, w1_inv, w2_inv, original_barycentric);
+  
+  // 2. 计算透视矫正的重心坐标
+  Vector3f corrected_barycentric(
+      original_barycentric.x * w0_inv / w_inv_interpolated,
+      original_barycentric.y * w1_inv / w_inv_interpolated,
+      original_barycentric.z * w2_inv / w_inv_interpolated
+  );
+  
+  // 3. 使用矫正的重心坐标插值深度值
+  float interpolated_z = Interpolate(z0, z1, z2, corrected_barycentric);
+  
+  return {corrected_barycentric, interpolated_z};
 }
 
 // Calculate the normal vector based on the vertices

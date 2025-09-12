@@ -33,12 +33,23 @@
 
 namespace simple_renderer {
 
+// RenderingMode到字符串转换函数
+std::string RenderingModeToString(RenderingMode mode) {
+  switch(mode) {
+    case RenderingMode::TRADITIONAL:
+      return "TRADITIONAL";
+    case RenderingMode::TILE_BASED:
+      return "TILE_BASED";
+    case RenderingMode::DEFERRED:
+      return "DEFERRED";
+  }
+}
 SimpleRenderer::SimpleRenderer(size_t width, size_t height)
     : height_(height),
       width_(width),
       log_system_(LogSystem(kLogFilePath, kLogFileMaxSize, kLogFileMaxCount)),
       current_mode_(RenderingMode::TILE_BASED),
-      early_z_enabled_(true) {
+      is_early_z_enabled_(true) {
   rasterizer_ = std::make_shared<Rasterizer>(width, height);
 }
 
@@ -52,19 +63,7 @@ bool SimpleRenderer::DrawModel(const Model &model, const Shader &shader,
 
 void SimpleRenderer::SetRenderingMode(RenderingMode mode) {
   current_mode_ = mode;
-  std::string mode_name;
-  switch(mode) {
-    case RenderingMode::TRADITIONAL:
-      mode_name = "TRADITIONAL";
-      break;
-    case RenderingMode::TILE_BASED:
-      mode_name = "TILE_BASED";
-      break;
-    case RenderingMode::DEFERRED:
-      mode_name = "DEFERRED";
-      break;
-  }
-  SPDLOG_INFO("rendering mode set to: {}", mode_name);
+  SPDLOG_INFO("rendering mode set to: {}", RenderingModeToString(mode));
 }
 
 RenderingMode SimpleRenderer::GetRenderingMode() const {
@@ -79,19 +78,8 @@ fragments—resulting in faster rendering.
 通过在光栅化过程中执行深度测试，仅保留每个像素的深度值最近的片段，避免存储所有片段，从而优化性能，实现更快的渲染。
 */
 void SimpleRenderer::ExecuteDrawPipeline(const Model &model, uint32_t *buffer) {
-  std::string mode_name;
-  switch(current_mode_) {
-    case RenderingMode::TRADITIONAL:
-      mode_name = "TRADITIONAL";
-      break;
-    case RenderingMode::TILE_BASED:
-      mode_name = "TILE_BASED";
-      break;
-    case RenderingMode::DEFERRED:
-      mode_name = "DEFERRED";
-      break;
-  }
-  SPDLOG_INFO("execute draw pipeline for {} using {} mode", model.GetModelPath(), mode_name);
+  SPDLOG_INFO("execute draw pipeline for {} using {} mode", 
+              model.GetModelPath(), RenderingModeToString(current_mode_));
   
   if (!shader_) {
     SPDLOG_ERROR("No shader set for DrawModel, cannot render");
@@ -147,47 +135,19 @@ void SimpleRenderer::ExecuteDrawPipeline(const Model &model, uint32_t *buffer) {
   switch (current_mode_) {
     case RenderingMode::TRADITIONAL: {
       auto stats = ExecuteTraditionalPipeline(model, processedVertices, buffer);
-      double total_ms = vertex_ms + stats.total_ms;
-      
-      SPDLOG_INFO("=== TRADITIONAL RENDERING PERFORMANCE ===");
-      SPDLOG_INFO("Vertex Shader:    {:8.3f} ms ({:5.1f}%)", vertex_ms, vertex_ms/total_ms*100);
-      SPDLOG_INFO("Buffer Alloc:     {:8.3f} ms ({:5.1f}%)", stats.buffer_alloc_ms, stats.buffer_alloc_ms/total_ms*100);
-      SPDLOG_INFO("Rasterization:    {:8.3f} ms ({:5.1f}%)", stats.rasterization_ms, stats.rasterization_ms/total_ms*100);
-      SPDLOG_INFO("Merge:            {:8.3f} ms ({:5.1f}%)", stats.merge_ms, stats.merge_ms/total_ms*100);
-      SPDLOG_INFO("Total:            {:8.3f} ms", total_ms);
-      SPDLOG_INFO("==========================================");
+      PrintTraditionalStats(vertex_ms, stats);
       break;
     }
     
     case RenderingMode::TILE_BASED: {
       auto stats = ExecuteTileBasedPipeline(model, processedSoA, buffer);
-      double total_ms = vertex_ms + stats.total_ms;
-      
-      SPDLOG_INFO("=== TILE-BASED RENDERING PERFORMANCE ===");
-      SPDLOG_INFO("Vertex Shader:    {:8.3f} ms ({:5.1f}%)", vertex_ms, vertex_ms/total_ms*100);
-      SPDLOG_INFO("Setup:            {:8.3f} ms ({:5.1f}%)", stats.setup_ms, stats.setup_ms/total_ms*100);
-      SPDLOG_INFO("Binning:          {:8.3f} ms ({:5.1f}%)", stats.binning_ms, stats.binning_ms/total_ms*100);
-      SPDLOG_INFO("Buffer Alloc:     {:8.3f} ms ({:5.1f}%)", stats.buffer_alloc_ms, stats.buffer_alloc_ms/total_ms*100);
-      SPDLOG_INFO("Rasterization:    {:8.3f} ms ({:5.1f}%)", stats.rasterization_ms, stats.rasterization_ms/total_ms*100);
-      SPDLOG_INFO("Merge:            {:8.3f} ms ({:5.1f}%)", stats.merge_ms, stats.merge_ms/total_ms*100);
-      SPDLOG_INFO("Total:            {:8.3f} ms", total_ms);
-      SPDLOG_INFO("==========================================");
+      PrintTileBasedStats(vertex_ms, stats);
       break;
     }
     
     case RenderingMode::DEFERRED: {
       auto stats = ExecuteDeferredPipeline(model, processedVertices, buffer);
-      double total_ms = vertex_ms + stats.total_ms;
-      
-      SPDLOG_INFO("=== DEFERRED RENDERING PERFORMANCE ===");
-      SPDLOG_INFO("Vertex Shader:        {:8.3f} ms ({:5.1f}%)", vertex_ms, vertex_ms/total_ms*100);
-      SPDLOG_INFO("Buffer Alloc:         {:8.3f} ms ({:5.1f}%)", stats.buffer_alloc_ms, stats.buffer_alloc_ms/total_ms*100);
-      SPDLOG_INFO("Rasterization:        {:8.3f} ms ({:5.1f}%)", stats.rasterization_ms, stats.rasterization_ms/total_ms*100);
-      SPDLOG_INFO("Fragment Collection:  {:8.3f} ms ({:5.1f}%)", stats.fragment_collection_ms, stats.fragment_collection_ms/total_ms*100);
-      SPDLOG_INFO("Fragment Merge:       {:8.3f} ms ({:5.1f}%)", stats.fragment_merge_ms, stats.fragment_merge_ms/total_ms*100);
-      SPDLOG_INFO("Deferred Shading:     {:8.3f} ms ({:5.1f}%)", stats.deferred_shading_ms, stats.deferred_shading_ms/total_ms*100);
-      SPDLOG_INFO("Total:                {:8.3f} ms", total_ms);
-      SPDLOG_INFO("=========================================");
+      PrintDeferredStats(vertex_ms, stats);
       break;
     }
   }
@@ -224,7 +184,7 @@ SimpleRenderer::DeferredRenderStats SimpleRenderer::ExecuteDeferredPipeline(
   std::vector<Material> material_cache;
   material_cache.reserve(model.GetFaces().size());
   for (const auto &f : model.GetFaces()) {
-    material_cache.push_back(f.GetMaterial()); // 值拷贝
+    material_cache.emplace_back(f.GetMaterial()); // 值拷贝
   }
   auto buffer_alloc_end_time = std::chrono::high_resolution_clock::now();
   auto buffer_alloc_duration = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -234,8 +194,8 @@ SimpleRenderer::DeferredRenderStats SimpleRenderer::ExecuteDeferredPipeline(
   /* * * Rasterization * * */
   auto rasterization_start_time = std::chrono::high_resolution_clock::now();
 #pragma omp parallel num_threads(kNProc) default(none)                       \
-    shared(processedVertices, fragmentsBuffer_all_thread, rasterizer_, width_, \
-               height_, material_cache) firstprivate(model)
+  shared(processedVertices, fragmentsBuffer_all_thread, rasterizer_, width_, \
+               height_, material_cache, model)
   {
     int thread_id = omp_get_thread_num();
     auto &fragmentsBuffer_per_thread = fragmentsBuffer_all_thread[thread_id];
@@ -349,7 +309,7 @@ Vertex SimpleRenderer::PerspectiveDivision(const Vertex &vertex) {
   Vector4f position = vertex.GetPosition();
   
   // 检查w分量，避免除零和负数问题
-  if (position.w <= 1e-6f) {
+  if (position.w <= kMinWValue) {
     Vector4f farPosition(0.0f, 0.0f, 1.0f, 1.0f);
     return Vertex(farPosition, vertex.GetNormal(), vertex.GetTexCoords(), vertex.GetColor());
   }
@@ -370,11 +330,7 @@ Vertex SimpleRenderer::PerspectiveDivision(const Vertex &vertex) {
   ndcPosition.z = std::clamp(ndcPosition.z, -1.0f, 1.0f);
   
   // 创建新的顶点，保持其他属性和裁剪空间坐标不变
-  if (vertex.HasClipPosition()) {
-    return Vertex(ndcPosition, vertex.GetNormal(), vertex.GetTexCoords(), vertex.GetColor(), vertex.GetClipPosition());
-  } else {
-    return Vertex(ndcPosition, vertex.GetNormal(), vertex.GetTexCoords(), vertex.GetColor());
-  }
+  return Vertex(ndcPosition, vertex.GetNormal(), vertex.GetTexCoords(), vertex.GetColor(), vertex.GetClipPosition());
 }
 
 Vertex SimpleRenderer::ViewportTransformation(const Vertex &vertex) {
@@ -629,8 +585,7 @@ SimpleRenderer::RenderStats SimpleRenderer::ExecuteTraditionalPipeline(
     auto raster_start_time = std::chrono::high_resolution_clock::now();
 #pragma omp parallel num_threads(kNProc) default(none) \
     shared(processedVertices, rasterizer_, shader_, width_, height_, \
-           depthBuffer_all_thread, colorBuffer_all_thread) \
-    firstprivate(model)
+           depthBuffer_all_thread, colorBuffer_all_thread, model)
     {
         int thread_id = omp_get_thread_num();
         auto &depthBuffer_per_thread = depthBuffer_all_thread[thread_id];
@@ -739,7 +694,7 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
 
     // 1. Setup阶段
     auto setup_start_time = std::chrono::high_resolution_clock::now();
-    const size_t TILE_SIZE = 64; // 64x64 pixels per tile
+    const size_t TILE_SIZE = kDefaultTileSize; // Default tile size per tile
     const size_t tiles_x = (width_ + TILE_SIZE - 1) / TILE_SIZE;
     const size_t tiles_y = (height_ + TILE_SIZE - 1) / TILE_SIZE;
     const size_t total_tiles = tiles_x * tiles_y;
@@ -774,7 +729,7 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
 #pragma omp parallel num_threads(kNProc) default(none) \
     shared(tile_triangles, rasterizer_, shader_, width_, height_, \
            depthBuffer, colorBuffer, tiles_x, tiles_y, total_tiles, \
-           early_z_enabled_, soa)
+           is_early_z_enabled_, soa)
     {
         int thread_id = omp_get_thread_num();
 
@@ -796,7 +751,7 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
                           tiles_x, tiles_y, TILE_SIZE,
                           tile_depth_buffer.get(), tile_color_buffer.get(),
                           depthBuffer, colorBuffer,
-                          soa, early_z_enabled_, &scratch_fragments);
+                          soa, is_early_z_enabled_, &scratch_fragments);
         }
     }
     auto rasterization_end_time = std::chrono::high_resolution_clock::now();
@@ -824,6 +779,46 @@ SimpleRenderer::TileRenderStats SimpleRenderer::ExecuteTileBasedPipeline(
     stats.total_ms = total_duration.count() / 1000.0;
 
     return stats;
+}
+
+void SimpleRenderer::PrintTraditionalStats(double vertex_ms, const RenderStats& stats) const {
+  double total_ms = vertex_ms + stats.total_ms;
+  
+  SPDLOG_INFO("=== TRADITIONAL RENDERING PERFORMANCE ===");
+  SPDLOG_INFO("Vertex Shader:    {:8.3f} ms ({:5.1f}%)", vertex_ms, vertex_ms/total_ms*100);
+  SPDLOG_INFO("Buffer Alloc:     {:8.3f} ms ({:5.1f}%)", stats.buffer_alloc_ms, stats.buffer_alloc_ms/total_ms*100);
+  SPDLOG_INFO("Rasterization:    {:8.3f} ms ({:5.1f}%)", stats.rasterization_ms, stats.rasterization_ms/total_ms*100);
+  SPDLOG_INFO("Merge:            {:8.3f} ms ({:5.1f}%)", stats.merge_ms, stats.merge_ms/total_ms*100);
+  SPDLOG_INFO("Total:            {:8.3f} ms", total_ms);
+  SPDLOG_INFO("==========================================");
+}
+
+void SimpleRenderer::PrintTileBasedStats(double vertex_ms, const TileRenderStats& stats) const {
+  double total_ms = vertex_ms + stats.total_ms;
+  
+  SPDLOG_INFO("=== TILE-BASED RENDERING PERFORMANCE ===");
+  SPDLOG_INFO("Vertex Shader:    {:8.3f} ms ({:5.1f}%)", vertex_ms, vertex_ms/total_ms*100);
+  SPDLOG_INFO("Setup:            {:8.3f} ms ({:5.1f}%)", stats.setup_ms, stats.setup_ms/total_ms*100);
+  SPDLOG_INFO("Binning:          {:8.3f} ms ({:5.1f}%)", stats.binning_ms, stats.binning_ms/total_ms*100);
+  SPDLOG_INFO("Buffer Alloc:     {:8.3f} ms ({:5.1f}%)", stats.buffer_alloc_ms, stats.buffer_alloc_ms/total_ms*100);
+  SPDLOG_INFO("Rasterization:    {:8.3f} ms ({:5.1f}%)", stats.rasterization_ms, stats.rasterization_ms/total_ms*100);
+  SPDLOG_INFO("Merge:            {:8.3f} ms ({:5.1f}%)", stats.merge_ms, stats.merge_ms/total_ms*100);
+  SPDLOG_INFO("Total:            {:8.3f} ms", total_ms);
+  SPDLOG_INFO("==========================================");
+}
+
+void SimpleRenderer::PrintDeferredStats(double vertex_ms, const DeferredRenderStats& stats) const {
+  double total_ms = vertex_ms + stats.total_ms;
+  
+  SPDLOG_INFO("=== DEFERRED RENDERING PERFORMANCE ===");
+  SPDLOG_INFO("Vertex Shader:        {:8.3f} ms ({:5.1f}%)", vertex_ms, vertex_ms/total_ms*100);
+  SPDLOG_INFO("Buffer Alloc:         {:8.3f} ms ({:5.1f}%)", stats.buffer_alloc_ms, stats.buffer_alloc_ms/total_ms*100);
+  SPDLOG_INFO("Rasterization:        {:8.3f} ms ({:5.1f}%)", stats.rasterization_ms, stats.rasterization_ms/total_ms*100);
+  SPDLOG_INFO("Fragment Collection:  {:8.3f} ms ({:5.1f}%)", stats.fragment_collection_ms, stats.fragment_collection_ms/total_ms*100);
+  SPDLOG_INFO("Fragment Merge:       {:8.3f} ms ({:5.1f}%)", stats.fragment_merge_ms, stats.fragment_merge_ms/total_ms*100);
+  SPDLOG_INFO("Deferred Shading:     {:8.3f} ms ({:5.1f}%)", stats.deferred_shading_ms, stats.deferred_shading_ms/total_ms*100);
+  SPDLOG_INFO("Total:                {:8.3f} ms", total_ms);
+  SPDLOG_INFO("=========================================");
 }
 
 }  // namespace simple_renderer

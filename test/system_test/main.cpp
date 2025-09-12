@@ -84,18 +84,8 @@ int main(int argc, char **argv) {
   simple_renderer.SetRenderingMode(simple_renderer::RenderingMode::TILE_BASED);
   
   // 输出当前渲染模式
-  std::string current_mode_name;
-  switch(simple_renderer.GetRenderingMode()) {
-    case simple_renderer::RenderingMode::TRADITIONAL:
-      current_mode_name = "TRADITIONAL (传统光栅化)";
-      break;
-    case simple_renderer::RenderingMode::TILE_BASED:
-      current_mode_name = "TILE_BASED (基于Tile光栅化)";
-      break;
-    case simple_renderer::RenderingMode::DEFERRED:
-      current_mode_name = "DEFERRED (模仿GPU的延迟渲染)";
-      break;
-  }
+  std::string current_mode_name = simple_renderer::RenderingModeToString(
+      simple_renderer.GetRenderingMode());
   SPDLOG_INFO("当前渲染模式: {}", current_mode_name);
 
   auto display = Display(kWidth, kHeight);

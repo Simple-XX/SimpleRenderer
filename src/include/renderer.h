@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <functional>
 #include <span>
+#include <string>
 
 #include "buffer.hpp"
 #include "light.h"
@@ -37,6 +38,10 @@ enum class RenderingMode {
   TILE_BASED,   // Tile-based光栅化模式 - 移动GPU架构
   DEFERRED      // 延迟渲染模式 - 经典GPU管线教学模拟
 };
+
+// RenderingMode辅助函数声明
+std::string RenderingModeToString(RenderingMode mode);
+std::string RenderingModeToDetailedString(RenderingMode mode);
 
 
 // SoA 版 tile 列表中的三角形引用（仅存索引与材质指针）
@@ -94,10 +99,14 @@ class SimpleRenderer {
   const size_t width_;
   LogSystem log_system_;
   RenderingMode current_mode_;  // 当前渲染模式
-  bool early_z_enabled_;        // Early-Z优化开关
+  bool is_early_z_enabled_;        // Early-Z优化开关
 
   std::shared_ptr<Shader> shader_;
   std::shared_ptr<Rasterizer> rasterizer_;
+
+  // Rendering constants
+  static constexpr float kMinWValue = 1e-6f;      // W分量检查阈值（避免除零）
+  static constexpr size_t kDefaultTileSize = 64;  // 默认Tile大小（64x64像素）
 
   /**
    * 执行绘制管线
@@ -125,13 +134,6 @@ class SimpleRenderer {
                                         const std::vector<Vertex> &processedVertices,
                                         uint32_t *buffer);
 
-  /**
-   * Tile-based光栅化渲染
-   * @param model 模型
-   * @param processedVertices 已处理的顶点
-   * @param buffer 输出缓冲区
-   * @return 渲染统计信息
-   */
   struct TileRenderStats {
     double setup_ms;
     double binning_ms;
@@ -167,9 +169,7 @@ class SimpleRenderer {
                                              const std::vector<Vertex> &processedVertices,
                                              uint32_t *buffer);
 
-  
 private:
-
 
   // SoA 版本的 Triangle-Tile binning（两遍计数 + reserve）
   void TriangleTileBinning(
@@ -191,7 +191,6 @@ private:
     bool use_early_z = false,
     std::vector<Fragment>* scratch_fragments = nullptr);
 
-  
   /**
    * 透视除法 - 将裁剪空间坐标转换为归一化设备坐标(NDC)
    * @param vertex 裁剪空间坐标的顶点
@@ -205,6 +204,21 @@ private:
    * @return 转换后的顶点(屏幕坐标)
    */
   Vertex ViewportTransformation(const Vertex &vertex);
+  
+  /**
+   * 打印传统渲染性能统计信息
+   */
+  void PrintTraditionalStats(double vertex_ms, const RenderStats& stats) const;
+  
+  /**
+   * 打印基于Tile渲染性能统计信息
+   */
+  void PrintTileBasedStats(double vertex_ms, const TileRenderStats& stats) const;
+  
+  /**
+   * 打印延迟渲染性能统计信息
+   */
+  void PrintDeferredStats(double vertex_ms, const DeferredRenderStats& stats) const;
   
 };
 }  // namespace simple_renderer

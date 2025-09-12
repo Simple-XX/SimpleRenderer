@@ -3,7 +3,7 @@
 
 #include "config.h"
 #include "shader.hpp"
-#include "vertex_soa.hpp"
+#include "vertex.hpp"
 
 namespace simple_renderer {
 
@@ -36,13 +36,25 @@ class Rasterizer {
  private:
   size_t width_, height_;
 
+  // 透视矫正结果
+  struct PerspectiveCorrectionResult {
+    Vector3f corrected_barycentric;
+    float interpolated_z;
+  };
+
+  // 透视矫正helper函数
+  PerspectiveCorrectionResult PerformPerspectiveCorrection(
+      float w0, float w1, float w2,
+      float z0, float z1, float z2,
+      const Vector3f& original_barycentric) const;
+
   template <typename T>
   T Interpolate(const T& v0, const T& v1, const T& v2,
-                const Vector3f& barycentric_coord);
+                const Vector3f& barycentric_coord) const;
 
   Color InterpolateColor(const Color& color0, const Color& color1,
                          const Color& color2,
-                         const Vector3f& barycentric_coord);
+                         const Vector3f& barycentric_coord) const;
 
   std::pair<bool, Vector3f> GetBarycentricCoord(const Vector3f& p0,
                                                 const Vector3f& p1,
