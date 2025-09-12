@@ -18,208 +18,95 @@
 #define SIMPLERENDER_SRC_INCLUDE_RENDERER_H_
 
 #include <cstdint>
-#include <functional>
-#include <span>
+#include <memory>
 #include <string>
 
-#include "buffer.hpp"
-#include "light.h"
 #include "log_system.h"
-#include "math.hpp"
 #include "model.hpp"
-#include "rasterizer.hpp"
 #include "shader.hpp"
+#include "renderers/renderer_base.hpp"
 
 namespace simple_renderer {
 
 // 渲染模式枚举
+/**
+ * @brief 渲染模式
+ * - PER_TRIANGLE: 逐三角形（triangle-major）前向渲染
+ * - TILE_BASED: 基于 tile（tile-major）前向渲染
+ * - DEFERRED: 延迟渲染（片段收集后再着色）
+ */
 enum class RenderingMode {
-  TRADITIONAL,  // 传统光栅化模式 - 立即深度测试
-  TILE_BASED,   // Tile-based光栅化模式 - 移动GPU架构
-  DEFERRED      // 延迟渲染模式 - 经典GPU管线教学模拟
+  PER_TRIANGLE,  //!< 逐三角形（triangle-major）
+  TILE_BASED,    //!< 基于 tile（tile-major）
+  DEFERRED       //!< 延迟渲染
 };
 
-// RenderingMode辅助函数声明
+/**
+ * @brief 将渲染模式枚举转为可读字符串
+ * @param mode 渲染模式
+ * @return 可读字符串（PER_TRIANGLE/TILE_BASED/DEFERRED）
+ */
 std::string RenderingModeToString(RenderingMode mode);
-std::string RenderingModeToDetailedString(RenderingMode mode);
 
-
-// SoA 版 tile 列表中的三角形引用（仅存索引与材质指针）
-struct TriangleRef {
-  size_t i0, i1, i2;
-  const Material* material = nullptr;
-  size_t face_index = 0;
-};
-
+/**
+ * @brief 渲染门面（Facade）
+ *
+ * 职责：
+ * - 仅作为模式选择与调用入口；
+ * - 根据 `RenderingMode` 构造并持有具体渲染器；
+ * - 对外暴露统一的 `DrawModel` 接口。
+ */
 class SimpleRenderer {
  public:
   /**
-   * 构造函数
-   * @param width
-   * @param height
-   * @param buffer 要进行绘制的内存区域，大小为 width*height*sizeof(uint32_t)
-   * @param
+   * @brief 构造渲染器门面
+   * @param width 画布宽度（像素）
+   * @param height 画布高度（像素）
    */
   SimpleRenderer(size_t width, size_t height);
-
-  /// @name 默认构造/析构函数
-  /// @{
-  SimpleRenderer(const SimpleRenderer &_simplerenderer) = default;
-  SimpleRenderer(SimpleRenderer &&_simplerenderer) = default;
-  auto operator=(const SimpleRenderer &_simplerenderer) -> SimpleRenderer & =
-                                                               default;
-  auto operator=(SimpleRenderer &&_simplerenderer) -> SimpleRenderer & =
-                                                          default;
-  virtual ~SimpleRenderer() = default;
-  /// @}
+  ~SimpleRenderer() = default;
 
   /**
-   * 绘制单个模型
-   * @param model 要绘制的模型
-   * @param shader 用于渲染的着色器
-   * @param buffer 输出缓冲区
-   * @return 绘制是否成功
+   * @brief 绘制单个模型
+   * @param model 模型
+   * @param shader 着色器（含 uniform）
+   * @param buffer 输出颜色缓冲（width*height）
+   * @return 是否成功
    */
   bool DrawModel(const Model &model, const Shader &shader, uint32_t *buffer);
 
   /**
-   * 设置渲染模式
-   * @param mode 渲染模式（传统或基于Tile）
+   * @brief 设置渲染模式
    */
   void SetRenderingMode(RenderingMode mode);
-
   /**
-   * 获取当前渲染模式
-   * @return 当前渲染模式
+   * @brief 获取当前渲染模式
    */
   RenderingMode GetRenderingMode() const;
+
+  // 可选：配置参数（仅对 TileBasedRenderer 生效；运行中修改将重建 TBR 实例）
+  /**
+   * @brief 启用或禁用 Early‑Z（仅 TBR 有效）
+   */
+  void SetEarlyZEnabled(bool enabled);
+  /**
+   * @brief 设置 Tile 大小（仅 TBR 有效）
+   */
+  void SetTileSize(size_t tile_size);
+
+ private:
+  void EnsureRenderer();
 
  private:
   const size_t height_;
   const size_t width_;
   LogSystem log_system_;
-  RenderingMode current_mode_;  // 当前渲染模式
-  bool is_early_z_enabled_;        // Early-Z优化开关
+  RenderingMode current_mode_;
+  std::unique_ptr<RendererBase> renderer_;
 
-  std::shared_ptr<Shader> shader_;
-  std::shared_ptr<Rasterizer> rasterizer_;
-
-  // Rendering constants
-  static constexpr float kMinWValue = 1e-6f;      // W分量检查阈值（避免除零）
-  static constexpr size_t kDefaultTileSize = 64;  // 默认Tile大小（64x64像素）
-
-  /**
-   * 执行绘制管线
-   * @param model 模型
-   * @param buffer 输出缓冲区
-   */
-  void ExecuteDrawPipeline(const Model &model, uint32_t *buffer);
-  
-
-  /**
-   * 传统光栅化渲染
-   * @param model 模型
-   * @param processedVertices 已处理的顶点
-   * @param buffer 输出缓冲区
-   * @return 渲染统计信息
-   */
-  struct RenderStats {
-    double buffer_alloc_ms;
-    double rasterization_ms;
-    double merge_ms;
-    double total_ms;
-  };
-  
-  RenderStats ExecuteTraditionalPipeline(const Model &model, 
-                                        const std::vector<Vertex> &processedVertices,
-                                        uint32_t *buffer);
-
-  struct TileRenderStats {
-    double setup_ms;
-    double binning_ms;
-    double buffer_alloc_ms;
-    double rasterization_ms;
-    double merge_ms;
-    double total_ms;
-  };
-  
-  /**
-   * 延迟渲染统计信息
-   */
-  struct DeferredRenderStats {
-    double buffer_alloc_ms;
-    double rasterization_ms;
-    double fragment_collection_ms;
-    double fragment_merge_ms;
-    double deferred_shading_ms;
-    double total_ms;
-  };
-  TileRenderStats ExecuteTileBasedPipeline(const Model &model,
-                                              const VertexSoA &soa,
-                                              uint32_t *buffer);
-
-  /**
-   * 延迟渲染管线
-   * @param model 模型
-   * @param processedVertices 已处理的顶点
-   * @param buffer 输出缓冲区
-   * @return 渲染统计信息
-   */
-  DeferredRenderStats ExecuteDeferredPipeline(const Model &model,
-                                             const std::vector<Vertex> &processedVertices,
-                                             uint32_t *buffer);
-
-private:
-
-  // SoA 版本的 Triangle-Tile binning（两遍计数 + reserve）
-  void TriangleTileBinning(
-    const Model &model,
-    const VertexSoA &soa,
-    std::vector<std::vector<TriangleRef>> &tile_triangles,
-    size_t tiles_x, size_t tiles_y, size_t tile_size);
-
-
-  // SoA 版本的 tile 光栅化
-  void RasterizeTile(
-    size_t tile_id,
-    const std::vector<TriangleRef> &triangles,
-    size_t tiles_x, size_t tiles_y, size_t tile_size,
-    float* tile_depth_buffer, uint32_t* tile_color_buffer,
-    std::unique_ptr<float[]> &global_depth_buffer,
-    std::unique_ptr<uint32_t[]> &global_color_buffer,
-    const VertexSoA &soa,
-    bool use_early_z = false,
-    std::vector<Fragment>* scratch_fragments = nullptr);
-
-  /**
-   * 透视除法 - 将裁剪空间坐标转换为归一化设备坐标(NDC)
-   * @param vertex 裁剪空间坐标的顶点
-   * @return 转换后的顶点(NDC坐标)
-   */
-  Vertex PerspectiveDivision(const Vertex &vertex);
-
-  /**
-   * 视口变换 - 将NDC坐标转换为屏幕坐标
-   * @param vertex NDC坐标的顶点
-   * @return 转换后的顶点(屏幕坐标)
-   */
-  Vertex ViewportTransformation(const Vertex &vertex);
-  
-  /**
-   * 打印传统渲染性能统计信息
-   */
-  void PrintTraditionalStats(double vertex_ms, const RenderStats& stats) const;
-  
-  /**
-   * 打印基于Tile渲染性能统计信息
-   */
-  void PrintTileBasedStats(double vertex_ms, const TileRenderStats& stats) const;
-  
-  /**
-   * 打印延迟渲染性能统计信息
-   */
-  void PrintDeferredStats(double vertex_ms, const DeferredRenderStats& stats) const;
-  
+  // TBR 配置缓存：在创建 TileBasedRenderer 时下发
+  bool tbr_early_z_ = true;
+  size_t tbr_tile_size_ = 64;
 };
 }  // namespace simple_renderer
 

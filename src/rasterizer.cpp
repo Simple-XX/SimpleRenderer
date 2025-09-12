@@ -81,6 +81,62 @@ std::vector<Fragment> Rasterizer::Rasterize(const Vertex& v0, const Vertex& v1,
   return fragments;
 }
 
+void Rasterizer::RasterizeTo(const Vertex& v0, const Vertex& v1, const Vertex& v2,
+                             int x0, int y0, int x1, int y1,
+                             std::vector<Fragment>& out) {
+  // 获取三角形的最小 box（屏幕空间）
+  const Vector4f p0 = v0.GetPosition();
+  const Vector4f p1 = v1.GetPosition();
+  const Vector4f p2 = v2.GetPosition();
+
+  Vector2f a(p0.x, p0.y);
+  Vector2f b(p1.x, p1.y);
+  Vector2f c(p2.x, p2.y);
+
+  Vector2f bboxMin = Vector2f{std::min({a.x, b.x, c.x}), std::min({a.y, b.y, c.y})};
+  Vector2f bboxMax = Vector2f{std::max({a.x, b.x, c.x}), std::max({a.y, b.y, c.y})};
+
+  // Clamp 到屏幕尺寸
+  float minx = std::max(0.0f, bboxMin.x);
+  float miny = std::max(0.0f, bboxMin.y);
+  float maxx = std::min(float(width_ - 1), bboxMax.x);
+  float maxy = std::min(float(height_ - 1), bboxMax.y);
+
+  // 与外部提供的裁剪区域相交（半开区间） -> 闭区间扫描
+  int sx = std::max(x0, static_cast<int>(std::floor(minx)));
+  int sy = std::max(y0, static_cast<int>(std::floor(miny)));
+  int ex = std::min(x1 - 1, static_cast<int>(std::floor(maxx)));
+  int ey = std::min(y1 - 1, static_cast<int>(std::floor(maxy)));
+  if (sx > ex || sy > ey) return;
+
+  for (int x = sx; x <= ex; ++x) {
+    for (int y = sy; y <= ey; ++y) {
+      auto [is_inside, bary] = GetBarycentricCoord(
+          Vector3f(p0.x, p0.y, p0.z), Vector3f(p1.x, p1.y, p1.z), Vector3f(p2.x, p2.y, p2.z),
+          Vector3f(static_cast<float>(x), static_cast<float>(y), 0));
+      if (!is_inside) continue;
+
+      // 透视矫正插值
+      auto perspective_result = PerformPerspectiveCorrection(
+          p0.w, p1.w, p2.w,
+          p0.z, p1.z, p2.z,
+          bary);
+
+      const Vector3f& corrected_bary = perspective_result.corrected_barycentric;
+      float z = perspective_result.interpolated_z;
+
+      Fragment frag; // material 指针由调用方填写
+      frag.screen_coord = {x, y};
+      frag.normal = Interpolate(v0.GetNormal(), v1.GetNormal(), v2.GetNormal(), corrected_bary);
+      frag.uv     = Interpolate(v0.GetTexCoords(), v1.GetTexCoords(), v2.GetTexCoords(), corrected_bary);
+      frag.color  = InterpolateColor(v0.GetColor(), v1.GetColor(), v2.GetColor(), corrected_bary);
+      frag.depth  = z;
+
+      out.push_back(frag);
+    }
+  }
+}
+
 void Rasterizer::RasterizeTo(const VertexSoA& soa, size_t i0, size_t i1, size_t i2,
                              int x0, int y0, int x1, int y1,
                              std::vector<Fragment>& out) {

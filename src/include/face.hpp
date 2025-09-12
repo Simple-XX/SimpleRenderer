@@ -40,7 +40,7 @@ class Face {
   // Get functions
   // 获取函数
   inline const std::array<size_t, 3>& GetIndices() const { return indices_; }
-  inline const size_t GetIndex(size_t index) const { return indices_[index]; }
+  inline size_t GetIndex(size_t index) const { return indices_[index]; }
   inline const Material& GetMaterial() const { return material_; }
 
  private:
