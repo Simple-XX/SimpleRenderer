@@ -145,41 +145,82 @@ void Rasterizer::RasterizeTo(const VertexSoA& soa, size_t i0, size_t i1, size_t 
   const Vector4f& p1 = soa.pos_screen[i1];
   const Vector4f& p2 = soa.pos_screen[i2];
 
-  Vector2f a = Vector2f(p0.x, p0.y);
-  Vector2f b = Vector2f(p1.x, p1.y);
-  Vector2f c = Vector2f(p2.x, p2.y);
+  // 为BarycentricCoord预构造Vec3f，避免循环内重复构造
+  const Vector3f sp0(p0.x, p0.y, p0.z);
+  const Vector3f sp1(p1.x, p1.y, p1.z);
+  const Vector3f sp2(p2.x, p2.y, p2.z);
 
-  Vector2f bboxMin = Vector2f{std::min({a.x, b.x, c.x}), std::min({a.y, b.y, c.y})};
-  Vector2f bboxMax = Vector2f{std::max({a.x, b.x, c.x}), std::max({a.y, b.y, c.y})};
-
-  // Clamp 到屏幕尺寸
-  float minx = std::max(0.0f, bboxMin.x);
-  float miny = std::max(0.0f, bboxMin.y);
-  float maxx = std::min(float(width_ - 1), bboxMax.x);
-  float maxy = std::min(float(height_ - 1), bboxMax.y);
+  // 计算屏幕空间AABB包围盒
+  const float minx_f = std::max(0.0f, std::min({p0.x, p1.x, p2.x}));
+  const float miny_f = std::max(0.0f, std::min({p0.y, p1.y, p2.y}));
+  const float maxx_f = std::min(float(width_  - 1), std::max({p0.x, p1.x, p2.x}));
+  const float maxy_f = std::min(float(height_ - 1), std::max({p0.y, p1.y, p2.y}));
 
   // 与外部提供的裁剪区域相交（半开区间） -> 闭区间扫描
-  int sx = std::max(x0, static_cast<int>(std::floor(minx)));
-  int sy = std::max(y0, static_cast<int>(std::floor(miny)));
-  int ex = std::min(x1 - 1, static_cast<int>(std::floor(maxx)));
-  int ey = std::min(y1 - 1, static_cast<int>(std::floor(maxy)));
+  int sx = std::max(x0, static_cast<int>(std::floor(minx_f)));
+  int sy = std::max(y0, static_cast<int>(std::floor(miny_f)));
+  int ex = std::min(x1 - 1, static_cast<int>(std::floor(maxx_f)));
+  int ey = std::min(y1 - 1, static_cast<int>(std::floor(maxy_f)));
   if (sx > ex || sy > ey) return;
 
-  for (int x = sx; x <= ex; ++x) {
-    for (int y = sy; y <= ey; ++y) {
-      auto [is_inside, bary] = GetBarycentricCoord(
-          Vector3f(p0.x, p0.y, p0.z), Vector3f(p1.x, p1.y, p1.z), Vector3f(p2.x, p2.y, p2.z),
-          Vector3f(static_cast<float>(x), static_cast<float>(y), 0));
-      if (!is_inside) continue;
+  // 预计算边函数系数：E(x,y) = A*x + B*y + C
+  // 使用相对坐标的边函数定义，避免大常数项导致的数值不稳定
+  // 如使用绝对形式Ax+By+C会由于常数C的量级过大，造成浮点抵消，有效位丢失不稳定
+  auto cross2 = [](float ax, float ay, float bx, float by) {
+    return ax * by - ay * bx;
+  };
+  // 边向量
+  const float e01x = p1.x - p0.x, e01y = p1.y - p0.y; // (p0->p1)
+  const float e12x = p2.x - p1.x, e12y = p2.y - p1.y; // (p1->p2)
+  const float e20x = p0.x - p2.x, e20y = p0.y - p2.y; // (p2->p0)
+
+  // 有向面积（两倍），用相对面积定义：area2 = cross(p1 - p0, p2 - p0)
+  float area2 = cross2(e01x, e01y, p2.x - p0.x, p2.y - p0.y);
+  if (std::abs(area2) < 1e-6f) return; // 退化三角形
+  const float inv_area2 = 1.0f / area2;
+  const bool positive = (area2 > 0.0f);
+
+  // 行优先遍历：有利于 cache 与向量化
+  #pragma omp simd
+  for (int y = sy; y <= ey; ++y) {
+    const float yf = static_cast<float>(y);
+
+    // 注意：此处存在对 out.push_back 的写入，属于有副作用操作，不适合使用
+    // omp simd 进行强制向量化，否则可能导致不符合预期的行为（如周期性伪影）。
+    // 先保持标量内层，后续如切换为“直写像素回调”再考虑安全的 SIMD 化。
+    for (int x = sx; x <= ex; ++x) {
+      const float xf = static_cast<float>(x);
+
+      // 相对坐标边函数：
+      // E01(p) = cross(p1 - p0, p - p0)
+      // E12(p) = cross(p2 - p1, p - p1)
+      // E20(p) = cross(p0 - p2, p - p2)
+      const float E01 = cross2(e01x, e01y, xf - p0.x, yf - p0.y);
+      const float E12 = cross2(e12x, e12y, xf - p1.x, yf - p1.y);
+      const float E20 = cross2(e20x, e20y, xf - p2.x, yf - p2.y);
+
+      // 半空间测试（根据朝向选择符号）
+      const bool inside = positive ? (E01 >= 0.0f && E12 >= 0.0f && E20 >= 0.0f)
+                                   : (E01 <= 0.0f && E12 <= 0.0f && E20 <= 0.0f);
+      if (!inside) continue;
+
+      // 重心权重映射：
+      // b0 对应 v0，取与对边 (v1,v2) 的子面积 → E12
+      // b1 对应 v1 → E20
+      // b2 对应 v2 → E01
+      const float b0 = E12 * inv_area2;
+      const float b1 = E20 * inv_area2;
+      const float b2 = E01 * inv_area2;
+      const Vector3f bary(b0, b1, b2);
 
       // 透视矫正插值
       auto perspective_result = PerformPerspectiveCorrection(
           p0.w, p1.w, p2.w,
           p0.z, p1.z, p2.z,
           bary);
-      
+
       const Vector3f& corrected_bary = perspective_result.corrected_barycentric;
-      float z = perspective_result.interpolated_z;
+      const float z = perspective_result.interpolated_z;
 
       Fragment frag; // Note: material 指针由调用方填写
       frag.screen_coord = {x, y};
