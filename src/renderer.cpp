@@ -30,7 +30,7 @@ SimpleRenderer::SimpleRenderer(size_t width, size_t height)
 
 bool SimpleRenderer::DrawModel(const Model &model, const Shader &shader, uint32_t *buffer) {
   EnsureRenderer(); // 确保渲染器实例存在
-  SPDLOG_INFO("draw model: {}", model.GetModelPath());
+  SPDLOG_DEBUG("draw model: {}", model.GetModelPath());
   return renderer_->Render(model, shader, buffer);
 }
 

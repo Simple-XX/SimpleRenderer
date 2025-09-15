@@ -8,7 +8,7 @@ namespace simple_renderer {
 
 Rasterizer::Rasterizer(size_t width, size_t height)
     : width_(width), height_(height) {
-  SPDLOG_INFO("Rasterizer init with {}, {}", width, height);
+  SPDLOG_DEBUG("Rasterizer init with {}, {}", width, height);
 }
 
 std::vector<Fragment> Rasterizer::Rasterize(const Vertex& v0, const Vertex& v1,

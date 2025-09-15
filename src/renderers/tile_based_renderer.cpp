@@ -132,19 +132,19 @@ bool TileBasedRenderer::Render(const Model &model, const Shader &shader_in,
                         .count() /
                     1000.0;
 
-  SPDLOG_INFO("=== TILE-BASED RENDERING PERFORMANCE ===");
+  SPDLOG_DEBUG("=== TILE-BASED RENDERING PERFORMANCE ===");
   double sum_ms = vertex_ms + (total_ms - vertex_ms);
-  SPDLOG_INFO("Vertex Shader:    {:8.3f} ms ({:5.1f}%)", vertex_ms,
+  SPDLOG_DEBUG("Vertex Shader:    {:8.3f} ms ({:5.1f}%)", vertex_ms,
               vertex_ms / sum_ms * 100);
-  SPDLOG_INFO("Setup:            {:8.3f} ms", setup_ms);
-  SPDLOG_INFO("Binning:          {:8.3f} ms", binning_ms);
-  SPDLOG_INFO("Buffer Alloc:     {:8.3f} ms", buffer_alloc_ms);
-  SPDLOG_INFO("Rasterization:    {:8.3f} ms", raster_ms);
-  SPDLOG_INFO("Copy:             {:8.3f} ms", present_ms);
-  SPDLOG_INFO("Total:            {:8.3f} ms",
+  SPDLOG_DEBUG("Setup:            {:8.3f} ms", setup_ms);
+  SPDLOG_DEBUG("Binning:          {:8.3f} ms", binning_ms);
+  SPDLOG_DEBUG("Buffer Alloc:     {:8.3f} ms", buffer_alloc_ms);
+  SPDLOG_DEBUG("Rasterization:    {:8.3f} ms", raster_ms);
+  SPDLOG_DEBUG("Copy:             {:8.3f} ms", present_ms);
+  SPDLOG_DEBUG("Total:            {:8.3f} ms",
               vertex_ms + (setup_ms + binning_ms + buffer_alloc_ms + raster_ms +
-                           present_ms));
-  SPDLOG_INFO("==========================================");
+                          present_ms));
+  SPDLOG_DEBUG("==========================================");
 
   return true;
 }
@@ -155,9 +155,9 @@ void TileBasedRenderer::TriangleTileBinning(
     std::vector<std::vector<TileTriangleRef>> &tile_triangles) {
   const size_t total_triangles = model.GetFaces().size();
 
-  SPDLOG_INFO("Starting triangle-tile binning (SoA) for {} triangles",
+  SPDLOG_DEBUG("Starting triangle-tile binning (SoA) for {} triangles",
               total_triangles);
-  SPDLOG_INFO("Screen dimensions: {}x{}, Tile size: {}, Tiles: {}x{}", width_,
+  SPDLOG_DEBUG("Screen dimensions: {}x{}, Tile size: {}, Tiles: {}x{}", width_,
               height_, grid.tile_size, grid.tiles_x, grid.tiles_y);
 
   std::vector<size_t> tile_counts(grid.tiles_x * grid.tiles_y, 0);
@@ -186,9 +186,9 @@ void TileBasedRenderer::TriangleTileBinning(
     total_triangle_refs += tile.size();
     if (!tile.empty()) non_empty_tiles++;
   }
-  SPDLOG_INFO("  (SoA) Total triangle references: {}", total_triangle_refs);
-  SPDLOG_INFO("  (SoA) Non-empty tiles: {}", non_empty_tiles);
-  SPDLOG_INFO("  (SoA) Average triangles per tile: {:.2f}",
+  SPDLOG_DEBUG("  (SoA) Total triangle references: {}", total_triangle_refs);
+  SPDLOG_DEBUG("  (SoA) Non-empty tiles: {}", non_empty_tiles);
+  SPDLOG_DEBUG("  (SoA) Average triangles per tile: {:.2f}",
               total_triangle_refs > 0
                   ? float(total_triangle_refs) / tile_triangles.size()
                   : 0.0f);

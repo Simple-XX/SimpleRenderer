@@ -159,16 +159,16 @@ bool DeferredRenderer::Render(const Model& model, const Shader& shader_in, uint3
   auto total_end_time = std::chrono::high_resolution_clock::now();
   double total_ms = std::chrono::duration_cast<std::chrono::microseconds>(total_end_time - total_start_time).count() / 1000.0;
 
-  SPDLOG_INFO("=== DEFERRED RENDERING PERFORMANCE ===");
+  SPDLOG_DEBUG("=== DEFERRED RENDERING PERFORMANCE ===");
   double sum_ms = vertex_ms + (total_ms - vertex_ms);
-  SPDLOG_INFO("Vertex Shader:        {:8.3f} ms ({:5.1f}%)", vertex_ms, vertex_ms/sum_ms*100);
-  SPDLOG_INFO("Buffer Alloc:         {:8.3f} ms", buffer_alloc_ms);
-  SPDLOG_INFO("Rasterization:        {:8.3f} ms", raster_ms);
-  SPDLOG_INFO("Fragment Collection:  {:8.3f} ms", collect_ms);
-  SPDLOG_INFO("Fragment Merge:       {:8.3f} ms", merge_ms);
-  SPDLOG_INFO("Deferred Shading:     {:8.3f} ms", shade_ms);
-  SPDLOG_INFO("Total:                {:8.3f} ms", vertex_ms + (buffer_alloc_ms + raster_ms + collect_ms + merge_ms + shade_ms));
-  SPDLOG_INFO("=========================================");
+  SPDLOG_DEBUG("Vertex Shader:        {:8.3f} ms ({:5.1f}%)", vertex_ms, vertex_ms/sum_ms*100);
+  SPDLOG_DEBUG("Buffer Alloc:         {:8.3f} ms", buffer_alloc_ms);
+  SPDLOG_DEBUG("Rasterization:        {:8.3f} ms", raster_ms);
+  SPDLOG_DEBUG("Fragment Collection:  {:8.3f} ms", collect_ms);
+  SPDLOG_DEBUG("Fragment Merge:       {:8.3f} ms", merge_ms);
+  SPDLOG_DEBUG("Deferred Shading:     {:8.3f} ms", shade_ms);
+  SPDLOG_DEBUG("Total:                {:8.3f} ms", vertex_ms + (buffer_alloc_ms + raster_ms + collect_ms + merge_ms + shade_ms));
+  SPDLOG_DEBUG("=========================================");
 
   return true;
 }

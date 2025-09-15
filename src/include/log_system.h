@@ -17,6 +17,9 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_LOG_SYSTEM_H_
 #define SIMPLERENDER_SRC_INCLUDE_LOG_SYSTEM_H_
 
+#ifndef SPDLOG_ACTIVE_LEVEL
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_INFO
+#endif
 #include <spdlog/spdlog.h>
 
 namespace simple_renderer {

@@ -155,16 +155,16 @@ bool PerTriangleRenderer::Render(const Model &model, const Shader &shader_in,
                       .count() /
                   1000.0;
 
-  SPDLOG_INFO("=== PER-TRIANGLE RENDERING PERFORMANCE ===");
+  SPDLOG_DEBUG("=== PER-TRIANGLE RENDERING PERFORMANCE ===");
   double sum_ms = vertex_ms + (total_ms - vertex_ms);
-  SPDLOG_INFO("Vertex Shader:    {:8.3f} ms ({:5.1f}%)", vertex_ms,
+  SPDLOG_DEBUG("Vertex Shader:    {:8.3f} ms ({:5.1f}%)", vertex_ms,
               vertex_ms / sum_ms * 100);
-  SPDLOG_INFO("Buffer Alloc:     {:8.3f} ms", buffer_alloc_ms);
-  SPDLOG_INFO("Rasterization:    {:8.3f} ms", raster_ms);
-  SPDLOG_INFO("Merge:            {:8.3f} ms", merge_ms);
-  SPDLOG_INFO("Total:            {:8.3f} ms",
+  SPDLOG_DEBUG("Buffer Alloc:     {:8.3f} ms", buffer_alloc_ms);
+  SPDLOG_DEBUG("Rasterization:    {:8.3f} ms", raster_ms);
+  SPDLOG_DEBUG("Merge:            {:8.3f} ms", merge_ms);
+  SPDLOG_DEBUG("Total:            {:8.3f} ms",
               vertex_ms + (buffer_alloc_ms + raster_ms + merge_ms));
-  SPDLOG_INFO("==========================================");
+  SPDLOG_DEBUG("==========================================");
 
   return true;
 }
