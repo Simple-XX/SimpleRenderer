@@ -3,6 +3,8 @@
 #include <omp.h>
 #include <algorithm>
 #include <chrono>
+#include <cassert>
+#include <iterator>
 
 #include "config.h"
 #include "log_system.h"
@@ -77,12 +79,40 @@ bool DeferredRenderer::Render(const Model& model, const Shader& shader_in, uint3
 
   /* * * Fragment Collection * * */
   auto collect_start = std::chrono::high_resolution_clock::now();
-  std::vector<std::vector<Fragment>> fragmentsBuffer(width_ * height_);
-  for (const auto &fragmentsBuffer_per_thread : fragmentsBuffer_all_thread) {
-    for (size_t i = 0; i < fragmentsBuffer_per_thread.size(); i++) {
-      fragmentsBuffer[i].insert(fragmentsBuffer[i].end(),
-                                fragmentsBuffer_per_thread[i].begin(),
-                                fragmentsBuffer_per_thread[i].end());
+
+  const size_t pixel_count = static_cast<size_t>(width_) * static_cast<size_t>(height_);
+
+#ifndef NDEBUG
+  for (const auto &tb : fragmentsBuffer_all_thread) {
+    // 断言避免越界，确保固定维度
+    assert(tb.size() == pixel_count && "thread buffer size mismatch");
+  }
+#endif
+
+  // Pass 1: 统计每个像素桶的总片元数
+  std::vector<size_t> bucket_total(pixel_count, 0);
+  for (const auto &tb : fragmentsBuffer_all_thread) {
+    for (size_t i = 0; i < pixel_count; ++i) {
+      bucket_total[i] += tb[i].size();
+    }
+  }
+
+  // Pass 2: 统一预分配
+  std::vector<std::vector<Fragment>> fragmentsBuffer(pixel_count);
+  for (size_t i = 0; i < pixel_count; ++i) {
+    if (bucket_total[i] > 0) fragmentsBuffer[i].reserve(bucket_total[i]);
+  }
+
+  // Pass 3: 按桶并行合并（每个桶内部保持按线程序的插入顺序）
+#pragma omp parallel for num_threads(kNProc) schedule(static)
+  for (long long i = 0; i < static_cast<long long>(pixel_count); ++i) {
+    auto &dst = fragmentsBuffer[static_cast<size_t>(i)];
+    for (size_t t = 0; t < fragmentsBuffer_all_thread.size(); ++t) {
+      auto &src = fragmentsBuffer_all_thread[t][static_cast<size_t>(i)];
+      dst.insert(dst.end(),
+                 std::make_move_iterator(src.begin()),
+                 std::make_move_iterator(src.end()));
+      src.clear();
     }
   }
   auto collect_end = std::chrono::high_resolution_clock::now();
