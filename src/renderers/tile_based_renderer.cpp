@@ -59,7 +59,8 @@ bool TileBasedRenderer::Render(const Model &model, const Shader &shader_in,
 
   // 2. Binning
   auto binning_start = std::chrono::high_resolution_clock::now();
-  TriangleTileBinning(model, soa, tile_triangles, tiles_x, tiles_y, TILE_SIZE);
+  TileGridContext grid_ctx{soa, tiles_x, tiles_y, TILE_SIZE};
+  TriangleTileBinning(model, grid_ctx, tile_triangles);
   auto binning_end = std::chrono::high_resolution_clock::now();
   auto binning_ms = std::chrono::duration_cast<std::chrono::microseconds>(
                         binning_end - binning_start)
@@ -74,11 +75,10 @@ bool TileBasedRenderer::Render(const Model &model, const Shader &shader_in,
       std::make_unique<float[]>(width_ * height_);
   std::unique_ptr<uint32_t[]> colorBuffer =
       std::make_unique<uint32_t[]>(width_ * height_);
-  // 深度初始化为最远值，颜色清零
 
-  std::fill_n(depthBuffer.get(), width_ * height_,
-              std::numeric_limits<float>::infinity());
-  std::fill_n(colorBuffer.get(), width_ * height_, 0);
+  // 深度初始化为最远值，颜色清零
+  std::fill_n(depthBuffer.get(), width_ * height_, kDepthClear);
+  std::fill_n(colorBuffer.get(), width_ * height_, kColorClear);
   auto buffer_alloc_end = std::chrono::high_resolution_clock::now();
   auto buffer_alloc_ms = std::chrono::duration_cast<std::chrono::microseconds>(
                              buffer_alloc_end - buffer_alloc_start)
@@ -88,26 +88,26 @@ bool TileBasedRenderer::Render(const Model &model, const Shader &shader_in,
   // 4. 并行光栅化每个 tile（SoA + early-z）
   auto raster_start = std::chrono::high_resolution_clock::now();
 #pragma omp parallel num_threads(kNProc) default(none)                        \
-    shared(tile_triangles, rasterizer_, shader, width_, height_, depthBuffer, \
-               colorBuffer, tiles_x, tiles_y, total_tiles, soa, TILE_SIZE)
+    shared(tile_triangles, shader, depthBuffer, colorBuffer, total_tiles,     \
+               grid_ctx, early_z_)
   {
     // 为每个 tile 分配局部深度和颜色缓冲
     std::unique_ptr<float[]> tile_depth_buffer =
-        std::make_unique<float[]>(TILE_SIZE * TILE_SIZE);
+        std::make_unique<float[]>(grid_ctx.tile_size * grid_ctx.tile_size);
     std::unique_ptr<uint32_t[]> tile_color_buffer =
-        std::make_unique<uint32_t[]>(TILE_SIZE * TILE_SIZE);
+        std::make_unique<uint32_t[]>(grid_ctx.tile_size * grid_ctx.tile_size);
 
     // 为每个 tile 分配可复用片段临时容器，容量按单 tile 上限预估
     std::vector<Fragment> scratch_fragments;
-    scratch_fragments.reserve(TILE_SIZE * TILE_SIZE);
+    scratch_fragments.reserve(grid_ctx.tile_size * grid_ctx.tile_size);
 
 #pragma omp for schedule(static)
     for (size_t tile_id = 0; tile_id < total_tiles; ++tile_id) {
       // 按照 tile 进行光栅化（SoA）
       // 直接写入单份全局 framebuffer；不同 tile 不重叠，无需加锁
-      RasterizeTile(tile_id, tile_triangles[tile_id], tiles_x, tiles_y,
-                    TILE_SIZE, tile_depth_buffer.get(), tile_color_buffer.get(),
-                    depthBuffer, colorBuffer, soa, *shader, early_z_,
+      RasterizeTile(tile_id, tile_triangles[tile_id], grid_ctx,
+                    tile_depth_buffer.get(), tile_color_buffer.get(),
+                    depthBuffer, colorBuffer, *shader, early_z_,
                     &scratch_fragments);
     }
   }
@@ -150,21 +150,22 @@ bool TileBasedRenderer::Render(const Model &model, const Shader &shader_in,
 }
 
 void TileBasedRenderer::TriangleTileBinning(
-    const Model &model, const VertexSoA &soa,
-    std::vector<std::vector<TileTriangleRef>> &tile_triangles, size_t tiles_x,
-    size_t tiles_y, size_t tile_size) {
+    const Model& model,
+    const TileGridContext& grid,
+    std::vector<std::vector<TileTriangleRef>> &tile_triangles) {
   const size_t total_triangles = model.GetFaces().size();
 
   SPDLOG_INFO("Starting triangle-tile binning (SoA) for {} triangles",
               total_triangles);
   SPDLOG_INFO("Screen dimensions: {}x{}, Tile size: {}, Tiles: {}x{}", width_,
-              height_, tile_size, tiles_x, tiles_y);
+              height_, grid.tile_size, grid.tiles_x, grid.tiles_y);
 
-  std::vector<size_t> tile_counts(tiles_x * tiles_y, 0);
+  std::vector<size_t> tile_counts(grid.tiles_x * grid.tiles_y, 0);
 
   // 第一遍（count only）：计算每个tile需要容纳多少三角形
   for (size_t tri_idx = 0; tri_idx < total_triangles; ++tri_idx) {
-    ProcessTriangleForTileBinning(tri_idx, true, model, soa, tiles_x, tiles_y, tile_size, tile_counts, tile_triangles);
+    ProcessTriangleForTileBinning(tri_idx, true, model, grid,
+                                  tile_counts, tile_triangles);
   }
 
   // 预分配，避免动态扩容
@@ -175,7 +176,8 @@ void TileBasedRenderer::TriangleTileBinning(
 
   // 第二遍（fill）：按范围填充TriangleRef
   for (size_t tri_idx = 0; tri_idx < total_triangles; ++tri_idx) {
-    ProcessTriangleForTileBinning(tri_idx, false, model, soa, tiles_x, tiles_y, tile_size, tile_counts, tile_triangles);
+    ProcessTriangleForTileBinning(tri_idx, false, model, grid,
+                                  tile_counts, tile_triangles);
   }
 
   size_t total_triangle_refs = 0;
@@ -194,25 +196,24 @@ void TileBasedRenderer::TriangleTileBinning(
 
 void TileBasedRenderer::RasterizeTile(
     size_t tile_id, const std::vector<TileTriangleRef> &triangles,
-    size_t tiles_x, size_t tiles_y, size_t tile_size, float *tile_depth_buffer,
+    const TileGridContext& grid, float *tile_depth_buffer,
     uint32_t *tile_color_buffer, std::unique_ptr<float[]> &global_depth_buffer,
-    std::unique_ptr<uint32_t[]> &global_color_buffer, const VertexSoA &soa,
+    std::unique_ptr<uint32_t[]> &global_color_buffer,
     const Shader &shader, bool use_early_z,
     std::vector<Fragment> *scratch_fragments) {
-  (void)tiles_y;
   // 计算 tile 屏幕范围
-  size_t tile_x = tile_id % tiles_x;
-  size_t tile_y = tile_id / tiles_x;
-  size_t screen_x_start = tile_x * tile_size;
-  size_t screen_y_start = tile_y * tile_size;
-  size_t screen_x_end = std::min(screen_x_start + tile_size, width_);
-  size_t screen_y_end = std::min(screen_y_start + tile_size, height_);
+  size_t tile_x = tile_id % grid.tiles_x;
+  size_t tile_y = tile_id / grid.tiles_x;
+  size_t screen_x_start = tile_x * grid.tile_size;
+  size_t screen_y_start = tile_y * grid.tile_size;
+  size_t screen_x_end = std::min(screen_x_start + grid.tile_size, width_);
+  size_t screen_y_end = std::min(screen_y_start + grid.tile_size, height_);
 
   // 初始化 tile 局部缓冲
   size_t tile_width = screen_x_end - screen_x_start;
   size_t tile_height = screen_y_end - screen_y_start;
-  std::fill_n(tile_depth_buffer, tile_width * tile_height, 1.0f);
-  std::fill_n(tile_color_buffer, tile_width * tile_height, 0);
+  std::fill_n(tile_depth_buffer, tile_width * tile_height, kDepthClear);
+  std::fill_n(tile_color_buffer, tile_width * tile_height, kColorClear);
 
   // 只有当调用方没有提供 scratch 时，才启用本地容器并且只构造一次
   const bool use_internal_scratch = (scratch_fragments == nullptr);
@@ -228,7 +229,7 @@ void TileBasedRenderer::RasterizeTile(
       out.reserve(tile_width * tile_height);
 
     rasterizer_->RasterizeTo(
-        soa, tri.i0, tri.i1, tri.i2, static_cast<int>(screen_x_start),
+        grid.soa, tri.i0, tri.i1, tri.i2, static_cast<int>(screen_x_start),
         static_cast<int>(screen_y_start), static_cast<int>(screen_x_end),
         static_cast<int>(screen_y_end), out);
 
@@ -278,11 +279,9 @@ void TileBasedRenderer::RasterizeTile(
 }
 
 void TileBasedRenderer::ProcessTriangleForTileBinning(
-    size_t tri_idx, bool count_only,
-    const Model& model, const VertexSoA& soa,
-    size_t tiles_x, size_t tiles_y, size_t tile_size,
-    std::vector<size_t>& tile_counts,
-    std::vector<std::vector<TileTriangleRef>>& tile_triangles) {
+    size_t tri_idx, bool count_only, const Model &model,
+    const TileGridContext &grid, std::vector<size_t> &tile_counts,
+    std::vector<std::vector<TileTriangleRef>> &tile_triangles) {
   const auto &f = model.GetFaces()[tri_idx];
   size_t i0 = f.GetIndex(0);
   size_t i1 = f.GetIndex(1);
@@ -290,9 +289,9 @@ void TileBasedRenderer::ProcessTriangleForTileBinning(
 
   // 视锥体裁剪 (裁剪空间)
   // 保守视锥体裁剪：只有当整个三角形都在视锥体外同一侧时才裁剪
-  const Vector4f &c0 = soa.pos_clip[i0];
-  const Vector4f &c1 = soa.pos_clip[i1];
-  const Vector4f &c2 = soa.pos_clip[i2];
+  const Vector4f &c0 = grid.soa.pos_clip[i0];
+  const Vector4f &c1 = grid.soa.pos_clip[i1];
+  const Vector4f &c2 = grid.soa.pos_clip[i2];
   bool frustum_cull =
       (c0.x > c0.w && c1.x > c1.w && c2.x > c2.w) ||     // 右平面外
       (c0.x < -c0.w && c1.x < -c0.w && c2.x < -c0.w) ||  // 左平面外
@@ -304,9 +303,9 @@ void TileBasedRenderer::ProcessTriangleForTileBinning(
     return;
   }
 
-  const Vector4f &pos0 = soa.pos_screen[i0];
-  const Vector4f &pos1 = soa.pos_screen[i1];
-  const Vector4f &pos2 = soa.pos_screen[i2];
+  const Vector4f &pos0 = grid.soa.pos_screen[i0];
+  const Vector4f &pos1 = grid.soa.pos_screen[i1];
+  const Vector4f &pos2 = grid.soa.pos_screen[i2];
 
   // 背面剔除（屏幕空间）
   // NDC空间中叉积为负表示顺时针，即背面。
@@ -332,23 +331,23 @@ void TileBasedRenderer::ProcessTriangleForTileBinning(
   float min_y = std::min({screen_y0, screen_y1, screen_y2});
   float max_y = std::max({screen_y0, screen_y1, screen_y2});
 
-  int start_tile_x =
-      std::max(0, static_cast<int>(min_x) / static_cast<int>(tile_size));
+  int start_tile_x = std::max(0, static_cast<int>(min_x) /
+                                     static_cast<int>(grid.tile_size));
   int end_tile_x =
-      std::min(static_cast<int>(tiles_x - 1),
-               static_cast<int>(max_x) / static_cast<int>(tile_size));
-  int start_tile_y =
-      std::max(0, static_cast<int>(min_y) / static_cast<int>(tile_size));
+      std::min(static_cast<int>(grid.tiles_x - 1),
+               static_cast<int>(max_x) / static_cast<int>(grid.tile_size));
+  int start_tile_y = std::max(0, static_cast<int>(min_y) /
+                                     static_cast<int>(grid.tile_size));
   int end_tile_y =
-      std::min(static_cast<int>(tiles_y - 1),
-               static_cast<int>(max_y) / static_cast<int>(tile_size));
+      std::min(static_cast<int>(grid.tiles_y - 1),
+               static_cast<int>(max_y) / static_cast<int>(grid.tile_size));
   if (start_tile_x > end_tile_x || start_tile_y > end_tile_y)
     return;  // 如果bbox不在任何tile内，直接返回
 
   if (count_only) {  // 第一遍计数，只统计tile内三角形数量
     for (int ty = start_tile_y; ty <= end_tile_y; ++ty) {
       for (int tx = start_tile_x; tx <= end_tile_x; ++tx) {
-        size_t tile_id = ty * tiles_x + tx;
+        size_t tile_id = ty * grid.tiles_x + tx;
         tile_counts[tile_id]++;
       }
     }
@@ -356,7 +355,7 @@ void TileBasedRenderer::ProcessTriangleForTileBinning(
     TileTriangleRef tri_ref{i0, i1, i2, &f.GetMaterial(), tri_idx};
     for (int ty = start_tile_y; ty <= end_tile_y; ++ty) {
       for (int tx = start_tile_x; tx <= end_tile_x; ++tx) {
-        size_t tile_id = ty * tiles_x + tx;
+        size_t tile_id = ty * grid.tiles_x + tx;
         tile_triangles[tile_id].push_back(tri_ref);
       }
     }

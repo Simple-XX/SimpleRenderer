@@ -15,6 +15,16 @@ struct TileTriangleRef {
 };
 
 /**
+ * @brief Tile 网格上下文（供 binning 和 raster 共享的网格/几何信息）
+ */
+struct TileGridContext {
+  const VertexSoA& soa;
+  size_t tiles_x;
+  size_t tiles_y;
+  size_t tile_size;
+};
+
+/**
  * @brief 基于 Tile 的渲染器（Tile‑Major）
  *
  * 特点：
@@ -49,10 +59,9 @@ class TileBasedRenderer final : public RendererBase {
    * @param tiles_y 垂直 tile 数
    * @param tile_size tile 像素尺寸
    */
-  void TriangleTileBinning(const Model &model,
-                           const VertexSoA &soa,
-                           std::vector<std::vector<TileTriangleRef>> &tile_triangles,
-                           size_t tiles_x, size_t tiles_y, size_t tile_size);
+  void TriangleTileBinning(const Model& model,
+                           const TileGridContext& grid,
+                           std::vector<std::vector<TileTriangleRef>> &tile_triangles);
 
   /**
    * @brief 处理单个三角形的 tile binning 逻辑
@@ -68,8 +77,8 @@ class TileBasedRenderer final : public RendererBase {
    */
   void ProcessTriangleForTileBinning(
       size_t tri_idx, bool count_only,
-      const Model& model, const VertexSoA& soa,
-      size_t tiles_x, size_t tiles_y, size_t tile_size,
+      const Model& model,
+      const TileGridContext& grid,
       std::vector<size_t>& tile_counts,
       std::vector<std::vector<TileTriangleRef>>& tile_triangles);
 
@@ -90,17 +99,20 @@ class TileBasedRenderer final : public RendererBase {
    * @param scratch_fragments 可复用片段临时容器
    */
   void RasterizeTile(size_t tile_id,
-                      const std::vector<TileTriangleRef> &triangles,
-                      size_t tiles_x, size_t tiles_y, size_t tile_size,
-                      float* tile_depth_buffer, uint32_t* tile_color_buffer,
-                      std::unique_ptr<float[]> &global_depth_buffer,
-                      std::unique_ptr<uint32_t[]> &global_color_buffer,
-                      const VertexSoA &soa,
-                      const Shader& shader,
-                      bool use_early_z,
-                      std::vector<Fragment>* scratch_fragments);
+                     const std::vector<TileTriangleRef> &triangles,
+                     const TileGridContext& grid,
+                     float* tile_depth_buffer, uint32_t* tile_color_buffer,
+                     std::unique_ptr<float[]> &global_depth_buffer,
+                     std::unique_ptr<uint32_t[]> &global_color_buffer,
+                     const Shader& shader,
+                     bool use_early_z,
+                     std::vector<Fragment>* scratch_fragments);
 
  private:
+  // 深度和颜色的默认值，同时用于tile级和全局级buffers的初始化
+  static constexpr float kDepthClear = 1.0f; // 默认为最远值，用于Early-Z
+  static constexpr uint32_t kColorClear = 0u; // 默认为黑色
+
   const bool early_z_;
   const size_t tile_size_;
 };
