@@ -63,6 +63,19 @@ struct SharedDataInShader {
   Vector3f fragPos_varying = Vector3f(0.0f);
 };
 
+struct VertexUniformCache {
+  Matrix4f model = Matrix4f(1.0f);
+  Matrix4f view = Matrix4f(1.0f);
+  Matrix4f projection = Matrix4f(1.0f);
+  Matrix4f model_view = Matrix4f(1.0f);
+  Matrix4f mvp = Matrix4f(1.0f);
+  Matrix3f normal = Matrix3f(1.0f);
+  bool has_model = false;
+  bool has_view = false;
+  bool has_projection = false;
+  bool derived_valid = false;
+};
+
 /**
  * @brief Shader Class 着色器类
  *
@@ -85,7 +98,12 @@ class Shader {
   template <typename T>
   void SetUniform(const std::string &name, const T &value) {
     uniformbuffer_.SetUniform(name, value);
+    if constexpr (std::is_same_v<T, Matrix4f>) {
+      UpdateMatrixCache(name, value);
+    }
   }
+
+  void PrepareVertexUniforms();
 
  private:
   // UniformBuffer
@@ -94,6 +112,10 @@ class Shader {
   // Shared Variables
   // 共享变量
   SharedDataInShader sharedDataInShader_;
+  VertexUniformCache vertex_uniform_cache_;
+
+  void UpdateMatrixCache(const std::string &name, const Matrix4f &value);
+  void RecalculateDerivedMatrices();
 
   Color SampleTexture(const Texture &texture, const Vector2f &uv) const;
   Color ClampColor(const Color color) const;
