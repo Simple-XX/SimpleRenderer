@@ -76,6 +76,15 @@ struct VertexUniformCache {
   bool derived_valid = false;
 };
 
+struct FragmentUniformCache {
+  Light light{};
+  Vector3f camera_pos = Vector3f(0.0f);
+  Vector3f light_dir_normalized = Vector3f(0.0f);
+  bool has_light = false;
+  bool has_camera = false;
+  bool derived_valid = false;
+};
+
 /**
  * @brief Shader Class 着色器类
  *
@@ -100,10 +109,14 @@ class Shader {
     uniformbuffer_.SetUniform(name, value);
     if constexpr (std::is_same_v<T, Matrix4f>) {
       UpdateMatrixCache(name, value);
+    } else if constexpr (std::is_same_v<T, Light>) {
+      UpdateFragmentCache(name, value);
+    } else if constexpr (std::is_same_v<T, Vector3f>) {
+      UpdateFragmentCache(name, value);
     }
   }
 
-  void PrepareVertexUniforms();
+  void PrepareUniformCaches();
 
  private:
   // UniformBuffer
@@ -113,9 +126,15 @@ class Shader {
   // 共享变量
   SharedDataInShader sharedDataInShader_;
   VertexUniformCache vertex_uniform_cache_;
+  FragmentUniformCache fragment_uniform_cache_;
 
   void UpdateMatrixCache(const std::string &name, const Matrix4f &value);
+  void UpdateFragmentCache(const std::string &name, const Light &value);
+  void UpdateFragmentCache(const std::string &name, const Vector3f &value);
   void RecalculateDerivedMatrices();
+  void RecalculateFragmentDerived();
+  void PrepareVertexUniformCache();
+  void PrepareFragmentUniformCache();
 
   Color SampleTexture(const Texture &texture, const Vector2f &uv) const;
   Color ClampColor(const Color color) const;

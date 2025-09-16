@@ -17,7 +17,7 @@ bool TileBasedRenderer::Render(const Model &model, const Shader &shader_in,
                                uint32_t *buffer) {
   auto total_start_time = std::chrono::high_resolution_clock::now();
   auto shader = std::make_shared<Shader>(shader_in);
-  shader->PrepareVertexUniforms();
+  shader->PrepareUniformCaches();
 
   // 顶点变换（SoA）
   auto vertex_start = std::chrono::high_resolution_clock::now();

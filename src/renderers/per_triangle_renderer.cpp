@@ -19,7 +19,7 @@ bool PerTriangleRenderer::Render(const Model &model, const Shader &shader_in,
 
   // 复制 shader 以便在多线程中共享
   auto shader = std::make_shared<Shader>(shader_in);
-  shader->PrepareVertexUniforms();
+  shader->PrepareUniformCaches();
 
   // 顶点变换（AoS）
   auto vertex_start = std::chrono::high_resolution_clock::now();

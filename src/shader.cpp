@@ -51,27 +51,6 @@ Vertex Shader::VertexShader(const Vertex& vertex) {
                 clip_position);  // 同时保存裁剪空间坐标用于后续裁剪
 }
 
-void Shader::PrepareVertexUniforms() {
-  if (vertex_uniform_cache_.derived_valid) {
-    return;
-  }
-  // 在进入顶点阶段前一次性取出常用矩阵并填充缓存
-  if (uniformbuffer_.HasUniform<Matrix4f>("modelMatrix") &&
-      uniformbuffer_.HasUniform<Matrix4f>("viewMatrix") &&
-      uniformbuffer_.HasUniform<Matrix4f>("projectionMatrix")) {
-    vertex_uniform_cache_.model =
-        uniformbuffer_.GetUniform<Matrix4f>("modelMatrix");
-    vertex_uniform_cache_.view =
-        uniformbuffer_.GetUniform<Matrix4f>("viewMatrix");
-    vertex_uniform_cache_.projection =
-        uniformbuffer_.GetUniform<Matrix4f>("projectionMatrix");
-    vertex_uniform_cache_.has_model = true;
-    vertex_uniform_cache_.has_view = true;
-    vertex_uniform_cache_.has_projection = true;
-    RecalculateDerivedMatrices();
-  }
-}
-
 void Shader::UpdateMatrixCache(const std::string& name,
                                const Matrix4f& value) {
   if (name == "modelMatrix") {
@@ -106,6 +85,80 @@ void Shader::RecalculateDerivedMatrices() {
   vertex_uniform_cache_.derived_valid = true;
 }
 
+void Shader::UpdateFragmentCache(const std::string& name,
+                                 const Light& value) {
+  if (name != "light") {
+    return;
+  }
+  fragment_uniform_cache_.light = value;
+  fragment_uniform_cache_.has_light = true;
+  fragment_uniform_cache_.derived_valid = false;
+  if (fragment_uniform_cache_.has_light && fragment_uniform_cache_.has_camera) {
+    RecalculateFragmentDerived();
+  }
+}
+
+void Shader::UpdateFragmentCache(const std::string& name,
+                                 const Vector3f& value) {
+  if (name != "cameraPos") {
+    return;
+  }
+  fragment_uniform_cache_.camera_pos = value;
+  fragment_uniform_cache_.has_camera = true;
+  fragment_uniform_cache_.derived_valid = false;
+  if (fragment_uniform_cache_.has_light && fragment_uniform_cache_.has_camera) {
+    RecalculateFragmentDerived();
+  }
+}
+
+void Shader::RecalculateFragmentDerived() {
+  fragment_uniform_cache_.light_dir_normalized =
+      glm::normalize(fragment_uniform_cache_.light.dir);
+  fragment_uniform_cache_.derived_valid = true;
+}
+
+void Shader::PrepareUniformCaches() {
+  PrepareVertexUniformCache();
+  PrepareFragmentUniformCache();
+}
+
+void Shader::PrepareVertexUniformCache() {
+  if (vertex_uniform_cache_.derived_valid) {
+    return;
+  }
+  // 在进入渲染阶段前一次性取出常用矩阵并填充缓存
+  if (uniformbuffer_.HasUniform<Matrix4f>("modelMatrix") &&
+      uniformbuffer_.HasUniform<Matrix4f>("viewMatrix") &&
+      uniformbuffer_.HasUniform<Matrix4f>("projectionMatrix")) {
+    vertex_uniform_cache_.model =
+        uniformbuffer_.GetUniform<Matrix4f>("modelMatrix");
+    vertex_uniform_cache_.view =
+        uniformbuffer_.GetUniform<Matrix4f>("viewMatrix");
+    vertex_uniform_cache_.projection =
+        uniformbuffer_.GetUniform<Matrix4f>("projectionMatrix");
+    vertex_uniform_cache_.has_model = true;
+    vertex_uniform_cache_.has_view = true;
+    vertex_uniform_cache_.has_projection = true;
+    RecalculateDerivedMatrices();
+  }
+}
+
+void Shader::PrepareFragmentUniformCache() {
+  if (fragment_uniform_cache_.derived_valid) {
+    return;
+  }
+  if (uniformbuffer_.HasUniform<Light>("light") &&
+      uniformbuffer_.HasUniform<Vector3f>("cameraPos")) {
+    fragment_uniform_cache_.light =
+        uniformbuffer_.GetUniform<Light>("light");
+    fragment_uniform_cache_.camera_pos =
+        uniformbuffer_.GetUniform<Vector3f>("cameraPos");
+    fragment_uniform_cache_.has_light = true;
+    fragment_uniform_cache_.has_camera = true;
+    RecalculateFragmentDerived();
+  }
+}
+
 Color Shader::FragmentShader(const Fragment& fragment) const {
   // interpolate Normal, Color and UV
   Color interpolateColor = fragment.color;
@@ -113,14 +166,23 @@ Color Shader::FragmentShader(const Fragment& fragment) const {
   Vector2f uv = fragment.uv;
 
   // uniform
-  Light light = uniformbuffer_.GetUniform<Light>("light");
+  Light light;
+  Vector3f light_dir;
+  Vector3f camera_pos;
+  if (fragment_uniform_cache_.derived_valid) {
+    light = fragment_uniform_cache_.light;
+    light_dir = fragment_uniform_cache_.light_dir_normalized;
+    camera_pos = fragment_uniform_cache_.camera_pos;
+  } else {
+    light = uniformbuffer_.GetUniform<Light>("light");
+    camera_pos = uniformbuffer_.GetUniform<Vector3f>("cameraPos");
+    light_dir = glm::normalize(light.dir);
+  }
   Material material = *fragment.material;
 
   // view direction
   Vector3f view_dir =
-      glm::normalize(sharedDataInShader_.fragPos_varying -
-                     uniformbuffer_.GetUniform<Vector3f>("cameraPos"));
-  Vector3f light_dir = glm::normalize(light.dir);
+      glm::normalize(sharedDataInShader_.fragPos_varying - camera_pos);
 
   auto intensity = std::max(glm::dot(normal, light_dir), 0.0f);
   // texture color
