@@ -1,6 +1,55 @@
 #include "shader.hpp"
 
+#include <algorithm>
+#include <cmath>
+#include <mutex>
+#include <shared_mutex>
+
 namespace simple_renderer {
+
+Shader::Shader(const Shader& shader) {
+  std::shared_lock lock(shader.specular_cache_mutex_);
+  uniformbuffer_ = shader.uniformbuffer_;
+  sharedDataInShader_ = shader.sharedDataInShader_;
+  vertex_uniform_cache_ = shader.vertex_uniform_cache_;
+  fragment_uniform_cache_ = shader.fragment_uniform_cache_;
+  specular_lut_cache_ = shader.specular_lut_cache_;
+}
+
+Shader::Shader(Shader&& shader) noexcept {
+  std::unique_lock lock(shader.specular_cache_mutex_);
+  uniformbuffer_ = std::move(shader.uniformbuffer_);
+  sharedDataInShader_ = shader.sharedDataInShader_;
+  vertex_uniform_cache_ = shader.vertex_uniform_cache_;
+  fragment_uniform_cache_ = shader.fragment_uniform_cache_;
+  specular_lut_cache_ = std::move(shader.specular_lut_cache_);
+}
+
+auto Shader::operator=(const Shader& shader) -> Shader& {
+  if (this == &shader) {
+    return *this;
+  }
+  std::shared_lock lock(shader.specular_cache_mutex_);
+  uniformbuffer_ = shader.uniformbuffer_;
+  sharedDataInShader_ = shader.sharedDataInShader_;
+  vertex_uniform_cache_ = shader.vertex_uniform_cache_;
+  fragment_uniform_cache_ = shader.fragment_uniform_cache_;
+  specular_lut_cache_ = shader.specular_lut_cache_;
+  return *this;
+}
+
+auto Shader::operator=(Shader&& shader) noexcept -> Shader& {
+  if (this == &shader) {
+    return *this;
+  }
+  std::unique_lock lock(shader.specular_cache_mutex_);
+  uniformbuffer_ = std::move(shader.uniformbuffer_);
+  sharedDataInShader_ = shader.sharedDataInShader_;
+  vertex_uniform_cache_ = shader.vertex_uniform_cache_;
+  fragment_uniform_cache_ = shader.fragment_uniform_cache_;
+  specular_lut_cache_ = std::move(shader.specular_lut_cache_);
+  return *this;
+}
 
 Vertex Shader::VertexShader(const Vertex& vertex) {
   const bool cache_ready = vertex_uniform_cache_.derived_valid;
@@ -159,6 +208,56 @@ void Shader::PrepareFragmentUniformCache() {
   }
 }
 
+auto Shader::BuildSpecularLUT(float shininess) const -> SpecularLUT {
+  SpecularLUT lut;
+  if (shininess <= 0.0f) {
+    lut.values.fill(1.0f);
+    return lut;
+  }
+
+  for (size_t i = 0; i < kSpecularLutResolution; ++i) {
+    float cos_theta = static_cast<float>(i) /
+                      static_cast<float>(kSpecularLutResolution - 1);
+    lut.values[i] = cos_theta <= 0.0f ? 0.0f : std::pow(cos_theta, shininess);
+  }
+  return lut;
+}
+
+auto Shader::GetSpecularLUT(float shininess) const -> const SpecularLUT& {
+  uint32_t key = std::bit_cast<uint32_t>(shininess);
+  {
+    std::shared_lock lock(specular_cache_mutex_);
+    auto it = specular_lut_cache_.find(key);
+    if (it != specular_lut_cache_.end()) {
+      return it->second;
+    }
+  }
+
+  SpecularLUT lut = BuildSpecularLUT(shininess);
+  std::unique_lock lock(specular_cache_mutex_);
+  auto [it, inserted] = specular_lut_cache_.emplace(key, std::move(lut));
+  return it->second;
+}
+
+auto Shader::EvaluateSpecular(float cos_theta, float shininess) const -> float {
+  cos_theta = std::clamp(cos_theta, 0.0f, 1.0f);
+  if (shininess <= 0.0f) {
+    return 1.0f;
+  }
+  if (cos_theta <= 0.0f) {
+    return 0.0f;
+  }
+
+  const auto& lut = GetSpecularLUT(shininess);
+  float scaled = cos_theta * static_cast<float>(kSpecularLutResolution - 1);
+  size_t index = static_cast<size_t>(scaled);
+  float frac = scaled - static_cast<float>(index);
+
+  const float v0 = lut.values[index];
+  const float v1 = lut.values[std::min(index + 1, kSpecularLutResolution - 1)];
+  return v0 + (v1 - v0) * frac;
+}
+
 Color Shader::FragmentShader(const Fragment& fragment) const {
   // interpolate Normal, Color and UV
   Color interpolateColor = fragment.color;
@@ -202,8 +301,8 @@ Color Shader::FragmentShader(const Fragment& fragment) const {
   }
 
   Vector3f halfVector = glm::normalize(light_dir + view_dir);
-  float spec = std::pow(std::max(glm::dot(normal, halfVector), 0.0f),
-                        material.shininess);
+  float cos_theta = std::max(glm::dot(normal, halfVector), 0.0f);
+  float spec = EvaluateSpecular(cos_theta, material.shininess);
   if (material.has_specular_texture) {
     Color texture_color = SampleTexture(material.specular_texture, uv);
     specular_color = texture_color * spec;

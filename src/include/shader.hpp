@@ -1,6 +1,10 @@
 #ifndef SIMPLERENDER_SRC_INCLUDE_SHADER_HPP_
 #define SIMPLERENDER_SRC_INCLUDE_SHADER_HPP_
 
+#include <array>
+#include <bit>
+#include <shared_mutex>
+#include <unordered_map>
 #include <variant>
 
 #include "light.h"
@@ -11,6 +15,8 @@ namespace simple_renderer {
 
 using UniformValue = std::variant<int, float, Vector2f, Vector3f, Vector4f,
                                   Matrix3f, Matrix4f, Material, Light>;
+
+inline constexpr size_t kSpecularLutResolution = 256;
 
 class UniformBuffer {
  public:
@@ -85,6 +91,10 @@ struct FragmentUniformCache {
   bool derived_valid = false;
 };
 
+struct SpecularLUT {
+  std::array<float, kSpecularLutResolution> values{};
+};
+
 /**
  * @brief Shader Class 着色器类
  *
@@ -92,10 +102,10 @@ struct FragmentUniformCache {
 class Shader {
  public:
   Shader() = default;
-  Shader(const Shader &shader) = default;
-  Shader(Shader &&shader) = default;
-  auto operator=(const Shader &shader) -> Shader & = default;
-  auto operator=(Shader &&shader) -> Shader & = default;
+  Shader(const Shader &shader);
+  Shader(Shader &&shader) noexcept;
+  auto operator=(const Shader &shader) -> Shader &;
+  auto operator=(Shader &&shader) noexcept -> Shader &;
   virtual ~Shader() = default;
 
   // Input Data -> Vertex Shader -> Screen Space Coordiante
@@ -127,6 +137,8 @@ class Shader {
   SharedDataInShader sharedDataInShader_;
   VertexUniformCache vertex_uniform_cache_;
   FragmentUniformCache fragment_uniform_cache_;
+  mutable std::unordered_map<uint32_t, SpecularLUT> specular_lut_cache_;
+  mutable std::shared_mutex specular_cache_mutex_;
 
   void UpdateMatrixCache(const std::string &name, const Matrix4f &value);
   void UpdateFragmentCache(const std::string &name, const Light &value);
@@ -135,6 +147,11 @@ class Shader {
   void RecalculateFragmentDerived();
   void PrepareVertexUniformCache();
   void PrepareFragmentUniformCache();
+
+  // LUT相关
+  [[nodiscard]] auto BuildSpecularLUT(float shininess) const -> SpecularLUT;
+  [[nodiscard]] auto GetSpecularLUT(float shininess) const -> const SpecularLUT &;
+  [[nodiscard]] auto EvaluateSpecular(float cos_theta, float shininess) const -> float;
 
   Color SampleTexture(const Texture &texture, const Vector2f &uv) const;
   Color ClampColor(const Color color) const;
