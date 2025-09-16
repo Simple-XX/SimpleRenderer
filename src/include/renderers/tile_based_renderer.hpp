@@ -14,6 +14,13 @@ struct TileTriangleRef {
   size_t face_index = 0;
 };
 
+struct TileMaskStats {
+  uint64_t tested = 0; // 遍历检测像素总数
+  uint64_t covered = 0; // 三角形内覆盖测试通过像素数（通过边函数做内点测试成功）
+  uint64_t zpass = 0; // 通过early-z测试像素数（深度值小于tile局部深度缓冲）
+  uint64_t shaded = 0; // 实际着色并写回像素数（同时通过early-z或late-z测试）
+};
+
 /**
  * @brief Tile 网格上下文（供 binning 和 raster 共享的网格/几何信息）
  */
@@ -106,7 +113,8 @@ class TileBasedRenderer final : public RendererBase {
                      std::unique_ptr<uint32_t[]> &global_color_buffer,
                      const Shader& shader,
                      bool use_early_z,
-                     std::vector<Fragment>* scratch_fragments);
+                     std::vector<Fragment>* scratch_fragments,
+                     TileMaskStats* out_stats);
 
  private:
   // 深度和颜色的默认值，同时用于tile级和全局级buffers的初始化
