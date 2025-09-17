@@ -27,7 +27,7 @@ const Vector3f Light::kDefaultDir = Vector3f(0, 0, -1);
 const Color Light::kDefaultColor = Color::kWhite;
 
 Light::Light(const std::string &name) : name_(name) {
-  SPDLOG_INFO("Light: {}", name_);
+  SPDLOG_DEBUG("Light: {}", name_);
 }
 
 }  // namespace simple_renderer

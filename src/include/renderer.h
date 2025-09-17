@@ -18,57 +18,95 @@
 #define SIMPLERENDER_SRC_INCLUDE_RENDERER_H_
 
 #include <cstdint>
-#include <functional>
-#include <span>
+#include <memory>
+#include <string>
 
-#include "buffer.hpp"
-#include "light.h"
 #include "log_system.h"
-#include "math.hpp"
 #include "model.hpp"
-#include "rasterizer.hpp"
 #include "shader.hpp"
+#include "renderers/renderer_base.hpp"
 
 namespace simple_renderer {
 
+// 渲染模式枚举
+/**
+ * @brief 渲染模式
+ * - PER_TRIANGLE: 逐三角形（triangle-major）前向渲染
+ * - TILE_BASED: 基于 tile（tile-major）前向渲染
+ * - DEFERRED: 延迟渲染（片段收集后再着色）
+ */
+enum class RenderingMode {
+  PER_TRIANGLE,  //!< 逐三角形（triangle-major）
+  TILE_BASED,    //!< 基于 tile（tile-major）
+  DEFERRED       //!< 延迟渲染
+};
+
+/**
+ * @brief 将渲染模式枚举转为可读字符串
+ * @param mode 渲染模式
+ * @return 可读字符串（PER_TRIANGLE/TILE_BASED/DEFERRED）
+ */
+std::string RenderingModeToString(RenderingMode mode);
+
+/**
+ * @brief 渲染门面（Facade）
+ *
+ * 职责：
+ * - 仅作为模式选择与调用入口；
+ * - 根据 `RenderingMode` 构造并持有具体渲染器；
+ * - 对外暴露统一的 `DrawModel` 接口。
+ */
 class SimpleRenderer {
  public:
   /**
-   * 构造函数
-   * @param width
-   * @param height
-   * @param buffer 要进行绘制的内存区域，大小为 width*height*sizeof(uint32_t)
-   * @param
+   * @brief 构造渲染器门面
+   * @param width 画布宽度（像素）
+   * @param height 画布高度（像素）
    */
   SimpleRenderer(size_t width, size_t height);
+  ~SimpleRenderer() = default;
 
-  /// @name 默认构造/析构函数
-  /// @{
-  SimpleRenderer(const SimpleRenderer &_simplerenderer) = default;
-  SimpleRenderer(SimpleRenderer &&_simplerenderer) = default;
-  auto operator=(const SimpleRenderer &_simplerenderer) -> SimpleRenderer & =
-                                                               default;
-  auto operator=(SimpleRenderer &&_simplerenderer) -> SimpleRenderer & =
-                                                          default;
-  virtual ~SimpleRenderer() = default;
-  /// @}
+  /**
+   * @brief 绘制单个模型
+   * @param model 模型
+   * @param shader 着色器（含 uniform）
+   * @param buffer 输出颜色缓冲（width*height）
+   * @return 是否成功
+   */
+  bool DrawModel(const Model &model, const Shader &shader, uint32_t *buffer);
 
-  bool Render(const Model &model, const Shader &shader, uint32_t *buffer);
+  /**
+   * @brief 设置渲染模式
+   */
+  void SetRenderingMode(RenderingMode mode);
+  /**
+   * @brief 获取当前渲染模式
+   */
+  RenderingMode GetRenderingMode() const;
+
+  // 可选：配置参数（仅对 TileBasedRenderer 生效；运行中修改将重建 TBR 实例）
+  /**
+   * @brief 启用或禁用 Early‑Z（仅 TBR 有效）
+   */
+  void SetEarlyZEnabled(bool enabled);
+  /**
+   * @brief 设置 Tile 大小（仅 TBR 有效）
+   */
+  void SetTileSize(size_t tile_size);
+
+ private:
+  void EnsureRenderer();
 
  private:
   const size_t height_;
   const size_t width_;
   LogSystem log_system_;
+  RenderingMode current_mode_;
+  std::unique_ptr<RendererBase> renderer_;
 
-  std::shared_ptr<Shader> shader_;
-  std::shared_ptr<Rasterizer> rasterizer_;
-
-  /**
-   * 绘制模型
-   * @param model 模型
-   */
-  void DrawModel(const Model &model, uint32_t *buffer);
-  void DrawModelSlower(const Model &model, uint32_t *buffer);
+  // TBR 配置缓存：在创建 TileBasedRenderer 时下发
+  bool tbr_early_z_ = true;
+  size_t tbr_tile_size_ = 64;
 };
 }  // namespace simple_renderer
 

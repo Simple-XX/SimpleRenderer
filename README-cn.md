@@ -85,7 +85,7 @@ cmake --build build-macos --target all
 #### 3. 运行示例应用程序
 
 ```bash
-./build/bin/system_test ../obj
+./build/bin/system_test ./obj
 ```
 
 ---
