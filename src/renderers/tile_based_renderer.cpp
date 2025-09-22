@@ -100,10 +100,6 @@ bool TileBasedRenderer::Render(const Model &model, const Shader &shader_in,
     std::unique_ptr<uint32_t[]> tile_color_buffer =
         std::make_unique<uint32_t[]>(grid_ctx.tile_size * grid_ctx.tile_size);
 
-    // 为每个 tile 分配可复用片段临时容器，容量按单 tile 上限预估
-    std::vector<Fragment> scratch_fragments;
-    scratch_fragments.reserve(grid_ctx.tile_size * grid_ctx.tile_size);
-
 #pragma omp for schedule(static)
     for (size_t tile_id = 0; tile_id < total_tiles; ++tile_id) {
       // 按照 tile 进行光栅化（SoA）
@@ -111,7 +107,7 @@ bool TileBasedRenderer::Render(const Model &model, const Shader &shader_in,
       RasterizeTile(tile_id, tile_triangles[tile_id], grid_ctx,
                     tile_depth_buffer.get(), tile_color_buffer.get(),
                     depthBuffer, colorBuffer, *shader, early_z_,
-                    &scratch_fragments, &tile_stats[tile_id]);
+                    &tile_stats[tile_id]);
     }
   }
   auto raster_end = std::chrono::high_resolution_clock::now();
@@ -129,7 +125,7 @@ bool TileBasedRenderer::Render(const Model &model, const Shader &shader_in,
     sum_shaded  += s.shaded;
   }
   auto rate = [](uint64_t num, uint64_t den) -> double {
-    if (den == 0) return 0.0; return double(num) / double(den) * 100.0;
+    return (den == 0)?0.0:double(num) / double(den) * 100.0;
   };
   SPDLOG_DEBUG(
       "TBR Mask Stats: tested={}, covered={} ({:.1f}%), zpass={} ({:.1f}%), shaded={} ({:.1f}%)",
@@ -220,7 +216,6 @@ void TileBasedRenderer::RasterizeTile(
     uint32_t *tile_color_buffer, std::unique_ptr<float[]> &global_depth_buffer,
     std::unique_ptr<uint32_t[]> &global_color_buffer,
     const Shader &shader, bool use_early_z,
-    std::vector<Fragment> *scratch_fragments,
     TileMaskStats* out_stats) {
   // 计算 tile 屏幕范围
   size_t tile_x = tile_id % grid.tiles_x;

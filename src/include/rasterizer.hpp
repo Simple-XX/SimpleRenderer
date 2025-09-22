@@ -33,41 +33,6 @@ class Rasterizer {
   std::vector<Fragment> Rasterize(const Vertex& v0, const Vertex& v1,
                                   const Vertex& v2);
 
-  /**
-   * @brief 非分配版本：将片段直接写入调用方提供的容器
-   * 
-   * 可选的裁剪区域为半开区间 [x0, x1) × [y0, y1)
-   * 用于 TBR：将光栅化限制在 tile 边界内，便于复用外部 scratch 容器
-   * 
-   * @param v0 三角形第一个顶点
-   * @param v1 三角形第二个顶点
-   * @param v2 三角形第三个顶点
-   * @param x0 裁剪区域左边界（包含）
-   * @param y0 裁剪区域上边界（包含）
-   * @param x1 裁剪区域右边界（不包含）
-   * @param y1 裁剪区域下边界（不包含）
-   * @param out 输出片段容器
-   */
-  void RasterizeTo(const Vertex& v0, const Vertex& v1, const Vertex& v2,
-                   int x0, int y0, int x1, int y1,
-                   std::vector<Fragment>& out);
-
-  /**
-   * @brief SoA 版本：按顶点索引从 SoA 读取三角形三顶点
-   * @param soa 结构体数组格式的顶点数据
-   * @param i0 三角形第一个顶点索引
-   * @param i1 三角形第二个顶点索引
-   * @param i2 三角形第三个顶点索引
-   * @param x0 裁剪区域左边界（包含）
-   * @param y0 裁剪区域上边界（包含）
-   * @param x1 裁剪区域右边界（不包含）
-   * @param y1 裁剪区域下边界（不包含）
-   * @param out 输出片段容器
-   */
-  void RasterizeTo(const VertexSoA& soa, size_t i0, size_t i1, size_t i2,
-                   int x0, int y0, int x1, int y1,
-                   std::vector<Fragment>& out);
-
  private:
   size_t width_, height_;
 
