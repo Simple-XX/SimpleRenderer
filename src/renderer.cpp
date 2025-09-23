@@ -6,6 +6,7 @@
 #include "renderers/per_triangle_renderer.hpp"
 #include "renderers/tile_based_renderer.hpp"
 #include "renderers/deferred_renderer.hpp"
+#include "renderers/tile_based_deferred_renderer.hpp"
 
 namespace simple_renderer {
 
@@ -14,6 +15,7 @@ std::string RenderingModeToString(RenderingMode mode) {
     case RenderingMode::PER_TRIANGLE: return "PER_TRIANGLE";
     case RenderingMode::TILE_BASED:  return "TILE_BASED";
     case RenderingMode::DEFERRED:    return "DEFERRED";
+    case RenderingMode::TILE_BASED_DEFERRED: return "TILE_BASED_DEFERRED";
   }
   return "PER_TRIANGLE";
 }
@@ -74,6 +76,11 @@ void SimpleRenderer::EnsureRenderer() {
     }
     case RenderingMode::DEFERRED: {
       auto r = std::make_unique<DeferredRenderer>(width_, height_);
+      renderer_ = std::move(r);
+      break;
+    }
+    case RenderingMode::TILE_BASED_DEFERRED: {
+      auto r = std::make_unique<TileBasedDeferredRenderer>(width_, height_, tbr_tile_size_);
       renderer_ = std::move(r);
       break;
     }

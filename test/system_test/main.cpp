@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
   simple_renderer::Camera camera(simple_renderer::Vector3f(0.0f, 0.0f, 1.0f));
 
   // 设置渲染模式（可选：PER_TRIANGLE、TILE_BASED 或 DEFERRED）
-  simple_renderer.SetRenderingMode(simple_renderer::RenderingMode::TILE_BASED);
+  simple_renderer.SetRenderingMode(simple_renderer::RenderingMode::TILE_BASED_DEFERRED);
   
   // 输出当前渲染模式
   std::string current_mode_name = simple_renderer::RenderingModeToString(
