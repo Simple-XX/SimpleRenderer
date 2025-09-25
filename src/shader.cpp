@@ -136,13 +136,23 @@ void Shader::RecalculateDerivedMatrices() {
 
 void Shader::UpdateFragmentCache(const std::string& name,
                                  const Light& value) {
-  if (name != "light") {
-    return;
-  }
-  fragment_uniform_cache_.light = value;
-  fragment_uniform_cache_.has_light = true;
+  if (name != "light") { return; }
+  fragment_uniform_cache_.lights.clear();
+  fragment_uniform_cache_.lights.push_back(value);
+  fragment_uniform_cache_.has_lights = true;
   fragment_uniform_cache_.derived_valid = false;
-  if (fragment_uniform_cache_.has_light && fragment_uniform_cache_.has_camera) {
+  if (fragment_uniform_cache_.has_lights && fragment_uniform_cache_.has_camera) {
+    RecalculateFragmentDerived();
+  }
+}
+
+void Shader::UpdateFragmentCache(const std::string& name,
+                                 const std::vector<Light>& value) {
+  if (name != "lights") { return; }
+  fragment_uniform_cache_.lights = value;
+  fragment_uniform_cache_.has_lights = true;
+  fragment_uniform_cache_.derived_valid = false;
+  if (fragment_uniform_cache_.has_lights && fragment_uniform_cache_.has_camera) {
     RecalculateFragmentDerived();
   }
 }
@@ -155,14 +165,18 @@ void Shader::UpdateFragmentCache(const std::string& name,
   fragment_uniform_cache_.camera_pos = value;
   fragment_uniform_cache_.has_camera = true;
   fragment_uniform_cache_.derived_valid = false;
-  if (fragment_uniform_cache_.has_light && fragment_uniform_cache_.has_camera) {
+  if (fragment_uniform_cache_.has_lights && fragment_uniform_cache_.has_camera) {
     RecalculateFragmentDerived();
   }
 }
 
 void Shader::RecalculateFragmentDerived() {
-  fragment_uniform_cache_.light_dir_normalized =
-      glm::normalize(fragment_uniform_cache_.light.dir);
+  fragment_uniform_cache_.light_dirs_normalized.clear();
+  fragment_uniform_cache_.light_dirs_normalized.reserve(
+      fragment_uniform_cache_.lights.size());
+  for (const auto& l : fragment_uniform_cache_.lights) {
+    fragment_uniform_cache_.light_dirs_normalized.push_back(glm::normalize(l.dir));
+  }
   fragment_uniform_cache_.derived_valid = true;
 }
 
@@ -196,13 +210,27 @@ void Shader::PrepareFragmentUniformCache() {
   if (fragment_uniform_cache_.derived_valid) {
     return;
   }
-  if (uniformbuffer_.HasUniform<Light>("light") &&
+  // 优先多光源
+  if (uniformbuffer_.HasUniform<std::vector<Light>>("lights") &&
       uniformbuffer_.HasUniform<Vector3f>("cameraPos")) {
-    fragment_uniform_cache_.light =
-        uniformbuffer_.GetUniform<Light>("light");
+    fragment_uniform_cache_.lights =
+        uniformbuffer_.GetUniform<std::vector<Light>>("lights");
+    fragment_uniform_cache_.has_lights = true;
     fragment_uniform_cache_.camera_pos =
         uniformbuffer_.GetUniform<Vector3f>("cameraPos");
-    fragment_uniform_cache_.has_light = true;
+    fragment_uniform_cache_.has_camera = true;
+    RecalculateFragmentDerived();
+    return;
+  }
+  // 兼容单光源
+  if (uniformbuffer_.HasUniform<Light>("light") &&
+      uniformbuffer_.HasUniform<Vector3f>("cameraPos")) {
+    fragment_uniform_cache_.lights.clear();
+    fragment_uniform_cache_.lights.push_back(
+        uniformbuffer_.GetUniform<Light>("light"));
+    fragment_uniform_cache_.camera_pos =
+        uniformbuffer_.GetUniform<Vector3f>("cameraPos");
+    fragment_uniform_cache_.has_lights = true;
     fragment_uniform_cache_.has_camera = true;
     RecalculateFragmentDerived();
   }
@@ -259,59 +287,81 @@ auto Shader::EvaluateSpecular(float cos_theta, float shininess) const -> float {
 }
 
 Color Shader::FragmentShader(const Fragment& fragment) const {
-  // interpolate Normal, Color and UV
-  Color interpolateColor = fragment.color;
+  // Helper: 将 Color 转为 [0,1] 归一化向量
+  auto color_to_vec = [](const Color& c) -> Vector3f {
+    constexpr float inv255 = 1.0f / 255.0f;
+    return Vector3f(static_cast<float>(c[Color::kColorIndexRed]) * inv255,
+                    static_cast<float>(c[Color::kColorIndexGreen]) * inv255,
+                    static_cast<float>(c[Color::kColorIndexBlue]) * inv255);
+  };
+
+  // 输入插值属性
+  Vector3f base_color = color_to_vec(fragment.color);
   Vector3f normal = glm::normalize(fragment.normal);
   Vector2f uv = fragment.uv;
 
-  // uniform
-  Light light;
-  Vector3f light_dir;
+  // uniform（优先缓存）
+  std::vector<Light> lights;
+  std::vector<Vector3f> light_dirs;
   Vector3f camera_pos;
   if (fragment_uniform_cache_.derived_valid) {
-    light = fragment_uniform_cache_.light;
-    light_dir = fragment_uniform_cache_.light_dir_normalized;
+    lights = fragment_uniform_cache_.lights;
+    light_dirs = fragment_uniform_cache_.light_dirs_normalized;
     camera_pos = fragment_uniform_cache_.camera_pos;
   } else {
-    light = uniformbuffer_.GetUniform<Light>("light");
+    if (uniformbuffer_.HasUniform<std::vector<Light>>("lights")) {
+      lights = uniformbuffer_.GetUniform<std::vector<Light>>("lights");
+      light_dirs.reserve(lights.size());
+      for (const auto& l : lights) light_dirs.push_back(glm::normalize(l.dir));
+    } else if (uniformbuffer_.HasUniform<Light>("light")) {
+      lights = {uniformbuffer_.GetUniform<Light>("light")};
+      light_dirs = {glm::normalize(lights[0].dir)};
+    }
     camera_pos = uniformbuffer_.GetUniform<Vector3f>("cameraPos");
-    light_dir = glm::normalize(light.dir);
   }
+
   Material material = *fragment.material;
 
-  // view direction
-  Vector3f view_dir =
-      glm::normalize(sharedDataInShader_.fragPos_varying - camera_pos);
+  // 视线方向
+  Vector3f view_dir = glm::normalize(sharedDataInShader_.fragPos_varying - camera_pos);
 
-  auto intensity = std::max(glm::dot(normal, light_dir), 0.0f);
-  // texture color
-  Color ambient_color, diffuse_color, specular_color;
+  // ambient（只计算一次，使用纹理或顶点颜色）
+  Vector3f ambient_rgb;
   if (material.has_ambient_texture) {
-    Color texture_color = SampleTexture(material.ambient_texture, uv);
-    ambient_color = texture_color;
+    ambient_rgb = color_to_vec(SampleTexture(material.ambient_texture, uv));
   } else {
-    ambient_color = interpolateColor;
+    ambient_rgb = base_color;
   }
 
-  if (material.has_diffuse_texture) {
-    Color texture_color = SampleTexture(material.diffuse_texture, uv);
-    diffuse_color = texture_color * intensity;
-  } else {
-    diffuse_color = interpolateColor * intensity;
+  // diffuse/specular 累加（float 归一化空间，避免 8bit 溢出与截断）
+  Vector3f diffuse_accum(0.0f);
+  Vector3f specular_accum(0.0f);
+  for (size_t i = 0; i < light_dirs.size(); ++i) {
+    const Vector3f& ldir = light_dirs[i];
+    float intensity = std::max(glm::dot(normal, ldir), 0.0f);
+
+    // diffuse
+    Vector3f kd = material.has_diffuse_texture
+                      ? color_to_vec(SampleTexture(material.diffuse_texture, uv))
+                      : base_color;
+    diffuse_accum += kd * intensity;
+
+    // specular
+    Vector3f halfVector = glm::normalize(ldir + view_dir);
+    float cos_theta = std::max(glm::dot(normal, halfVector), 0.0f);
+    float spec = EvaluateSpecular(cos_theta, material.shininess);
+    Vector3f ks = material.has_specular_texture
+                      ? color_to_vec(SampleTexture(material.specular_texture, uv))
+                      : Vector3f(1.0f);
+    specular_accum += ks * spec;
   }
 
-  Vector3f halfVector = glm::normalize(light_dir + view_dir);
-  float cos_theta = std::max(glm::dot(normal, halfVector), 0.0f);
-  float spec = EvaluateSpecular(cos_theta, material.shininess);
-  if (material.has_specular_texture) {
-    Color texture_color = SampleTexture(material.specular_texture, uv);
-    specular_color = texture_color * spec;
-  } else {
-    specular_color = Color(1.0f, 1.0f, 1.0f) * spec;
-  }
-
-  return ClampColor(ambient_color * 0.1f + diffuse_color +
-                    specular_color * 0.2f);
+  Vector3f out_rgb = ambient_rgb * 0.1f + diffuse_accum + specular_accum * 0.2f;
+  // clamp 到 [0,1]
+  out_rgb.x = std::clamp(out_rgb.x, 0.0f, 1.0f);
+  out_rgb.y = std::clamp(out_rgb.y, 0.0f, 1.0f);
+  out_rgb.z = std::clamp(out_rgb.z, 0.0f, 1.0f);
+  return Color(out_rgb.x, out_rgb.y, out_rgb.z, 1.0f);
 }
 
 // 将浮点数转换为 uint8_t

@@ -6,6 +6,7 @@
 #include <shared_mutex>
 #include <unordered_map>
 #include <variant>
+#include <vector>
 
 #include "light.h"
 #include "material.hpp"
@@ -14,7 +15,8 @@
 namespace simple_renderer {
 
 using UniformValue = std::variant<int, float, Vector2f, Vector3f, Vector4f,
-                                  Matrix3f, Matrix4f, Material, Light>;
+                                  Matrix3f, Matrix4f, Material, Light,
+                                  std::vector<Light>>;
 
 inline constexpr size_t kSpecularLutResolution = 256;
 
@@ -27,7 +29,7 @@ class UniformBuffer {
             std::is_same_v<T, Vector2f> || std::is_same_v<T, Vector3f> ||
             std::is_same_v<T, Vector4f> || std::is_same_v<T, Matrix3f> ||
             std::is_same_v<T, Matrix4f> || std::is_same_v<T, Material> ||
-            std::is_same_v<T, Light>,
+            std::is_same_v<T, Light> || std::is_same_v<T, std::vector<Light>>,
         "Type not supported by UniformValue");
     uniforms_[name] = value;
   }
@@ -83,10 +85,10 @@ struct VertexUniformCache {
 };
 
 struct FragmentUniformCache {
-  Light light{};
+  std::vector<Light> lights{}; // 支持多光源
   Vector3f camera_pos = Vector3f(0.0f);
-  Vector3f light_dir_normalized = Vector3f(0.0f);
-  bool has_light = false;
+  std::vector<Vector3f> light_dirs_normalized{};
+  bool has_lights = false;
   bool has_camera = false;
   bool derived_valid = false;
 };
@@ -142,6 +144,7 @@ class Shader {
 
   void UpdateMatrixCache(const std::string &name, const Matrix4f &value);
   void UpdateFragmentCache(const std::string &name, const Light &value);
+  void UpdateFragmentCache(const std::string &name, const std::vector<Light> &value);
   void UpdateFragmentCache(const std::string &name, const Vector3f &value);
   void RecalculateDerivedMatrices();
   void RecalculateFragmentDerived();
@@ -155,6 +158,10 @@ class Shader {
 
   Color SampleTexture(const Texture &texture, const Vector2f &uv) const;
   Color ClampColor(const Color color) const;
+
+ public:
+  // 便捷接口：设置多光源
+  void SetLights(const std::vector<Light>& lights) { SetUniform("lights", lights); }
 };
 
 uint8_t FloatToUint8_t(float val);
