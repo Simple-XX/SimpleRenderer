@@ -20,8 +20,6 @@ using UniformValue = std::variant<int, float, Vector2f, Vector3f, Vector4f,
 
 inline constexpr size_t kSpecularLutResolution = 256;
 
-inline constexpr size_t kSpecularLutResolution = 256;
-
 class UniformBuffer {
  public:
   template <typename T>
