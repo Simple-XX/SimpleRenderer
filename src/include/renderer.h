@@ -36,9 +36,10 @@ namespace simple_renderer {
  * - DEFERRED: 延迟渲染（片段收集后再着色）
  */
 enum class RenderingMode {
-  PER_TRIANGLE,  //!< 逐三角形（triangle-major）
-  TILE_BASED,    //!< 基于 tile（tile-major）
-  DEFERRED       //!< 延迟渲染
+  PER_TRIANGLE,        //!< 逐三角形（triangle-major）
+  TILE_BASED,          //!< 基于 tile（tile-major）
+  DEFERRED,            //!< 延迟渲染
+  TILE_BASED_DEFERRED  //!< 基于 tile 的延迟着色（TBDR）
 };
 
 /**

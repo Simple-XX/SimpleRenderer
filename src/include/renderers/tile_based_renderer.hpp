@@ -103,7 +103,6 @@ class TileBasedRenderer final : public RendererBase {
    * @param soa 经过变换后的 SoA 顶点数据
    * @param shader 着色器
    * @param use_early_z 是否启用 Early‑Z
-   * @param scratch_fragments 可复用片段临时容器
    */
   void RasterizeTile(size_t tile_id,
                      const std::vector<TileTriangleRef> &triangles,
@@ -113,7 +112,6 @@ class TileBasedRenderer final : public RendererBase {
                      std::unique_ptr<uint32_t[]> &global_color_buffer,
                      const Shader& shader,
                      bool use_early_z,
-                     std::vector<Fragment>* scratch_fragments,
                      TileMaskStats* out_stats);
 
  private:

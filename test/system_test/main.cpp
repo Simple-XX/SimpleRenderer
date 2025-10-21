@@ -74,9 +74,14 @@ int main(int argc, char **argv) {
   simple_renderer::Shader shader;
   shader.SetUniform("modelMatrix", modelMatrix);
 
-  simple_renderer::Light light;
-  light.dir = simple_renderer::Vector3f(1.0f, 5.0f, 1.0f);
-  shader.SetUniform("light", light);
+  // 多光源
+  std::vector<simple_renderer::Light> lights;
+  {
+    simple_renderer::Light l0; l0.dir = simple_renderer::Vector3f( 1.0f,  5.0f,  1.0f); lights.push_back(l0);
+    simple_renderer::Light l1; l1.dir = simple_renderer::Vector3f(-3.0f, -2.0f,  2.0f); lights.push_back(l1);
+    simple_renderer::Light l2; l2.dir = simple_renderer::Vector3f( 2.0f,  1.0f, -1.0f); lights.push_back(l2);
+  }
+  shader.SetLights(lights);
 
   simple_renderer::Camera camera(simple_renderer::Vector3f(0.0f, 0.0f, 1.0f));
 
