@@ -9,12 +9,11 @@
 build
 cmake-build*
 .gdbinit
-tools/opensbi/build
 .vscode
 .idea
 3rd
 Doxyfile
-src/include/config.h
+cpp/src/include/config.h
 
 # Rust
-rust/target/
+target/

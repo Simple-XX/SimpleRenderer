@@ -256,7 +256,7 @@ mod tests {
     /// Load a model without MTL file — should still succeed with default materials.
     #[test]
     fn load_model_without_mtl_uses_defaults() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../obj/cube2.obj");
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../obj/cube2.obj");
         let result = Model::load(path);
         assert!(result.is_ok(), "Model without MTL should load: {:?}", result.err());
     }
@@ -265,7 +265,7 @@ mod tests {
     /// Avoids loading the model 11 times in parallel (OOM risk).
     #[test]
     fn load_teapot_comprehensive() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../obj/utah-teapot-texture/teapot.obj");
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../obj/utah-teapot-texture/teapot.obj");
         let model = Model::load(path).expect("Failed to load teapot.obj");
 
         // Basic structure

@@ -7,7 +7,7 @@ use simple_renderer::{Buffer, Color, Light, Model, RenderingMode, Shader, Simple
 use glam::{Mat4, Vec3};
 
 /// Test model path relative to workspace root
-const TEAPOT_PATH: &str = "../../obj/utah-teapot-texture/teapot.obj";
+const TEAPOT_PATH: &str = "../obj/utah-teapot-texture/teapot.obj";
 
 /// Small render resolution to avoid OOM in test environments.
 const TEST_W: usize = 100;
