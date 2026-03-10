@@ -1,0 +1,11 @@
+[package]
+name = "system_test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+simple_renderer = { path = "../simple_renderer" }
+minifb = "0.27"
+log = "0.4"
+env_logger = "0.11"
+glam = "0.29"

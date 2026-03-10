@@ -15,3 +15,6 @@ tools/opensbi/build
 3rd
 Doxyfile
 src/include/config.h
+
+# Rust
+rust/target/

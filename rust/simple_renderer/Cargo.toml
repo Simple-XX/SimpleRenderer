@@ -1,0 +1,15 @@
+[package]
+name = "simple_renderer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+glam = "0.29"
+tobj = { version = "4.0", features = ["async"] }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "bmp", "tga"] }
+rayon = "1.10"
+log = "0.4"
+thiserror = "2"
+
+[dev-dependencies]
+env_logger = "0.11"
