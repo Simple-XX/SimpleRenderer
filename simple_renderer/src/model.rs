@@ -42,10 +42,8 @@ impl Model {
             ..Default::default()
         };
 
-        let (models, materials_result) =
-            tobj::load_obj(obj_path, &load_options).map_err(|e| {
-                RendererError::ModelLoad(format!("{}: {}", path, e))
-            })?;
+        let (models, materials_result) = tobj::load_obj(obj_path, &load_options)
+            .map_err(|e| RendererError::ModelLoad(format!("{}: {}", path, e)))?;
 
         // Load materials — warn on failure, fall back to empty vec.
         let materials = match materials_result {
@@ -259,14 +257,21 @@ mod tests {
     fn load_model_without_mtl_uses_defaults() {
         let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../obj/cube2.obj");
         let result = Model::load(path);
-        assert!(result.is_ok(), "Model without MTL should load: {:?}", result.err());
+        assert!(
+            result.is_ok(),
+            "Model without MTL should load: {:?}",
+            result.err()
+        );
     }
 
     /// Comprehensive test for teapot loading — single load, many assertions.
     /// Avoids loading the model 11 times in parallel (OOM risk).
     #[test]
     fn load_teapot_comprehensive() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../obj/utah-teapot-texture/teapot.obj");
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../obj/utah-teapot-texture/teapot.obj"
+        );
         let model = Model::load(path).expect("Failed to load teapot.obj");
 
         // Basic structure
@@ -280,7 +285,9 @@ mod tests {
                 assert!(
                     idx < n,
                     "Face {} index {} out of range (vertices: {})",
-                    i, idx, n
+                    i,
+                    idx,
+                    n
                 );
             }
         }
@@ -290,22 +297,24 @@ mod tests {
             assert!(
                 (v.position.w - 1.0).abs() < f32::EPSILON,
                 "Vertex {} position.w = {}, expected 1.0",
-                i, v.position.w
+                i,
+                v.position.w
             );
-            assert_eq!(
-                v.color,
-                Color::WHITE,
-                "Vertex {} color should be WHITE",
-                i
-            );
+            assert_eq!(v.color, Color::WHITE, "Vertex {} color should be WHITE", i);
         }
 
         // Normals and UVs present
         let has_nonzero_normal = model.vertices().iter().any(|v| v.normal.length() > 0.0);
-        assert!(has_nonzero_normal, "At least some vertices should have non-zero normals");
+        assert!(
+            has_nonzero_normal,
+            "At least some vertices should have non-zero normals"
+        );
 
         let has_nonzero_uv = model.vertices().iter().any(|v| v.tex_coords.length() > 0.0);
-        assert!(has_nonzero_uv, "At least some vertices should have non-zero UVs");
+        assert!(
+            has_nonzero_uv,
+            "At least some vertices should have non-zero UVs"
+        );
 
         // Materials: shininess > 0 (teapot.mtl has Ns 20.0)
         let mat = &model.faces()[0].material;

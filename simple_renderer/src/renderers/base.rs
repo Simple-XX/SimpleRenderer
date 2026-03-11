@@ -43,10 +43,10 @@ pub fn viewport_transform(vertex: &Vertex, width: usize, height: usize) -> Verte
 
     Vertex {
         position: Vec4::new(
-            (pos.x + 1.0) * w / 2.0,  // x: [-1,1] → [0, width]
-            (1.0 - pos.y) * h / 2.0,  // y: [-1,1] → [height, 0] (flipped)
-            pos.z,                     // z: preserved for depth testing
-            pos.w,                     // w: preserved (1/w from perspective division)
+            (pos.x + 1.0) * w / 2.0, // x: [-1,1] → [0, width]
+            (1.0 - pos.y) * h / 2.0, // y: [-1,1] → [height, 0] (flipped)
+            pos.z,                   // z: preserved for depth testing
+            pos.w,                   // w: preserved (1/w from perspective division)
         ),
         normal: vertex.normal,
         tex_coords: vertex.tex_coords,
@@ -168,12 +168,18 @@ mod tests {
         // NDC (0, 0.5) should map to screen y < center
         let v = clip_vertex(0.0, 0.5, 0.0, 1.0);
         let s = viewport_transform(&v, 100, 100);
-        assert!(s.position.y < 50.0, "positive NDC y should map above center");
+        assert!(
+            s.position.y < 50.0,
+            "positive NDC y should map above center"
+        );
 
         // NDC (0, -0.5) should map to screen y > center
         let v = clip_vertex(0.0, -0.5, 0.0, 1.0);
         let s = viewport_transform(&v, 100, 100);
-        assert!(s.position.y > 50.0, "negative NDC y should map below center");
+        assert!(
+            s.position.y > 50.0,
+            "negative NDC y should map below center"
+        );
     }
 
     #[test]

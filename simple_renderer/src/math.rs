@@ -34,11 +34,7 @@ mod tests {
 
     #[test]
     fn look_at_produces_finite_matrix() {
-        let m = look_at(
-            Vec3::new(0.0, 0.0, 5.0),
-            Vec3::ZERO,
-            Vec3::Y,
-        );
+        let m = look_at(Vec3::new(0.0, 0.0, 5.0), Vec3::ZERO, Vec3::Y);
         for col in 0..4 {
             for row in 0..4 {
                 assert!(m.col(col)[row].is_finite());

@@ -170,7 +170,11 @@ impl Renderer for DeferredRenderer {
         let sum_ms = vertex_ms + collect_ms + shade_ms;
         if sum_ms > 0.0 {
             debug!("=== DEFERRED RENDERING PERFORMANCE ===");
-            debug!("Vertex Shader:        {:8.3} ms ({:5.1}%)", vertex_ms, vertex_ms / sum_ms * 100.0);
+            debug!(
+                "Vertex Shader:        {:8.3} ms ({:5.1}%)",
+                vertex_ms,
+                vertex_ms / sum_ms * 100.0
+            );
             debug!("Fragment Collection:  {:8.3} ms", collect_ms);
             debug!("Deferred Shading:     {:8.3} ms", shade_ms);
             debug!("Total:                {:8.3} ms", sum_ms);
@@ -216,8 +220,7 @@ mod tests {
 
         static COUNTER: AtomicUsize = AtomicUsize::new(1000);
         let id = COUNTER.fetch_add(1, Ordering::SeqCst);
-        let path = std::env::temp_dir()
-            .join(format!("simple_renderer_deferred_test_{}.obj", id));
+        let path = std::env::temp_dir().join(format!("simple_renderer_deferred_test_{}.obj", id));
 
         let mut file = std::fs::File::create(&path).unwrap();
         for pos in positions {

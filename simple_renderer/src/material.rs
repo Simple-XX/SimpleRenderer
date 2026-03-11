@@ -28,9 +28,8 @@ impl Texture {
     /// Load a texture from an image file (PNG, JPEG, BMP, TGA).
     pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Texture> {
         let path = path.as_ref();
-        let img = image::open(path).map_err(|e| {
-            RendererError::TextureLoad(format!("{}: {}", path.display(), e))
-        })?;
+        let img = image::open(path)
+            .map_err(|e| RendererError::TextureLoad(format!("{}: {}", path.display(), e)))?;
 
         let rgba = img.to_rgba8();
         let (width, height) = rgba.dimensions();
@@ -63,12 +62,7 @@ impl Texture {
                 self.data[idx + 2],
                 self.data[idx + 3],
             ),
-            3 => Color::new(
-                self.data[idx],
-                self.data[idx + 1],
-                self.data[idx + 2],
-                255,
-            ),
+            3 => Color::new(self.data[idx], self.data[idx + 1], self.data[idx + 2], 255),
             _ => Color::default(),
         }
     }

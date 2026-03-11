@@ -173,8 +173,7 @@ impl Shader {
                 .get_mat4("projectionMatrix")
                 .unwrap_or(Mat4::IDENTITY);
             let mvp = projection * view * model;
-            let normal_mat =
-                Mat3::from_mat4(model).inverse().transpose();
+            let normal_mat = Mat3::from_mat4(model).inverse().transpose();
             (model, mvp, normal_mat)
         };
 
@@ -187,8 +186,13 @@ impl Shader {
         let clip_position = mvp * position;
         let transformed_normal = (normal_mat * vertex.normal).normalize_or_zero();
 
-        Vertex::new(clip_position, transformed_normal, vertex.tex_coords, vertex.color)
-            .with_clip_position(clip_position)
+        Vertex::new(
+            clip_position,
+            transformed_normal,
+            vertex.tex_coords,
+            vertex.color,
+        )
+        .with_clip_position(clip_position)
     }
 
     // ── Fragment shader ───────────────────────────────────────────────
@@ -218,7 +222,9 @@ impl Shader {
         } else {
             // Fallback: read from uniform buffer
             fallback_dirs = if let Some(ls) = self.uniform_buffer.get_lights("lights") {
-                ls.iter().map(|l| l.direction.normalize_or_zero()).collect::<Vec<_>>()
+                ls.iter()
+                    .map(|l| l.direction.normalize_or_zero())
+                    .collect::<Vec<_>>()
             } else if let Some(l) = self.uniform_buffer.get_light("light") {
                 vec![l.direction.normalize_or_zero()]
             } else {
@@ -528,9 +534,7 @@ impl Clone for Shader {
             frag_pos_varying: self.frag_pos_varying,
             vertex_cache: self.vertex_cache.clone(),
             fragment_cache: self.fragment_cache.clone(),
-            specular_lut_cache: RwLock::new(
-                self.specular_lut_cache.read().unwrap().clone(),
-            ),
+            specular_lut_cache: RwLock::new(self.specular_lut_cache.read().unwrap().clone()),
         }
     }
 }
@@ -753,7 +757,7 @@ mod tests {
         // Low cos_theta values should be near 0 with high shininess
         assert!(lut.values[0] < 1e-6); // cos_theta = 0
         assert!(lut.values[128] < 0.01); // cos_theta = 0.502 → 0.502^128 ≈ 0
-        // High cos_theta should be closer to 1
+                                         // High cos_theta should be closer to 1
         assert!(lut.values[255] > 0.99); // cos_theta = 1.0 → 1.0^128 = 1.0
     }
 
@@ -805,7 +809,9 @@ mod tests {
     #[test]
     fn sample_texture_basic() {
         let texture = Texture {
-            data: vec![255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 128, 128, 128, 255],
+            data: vec![
+                255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 128, 128, 128, 255,
+            ],
             width: 2,
             height: 2,
             channels: 4,

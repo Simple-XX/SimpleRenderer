@@ -75,14 +75,10 @@ pub fn vertex_transform_soa(
 /// Bin triangles into tiles using a 2-pass approach (count then fill).
 ///
 /// Includes frustum culling (clip space) and backface culling (screen space).
-pub fn triangle_tile_binning(
-    model: &Model,
-    grid: &TileGridContext,
-) -> Vec<Vec<TileTriangleRef>> {
+pub fn triangle_tile_binning(model: &Model, grid: &TileGridContext) -> Vec<Vec<TileTriangleRef>> {
     let total_tiles = grid.tiles_x * grid.tiles_y;
-    let mut tile_triangles: Vec<Vec<TileTriangleRef>> = (0..total_tiles)
-        .map(|_| Vec::new())
-        .collect();
+    let mut tile_triangles: Vec<Vec<TileTriangleRef>> =
+        (0..total_tiles).map(|_| Vec::new()).collect();
     let mut tile_counts = vec![0usize; total_tiles];
 
     let faces = model.faces();
@@ -90,7 +86,12 @@ pub fn triangle_tile_binning(
     // Pass 1: count triangles per tile
     for (tri_idx, face) in faces.iter().enumerate() {
         process_triangle_for_binning(
-            tri_idx, face, true, grid, &mut tile_counts, &mut tile_triangles,
+            tri_idx,
+            face,
+            true,
+            grid,
+            &mut tile_counts,
+            &mut tile_triangles,
         );
     }
 
@@ -104,7 +105,12 @@ pub fn triangle_tile_binning(
     // Pass 2: fill
     for (tri_idx, face) in faces.iter().enumerate() {
         process_triangle_for_binning(
-            tri_idx, face, false, grid, &mut tile_counts, &mut tile_triangles,
+            tri_idx,
+            face,
+            false,
+            grid,
+            &mut tile_counts,
+            &mut tile_triangles,
         );
     }
 
@@ -160,11 +166,11 @@ fn process_triangle_for_binning(
 
     // Find overlapping tiles
     let start_tile_x = (min_x as i32).max(0) as usize / grid.tile_size;
-    let end_tile_x = ((max_x as i32).max(0) as usize / grid.tile_size)
-        .min(grid.tiles_x.saturating_sub(1));
+    let end_tile_x =
+        ((max_x as i32).max(0) as usize / grid.tile_size).min(grid.tiles_x.saturating_sub(1));
     let start_tile_y = (min_y as i32).max(0) as usize / grid.tile_size;
-    let end_tile_y = ((max_y as i32).max(0) as usize / grid.tile_size)
-        .min(grid.tiles_y.saturating_sub(1));
+    let end_tile_y =
+        ((max_y as i32).max(0) as usize / grid.tile_size).min(grid.tiles_y.saturating_sub(1));
 
     if start_tile_x > end_tile_x || start_tile_y > end_tile_y {
         return;

@@ -75,11 +75,7 @@ impl Display {
     /// - **鼠标右键拖拽**：旋转视角
     /// - **滚轮**：调整移动速度
     /// - **数字键 1-4**：切换渲染模式
-    pub fn handle_input(
-        &mut self,
-        camera: &mut Camera,
-        delta_time: f32,
-    ) -> Option<RenderingMode> {
+    pub fn handle_input(&mut self, camera: &mut Camera, delta_time: f32) -> Option<RenderingMode> {
         // ===== 键盘移动 =====
         if self.window.is_key_down(Key::W) || self.window.is_key_down(Key::Up) {
             camera.process_keyboard(CameraMovement::Forward, delta_time);

@@ -19,8 +19,8 @@ use crate::face::Face;
 use crate::fragment::Fragment;
 use crate::model::Model;
 use crate::renderers::tile_common::{
-    self, cross2, interpolate_color_bary, TileGridContext, TileTriangleRef,
-    COLOR_CLEAR, DEFAULT_TILE_SIZE, DEPTH_CLEAR, K_LANE,
+    self, cross2, interpolate_color_bary, TileGridContext, TileTriangleRef, COLOR_CLEAR,
+    DEFAULT_TILE_SIZE, DEPTH_CLEAR, K_LANE,
 };
 use crate::renderers::Renderer;
 use crate::shader::Shader;
@@ -43,7 +43,11 @@ impl TileBasedRenderer {
         Self {
             width,
             height,
-            tile_size: if tile_size > 0 { tile_size } else { DEFAULT_TILE_SIZE },
+            tile_size: if tile_size > 0 {
+                tile_size
+            } else {
+                DEFAULT_TILE_SIZE
+            },
             early_z,
         }
     }
@@ -103,50 +107,48 @@ impl Renderer for TileBasedRenderer {
         let total_tiles = tiles_x * tiles_y;
         let early_z = self.early_z;
 
-        let tile_results: Vec<(Vec<f32>, Vec<u32>, usize, usize, usize, usize)> =
-            (0..total_tiles)
-                .into_par_iter()
-                .map(|tile_id| {
-                    let tile_x = tile_id % tiles_x;
-                    let tile_y = tile_id / tiles_x;
-                    let screen_x_start = tile_x * tile_size;
-                    let screen_y_start = tile_y * tile_size;
-                    let screen_x_end = (screen_x_start + tile_size).min(width);
-                    let screen_y_end = (screen_y_start + tile_size).min(height);
-                    let tile_width = screen_x_end - screen_x_start;
-                    let tile_height = screen_y_end - screen_y_start;
+        let tile_results: Vec<(Vec<f32>, Vec<u32>, usize, usize, usize, usize)> = (0..total_tiles)
+            .into_par_iter()
+            .map(|tile_id| {
+                let tile_x = tile_id % tiles_x;
+                let tile_y = tile_id / tiles_x;
+                let screen_x_start = tile_x * tile_size;
+                let screen_y_start = tile_y * tile_size;
+                let screen_x_end = (screen_x_start + tile_size).min(width);
+                let screen_y_end = (screen_y_start + tile_size).min(height);
+                let tile_width = screen_x_end - screen_x_start;
+                let tile_height = screen_y_end - screen_y_start;
 
-                    let mut tile_depth = vec![DEPTH_CLEAR; tile_width * tile_height];
-                    let mut tile_color = vec![COLOR_CLEAR; tile_width * tile_height];
+                let mut tile_depth = vec![DEPTH_CLEAR; tile_width * tile_height];
+                let mut tile_color = vec![COLOR_CLEAR; tile_width * tile_height];
 
+                rasterize_tile(
+                    &tile_triangles[tile_id],
+                    &grid,
+                    &mut tile_depth,
+                    &mut tile_color,
+                    &shader,
+                    model.faces(),
+                    early_z,
+                    screen_x_start,
+                    screen_y_start,
+                    screen_x_end,
+                    screen_y_end,
+                    tile_width,
+                    width,
+                    height,
+                );
 
-                    rasterize_tile(
-                        &tile_triangles[tile_id],
-                        &grid,
-                        &mut tile_depth,
-                        &mut tile_color,
-                        &shader,
-                        model.faces(),
-                        early_z,
-                        screen_x_start,
-                        screen_y_start,
-                        screen_x_end,
-                        screen_y_end,
-                        tile_width,
-                        width,
-                        height,
-                    );
-
-                    (
-                        tile_depth,
-                        tile_color,
-                        screen_x_start,
-                        screen_y_start,
-                        tile_width,
-                        tile_height,
-                    )
-                })
-                .collect();
+                (
+                    tile_depth,
+                    tile_color,
+                    screen_x_start,
+                    screen_y_start,
+                    tile_width,
+                    tile_height,
+                )
+            })
+            .collect();
 
         let raster_ms = t.elapsed().as_secs_f64() * 1000.0;
 
@@ -170,7 +172,11 @@ impl Renderer for TileBasedRenderer {
         let sum_ms = vertex_ms + setup_ms + binning_ms + raster_ms + copy_ms;
         if sum_ms > 0.0 {
             debug!("=== TILE-BASED RENDERING PERFORMANCE ===");
-            debug!("Vertex Shader:    {:8.3} ms ({:5.1}%)", vertex_ms, vertex_ms / sum_ms * 100.0);
+            debug!(
+                "Vertex Shader:    {:8.3} ms ({:5.1}%)",
+                vertex_ms,
+                vertex_ms / sum_ms * 100.0
+            );
             debug!("Setup:            {:8.3} ms", setup_ms);
             debug!("Binning:          {:8.3} ms", binning_ms);
             debug!("Rasterization:    {:8.3} ms", raster_ms);
@@ -220,8 +226,7 @@ fn rasterize_tile(
         let sx = (screen_x_start as i32).max(tri_minx.max(0.0).floor() as i32);
         let sy = (screen_y_start as i32).max(tri_miny.max(0.0).floor() as i32);
         let ex = ((screen_x_end - 1) as i32).min(tri_maxx.min((width - 1) as f32).floor() as i32);
-        let ey =
-            ((screen_y_end - 1) as i32).min(tri_maxy.min((height - 1) as f32).floor() as i32);
+        let ey = ((screen_y_end - 1) as i32).min(tri_maxy.min((height - 1) as f32).floor() as i32);
 
         if sx > ex || sy > ey {
             continue;
@@ -383,11 +388,13 @@ fn rasterize_tile(
                     };
 
                     if use_early_z {
-                        let out_color = shader.fragment_shader(&frag, &faces[tri.face_index].material);
+                        let out_color =
+                            shader.fragment_shader(&frag, &faces[tri.face_index].material);
                         tile_depth[idx] = frag.depth;
                         tile_color[idx] = u32::from(out_color);
                     } else {
-                        let out_color = shader.fragment_shader(&frag, &faces[tri.face_index].material);
+                        let out_color =
+                            shader.fragment_shader(&frag, &faces[tri.face_index].material);
                         if frag.depth < tile_depth[idx] {
                             tile_depth[idx] = frag.depth;
                             tile_color[idx] = u32::from(out_color);
@@ -435,8 +442,7 @@ mod tests {
 
         static COUNTER: AtomicUsize = AtomicUsize::new(2000);
         let id = COUNTER.fetch_add(1, Ordering::SeqCst);
-        let path = std::env::temp_dir()
-            .join(format!("simple_renderer_tilebased_test_{}.obj", id));
+        let path = std::env::temp_dir().join(format!("simple_renderer_tilebased_test_{}.obj", id));
 
         let mut file = std::fs::File::create(&path).unwrap();
         for pos in positions {

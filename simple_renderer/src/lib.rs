@@ -1,5 +1,5 @@
-pub mod color;
 pub mod buffer;
+pub mod color;
 pub mod error;
 pub mod face;
 pub mod fragment;
@@ -15,11 +15,11 @@ pub mod uniform;
 pub mod vertex;
 
 // Convenience re-exports
-pub use color::Color;
-pub use renderer::{SimpleRenderer, RenderingMode};
-pub use shader::Shader;
-pub use model::Model;
 pub use buffer::Buffer;
-pub use light::Light;
-pub use vertex::Vertex;
+pub use color::Color;
 pub use error::{RendererError, Result};
+pub use light::Light;
+pub use model::Model;
+pub use renderer::{RenderingMode, SimpleRenderer};
+pub use shader::Shader;
+pub use vertex::Vertex;

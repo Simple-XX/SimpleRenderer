@@ -87,8 +87,7 @@ impl Rasterizer {
                         None => continue,
                     };
 
-                    let (corrected, depth) =
-                        perspective_correction(w0, w1, w2, z0, z1, z2, bary);
+                    let (corrected, depth) = perspective_correction(w0, w1, w2, z0, z1, z2, bary);
 
                     let normal = interpolate_vec3(n0, n1, n2, corrected);
                     let uv = interpolate_vec2(uv0, uv1, uv2, corrected);
@@ -219,7 +218,10 @@ mod tests {
         let v2 = screen_vertex(150.0, 200.0, 0.5, 1.0);
 
         let frags = rast.rasterize(&v0, &v1, &v2);
-        assert!(!frags.is_empty(), "should produce fragments for a valid triangle");
+        assert!(
+            !frags.is_empty(),
+            "should produce fragments for a valid triangle"
+        );
 
         // All fragments must lie within the triangle bounding box.
         for f in &frags {
@@ -257,7 +259,10 @@ mod tests {
         let v2 = screen_vertex(300.0, 100.0, 0.5, 1.0);
 
         let frags = rast.rasterize(&v0, &v1, &v2);
-        assert!(frags.is_empty(), "collinear points should yield no fragments");
+        assert!(
+            frags.is_empty(),
+            "collinear points should yield no fragments"
+        );
     }
 
     // ── Barycentric coords ─────────────────────────────────────────────
@@ -268,11 +273,7 @@ mod tests {
         let p0 = Vec3::new(100.0, 100.0, 0.0);
         let p1 = Vec3::new(200.0, 100.0, 0.0);
         let p2 = Vec3::new(150.0, 200.0, 0.0);
-        let centroid = Vec3::new(
-            (p0.x + p1.x + p2.x) / 3.0,
-            (p0.y + p1.y + p2.y) / 3.0,
-            0.0,
-        );
+        let centroid = Vec3::new((p0.x + p1.x + p2.x) / 3.0, (p0.y + p1.y + p2.y) / 3.0, 0.0);
 
         let bary = get_barycentric_coord(p0, p1, p2, centroid)
             .expect("centroid should be inside triangle");
@@ -315,7 +316,10 @@ mod tests {
         let v2 = screen_vertex(-250.0, 200.0, 0.5, 1.0);
 
         let frags = rast.rasterize(&v0, &v1, &v2);
-        assert!(frags.is_empty(), "off-screen triangle should yield no fragments");
+        assert!(
+            frags.is_empty(),
+            "off-screen triangle should yield no fragments"
+        );
     }
 
     #[test]
@@ -327,7 +331,10 @@ mod tests {
         let v2 = screen_vertex(150.0, 600.0, 0.5, 1.0);
 
         let frags = rast.rasterize(&v0, &v1, &v2);
-        assert!(frags.is_empty(), "off-screen triangle should yield no fragments");
+        assert!(
+            frags.is_empty(),
+            "off-screen triangle should yield no fragments"
+        );
     }
 
     // ── Perspective correction ─────────────────────────────────────────

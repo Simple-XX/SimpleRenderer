@@ -1,11 +1,11 @@
-use log::info;
 use crate::model::Model;
-use crate::shader::Shader;
-use crate::renderers::Renderer;
-use crate::renderers::per_triangle::PerTriangleRenderer;
 use crate::renderers::deferred::DeferredRenderer;
+use crate::renderers::per_triangle::PerTriangleRenderer;
 use crate::renderers::tile_based::TileBasedRenderer;
 use crate::renderers::tile_based_deferred::TileBasedDeferredRenderer;
+use crate::renderers::Renderer;
+use crate::shader::Shader;
+use log::info;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RenderingMode {
@@ -41,17 +41,31 @@ impl SimpleRenderer {
         let early_z_enabled = true;
         let tile_size = 64;
         let renderer = Self::create_renderer(mode, width, height, early_z_enabled, tile_size);
-        Self { width, height, mode, renderer, early_z_enabled, tile_size }
+        Self {
+            width,
+            height,
+            mode,
+            renderer,
+            early_z_enabled,
+            tile_size,
+        }
     }
 
     pub fn draw_model(&self, model: &Model, shader: &Shader, buffer: &mut [u32]) -> bool {
-        self.renderer.render(model, shader, buffer, self.width, self.height)
+        self.renderer
+            .render(model, shader, buffer, self.width, self.height)
     }
 
     pub fn set_rendering_mode(&mut self, mode: RenderingMode) {
         self.mode = mode;
         info!("Rendering mode set to: {}", mode);
-        self.renderer = Self::create_renderer(mode, self.width, self.height, self.early_z_enabled, self.tile_size);
+        self.renderer = Self::create_renderer(
+            mode,
+            self.width,
+            self.height,
+            self.early_z_enabled,
+            self.tile_size,
+        );
     }
 
     pub fn rendering_mode(&self) -> RenderingMode {
@@ -61,23 +75,45 @@ impl SimpleRenderer {
     pub fn set_early_z_enabled(&mut self, enabled: bool) {
         self.early_z_enabled = enabled;
         if self.mode == RenderingMode::TileBased {
-            self.renderer = Self::create_renderer(self.mode, self.width, self.height, self.early_z_enabled, self.tile_size);
+            self.renderer = Self::create_renderer(
+                self.mode,
+                self.width,
+                self.height,
+                self.early_z_enabled,
+                self.tile_size,
+            );
         }
     }
 
     pub fn set_tile_size(&mut self, size: usize) {
         self.tile_size = size;
         if self.mode == RenderingMode::TileBased || self.mode == RenderingMode::TileBasedDeferred {
-            self.renderer = Self::create_renderer(self.mode, self.width, self.height, self.early_z_enabled, self.tile_size);
+            self.renderer = Self::create_renderer(
+                self.mode,
+                self.width,
+                self.height,
+                self.early_z_enabled,
+                self.tile_size,
+            );
         }
     }
 
-    fn create_renderer(mode: RenderingMode, width: usize, height: usize, early_z: bool, tile_size: usize) -> Box<dyn Renderer> {
+    fn create_renderer(
+        mode: RenderingMode,
+        width: usize,
+        height: usize,
+        early_z: bool,
+        tile_size: usize,
+    ) -> Box<dyn Renderer> {
         match mode {
             RenderingMode::PerTriangle => Box::new(PerTriangleRenderer::new(width, height)),
-            RenderingMode::TileBased => Box::new(TileBasedRenderer::with_options(width, height, tile_size, early_z)),
+            RenderingMode::TileBased => Box::new(TileBasedRenderer::with_options(
+                width, height, tile_size, early_z,
+            )),
             RenderingMode::Deferred => Box::new(DeferredRenderer::new(width, height)),
-            RenderingMode::TileBasedDeferred => Box::new(TileBasedDeferredRenderer::with_tile_size(width, height, tile_size)),
+            RenderingMode::TileBasedDeferred => Box::new(
+                TileBasedDeferredRenderer::with_tile_size(width, height, tile_size),
+            ),
         }
     }
 }
@@ -104,12 +140,20 @@ mod tests {
         assert_eq!(format!("{}", RenderingMode::PerTriangle), "PER_TRIANGLE");
         assert_eq!(format!("{}", RenderingMode::TileBased), "TILE_BASED");
         assert_eq!(format!("{}", RenderingMode::Deferred), "DEFERRED");
-        assert_eq!(format!("{}", RenderingMode::TileBasedDeferred), "TILE_BASED_DEFERRED");
+        assert_eq!(
+            format!("{}", RenderingMode::TileBasedDeferred),
+            "TILE_BASED_DEFERRED"
+        );
     }
 
     #[test]
     fn all_modes_can_be_created() {
-        let modes = [RenderingMode::PerTriangle, RenderingMode::TileBased, RenderingMode::Deferred, RenderingMode::TileBasedDeferred];
+        let modes = [
+            RenderingMode::PerTriangle,
+            RenderingMode::TileBased,
+            RenderingMode::Deferred,
+            RenderingMode::TileBasedDeferred,
+        ];
         for mode in &modes {
             let mut r = SimpleRenderer::new(100, 100);
             r.set_rendering_mode(*mode);

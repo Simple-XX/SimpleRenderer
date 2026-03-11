@@ -24,8 +24,8 @@ fn main() {
     let mut buffer = Buffer::new(WIDTH, HEIGHT);
     let mut renderer = SimpleRenderer::new(WIDTH, HEIGHT);
 
-    let model = Model::load(&format!("{}/utah-teapot-texture/teapot.obj", obj_path))
-        .expect("加载模型失败");
+    let model =
+        Model::load(&format!("{}/utah-teapot-texture/teapot.obj", obj_path)).expect("加载模型失败");
 
     // 模型矩阵：缩放 × 平移 × 旋转
     let model_matrix = Mat4::from_scale(Vec3::splat(0.02))

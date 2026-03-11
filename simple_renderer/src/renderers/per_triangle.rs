@@ -76,7 +76,6 @@ impl Renderer for PerTriangleRenderer {
                 let mut depth_buf = vec![f32::INFINITY; num_pixels];
                 let mut color_buf = vec![0u32; num_pixels];
 
-
                 for face in face_chunk {
                     let v0 = &processed_vertices[face.indices[0]];
                     let v1 = &processed_vertices[face.indices[1]];
@@ -109,8 +108,7 @@ impl Renderer for PerTriangleRenderer {
                         let idx = x + y * width;
                         if frag.depth < depth_buf[idx] {
                             depth_buf[idx] = frag.depth;
-                            let color =
-                                shader.fragment_shader(frag, &face.material);
+                            let color = shader.fragment_shader(frag, &face.material);
                             color_buf[idx] = u32::from(color);
                         }
                     }
@@ -142,9 +140,21 @@ impl Renderer for PerTriangleRenderer {
         let sum_ms = vertex_ms + raster_ms + merge_ms;
         if sum_ms > 0.0 {
             debug!("=== PER-TRIANGLE RENDERING PERFORMANCE ===");
-            debug!("Vertex Shader:    {:8.3} ms ({:5.1}%)", vertex_ms, vertex_ms / sum_ms * 100.0);
-            debug!("Rasterization:    {:8.3} ms ({:5.1}%)", raster_ms, raster_ms / sum_ms * 100.0);
-            debug!("Merge:            {:8.3} ms ({:5.1}%)", merge_ms, merge_ms / sum_ms * 100.0);
+            debug!(
+                "Vertex Shader:    {:8.3} ms ({:5.1}%)",
+                vertex_ms,
+                vertex_ms / sum_ms * 100.0
+            );
+            debug!(
+                "Rasterization:    {:8.3} ms ({:5.1}%)",
+                raster_ms,
+                raster_ms / sum_ms * 100.0
+            );
+            debug!(
+                "Merge:            {:8.3} ms ({:5.1}%)",
+                merge_ms,
+                merge_ms / sum_ms * 100.0
+            );
             debug!("Total:            {:8.3} ms", sum_ms);
             debug!("==========================================");
         }
@@ -190,8 +200,7 @@ mod tests {
 
         static COUNTER: AtomicUsize = AtomicUsize::new(0);
         let id = COUNTER.fetch_add(1, Ordering::SeqCst);
-        let path = std::env::temp_dir()
-            .join(format!("simple_renderer_test_{}.obj", id));
+        let path = std::env::temp_dir().join(format!("simple_renderer_test_{}.obj", id));
 
         let mut file = std::fs::File::create(&path).unwrap();
         for pos in positions {
