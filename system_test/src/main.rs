@@ -2,7 +2,9 @@ mod camera;
 mod display;
 
 use glam::{Mat4, Vec3};
+use log::info;
 use simple_renderer::{Buffer, Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
+use std::time::Instant;
 
 use camera::Camera;
 use display::Display;
@@ -53,8 +55,16 @@ fn main() {
 
     let mut display = Display::new(WIDTH, HEIGHT);
 
+    let mut frame_count = 0u32;
+    let mut fps_timer = Instant::now();
+
     while display.is_open() {
-        display.handle_input(&mut camera);
+        if let Some(new_mode) = display.handle_input(&mut camera) {
+            if new_mode != renderer.rendering_mode() {
+                renderer.set_rendering_mode(new_mode);
+                info!("Switched to rendering mode: {}", new_mode);
+            }
+        }
 
         shader.set_uniform("cameraPos", camera.position());
         shader.set_uniform("viewMatrix", camera.view_matrix());
@@ -68,5 +78,17 @@ fn main() {
         buffer.swap();
 
         display.update(buffer.display_buffer());
+
+        frame_count += 1;
+        if fps_timer.elapsed().as_secs_f64() >= 1.0 {
+            let fps = frame_count as f64 / fps_timer.elapsed().as_secs_f64();
+            display.set_title(&format!(
+                "SimpleRenderer (Rust) | {} | {:.1} FPS",
+                renderer.rendering_mode(),
+                fps
+            ));
+            frame_count = 0;
+            fps_timer = Instant::now();
+        }
     }
 }

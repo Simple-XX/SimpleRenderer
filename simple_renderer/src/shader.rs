@@ -212,25 +212,26 @@ impl Shader {
         let uv = fragment.uv;
 
         // Get lights + camera from cache or uniform buffer
-        let (light_dirs, camera_pos) = if self.fragment_cache.derived_valid {
-            (
-                self.fragment_cache.light_dirs_normalized.clone(),
-                self.fragment_cache.camera_pos,
-            )
+        let fallback_dirs;
+        let light_dirs: &[Vec3] = if self.fragment_cache.derived_valid {
+            &self.fragment_cache.light_dirs_normalized
         } else {
             // Fallback: read from uniform buffer
-            let dirs = if let Some(ls) = self.uniform_buffer.get_lights("lights") {
-                ls.iter().map(|l| l.direction.normalize_or_zero()).collect()
+            fallback_dirs = if let Some(ls) = self.uniform_buffer.get_lights("lights") {
+                ls.iter().map(|l| l.direction.normalize_or_zero()).collect::<Vec<_>>()
             } else if let Some(l) = self.uniform_buffer.get_light("light") {
                 vec![l.direction.normalize_or_zero()]
             } else {
                 Vec::new()
             };
-            let cam = self
-                .uniform_buffer
+            &fallback_dirs
+        };
+        let camera_pos = if self.fragment_cache.derived_valid {
+            self.fragment_cache.camera_pos
+        } else {
+            self.uniform_buffer
                 .get_vec3("cameraPos")
-                .unwrap_or(Vec3::ZERO);
-            (dirs, cam)
+                .unwrap_or(Vec3::ZERO)
         };
 
         // View direction (from camera toward fragment, matching C++)

@@ -10,8 +10,12 @@
 //! 5. Copy tile buffers to global framebuffer
 //! 6. Copy to output
 
+use log::debug;
+use std::time::Instant;
+
 use rayon::prelude::*;
 
+use crate::face::Face;
 use crate::fragment::Fragment;
 use crate::model::Model;
 use crate::renderers::tile_common::{
@@ -63,9 +67,12 @@ impl Renderer for TileBasedRenderer {
         let mut shader = shader.clone();
         shader.prepare_caches();
 
+        let t = Instant::now();
         // 2. Vertex transform to SoA
         let soa = tile_common::vertex_transform_soa(model, &mut shader, width, height);
+        let vertex_ms = t.elapsed().as_secs_f64() * 1000.0;
 
+        let t = Instant::now();
         // 3. Setup tile grid
         let tile_size = self.tile_size;
         let tiles_x = (width + tile_size - 1) / tile_size;
@@ -79,15 +86,19 @@ impl Renderer for TileBasedRenderer {
             width,
             height,
         };
+        let setup_ms = t.elapsed().as_secs_f64() * 1000.0;
 
+        let t = Instant::now();
         // 4. Triangle-tile binning
         let tile_triangles = tile_common::triangle_tile_binning(model, &grid);
+        let binning_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         // 5. Global framebuffer
         let num_pixels = width * height;
         let mut global_color = vec![COLOR_CLEAR; num_pixels];
         let mut global_depth = vec![DEPTH_CLEAR; num_pixels];
 
+        let t = Instant::now();
         // 6. Parallel rasterization per tile
         let total_tiles = tiles_x * tiles_y;
         let early_z = self.early_z;
@@ -108,14 +119,14 @@ impl Renderer for TileBasedRenderer {
                     let mut tile_depth = vec![DEPTH_CLEAR; tile_width * tile_height];
                     let mut tile_color = vec![COLOR_CLEAR; tile_width * tile_height];
 
-                    let local_shader = shader.clone();
 
                     rasterize_tile(
                         &tile_triangles[tile_id],
                         &grid,
                         &mut tile_depth,
                         &mut tile_color,
-                        &local_shader,
+                        &shader,
+                        model.faces(),
                         early_z,
                         screen_x_start,
                         screen_y_start,
@@ -137,7 +148,10 @@ impl Renderer for TileBasedRenderer {
                 })
                 .collect();
 
+        let raster_ms = t.elapsed().as_secs_f64() * 1000.0;
+
         // 7. Copy tile results to global framebuffer
+        let t = Instant::now();
         for (tile_depth, tile_color, sx, sy, tw, th) in &tile_results {
             for y in 0..*th {
                 let tile_row_off = y * tw;
@@ -148,9 +162,22 @@ impl Renderer for TileBasedRenderer {
                     .copy_from_slice(&tile_depth[tile_row_off..tile_row_off + tw]);
             }
         }
+        let copy_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         // 8. Copy to output
         out_buffer[..num_pixels].copy_from_slice(&global_color);
+
+        let sum_ms = vertex_ms + setup_ms + binning_ms + raster_ms + copy_ms;
+        if sum_ms > 0.0 {
+            debug!("=== TILE-BASED RENDERING PERFORMANCE ===");
+            debug!("Vertex Shader:    {:8.3} ms ({:5.1}%)", vertex_ms, vertex_ms / sum_ms * 100.0);
+            debug!("Setup:            {:8.3} ms", setup_ms);
+            debug!("Binning:          {:8.3} ms", binning_ms);
+            debug!("Rasterization:    {:8.3} ms", raster_ms);
+            debug!("Copy:             {:8.3} ms", copy_ms);
+            debug!("Total:            {:8.3} ms", sum_ms);
+            debug!("=========================================");
+        }
 
         true
     }
@@ -165,6 +192,7 @@ fn rasterize_tile(
     tile_depth: &mut [f32],
     tile_color: &mut [u32],
     shader: &Shader,
+    faces: &[Face],
     use_early_z: bool,
     screen_x_start: usize,
     screen_y_start: usize,
@@ -355,11 +383,11 @@ fn rasterize_tile(
                     };
 
                     if use_early_z {
-                        let out_color = shader.fragment_shader(&frag, &tri.material);
+                        let out_color = shader.fragment_shader(&frag, &faces[tri.face_index].material);
                         tile_depth[idx] = frag.depth;
                         tile_color[idx] = u32::from(out_color);
                     } else {
-                        let out_color = shader.fragment_shader(&frag, &tri.material);
+                        let out_color = shader.fragment_shader(&frag, &faces[tri.face_index].material);
                         if frag.depth < tile_depth[idx] {
                             tile_depth[idx] = frag.depth;
                             tile_color[idx] = u32::from(out_color);

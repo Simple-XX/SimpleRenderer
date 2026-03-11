@@ -7,6 +7,9 @@
 //! 2. Parallel rasterization over face chunks (rayon `par_chunks`)
 //! 3. Per-chunk depth + color buffers, merged at the end
 
+use log::debug;
+use std::time::Instant;
+
 use rayon::prelude::*;
 
 use crate::math::Vec2;
@@ -46,6 +49,7 @@ impl Renderer for PerTriangleRenderer {
         let mut shader = shader.clone();
         shader.prepare_caches();
 
+        let t = Instant::now();
         // 2. Vertex transform (sequential — vertex_shader writes frag_pos_varying)
         let vertices = model.vertices();
         let processed_vertices: Vec<_> = vertices
@@ -56,8 +60,10 @@ impl Renderer for PerTriangleRenderer {
                 base::viewport_transform(&ndc, width, height)
             })
             .collect();
+        let vertex_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         // 3. Parallel rasterization over face chunks
+        let t = Instant::now();
         let num_pixels = width * height;
         let faces = model.faces();
         let rasterizer = Rasterizer::new(width, height);
@@ -69,7 +75,7 @@ impl Renderer for PerTriangleRenderer {
             .map(|face_chunk| {
                 let mut depth_buf = vec![f32::INFINITY; num_pixels];
                 let mut color_buf = vec![0u32; num_pixels];
-                let local_shader = shader.clone();
+
 
                 for face in face_chunk {
                     let v0 = &processed_vertices[face.indices[0]];
@@ -104,7 +110,7 @@ impl Renderer for PerTriangleRenderer {
                         if frag.depth < depth_buf[idx] {
                             depth_buf[idx] = frag.depth;
                             let color =
-                                local_shader.fragment_shader(frag, &face.material);
+                                shader.fragment_shader(frag, &face.material);
                             color_buf[idx] = u32::from(color);
                         }
                     }
@@ -114,7 +120,10 @@ impl Renderer for PerTriangleRenderer {
             })
             .collect();
 
+        let raster_ms = t.elapsed().as_secs_f64() * 1000.0;
+
         // 4. Merge thread results — pick minimum depth per pixel
+        let t = Instant::now();
         for i in 0..num_pixels {
             let mut min_depth = f32::INFINITY;
             let mut final_color = 0u32;
@@ -128,7 +137,17 @@ impl Renderer for PerTriangleRenderer {
                 out_buffer[i] = final_color;
             }
         }
+        let merge_ms = t.elapsed().as_secs_f64() * 1000.0;
 
+        let sum_ms = vertex_ms + raster_ms + merge_ms;
+        if sum_ms > 0.0 {
+            debug!("=== PER-TRIANGLE RENDERING PERFORMANCE ===");
+            debug!("Vertex Shader:    {:8.3} ms ({:5.1}%)", vertex_ms, vertex_ms / sum_ms * 100.0);
+            debug!("Rasterization:    {:8.3} ms ({:5.1}%)", raster_ms, raster_ms / sum_ms * 100.0);
+            debug!("Merge:            {:8.3} ms ({:5.1}%)", merge_ms, merge_ms / sum_ms * 100.0);
+            debug!("Total:            {:8.3} ms", sum_ms);
+            debug!("==========================================");
+        }
         true
     }
 }

@@ -10,6 +10,9 @@
 //! 5. Deferred shading: shade only winner fragments
 //! 6. Write to output buffer
 
+use log::debug;
+use std::time::Instant;
+
 use rayon::prelude::*;
 
 use crate::fragment::Fragment;
@@ -57,6 +60,7 @@ impl Renderer for DeferredRenderer {
         let mut shader = shader.clone();
         shader.prepare_caches();
 
+        let t = Instant::now();
         // 2. Vertex transform (sequential — vertex_shader writes frag_pos_varying)
         let vertices = model.vertices();
         let processed_vertices: Vec<_> = vertices
@@ -67,7 +71,9 @@ impl Renderer for DeferredRenderer {
                 base::viewport_transform(&ndc, width, height)
             })
             .collect();
+        let vertex_ms = t.elapsed().as_secs_f64() * 1000.0;
 
+        let t = Instant::now();
         // 3. Parallel rasterization: collect ALL fragments (NO backface culling)
         let num_pixels = width * height;
         let faces = model.faces();
@@ -119,7 +125,10 @@ impl Renderer for DeferredRenderer {
             })
             .collect();
 
+        let collect_ms = t.elapsed().as_secs_f64() * 1000.0;
+
         // 4. Merge per-thread fragment buffers + depth resolve + deferred shading
+        let t = Instant::now();
         // For each pixel: collect from all threads, find min depth, shade winner
         for i in 0..num_pixels {
             let mut best_entry: Option<(&FragmentEntry, f32)> = None;
@@ -142,6 +151,17 @@ impl Renderer for DeferredRenderer {
                 let color = shader.fragment_shader(&winner.fragment, material);
                 out_buffer[i] = u32::from(color);
             }
+        }
+        let shade_ms = t.elapsed().as_secs_f64() * 1000.0;
+
+        let sum_ms = vertex_ms + collect_ms + shade_ms;
+        if sum_ms > 0.0 {
+            debug!("=== DEFERRED RENDERING PERFORMANCE ===");
+            debug!("Vertex Shader:        {:8.3} ms ({:5.1}%)", vertex_ms, vertex_ms / sum_ms * 100.0);
+            debug!("Fragment Collection:  {:8.3} ms", collect_ms);
+            debug!("Deferred Shading:     {:8.3} ms", shade_ms);
+            debug!("Total:                {:8.3} ms", sum_ms);
+            debug!("=======================================");
         }
 
         true

@@ -1,3 +1,12 @@
 [workspace]
 members = ["simple_renderer", "system_test"]
 resolver = "2"
+
+[profile.dev]
+opt-level = 2
+
+[profile.dev.package.image]
+opt-level = 3
+
+[profile.dev.package.tobj]
+opt-level = 3

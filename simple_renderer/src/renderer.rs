@@ -1,3 +1,4 @@
+use log::info;
 use crate::model::Model;
 use crate::shader::Shader;
 use crate::renderers::Renderer;
@@ -49,6 +50,7 @@ impl SimpleRenderer {
 
     pub fn set_rendering_mode(&mut self, mode: RenderingMode) {
         self.mode = mode;
+        info!("Rendering mode set to: {}", mode);
         self.renderer = Self::create_renderer(mode, self.width, self.height, self.early_z_enabled, self.tile_size);
     }
 

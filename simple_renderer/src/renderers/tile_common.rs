@@ -3,7 +3,7 @@
 //! Used by both `TileBasedRenderer` and `TileBasedDeferredRenderer`.
 
 use crate::color::Color;
-use crate::material::Material;
+
 use crate::model::Model;
 use crate::renderers::base;
 use crate::shader::Shader;
@@ -37,7 +37,6 @@ pub struct TileTriangleRef {
     pub i0: usize,
     pub i1: usize,
     pub i2: usize,
-    pub material: Material,
     pub face_index: usize,
 }
 
@@ -186,7 +185,6 @@ fn process_triangle_for_binning(
                     i0,
                     i1,
                     i2,
-                    material: face.material.clone(),
                     face_index: tri_idx,
                 });
             }

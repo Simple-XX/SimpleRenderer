@@ -1,19 +1,21 @@
 use glam::{Mat4, Vec3};
 
-#[allow(dead_code)]
 pub struct Camera {
     position: Vec3,
     front: Vec3,
     up: Vec3,
+    yaw: f32,
+    pitch: f32,
 }
 
-#[allow(dead_code)]
 impl Camera {
     pub fn new(position: Vec3) -> Self {
         Self {
             position,
             front: Vec3::new(0.0, 0.0, -1.0),
             up: Vec3::new(0.0, 1.0, 0.0),
+            yaw: -90.0,
+            pitch: 0.0,
         }
     }
 
@@ -41,9 +43,11 @@ impl Camera {
         self.position += self.up * distance;
     }
 
-    pub fn rotate(&mut self, yaw: f32, pitch: f32) {
-        let yaw_rad = yaw.to_radians();
-        let pitch_rad = pitch.to_radians();
+    pub fn rotate(&mut self, yaw_delta: f32, pitch_delta: f32) {
+        self.yaw += yaw_delta;
+        self.pitch = (self.pitch + pitch_delta).clamp(-89.0, 89.0);
+        let yaw_rad = self.yaw.to_radians();
+        let pitch_rad = self.pitch.to_radians();
         self.front = Vec3::new(
             yaw_rad.cos() * pitch_rad.cos(),
             pitch_rad.sin(),

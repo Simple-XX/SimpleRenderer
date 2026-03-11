@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use log::warn;
 
@@ -96,13 +97,13 @@ impl Model {
                 ));
             }
 
-            // Build material for this mesh
-            let material = Self::build_material(
+            // Build material for this mesh (shared across all faces)
+            let material = Arc::new(Self::build_material(
                 mesh.material_id,
                 &materials,
                 &directory,
                 &mut texture_cache,
-            );
+            ));
 
             // Build faces (triangles) from indices
             let num_faces = mesh.indices.len() / 3;
@@ -112,7 +113,7 @@ impl Model {
                 let i2 = mesh.indices[i * 3 + 2] as usize + vertex_offset;
                 faces.push(Face {
                     indices: [i0, i1, i2],
-                    material: material.clone(),
+                    material: Arc::clone(&material),
                 });
             }
         }
