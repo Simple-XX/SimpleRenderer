@@ -25,6 +25,16 @@ use crate::renderers::tile_common::{
 use crate::renderers::Renderer;
 use crate::shader::Shader;
 
+/// Result of rasterizing a single tile.
+struct TileResult {
+    depth: Vec<f32>,
+    color: Vec<u32>,
+    screen_x: usize,
+    screen_y: usize,
+    width: usize,
+    height: usize,
+}
+
 /// SoA tile-based renderer with edge function rasterization and optional Early-Z.
 ///
 /// Mirrors C++ `TileBasedRenderer`: vertex transform → tile binning →
@@ -79,8 +89,8 @@ impl Renderer for TileBasedRenderer {
         let t = Instant::now();
         // 3. Setup tile grid
         let tile_size = self.tile_size;
-        let tiles_x = (width + tile_size - 1) / tile_size;
-        let tiles_y = (height + tile_size - 1) / tile_size;
+        let tiles_x = width.div_ceil(tile_size);
+        let tiles_y = height.div_ceil(tile_size);
 
         let grid = TileGridContext {
             soa,
@@ -107,7 +117,7 @@ impl Renderer for TileBasedRenderer {
         let total_tiles = tiles_x * tiles_y;
         let early_z = self.early_z;
 
-        let tile_results: Vec<(Vec<f32>, Vec<u32>, usize, usize, usize, usize)> = (0..total_tiles)
+        let tile_results: Vec<TileResult> = (0..total_tiles)
             .into_par_iter()
             .map(|tile_id| {
                 let tile_x = tile_id % tiles_x;
@@ -139,14 +149,14 @@ impl Renderer for TileBasedRenderer {
                     height,
                 );
 
-                (
-                    tile_depth,
-                    tile_color,
-                    screen_x_start,
-                    screen_y_start,
-                    tile_width,
-                    tile_height,
-                )
+                TileResult {
+                    depth: tile_depth,
+                    color: tile_color,
+                    screen_x: screen_x_start,
+                    screen_y: screen_y_start,
+                    width: tile_width,
+                    height: tile_height,
+                }
             })
             .collect();
 
@@ -154,14 +164,14 @@ impl Renderer for TileBasedRenderer {
 
         // 7. Copy tile results to global framebuffer
         let t = Instant::now();
-        for (tile_depth, tile_color, sx, sy, tw, th) in &tile_results {
-            for y in 0..*th {
-                let tile_row_off = y * tw;
-                let global_row_off = (sy + y) * width + sx;
-                global_color[global_row_off..global_row_off + tw]
-                    .copy_from_slice(&tile_color[tile_row_off..tile_row_off + tw]);
-                global_depth[global_row_off..global_row_off + tw]
-                    .copy_from_slice(&tile_depth[tile_row_off..tile_row_off + tw]);
+        for tile in &tile_results {
+            for y in 0..tile.height {
+                let tile_row_off = y * tile.width;
+                let global_row_off = (tile.screen_y + y) * width + tile.screen_x;
+                global_color[global_row_off..global_row_off + tile.width]
+                    .copy_from_slice(&tile.color[tile_row_off..tile_row_off + tile.width]);
+                global_depth[global_row_off..global_row_off + tile.width]
+                    .copy_from_slice(&tile.depth[tile_row_off..tile_row_off + tile.width]);
             }
         }
         let copy_ms = t.elapsed().as_secs_f64() * 1000.0;

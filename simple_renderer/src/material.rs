@@ -5,23 +5,12 @@ use crate::error::{RendererError, Result};
 use crate::math::Vec3;
 
 /// An image texture with pixel data stored in a flat `Vec<u8>`.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Texture {
     pub data: Vec<u8>,
     pub width: u32,
     pub height: u32,
     pub channels: u32,
-}
-
-impl Default for Texture {
-    fn default() -> Self {
-        Self {
-            data: Vec::new(),
-            width: 0,
-            height: 0,
-            channels: 0,
-        }
-    }
 }
 
 impl Texture {

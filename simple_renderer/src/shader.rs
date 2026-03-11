@@ -443,9 +443,9 @@ impl Shader {
             values.fill(1.0);
             return SpecularLut { values };
         }
-        for i in 0..SPECULAR_LUT_RESOLUTION {
+        for (i, value) in values.iter_mut().enumerate().take(SPECULAR_LUT_RESOLUTION) {
             let cos_theta = i as f32 / (SPECULAR_LUT_RESOLUTION - 1) as f32;
-            values[i] = if cos_theta <= 0.0 {
+            *value = if cos_theta <= 0.0 {
                 0.0
             } else {
                 cos_theta.powf(shininess)

@@ -79,8 +79,8 @@ impl Renderer for TileBasedDeferredRenderer {
         let t = Instant::now();
         // 3. Setup tile grid
         let tile_size = self.tile_size;
-        let tiles_x = (width + tile_size - 1) / tile_size;
-        let tiles_y = (height + tile_size - 1) / tile_size;
+        let tiles_x = width.div_ceil(tile_size);
+        let tiles_y = height.div_ceil(tile_size);
 
         let grid = TileGridContext {
             soa,
