@@ -93,16 +93,12 @@ impl Renderer for TileBasedDeferredRenderer {
         let tile_triangles = tile_common::triangle_tile_binning(model, &grid);
         let binning_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 5. Global framebuffer
-        let num_pixels = width * height;
-        let mut global_color = vec![COLOR_CLEAR; num_pixels];
-        let mut global_depth = vec![DEPTH_CLEAR; num_pixels];
 
         let t = Instant::now();
         // 6. Parallel 2-pass rasterization per tile
         let total_tiles = tiles_x * tiles_y;
 
-        let tile_results: Vec<(Vec<f32>, Vec<u32>, usize, usize, usize, usize)> =
+        let tile_results: Vec<(Vec<u32>, usize, usize, usize, usize)> =
             (0..total_tiles)
                 .into_par_iter()
                 .map(|tile_id| {
@@ -136,8 +132,9 @@ impl Renderer for TileBasedDeferredRenderer {
                         height,
                     );
 
+                    // tile_depth is only used as z-buffer within
+                    // rasterize_tile_deferred — no need to return it
                     (
-                        tile_depth,
                         tile_color,
                         screen_x_start,
                         screen_y_start,
@@ -149,22 +146,17 @@ impl Renderer for TileBasedDeferredRenderer {
 
         let raster_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 7. Copy tile results to global framebuffer
+        // 7. Copy tile results directly to output buffer
         let t = Instant::now();
-        for (tile_depth, tile_color, sx, sy, tw, th) in &tile_results {
+        for (tile_color, sx, sy, tw, th) in &tile_results {
             for y in 0..*th {
                 let tile_row_off = y * tw;
-                let global_row_off = (sy + y) * width + sx;
-                global_color[global_row_off..global_row_off + tw]
+                let out_row_off = (sy + y) * width + sx;
+                out_buffer[out_row_off..out_row_off + tw]
                     .copy_from_slice(&tile_color[tile_row_off..tile_row_off + tw]);
-                global_depth[global_row_off..global_row_off + tw]
-                    .copy_from_slice(&tile_depth[tile_row_off..tile_row_off + tw]);
             }
         }
         let copy_ms = t.elapsed().as_secs_f64() * 1000.0;
-
-        // 8. Copy to output
-        out_buffer[..num_pixels].copy_from_slice(&global_color);
 
         let sum_ms = vertex_ms + setup_ms + binning_ms + raster_ms + copy_ms;
         if sum_ms > 0.0 {
@@ -204,7 +196,7 @@ fn rasterize_tile_deferred(
     let tile_pixels = tile_width * tile_height;
 
     // Per-pixel state for 2-pass
-    let mut zmin = vec![DEPTH_CLEAR; tile_pixels];
+    // tile_depth is used as zmin buffer (Pass A) and output depth (Pass B)
     let mut winner: Vec<i32> = vec![-1; tile_pixels];
     let mut b0c_buf = vec![0.0f32; tile_pixels];
     let mut b1c_buf = vec![0.0f32; tile_pixels];
@@ -319,8 +311,8 @@ fn rasterize_tile_deferred(
                     let local_y = (y - screen_y_start as i32) as usize;
                     let idx = local_x + local_y * tile_width;
 
-                    if z < zmin[idx] - 1e-8 {
-                        zmin[idx] = z;
+                    if z < tile_depth[idx] - 1e-8 {
+                        tile_depth[idx] = z;
                         winner[idx] = tri_local_idx as i32;
                         b0c_buf[idx] = b0c;
                         b1c_buf[idx] = b1c;
@@ -374,11 +366,11 @@ fn rasterize_tile_deferred(
                 normal,
                 uv,
                 color,
-                depth: zmin[idx],
+                depth: tile_depth[idx],
             };
 
             let out_color = shader.fragment_shader(&frag, &faces[tri.face_index].material);
-            tile_depth[idx] = frag.depth;
+            // tile_depth[idx] already set in Pass A
             tile_color[idx] = u32::from(out_color);
         }
     }

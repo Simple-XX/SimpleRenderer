@@ -4,25 +4,27 @@
 //!
 //! Algorithm:
 //! 1. Vertex transform (sequential — `vertex_shader` needs `&mut self`)
-//! 2. Parallel rasterization: collect ALL fragments per pixel (no backface culling)
-//! 3. Merge per-thread fragment buffers
-//! 4. Depth resolve: find closest fragment per pixel
-//! 5. Deferred shading: shade only winner fragments
-//! 6. Write to output buffer
+//! 2. Parallel rasterization with per-thread depth testing:
+//!    each thread keeps only the closest fragment per pixel (NO backface culling)
+//! 3. Parallel merge + deferred shading:
+//!    find closest fragment across threads and shade only winners (in parallel)
+//! 4. Write to output buffer
 
 use log::debug;
 use std::time::Instant;
 
 use rayon::prelude::*;
 
+use crate::color::Color;
 use crate::fragment::Fragment;
+use crate::math::{Vec2, Vec3};
 use crate::model::Model;
 use crate::rasterizer::Rasterizer;
 use crate::renderers::base;
 use crate::renderers::Renderer;
 use crate::shader::Shader;
 
-/// AoS deferred renderer: collect all fragments, then shade only the winners.
+/// AoS deferred renderer: collect closest fragments per thread, then shade only the winners.
 ///
 /// Key difference from `PerTriangleRenderer`:
 /// - NO backface culling — all fragments are collected
@@ -39,12 +41,6 @@ impl DeferredRenderer {
     pub fn new(width: usize, height: usize) -> Self {
         Self { width, height }
     }
-}
-
-/// Per-pixel fragment entry: stores fragment + face index for material lookup.
-struct FragmentEntry {
-    fragment: Fragment,
-    face_index: usize,
 }
 
 impl Renderer for DeferredRenderer {
@@ -74,27 +70,38 @@ impl Renderer for DeferredRenderer {
         let vertex_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         let t = Instant::now();
-        // 3. Parallel rasterization: collect ALL fragments (NO backface culling)
+        // 3. Parallel rasterization with per-thread depth testing
+        //
+        // Each thread keeps only the CLOSEST fragment per pixel, drastically
+        // reducing memory from O(threads × pixels × fragments_per_pixel) to
+        // O(threads × pixels).
         let num_pixels = width * height;
         let faces = model.faces();
         let rasterizer = Rasterizer::new(width, height);
         let num_threads = rayon::current_num_threads();
         let chunk_size = std::cmp::max(faces.len() / num_threads, 1);
 
-        // Per-thread fragment buffers: Vec<Vec<FragmentEntry>> per pixel
-        let chunk_results: Vec<Vec<Vec<FragmentEntry>>> = faces
+        // Dummy fragment for buffer initialization (never read — only valid
+        // entries where depth_buf < INFINITY are accessed during merge).
+        let dummy = Fragment {
+            screen_coord: [0, 0],
+            normal: Vec3::ZERO,
+            uv: Vec2::ZERO,
+            color: Color::new(0, 0, 0, 0),
+            depth: f32::INFINITY,
+        };
+
+        // Per-thread result: (depth_buf, fragment_buf, face_index_buf)
+        let chunk_results: Vec<(Vec<f32>, Vec<Fragment>, Vec<usize>)> = faces
             .par_chunks(chunk_size)
             .enumerate()
-            .map(|(_chunk_idx, face_chunk)| {
-                let mut pixel_fragments: Vec<Vec<FragmentEntry>> =
-                    (0..num_pixels).map(|_| Vec::new()).collect();
-
-                // Compute starting face index for this chunk
-                let chunk_start = face_chunk.as_ptr() as usize - faces.as_ptr() as usize;
-                let chunk_start_idx = chunk_start / std::mem::size_of_val(&faces[0]);
+            .map(|(chunk_idx, face_chunk)| {
+                let mut depth_buf = vec![f32::INFINITY; num_pixels];
+                let mut frag_buf = vec![dummy.clone(); num_pixels];
+                let mut face_buf = vec![0usize; num_pixels];
 
                 for (local_idx, face) in face_chunk.iter().enumerate() {
-                    let face_idx = chunk_start_idx + local_idx;
+                    let face_idx = chunk_idx * chunk_size + local_idx;
                     let v0 = &processed_vertices[face.indices[0]];
                     let v1 = &processed_vertices[face.indices[1]];
                     let v2 = &processed_vertices[face.indices[2]];
@@ -114,44 +121,50 @@ impl Renderer for DeferredRenderer {
                             continue;
                         }
                         let idx = x + y * width;
-                        pixel_fragments[idx].push(FragmentEntry {
-                            fragment: frag,
-                            face_index: face_idx,
-                        });
+                        // Per-thread depth test: keep only the closest fragment
+                        if frag.depth < depth_buf[idx] {
+                            depth_buf[idx] = frag.depth;
+                            frag_buf[idx] = frag;
+                            face_buf[idx] = face_idx;
+                        }
                     }
                 }
 
-                pixel_fragments
+                (depth_buf, frag_buf, face_buf)
             })
             .collect();
 
         let collect_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 4. Merge per-thread fragment buffers + depth resolve + deferred shading
+        // 4. Parallel merge + deferred shading
+        //
+        // For each pixel, find the closest fragment across all threads,
+        // then shade only that winner. Both merge and shade run in parallel.
         let t = Instant::now();
-        // For each pixel: collect from all threads, find min depth, shade winner
-        for i in 0..num_pixels {
-            let mut best_entry: Option<(&FragmentEntry, f32)> = None;
+        let final_buffer: Vec<u32> = (0..num_pixels)
+            .into_par_iter()
+            .map(|i| {
+                let mut best_depth = f32::INFINITY;
+                let mut best_chunk: Option<usize> = None;
 
-            for thread_buf in &chunk_results {
-                for entry in &thread_buf[i] {
-                    let depth = entry.fragment.depth;
-                    match best_entry {
-                        None => best_entry = Some((entry, depth)),
-                        Some((_, best_depth)) if depth < best_depth => {
-                            best_entry = Some((entry, depth));
-                        }
-                        _ => {}
+                for (chunk_idx, (depth_buf, _, _)) in chunk_results.iter().enumerate() {
+                    if depth_buf[i] < best_depth {
+                        best_depth = depth_buf[i];
+                        best_chunk = Some(chunk_idx);
                     }
                 }
-            }
 
-            if let Some((winner, _)) = best_entry {
-                let material = &faces[winner.face_index].material;
-                let color = shader.fragment_shader(&winner.fragment, material);
-                out_buffer[i] = u32::from(color);
-            }
-        }
+                if let Some(chunk_idx) = best_chunk {
+                    let winner_frag = &chunk_results[chunk_idx].1[i];
+                    let winner_face_idx = chunk_results[chunk_idx].2[i];
+                    let material = &faces[winner_face_idx].material;
+                    u32::from(shader.fragment_shader(winner_frag, material))
+                } else {
+                    0u32
+                }
+            })
+            .collect();
+        out_buffer[..num_pixels].copy_from_slice(&final_buffer);
         let shade_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         let sum_ms = vertex_ms + collect_ms + shade_ms;
@@ -173,9 +186,8 @@ impl Renderer for DeferredRenderer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::color::Color;
     use crate::light::Light;
-    use crate::math::{Mat4, Vec3};
+    use crate::math::Mat4;
 
     /// Set up a shader with identity matrices and a simple light for testing.
     fn test_shader() -> Shader {
