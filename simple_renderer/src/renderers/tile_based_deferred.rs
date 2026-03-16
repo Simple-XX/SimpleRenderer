@@ -1,6 +1,6 @@
 //! Tile-based deferred renderer (TBDR) with 2-pass rasterization.
 //!
-//! Port of C++ `TileBasedDeferredRenderer` (tile_based_deferred_renderer.cpp, 435 lines).
+//! SoA tile-based deferred renderer with 2-pass (Z-prepass + shade winners) rasterization.
 //!
 //! Algorithm:
 //! 1. Vertex transform to SoA
@@ -302,8 +302,12 @@ fn rasterize_tile_deferred(
                     let z = z0 * b0c + z1 * b1c + z2 * b2c;
 
                     let sx_pix = xb + j as i32;
-                    let local_x = (sx_pix - screen_x_start as i32) as usize;
-                    let local_y = (y - screen_y_start as i32) as usize;
+                    let lx = sx_pix - screen_x_start as i32;
+                    let ly = y - screen_y_start as i32;
+                    debug_assert!(lx >= 0, "tile local x must be non-negative: {}", lx);
+                    debug_assert!(ly >= 0, "tile local y must be non-negative: {}", ly);
+                    let local_x = lx as usize;
+                    let local_y = ly as usize;
                     let idx = local_x + local_y * tile_width;
 
                     if z < tile_depth[idx] - 1e-8 {

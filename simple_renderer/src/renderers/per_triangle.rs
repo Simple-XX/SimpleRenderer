@@ -1,6 +1,6 @@
 //! Per-triangle forward renderer (AoS layout).
 //!
-//! Port of C++ `PerTriangleRenderer` (per_triangle_renderer.cpp, 173 lines).
+//! Per-triangle forward renderer with chunk-parallel rasterization.
 //!
 //! Algorithm:
 //! 1. Vertex transform (sequential — `vertex_shader` needs `&mut self`)
@@ -21,8 +21,7 @@ use crate::shader::Shader;
 
 /// AoS per-triangle renderer with per-thread local framebuffers.
 ///
-/// Mirrors C++ `PerTriangleRenderer`: vertex transform → parallel
-/// rasterization (backface culling + depth test) → merge.
+/// Vertex transform → parallel rasterization (backface culling + depth test) → merge.
 pub struct PerTriangleRenderer;
 
 impl PerTriangleRenderer {

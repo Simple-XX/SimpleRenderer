@@ -8,8 +8,6 @@ use crate::math::{Mat3, Mat4, Vec2, Vec3, Vec4};
 // ── UniformValue ──────────────────────────────────────────────────────────
 
 /// A dynamically-typed value that can be stored in a [`UniformBuffer`].
-///
-/// Mirrors the C++ `std::variant`-based `UniformValue`.
 #[derive(Debug, Clone)]
 pub enum UniformValue {
     Int(i32),
@@ -106,7 +104,7 @@ impl From<Vec<Light>> for UniformValue {
 
 // ── UniformBuffer ─────────────────────────────────────────────────────────
 
-/// Named uniform storage, mirroring the C++ `UniformBuffer` class.
+/// Named uniform storage with typed getters.
 ///
 /// Stores uniforms by string key and provides typed getters that return
 /// `Option<T>` (rather than panicking on type mismatch).

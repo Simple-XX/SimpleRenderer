@@ -29,8 +29,12 @@ impl Rasterizer {
     where
         F: FnMut(Fragment),
     {
-        let x_min = v0.position.x.min(v1.position.x).min(v2.position.x).max(0.0) as i32;
-        let y_min = v0.position.y.min(v1.position.y).min(v2.position.y).max(0.0) as i32;
+        let x_min_f = v0.position.x.min(v1.position.x).min(v2.position.x).max(0.0);
+        let y_min_f = v0.position.y.min(v1.position.y).min(v2.position.y).max(0.0);
+        debug_assert!(x_min_f >= 0.0, "x_min must be non-negative: {}", x_min_f);
+        debug_assert!(y_min_f >= 0.0, "y_min must be non-negative: {}", y_min_f);
+        let x_min = x_min_f as i32;
+        let y_min = y_min_f as i32;
         let x_max = v0
             .position
             .x
@@ -99,7 +103,15 @@ impl Rasterizer {
     /// Prefer `rasterize_each` in hot paths to avoid allocation.
     #[allow(dead_code)]
     pub fn rasterize(&self, v0: &Vertex, v1: &Vertex, v2: &Vertex) -> Vec<Fragment> {
-        let mut fragments = Vec::new();
+        let bbox_w = (v0.position.x.max(v1.position.x).max(v2.position.x)
+            - v0.position.x.min(v1.position.x).min(v2.position.x))
+        .max(0.0) as usize
+            + 1;
+        let bbox_h = (v0.position.y.max(v1.position.y).max(v2.position.y)
+            - v0.position.y.min(v1.position.y).min(v2.position.y))
+        .max(0.0) as usize
+            + 1;
+        let mut fragments = Vec::with_capacity(bbox_w * bbox_h / 2);
         self.rasterize_each(v0, v1, v2, |frag| fragments.push(frag));
         fragments
     }
@@ -107,7 +119,7 @@ impl Rasterizer {
 
 // ── Barycentric coordinates ────────────────────────────────────────────────
 //
-// Exact port of C++ `Rasterizer::GetBarycentricCoord` (cross-product method).
+// Barycentric coordinates via cross-product method.
 
 fn get_barycentric_coord(p0: Vec3, p1: Vec3, p2: Vec3, pa: Vec3) -> Option<Vec3> {
     let v0 = Vec3::new(p2.x - p0.x, p1.x - p0.x, p0.x - pa.x);
@@ -133,7 +145,7 @@ fn get_barycentric_coord(p0: Vec3, p1: Vec3, p2: Vec3, pa: Vec3) -> Option<Vec3>
 
 // ── Perspective correction ─────────────────────────────────────────────────
 //
-// Exact port of C++ `Rasterizer::PerformPerspectiveCorrection`.
+// Correct barycentric weights for perspective-projected triangles.
 
 fn perspective_correction(
     w0: f32,
@@ -177,8 +189,7 @@ fn interpolate_vec3(v0: Vec3, v1: Vec3, v2: Vec3, bary: Vec3) -> Vec3 {
     v0 * bary.x + v1 * bary.y + v2 * bary.z
 }
 
-/// Per-channel float interpolation matching C++ `InterpolateColor` +
-/// `FloatToUint8_t`: `val + 0.5` then truncate.
+/// Per-channel float interpolation with `(val + 0.5) as u8` rounding.
 #[inline]
 fn interpolate_color(c0: Color, c1: Color, c2: Color, bary: Vec3) -> Color {
     let r = c0.r() as f32 * bary.x + c1.r() as f32 * bary.y + c2.r() as f32 * bary.z;

@@ -40,8 +40,6 @@ pub struct TileGridContext {
 // ── Triangle reference for tile binning ───────────────────────────────────
 
 /// A lightweight reference to a triangle stored in a tile's triangle list.
-///
-/// Mirrors C++ `TileTriangleRef`.
 pub struct TileTriangleRef {
     pub i0: usize,
     pub i1: usize,
@@ -175,12 +173,24 @@ fn process_triangle_for_binning(
     let max_y = pos0.y.max(pos1.y).max(pos2.y);
 
     // Find overlapping tiles
-    let start_tile_x = (min_x as i32).max(0) as usize / grid.tile_size;
-    let end_tile_x =
-        ((max_x as i32).max(0) as usize / grid.tile_size).min(grid.tiles_x.saturating_sub(1));
-    let start_tile_y = (min_y as i32).max(0) as usize / grid.tile_size;
-    let end_tile_y =
-        ((max_y as i32).max(0) as usize / grid.tile_size).min(grid.tiles_y.saturating_sub(1));
+    let clamped_min_x = (min_x as i32).max(0);
+    let clamped_min_y = (min_y as i32).max(0);
+    let clamped_max_x = (max_x as i32).max(0);
+    let clamped_max_y = (max_y as i32).max(0);
+    debug_assert!(
+        clamped_min_x >= 0,
+        "clamped min_x must be non-negative: {}",
+        clamped_min_x
+    );
+    debug_assert!(
+        clamped_min_y >= 0,
+        "clamped min_y must be non-negative: {}",
+        clamped_min_y
+    );
+    let start_tile_x = clamped_min_x as usize / grid.tile_size;
+    let end_tile_x = (clamped_max_x as usize / grid.tile_size).min(grid.tiles_x.saturating_sub(1));
+    let start_tile_y = clamped_min_y as usize / grid.tile_size;
+    let end_tile_y = (clamped_max_y as usize / grid.tile_size).min(grid.tiles_y.saturating_sub(1));
 
     if start_tile_x > end_tile_x || start_tile_y > end_tile_y {
         return;
@@ -218,8 +228,7 @@ pub fn cross2(ax: f32, ay: f32, bx: f32, by: f32) -> f32 {
 
 /// Interpolate color using perspective-corrected barycentric coordinates.
 ///
-/// Uses `Color::from_f32` which does `(val + 0.5) as u8` rounding,
-/// matching C++ `FloatToUint8_t`.
+/// Uses `Color::from_f32` which does `(val + 0.5) as u8` rounding.
 #[inline]
 pub fn interpolate_color_bary(c0: Color, c1: Color, c2: Color, b0: f32, b1: f32, b2: f32) -> Color {
     let r = c0.r() as f32 * b0 + c1.r() as f32 * b1 + c2.r() as f32 * b2;

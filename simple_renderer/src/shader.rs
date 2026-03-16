@@ -24,8 +24,6 @@ struct SpecularLut {
 // ── Caches ────────────────────────────────────────────────────────────────
 
 /// Cached vertex-shader matrices, avoiding per-vertex HashMap lookups.
-///
-/// Mirrors C++ `VertexUniformCache`.
 #[derive(Clone)]
 struct VertexUniformCache {
     model: Mat4,
@@ -59,8 +57,6 @@ impl Default for VertexUniformCache {
 
 /// Cached fragment-shader uniforms (lights + camera), avoiding per-fragment
 /// HashMap lookups.
-///
-/// Mirrors C++ `FragmentUniformCache`.
 #[derive(Clone)]
 struct FragmentUniformCache {
     lights: Vec<Light>,
@@ -88,8 +84,6 @@ impl Default for FragmentUniformCache {
 
 /// Vertex + fragment shader with uniform caching and specular LUT.
 ///
-/// Port of C++ `Shader` class.
-///
 /// - `vertex_shader` takes `&self` (world position stored on returned Vertex)
 /// - `fragment_shader` takes `&self` (interior mutability via `RwLock` for
 ///   specular LUT cache)
@@ -114,11 +108,8 @@ impl Shader {
     // ── Uniform management ────────────────────────────────────────────
 
     /// Store a uniform and update relevant caches.
-    ///
-    /// Port of C++ `Shader::SetUniform`.
     pub fn set_uniform(&mut self, name: &str, value: impl Into<UniformValue>) {
         let value = value.into();
-        self.uniform_buffer.set(name, value.clone());
 
         match &value {
             UniformValue::Mat4(m) => self.update_matrix_cache(name, *m),
@@ -127,6 +118,8 @@ impl Shader {
             UniformValue::Vec3(v) => self.update_fragment_cache_vec3(name, *v),
             _ => {}
         }
+
+        self.uniform_buffer.set(name, value);
     }
 
     /// Convenience: set multiple lights under the `"lights"` uniform.
@@ -136,8 +129,6 @@ impl Shader {
 
     /// Ensure both vertex and fragment caches are up-to-date before a render
     /// pass. Call once before processing all vertices/fragments of a frame.
-    ///
-    /// Port of C++ `Shader::PrepareUniformCaches`.
     pub fn prepare_caches(&mut self) {
         self.prepare_vertex_cache();
         self.prepare_fragment_cache();
@@ -148,8 +139,6 @@ impl Shader {
     /// Transform a vertex from model space to clip space.
     ///
     /// Stores world-space position on the returned Vertex's `world_position` field.
-    ///
-    /// Port of C++ `Shader::VertexShader` (shader.cpp:54-101).
     pub fn vertex_shader(&self, vertex: &Vertex) -> Vertex {
         let (model, mvp, normal_mat) = if self.vertex_cache.derived_valid {
             (
@@ -193,9 +182,7 @@ impl Shader {
 
     // ── Fragment shader ───────────────────────────────────────────────
 
-    /// Compute the final color of a fragment using Phong shading.
-    ///
-    /// Port of C++ `Shader::FragmentShader` (shader.cpp:289-365).
+    /// Compute the final color of a fragment using Blinn-Phong shading.
     pub fn fragment_shader(&self, fragment: &Fragment, material: &Material) -> Color {
         // Helper: Color → normalized Vec3 in [0, 1]
         let color_to_vec = |c: &Color| -> Vec3 {
@@ -236,7 +223,7 @@ impl Shader {
                 .unwrap_or(Vec3::ZERO)
         };
 
-        // View direction (from camera toward fragment, matching C++)
+        // View direction (from camera toward fragment)
         let view_dir = (fragment.world_position - camera_pos).normalize_or_zero();
 
         // Ambient (once, using ambient texture or base color)
@@ -284,7 +271,6 @@ impl Shader {
 
     // ── Cache updates (private) ───────────────────────────────────────
 
-    /// Port of C++ `Shader::UpdateMatrixCache`.
     fn update_matrix_cache(&mut self, name: &str, value: Mat4) {
         match name {
             "modelMatrix" => {
@@ -312,7 +298,6 @@ impl Shader {
         }
     }
 
-    /// Port of C++ `Shader::RecalculateDerivedMatrices`.
     fn recalculate_derived_matrices(&mut self) {
         self.vertex_cache.model_view = self.vertex_cache.view * self.vertex_cache.model;
         self.vertex_cache.mvp = self.vertex_cache.projection * self.vertex_cache.model_view;
@@ -322,7 +307,6 @@ impl Shader {
         self.vertex_cache.derived_valid = true;
     }
 
-    /// Port of C++ `Shader::UpdateFragmentCache` for single Light.
     fn update_fragment_cache_light(&mut self, name: &str, value: &Light) {
         if name != "light" {
             return;
@@ -336,7 +320,6 @@ impl Shader {
         }
     }
 
-    /// Port of C++ `Shader::UpdateFragmentCache` for `Vec<Light>`.
     fn update_fragment_cache_lights(&mut self, name: &str, value: &[Light]) {
         if name != "lights" {
             return;
@@ -349,7 +332,6 @@ impl Shader {
         }
     }
 
-    /// Port of C++ `Shader::UpdateFragmentCache` for Vec3 (camera position).
     fn update_fragment_cache_vec3(&mut self, name: &str, value: Vec3) {
         if name != "cameraPos" {
             return;
@@ -375,7 +357,6 @@ impl Shader {
 
     // ── Cache preparation (public, pre-render) ────────────────────────
 
-    /// Port of C++ `Shader::PrepareVertexUniformCache`.
     fn prepare_vertex_cache(&mut self) {
         if self.vertex_cache.derived_valid {
             return;
@@ -395,7 +376,6 @@ impl Shader {
         }
     }
 
-    /// Port of C++ `Shader::PrepareFragmentUniformCache`.
     fn prepare_fragment_cache(&mut self) {
         if self.fragment_cache.derived_valid {
             return;
@@ -430,8 +410,6 @@ impl Shader {
     // ── Specular LUT (private) ────────────────────────────────────────
 
     /// Build a lookup table for `cos_theta^shininess`.
-    ///
-    /// Port of C++ `Shader::BuildSpecularLUT` (shader.cpp:239-252).
     fn build_specular_lut(shininess: f32) -> SpecularLut {
         let mut values = [0.0_f32; SPECULAR_LUT_RESOLUTION];
         if shininess <= 0.0 {
@@ -451,8 +429,7 @@ impl Shader {
 
     /// Get or create a cached specular LUT for the given shininess.
     ///
-    /// Port of C++ `Shader::GetSpecularLUT` (shader.cpp:254-268).
-    /// Returns a clone of the LUT values (RwLock prevents returning a reference).
+    /// Returns a clone of the LUT values (`RwLock` prevents returning a reference).
     fn get_specular_lut(&self, shininess: f32) -> [f32; SPECULAR_LUT_RESOLUTION] {
         let key = shininess.to_bits();
 
@@ -478,8 +455,6 @@ impl Shader {
     }
 
     /// Evaluate specular contribution using cached LUT with linear interpolation.
-    ///
-    /// Port of C++ `Shader::EvaluateSpecular` (shader.cpp:270-287).
     fn evaluate_specular(&self, cos_theta: f32, shininess: f32) -> f32 {
         let cos_theta = cos_theta.clamp(0.0, 1.0);
         if shininess <= 0.0 {
@@ -502,8 +477,6 @@ impl Shader {
     // ── Texture sampling (private static) ─────────────────────────────
 
     /// Sample a texture at the given UV coordinates with wrapping.
-    ///
-    /// Port of C++ `Shader::SampleTexture` (shader.cpp:376-395).
     fn sample_texture(texture: &Texture, uv: Vec2) -> Color {
         // Wrap to [0, 1]
         let u = uv.x - uv.x.floor();
@@ -801,7 +774,10 @@ mod tests {
         assert!((val1 - val2).abs() < 1e-10);
 
         // Verify cache has exactly one entry
-        let cache = shader.specular_lut_cache.read().unwrap();
+        let cache = shader
+            .specular_lut_cache
+            .read()
+            .expect("specular LUT lock poisoned");
         assert_eq!(cache.len(), 1);
     }
 
@@ -814,14 +790,20 @@ mod tests {
         // Clone shares the same Arc
         let shader2 = shader.clone();
         {
-            let cache = shader2.specular_lut_cache.read().unwrap();
+            let cache = shader2
+                .specular_lut_cache
+                .read()
+                .expect("specular LUT lock poisoned");
             assert_eq!(cache.len(), 1);
         }
 
         // Building a new entry via the clone is visible to original
         let _ = shader2.evaluate_specular(0.5, 64.0);
         {
-            let cache = shader.specular_lut_cache.read().unwrap();
+            let cache = shader
+                .specular_lut_cache
+                .read()
+                .expect("specular LUT lock poisoned");
             assert_eq!(cache.len(), 2);
         }
     }

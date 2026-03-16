@@ -4,9 +4,8 @@ use std::ops;
 /// 32-bit RGBA color.
 ///
 /// Internal storage is `[u8; 4]` as `[R, G, B, A]`.
-/// Memory layout matches C++ `Color` class for u32 reinterpret compatibility
-/// on little-endian systems: R in bits 0-7, G in bits 8-15, B in bits 16-23,
-/// A in bits 24-31.
+/// Memory layout is u32-reinterpret compatible (little-endian RGBA):
+/// R in bits 0–7, G in bits 8–15, B in bits 16–23, A in bits 24–31.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Color {
     channels: [u8; 4],
@@ -36,8 +35,7 @@ impl Color {
     /// Create a color from floats in the `[0.0, 255.0]` range.
     ///
     /// Values are rounded via `+0.5` then truncated to `u8`.
-    /// This matches the C++ constructor that takes float parameters in the
-    /// `[0, 255]` range (NOT normalized `[0, 1]`).
+    /// Note: these are raw `[0, 255]` floats, NOT normalized `[0, 1]`.
     #[inline]
     pub fn from_f32(r: f32, g: f32, b: f32, a: f32) -> Self {
         Self {
@@ -96,8 +94,7 @@ impl Color {
 // ── u32 conversions ────────────────────────────────────────────────────────
 //
 // Layout: R in bits 0-7, G in bits 8-15, B in bits 16-23, A in bits 24-31.
-// This matches the C++ struct memory layout reinterpreted as u32 on
-// little-endian.
+// 4-byte struct reinterpreted as u32 on little-endian.
 
 impl From<u32> for Color {
     #[inline]
@@ -479,19 +476,17 @@ mod tests {
         assert_ne!(Color::new(1, 2, 3, 4), Color::new(1, 2, 3, 5));
     }
 
-    // ── C++ parity tests ──────────────────────────────────────────────
+    // ── u32 reinterpret tests ─────────────────────────────────────────
 
     #[test]
-    fn cpp_parity_white() {
-        // C++: Color::kWhite = Color((uint8_t)0xFF, 0xFF, 0xFF)
-        // alpha defaults to 255
+    fn white_constant_is_fully_opaque() {
         assert_eq!(Color::WHITE, Color::new(0xFF, 0xFF, 0xFF, 0xFF));
     }
 
     #[test]
-    fn cpp_parity_u32_roundtrip() {
-        // C++ reinterprets the 4 bytes of the struct as u32
-        // In little-endian: [R, G, B, A] → R is lowest byte
+    fn u32_reinterpret_roundtrip() {
+        // 4-byte struct reinterpreted as u32 on little-endian
+        // [R, G, B, A] → R is lowest byte
         let c = Color::new(0x12, 0x34, 0x56, 0x78);
         let val: u32 = c.into();
         assert_eq!(val, 0x78563412);

@@ -11,8 +11,6 @@ use crate::model::Model;
 use crate::shader::Shader;
 
 /// Common interface for all rendering strategies.
-///
-/// Mirrors C++ `RendererBase::Render()`.
 pub trait Renderer: Send {
     /// Render `model` into `out_buffer` (row-major, `width × height` pixels).
     ///

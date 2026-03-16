@@ -1,6 +1,6 @@
 //! Tile-based renderer (SoA layout) with edge function rasterization.
 //!
-//! Port of C++ `TileBasedRenderer` (tile_based_renderer.cpp, 530 lines).
+//! SoA tile-based forward renderer with edge-function rasterization.
 //!
 //! Algorithm:
 //! 1. Vertex transform to SoA
@@ -37,8 +37,7 @@ struct TileResult {
 
 /// SoA tile-based renderer with edge function rasterization and optional Early-Z.
 ///
-/// Mirrors C++ `TileBasedRenderer`: vertex transform → tile binning →
-/// parallel per-tile rasterization → copy to output.
+/// Vertex transform → tile binning → parallel per-tile rasterization → copy to output.
 pub struct TileBasedRenderer {
     tile_size: usize,
     early_z: bool,
@@ -329,8 +328,12 @@ fn rasterize_tile(
                     zvals[j] = z;
 
                     let sx_pix = xb + j as i32;
-                    let local_x = (sx_pix - screen_x_start as i32) as usize;
-                    let local_y = (y - screen_y_start as i32) as usize;
+                    let lx = sx_pix - screen_x_start as i32;
+                    let ly = y - screen_y_start as i32;
+                    debug_assert!(lx >= 0, "tile local x must be non-negative: {}", lx);
+                    debug_assert!(ly >= 0, "tile local y must be non-negative: {}", ly);
+                    let local_x = lx as usize;
+                    let local_y = ly as usize;
                     let idx = local_x + local_y * tile_width;
                     if z < tile_depth[idx] {
                         mask_zpass |= 1 << j;
@@ -358,8 +361,12 @@ fn rasterize_tile(
                     }
 
                     let sx_pix = xb + j as i32;
-                    let local_x = (sx_pix - screen_x_start as i32) as usize;
-                    let local_y = (y - screen_y_start as i32) as usize;
+                    let lx = sx_pix - screen_x_start as i32;
+                    let ly = y - screen_y_start as i32;
+                    debug_assert!(lx >= 0, "tile local x must be non-negative: {}", lx);
+                    debug_assert!(ly >= 0, "tile local y must be non-negative: {}", ly);
+                    let local_x = lx as usize;
+                    let local_y = ly as usize;
                     let idx = local_x + local_y * tile_width;
 
                     let b0c = b0c_arr[j];

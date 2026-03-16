@@ -27,7 +27,7 @@ impl Display {
             height,
             WindowOptions::default(),
         )
-        .expect("创建窗口失败");
+        .expect("failed to create window");
 
         Self {
             window,
@@ -56,7 +56,7 @@ impl Display {
         }
         self.window
             .update_with_buffer(&self.minifb_buffer, self.width, self.height)
-            .expect("更新窗口缓冲区失败");
+            .expect("failed to update window buffer");
     }
 
     pub fn handle_input(&mut self, camera: &mut Camera, delta_time: f32) -> Option<InputAction> {

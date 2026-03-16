@@ -1,3 +1,33 @@
+//! # SimpleRenderer
+//!
+//! An educational software renderer that implements a simplified GPU rendering
+//! pipeline entirely in safe Rust. Demonstrates vertex processing, rasterization,
+//! fragment shading, and multi-buffered display output.
+//!
+//! ## Quick Start
+//!
+//! ```no_run
+//! use simple_renderer::{SimpleRenderer, Model, Shader, Buffer, Light, RenderingMode};
+//! use simple_renderer::vertex::Vertex;
+//!
+//! let renderer = SimpleRenderer::new(800, 600);
+//! let model = Model::load("path/to/model.obj").unwrap();
+//! let mut shader = Shader::new();
+//! let mut buffer = Buffer::new(800, 600);
+//! renderer.draw_model(&model, &mut shader, buffer.draw_buffer_mut()).unwrap();
+//! ```
+//!
+//! ## Architecture
+//!
+//! The pipeline mirrors a typical GPU: **Vertex Shader → Perspective Division →
+//! Viewport Transform → Rasterization → Fragment Shader → Depth Test → Framebuffer**.
+//!
+//! Four rendering strategies are available via [`RenderingMode`]:
+//! - [`RenderingMode::PerTriangle`] — chunk-parallel forward rendering
+//! - [`RenderingMode::TileBased`] — tile-parallel with optional early-Z
+//! - [`RenderingMode::Deferred`] — deferred shading (shade only depth winners)
+//! - [`RenderingMode::TileBasedDeferred`] — tile-parallel deferred (best of both)
+
 pub mod buffer;
 pub mod color;
 pub mod error;

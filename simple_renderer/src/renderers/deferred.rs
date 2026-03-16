@@ -1,6 +1,6 @@
 //! Deferred renderer (AoS layout).
 //!
-//! Port of C++ `DeferredRenderer` (deferred_renderer.cpp, 177 lines).
+//! Deferred renderer: collect closest fragments, then shade only depth winners.
 //!
 //! Algorithm:
 //! 1. Vertex transform (sequential — `vertex_shader` needs `&mut self`)

@@ -1,6 +1,4 @@
-//! Shared helper functions for all renderer strategies.
-//!
-//! Port of C++ `RendererBase` (renderer_base.cpp, 44 lines).
+//! Shared vertex post-processing utilities for all rendering strategies.
 
 use crate::math::Vec4;
 use crate::vertex::Vertex;
@@ -11,8 +9,6 @@ const MIN_W_VALUE: f32 = 1e-6;
 ///
 /// Divides x, y, z by w.  Stores `1/w` in the w component for later
 /// perspective-correct interpolation.
-///
-/// Port of C++ `RendererBase::PerspectiveDivision`.
 pub fn perspective_division(vertex: &Vertex) -> Vertex {
     let pos = vertex.position;
     let w = if pos.w.abs() < MIN_W_VALUE {
@@ -35,8 +31,6 @@ pub fn perspective_division(vertex: &Vertex) -> Vertex {
 /// Viewport transform: NDC `[-1, 1]` → screen coordinates `[0, width/height]`.
 ///
 /// Y is flipped (NDC +Y is up, screen +Y is down).
-///
-/// Port of C++ `RendererBase::ViewportTransformation`.
 pub fn viewport_transform(vertex: &Vertex, width: usize, height: usize) -> Vertex {
     let pos = vertex.position;
     let w = width as f32;

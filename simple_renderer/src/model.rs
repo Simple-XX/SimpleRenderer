@@ -13,8 +13,7 @@ use crate::vertex::Vertex;
 
 /// An OBJ/MTL model loaded via tobj.
 ///
-/// Mirrors the C++ `Model` class: loads vertices, faces and materials
-/// (including texture maps) from Wavefront OBJ files.
+/// OBJ model loader: vertices, faces, and materials from Wavefront .obj files.
 #[derive(Debug, Clone)]
 pub struct Model {
     vertices: Vec<Vertex>,
@@ -329,9 +328,10 @@ mod tests {
             mat.diffuse_texture.is_some(),
             "Teapot should have a diffuse texture"
         );
-        let dtex = mat.diffuse_texture.as_ref().unwrap();
-        assert!(dtex.width > 0);
-        assert!(dtex.height > 0);
+        if let Some(dtex) = mat.diffuse_texture.as_ref() {
+            assert!(dtex.width > 0);
+            assert!(dtex.height > 0);
+        }
         assert!(
             mat.specular_texture.is_some(),
             "Teapot should have a specular texture"

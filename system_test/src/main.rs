@@ -35,10 +35,11 @@ fn main() {
 
     let obj_path = std::env::args()
         .nth(1)
-        .expect("用法: system_test <obj_dir>");
+        .expect("usage: system_test <obj_dir>");
 
     let model = Arc::new(
-        Model::load(&format!("{}/utah-teapot-texture/teapot.obj", obj_path)).expect("加载模型失败"),
+        Model::load(&format!("{}/utah-teapot-texture/teapot.obj", obj_path))
+            .expect("failed to load model"),
     );
 
     let mut camera = Camera::new(Vec3::new(0.0, 0.0, 1.0));
@@ -89,7 +90,7 @@ fn main() {
                     if mode != current_mode {
                         current_mode = mode;
                         shared.rendering_mode.store(mode as u8, Ordering::Relaxed);
-                        info!("切换渲染模式: {}", mode);
+                        info!("switched rendering mode: {}", mode);
                     }
                 }
                 display::InputAction::ToggleVSync => {
@@ -102,11 +103,11 @@ fn main() {
                         .double_buffer_mode
                         .store(double_buffer, Ordering::Relaxed);
                     info!(
-                        "缓冲模式: {}",
+                        "buffer mode: {}",
                         if double_buffer {
-                            "双缓冲"
+                            "double-buffered"
                         } else {
-                            "三缓冲"
+                            "triple-buffered"
                         }
                     );
                 }
@@ -207,7 +208,7 @@ fn render_loop(
         writer.clear(Color::BLACK);
         let buf = writer.render_buffer_mut();
         if let Err(e) = renderer.draw_model(&model, &mut shader, buf) {
-            log::error!("渲染失败: {}", e);
+            log::error!("render failed: {}", e);
         }
 
         if shared.double_buffer_mode.load(Ordering::Relaxed) {

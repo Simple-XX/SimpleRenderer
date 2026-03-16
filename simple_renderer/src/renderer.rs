@@ -38,7 +38,7 @@ pub struct SimpleRenderer {
 
 impl SimpleRenderer {
     pub fn new(width: usize, height: usize) -> Self {
-        let mode = RenderingMode::TileBased; // default matches C++
+        let mode = RenderingMode::TileBased;
         let early_z_enabled = true;
         let tile_size = 64;
         let renderer = Self::create_renderer(mode, width, height, early_z_enabled, tile_size);
