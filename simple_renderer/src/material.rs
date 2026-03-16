@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::sync::Arc;
 
 use crate::color::Color;
 use crate::error::{RendererError, Result};
@@ -17,8 +18,10 @@ impl Texture {
     /// Load a texture from an image file (PNG, JPEG, BMP, TGA).
     pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Texture> {
         let path = path.as_ref();
-        let img = image::open(path)
-            .map_err(|e| RendererError::TextureLoad(format!("{}: {}", path.display(), e)))?;
+        let img = image::open(path).map_err(|e| RendererError::TextureLoad {
+            path: path.display().to_string(),
+            source: Box::new(e),
+        })?;
 
         let rgba = img.to_rgba8();
         let (width, height) = rgba.dimensions();
@@ -64,9 +67,9 @@ pub struct Material {
     pub ambient: Vec3,
     pub diffuse: Vec3,
     pub specular: Vec3,
-    pub ambient_texture: Option<Texture>,
-    pub diffuse_texture: Option<Texture>,
-    pub specular_texture: Option<Texture>,
+    pub ambient_texture: Option<Arc<Texture>>,
+    pub diffuse_texture: Option<Arc<Texture>>,
+    pub specular_texture: Option<Arc<Texture>>,
 }
 
 impl Default for Material {

@@ -113,7 +113,6 @@ pub struct UniformBuffer {
     uniforms: HashMap<String, UniformValue>,
 }
 
-#[allow(dead_code)]
 impl UniformBuffer {
     /// Create an empty uniform buffer.
     pub fn new() -> Self {
@@ -129,12 +128,14 @@ impl UniformBuffer {
     }
 
     /// Check whether a uniform with the given name exists.
+    #[allow(dead_code)]
     pub fn has(&self, name: &str) -> bool {
         self.uniforms.contains_key(name)
     }
 
     // ── Typed getters ─────────────────────────────────────────────────
 
+    #[allow(dead_code)]
     pub fn get_int(&self, name: &str) -> Option<i32> {
         match self.uniforms.get(name)? {
             UniformValue::Int(v) => Some(*v),
@@ -142,6 +143,7 @@ impl UniformBuffer {
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_float(&self, name: &str) -> Option<f32> {
         match self.uniforms.get(name)? {
             UniformValue::Float(v) => Some(*v),
@@ -149,6 +151,7 @@ impl UniformBuffer {
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_vec2(&self, name: &str) -> Option<Vec2> {
         match self.uniforms.get(name)? {
             UniformValue::Vec2(v) => Some(*v),
@@ -163,6 +166,7 @@ impl UniformBuffer {
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_vec4(&self, name: &str) -> Option<Vec4> {
         match self.uniforms.get(name)? {
             UniformValue::Vec4(v) => Some(*v),
@@ -170,6 +174,7 @@ impl UniformBuffer {
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_mat3(&self, name: &str) -> Option<Mat3> {
         match self.uniforms.get(name)? {
             UniformValue::Mat3(v) => Some(*v),
@@ -198,6 +203,7 @@ impl UniformBuffer {
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_material(&self, name: &str) -> Option<&Material> {
         match self.uniforms.get(name)? {
             UniformValue::Material(v) => Some(v),

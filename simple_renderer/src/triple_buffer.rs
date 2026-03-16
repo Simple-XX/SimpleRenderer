@@ -92,8 +92,16 @@ impl TripleBufferWriter {
     /// until the display has swapped.
     pub fn publish_and_wait(&mut self) {
         self.publish();
+        // Hybrid wait: spin briefly for low-latency, then yield to avoid burning CPU.
+        const SPIN_ITERS: u32 = 64;
+        let mut spins = 0u32;
         while self.shared.state.load(Ordering::Acquire) & FRESH_BIT != 0 {
-            std::hint::spin_loop();
+            if spins < SPIN_ITERS {
+                std::hint::spin_loop();
+                spins += 1;
+            } else {
+                std::thread::yield_now();
+            }
         }
     }
 

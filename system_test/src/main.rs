@@ -191,12 +191,7 @@ fn render_loop(
         let cmd = shared.command.lock().unwrap().clone();
 
         let mode_u8 = shared.rendering_mode.load(Ordering::Relaxed);
-        let mode = match mode_u8 {
-            x if x == RenderingMode::PerTriangle as u8 => RenderingMode::PerTriangle,
-            x if x == RenderingMode::TileBased as u8 => RenderingMode::TileBased,
-            x if x == RenderingMode::Deferred as u8 => RenderingMode::Deferred,
-            _ => RenderingMode::TileBasedDeferred,
-        };
+        let mode = RenderingMode::try_from(mode_u8).unwrap_or(RenderingMode::TileBasedDeferred);
         if mode != renderer.rendering_mode() {
             renderer.set_rendering_mode(mode);
         }

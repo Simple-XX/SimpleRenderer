@@ -55,14 +55,11 @@ impl Vertex {
 
     /// Transform this vertex by a 4×4 matrix.
     ///
-    /// Applies `mat` to `position` and the upper-left 3×3 of `mat` to `normal`.
+    /// Applies `mat` to `position` and the inverse-transpose of the upper-left 3×3 of `mat` to `normal`.
+    /// This correctly handles non-uniform scaling.
     /// Also transforms `world_position` as `(mat * position).truncate()`.
     pub fn transform(&self, mat: &Mat4) -> Vertex {
-        let normal_mat = Mat3::from_cols(
-            mat.col(0).truncate(),
-            mat.col(1).truncate(),
-            mat.col(2).truncate(),
-        );
+        let normal_mat = Mat3::from_mat4(*mat).inverse().transpose();
         let transformed_pos = *mat * self.position;
         Vertex {
             position: transformed_pos,
@@ -179,6 +176,31 @@ mod tests {
         assert!((t.position.y - 20.0).abs() < 1e-6);
         assert!((t.position.z - 30.0).abs() < 1e-6);
         assert!((t.world_position - Vec3::new(10.0, 20.0, 30.0)).length() < 1e-6);
+    }
+
+    #[test]
+    fn vertex_transform_nonuniform_scale_normal() {
+        let v = Vertex::new(
+            Vec4::new(0.0, 0.0, 0.0, 1.0),
+            Vec3::new(0.0, 1.0, 0.0), // +Y normal
+            Vec2::ZERO,
+            Color::WHITE,
+        );
+        // Non-uniform scale: stretch X by 2, keep Y and Z
+        let mat = Mat4::from_scale(Vec3::new(2.0, 1.0, 1.0));
+        let t = v.transform(&mat);
+        // With correct inverse-transpose, normal should remain (0, 1, 0) normalized
+        // (stretching X doesn't affect Y normal)
+        assert!(
+            (t.normal.y - 1.0).abs() < 1e-5,
+            "normal Y should be ~1.0, got {}",
+            t.normal.y
+        );
+        assert!(
+            t.normal.x.abs() < 1e-5,
+            "normal X should be ~0.0, got {}",
+            t.normal.x
+        );
     }
 
     #[test]

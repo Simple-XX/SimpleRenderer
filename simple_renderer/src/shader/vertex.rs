@@ -1,0 +1,145 @@
+use crate::math::{Mat3, Mat4, Vec3};
+use crate::vertex::Vertex;
+
+use super::Shader;
+
+// ── Caches ────────────────────────────────────────────────────────────────
+
+/// Cached vertex-shader matrices, avoiding per-vertex HashMap lookups.
+#[derive(Clone)]
+pub(crate) struct VertexUniformCache {
+    pub(crate) model: Mat4,
+    pub(crate) view: Mat4,
+    pub(crate) projection: Mat4,
+    pub(crate) model_view: Mat4,
+    pub(crate) mvp: Mat4,
+    pub(crate) normal: Mat3,
+    pub(crate) has_model: bool,
+    pub(crate) has_view: bool,
+    pub(crate) has_projection: bool,
+    pub(crate) derived_valid: bool,
+}
+
+impl Default for VertexUniformCache {
+    fn default() -> Self {
+        Self {
+            model: Mat4::IDENTITY,
+            view: Mat4::IDENTITY,
+            projection: Mat4::IDENTITY,
+            model_view: Mat4::IDENTITY,
+            mvp: Mat4::IDENTITY,
+            normal: Mat3::IDENTITY,
+            has_model: false,
+            has_view: false,
+            has_projection: false,
+            derived_valid: false,
+        }
+    }
+}
+
+impl Shader {
+    // ── Vertex shader ─────────────────────────────────────────────────
+
+    /// Transform a vertex from model space to clip space.
+    ///
+    /// Stores world-space position on the returned Vertex's `world_position` field.
+    pub fn vertex_shader(&self, vertex: &Vertex) -> Vertex {
+        let (model, mvp, normal_mat) = if self.vertex_cache.derived_valid {
+            (
+                self.vertex_cache.model,
+                self.vertex_cache.mvp,
+                self.vertex_cache.normal,
+            )
+        } else {
+            let model = self
+                .uniform_buffer
+                .get_mat4("modelMatrix")
+                .unwrap_or(Mat4::IDENTITY);
+            let view = self
+                .uniform_buffer
+                .get_mat4("viewMatrix")
+                .unwrap_or(Mat4::IDENTITY);
+            let projection = self
+                .uniform_buffer
+                .get_mat4("projectionMatrix")
+                .unwrap_or(Mat4::IDENTITY);
+            let mvp = projection * view * model;
+            let normal_mat = Mat3::from_mat4(model).inverse().transpose();
+            (model, mvp, normal_mat)
+        };
+
+        let position = vertex.position;
+        let world_position = model * position;
+
+        let clip_position = mvp * position;
+        let transformed_normal = (normal_mat * vertex.normal).normalize_or_zero();
+
+        Vertex::new(
+            clip_position,
+            transformed_normal,
+            vertex.tex_coords,
+            vertex.color,
+        )
+        .with_clip_position(clip_position)
+        .with_world_position(world_position.truncate())
+    }
+
+    // ── Vertex cache updates (private) ────────────────────────────────
+
+    pub(super) fn update_matrix_cache(&mut self, name: &str, value: Mat4) {
+        match name {
+            "modelMatrix" => {
+                self.vertex_cache.model = value;
+                self.vertex_cache.has_model = true;
+            }
+            "viewMatrix" => {
+                self.vertex_cache.view = value;
+                self.vertex_cache.has_view = true;
+            }
+            "projectionMatrix" => {
+                self.vertex_cache.projection = value;
+                self.vertex_cache.has_projection = true;
+            }
+            _ => return,
+        }
+
+        // Any base matrix update invalidates derived matrices
+        self.vertex_cache.derived_valid = false;
+        if self.vertex_cache.has_model
+            && self.vertex_cache.has_view
+            && self.vertex_cache.has_projection
+        {
+            self.recalculate_derived_matrices();
+        }
+    }
+
+    fn recalculate_derived_matrices(&mut self) {
+        self.vertex_cache.model_view = self.vertex_cache.view * self.vertex_cache.model;
+        self.vertex_cache.mvp = self.vertex_cache.projection * self.vertex_cache.model_view;
+        self.vertex_cache.normal = Mat3::from_mat4(self.vertex_cache.model)
+            .inverse()
+            .transpose();
+        self.vertex_cache.derived_valid = true;
+    }
+
+    // ── Vertex cache preparation (pre-render) ─────────────────────────
+
+    pub(super) fn prepare_vertex_cache(&mut self) {
+        if self.vertex_cache.derived_valid {
+            return;
+        }
+        if let (Some(model), Some(view), Some(proj)) = (
+            self.uniform_buffer.get_mat4("modelMatrix"),
+            self.uniform_buffer.get_mat4("viewMatrix"),
+            self.uniform_buffer.get_mat4("projectionMatrix"),
+        ) {
+            self.vertex_cache.model = model;
+            self.vertex_cache.view = view;
+            self.vertex_cache.projection = proj;
+            self.vertex_cache.has_model = true;
+            self.vertex_cache.has_view = true;
+            self.vertex_cache.has_projection = true;
+            self.recalculate_derived_matrices();
+        }
+    }
+}

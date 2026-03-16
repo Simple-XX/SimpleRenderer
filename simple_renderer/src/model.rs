@@ -41,8 +41,11 @@ impl Model {
             ..Default::default()
         };
 
-        let (models, materials_result) = tobj::load_obj(obj_path, &load_options)
-            .map_err(|e| RendererError::ModelLoad(format!("{}: {}", path, e)))?;
+        let (models, materials_result) =
+            tobj::load_obj(obj_path, &load_options).map_err(|e| RendererError::ModelLoad {
+                path: path.to_string(),
+                source: Box::new(e),
+            })?;
 
         // Load materials — warn on failure, fall back to empty vec.
         let materials = match materials_result {
@@ -55,7 +58,7 @@ impl Model {
 
         let mut vertices: Vec<Vertex> = Vec::new();
         let mut faces: Vec<Face> = Vec::new();
-        let mut texture_cache: HashMap<PathBuf, Texture> = HashMap::new();
+        let mut texture_cache: HashMap<PathBuf, Arc<Texture>> = HashMap::new();
 
         for model in &models {
             let mesh = &model.mesh;
@@ -134,7 +137,7 @@ impl Model {
         material_id: Option<usize>,
         materials: &[tobj::Material],
         directory: &str,
-        texture_cache: &mut HashMap<PathBuf, Texture>,
+        texture_cache: &mut HashMap<PathBuf, Arc<Texture>>,
     ) -> Material {
         let mat_idx = match material_id {
             Some(idx) if idx < materials.len() => idx,
@@ -193,8 +196,8 @@ impl Model {
     fn load_texture_cached(
         texture_name: Option<&str>,
         directory: &str,
-        cache: &mut HashMap<PathBuf, Texture>,
-    ) -> Option<Texture> {
+        cache: &mut HashMap<PathBuf, Arc<Texture>>,
+    ) -> Option<Arc<Texture>> {
         let name = texture_name?;
         if name.is_empty() {
             return None;
@@ -202,13 +205,14 @@ impl Model {
 
         let full_path = PathBuf::from(directory).join(name);
 
-        if let Some(cached) = cache.get(&full_path) {
-            return Some(cached.clone());
+        if cache.contains_key(&full_path) {
+            return Some(Arc::clone(cache.get(&full_path).unwrap()));
         }
 
         match Texture::load_from_file(&full_path) {
             Ok(tex) => {
-                cache.insert(full_path, tex.clone());
+                let tex = Arc::new(tex);
+                cache.insert(full_path, Arc::clone(&tex));
                 Some(tex)
             }
             Err(e) => {
@@ -244,8 +248,8 @@ mod tests {
         let result = Model::load("/nonexistent/path/model.obj");
         assert!(result.is_err());
         match result.unwrap_err() {
-            RendererError::ModelLoad(msg) => {
-                assert!(!msg.is_empty());
+            RendererError::ModelLoad { path, .. } => {
+                assert!(!path.is_empty());
             }
             other => panic!("Expected ModelLoad error, got: {:?}", other),
         }

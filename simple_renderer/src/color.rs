@@ -35,15 +35,16 @@ impl Color {
     /// Create a color from floats in the `[0.0, 255.0]` range.
     ///
     /// Values are rounded via `+0.5` then truncated to `u8`.
+    /// Out-of-range values are clamped to `[0.0, 255.0]` before casting.
     /// Note: these are raw `[0, 255]` floats, NOT normalized `[0, 1]`.
     #[inline]
     pub fn from_f32(r: f32, g: f32, b: f32, a: f32) -> Self {
         Self {
             channels: [
-                (r + 0.5) as u8,
-                (g + 0.5) as u8,
-                (b + 0.5) as u8,
-                (a + 0.5) as u8,
+                ((r + 0.5).clamp(0.0, 255.0)) as u8,
+                ((g + 0.5).clamp(0.0, 255.0)) as u8,
+                ((b + 0.5).clamp(0.0, 255.0)) as u8,
+                ((a + 0.5).clamp(0.0, 255.0)) as u8,
             ],
         }
     }
@@ -51,14 +52,15 @@ impl Color {
     /// Create a color from normalized floats in the `[0.0, 1.0]` range.
     ///
     /// Each component is multiplied by 255.0, then truncated to `u8`.
+    /// Out-of-range values are clamped to `[0.0, 255.0]` before casting.
     #[inline]
     pub fn from_normalized(r: f32, g: f32, b: f32, a: f32) -> Self {
         Self {
             channels: [
-                (r * 255.0) as u8,
-                (g * 255.0) as u8,
-                (b * 255.0) as u8,
-                (a * 255.0) as u8,
+                ((r * 255.0).clamp(0.0, 255.0)) as u8,
+                ((g * 255.0).clamp(0.0, 255.0)) as u8,
+                ((b * 255.0).clamp(0.0, 255.0)) as u8,
+                ((a * 255.0).clamp(0.0, 255.0)) as u8,
             ],
         }
     }
@@ -251,6 +253,33 @@ mod tests {
     fn from_normalized_one() {
         let c = Color::from_normalized(1.0, 1.0, 1.0, 1.0);
         assert_eq!(c, Color::new(255, 255, 255, 255));
+    }
+
+    #[test]
+    fn from_f32_clamps_negative() {
+        let c = Color::from_f32(-10.0, -5.0, 0.0, 255.0);
+        assert_eq!(c.r(), 0);
+        assert_eq!(c.g(), 0);
+        assert_eq!(c.b(), 0);
+        assert_eq!(c.a(), 255);
+    }
+
+    #[test]
+    fn from_f32_clamps_overflow() {
+        let c = Color::from_f32(300.0, 256.0, 255.0, 255.0);
+        assert_eq!(c.r(), 255);
+        assert_eq!(c.g(), 255);
+        assert_eq!(c.b(), 255);
+        assert_eq!(c.a(), 255);
+    }
+
+    #[test]
+    fn from_normalized_clamps_overflow() {
+        let c = Color::from_normalized(1.5, -0.5, 0.5, 1.0);
+        assert_eq!(c.r(), 255);
+        assert_eq!(c.g(), 0);
+        assert_eq!(c.b(), 127);
+        assert_eq!(c.a(), 255);
     }
 
     // ── Constant tests ─────────────────────────────────────────────────

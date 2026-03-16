@@ -1,13 +1,22 @@
 use thiserror::Error;
 
 /// Errors that can occur in the renderer.
+#[non_exhaustive]
 #[derive(Debug, Error)]
 pub enum RendererError {
-    #[error("Model loading failed: {0}")]
-    ModelLoad(String),
+    #[error("Model loading failed: {path}")]
+    ModelLoad {
+        path: String,
+        #[source]
+        source: Box<dyn std::error::Error + Send + Sync>,
+    },
 
-    #[error("Texture loading failed: {0}")]
-    TextureLoad(String),
+    #[error("Texture loading failed: {path}")]
+    TextureLoad {
+        path: String,
+        #[source]
+        source: Box<dyn std::error::Error + Send + Sync>,
+    },
 
     #[error("Rendering failed: {0}")]
     RenderFailed(String),
@@ -25,8 +34,11 @@ mod tests {
 
     #[test]
     fn error_display() {
-        let e = RendererError::ModelLoad("file not found".into());
-        assert_eq!(e.to_string(), "Model loading failed: file not found");
+        let e = RendererError::ModelLoad {
+            path: "test.obj".into(),
+            source: "file not found".into(),
+        };
+        assert!(e.to_string().contains("test.obj"));
     }
 
     #[test]
@@ -44,5 +56,15 @@ mod tests {
 
         let err: Result<i32> = Err(RendererError::RenderFailed("oops".into()));
         assert!(err.is_err());
+    }
+
+    #[test]
+    fn error_source_chain() {
+        use std::error::Error;
+        let e = RendererError::ModelLoad {
+            path: "model.obj".into(),
+            source: Box::new(std::io::Error::new(std::io::ErrorKind::NotFound, "missing")),
+        };
+        assert!(e.source().is_some());
     }
 }

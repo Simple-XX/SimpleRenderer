@@ -7,6 +7,7 @@ use crate::renderers::Renderer;
 use crate::shader::Shader;
 use log::info;
 
+#[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum RenderingMode {
@@ -23,6 +24,20 @@ impl std::fmt::Display for RenderingMode {
             Self::TileBased => write!(f, "TILE_BASED"),
             Self::Deferred => write!(f, "DEFERRED"),
             Self::TileBasedDeferred => write!(f, "TILE_BASED_DEFERRED"),
+        }
+    }
+}
+
+impl TryFrom<u8> for RenderingMode {
+    type Error = u8;
+
+    fn try_from(value: u8) -> std::result::Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::PerTriangle),
+            1 => Ok(Self::TileBased),
+            2 => Ok(Self::Deferred),
+            3 => Ok(Self::TileBasedDeferred),
+            other => Err(other),
         }
     }
 }
@@ -166,5 +181,22 @@ mod tests {
             r.set_rendering_mode(*mode);
             assert_eq!(r.rendering_mode(), *mode);
         }
+    }
+
+    #[test]
+    fn try_from_u8_valid() {
+        assert_eq!(RenderingMode::try_from(0), Ok(RenderingMode::PerTriangle));
+        assert_eq!(RenderingMode::try_from(1), Ok(RenderingMode::TileBased));
+        assert_eq!(RenderingMode::try_from(2), Ok(RenderingMode::Deferred));
+        assert_eq!(
+            RenderingMode::try_from(3),
+            Ok(RenderingMode::TileBasedDeferred)
+        );
+    }
+
+    #[test]
+    fn try_from_u8_invalid() {
+        assert_eq!(RenderingMode::try_from(4), Err(4));
+        assert_eq!(RenderingMode::try_from(255), Err(255));
     }
 }
