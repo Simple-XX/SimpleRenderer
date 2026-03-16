@@ -44,13 +44,13 @@ impl Renderer for PerTriangleRenderer {
         out_buffer: &mut [u32],
         width: usize,
         height: usize,
-    ) -> bool {
+    ) -> crate::error::Result<()> {
         // 1. Clone shader + prepare caches
         let mut shader = shader.clone();
         shader.prepare_caches();
 
         let t = Instant::now();
-        // 2. Vertex transform (sequential — vertex_shader writes frag_pos_varying)
+        // 2. Vertex transform (sequential)
         let vertices = model.vertices();
         let processed_vertices: Vec<_> = vertices
             .iter()
@@ -158,7 +158,7 @@ impl Renderer for PerTriangleRenderer {
             debug!("Total:            {:8.3} ms", sum_ms);
             debug!("==========================================");
         }
-        true
+        Ok(())
     }
 }
 
@@ -252,7 +252,7 @@ mod tests {
 
         let mut buffer = vec![0u32; width * height];
         let result = renderer.render(&model, &shader, &mut buffer, width, height);
-        assert!(result);
+        assert!(result.is_ok());
 
         let nonzero_count = buffer.iter().filter(|&&p| p != 0).count();
         assert!(
@@ -282,7 +282,7 @@ mod tests {
         );
 
         let mut buffer = vec![0u32; width * height];
-        renderer.render(&model, &shader, &mut buffer, width, height);
+        let _ = renderer.render(&model, &shader, &mut buffer, width, height);
 
         let nonzero_count = buffer.iter().filter(|&&p| p != 0).count();
         assert_eq!(
@@ -311,7 +311,7 @@ mod tests {
         );
 
         let mut buffer = vec![0u32; width * height];
-        renderer.render(&model, &shader, &mut buffer, width, height);
+        let _ = renderer.render(&model, &shader, &mut buffer, width, height);
 
         let nonzero_count = buffer.iter().filter(|&&p| p != 0).count();
         assert_eq!(

@@ -11,6 +11,7 @@ pub struct Fragment {
     pub uv: Vec2,
     pub color: Color,
     pub depth: f32,
+    pub world_position: Vec3,
 }
 
 #[cfg(test)]
@@ -25,10 +26,12 @@ mod tests {
             uv: Vec2::new(0.5, 0.5),
             color: Color::WHITE,
             depth: 0.5,
+            world_position: Vec3::new(1.0, 2.0, 3.0),
         };
         assert_eq!(f.screen_coord, [100, 200]);
         assert_eq!(f.normal, Vec3::Y);
         assert_eq!(f.depth, 0.5);
+        assert_eq!(f.world_position, Vec3::new(1.0, 2.0, 3.0));
     }
 
     #[test]
@@ -39,6 +42,7 @@ mod tests {
             uv: Vec2::ZERO,
             color: Color::RED,
             depth: 0.1,
+            world_position: Vec3::ZERO,
         };
         let f2 = f.clone();
         assert_eq!(f2.screen_coord, f.screen_coord);

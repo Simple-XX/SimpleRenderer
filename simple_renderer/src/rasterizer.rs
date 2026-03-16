@@ -75,6 +75,10 @@ impl Rasterizer {
         let c1 = v1.color;
         let c2 = v2.color;
 
+        let wp0 = v0.world_position;
+        let wp1 = v1.world_position;
+        let wp2 = v2.world_position;
+
         // Parallel over rows.
         let rows: Vec<i32> = (y_min..=y_max).collect();
         rows.par_iter()
@@ -92,6 +96,7 @@ impl Rasterizer {
                     let normal = interpolate_vec3(n0, n1, n2, corrected);
                     let uv = interpolate_vec2(uv0, uv1, uv2, corrected);
                     let color = interpolate_color(c0, c1, c2, corrected);
+                    let world_position = interpolate_vec3(wp0, wp1, wp2, corrected);
 
                     row_frags.push(Fragment {
                         screen_coord: [x, y],
@@ -99,6 +104,7 @@ impl Rasterizer {
                         uv,
                         color,
                         depth,
+                        world_position,
                     });
                 }
                 row_frags
@@ -205,6 +211,7 @@ mod tests {
             tex_coords: Vec2::ZERO,
             color: Color::WHITE,
             clip_position: None,
+            world_position: Vec3::ZERO,
         }
     }
 

@@ -59,7 +59,7 @@ fn render_with_mode(mode: RenderingMode) -> usize {
 
     let mut buffer = vec![0u32; TEST_W * TEST_H];
     let result = renderer.draw_model(&model, &shader, &mut buffer);
-    assert!(result, "{:?} render should succeed", mode);
+    result.expect(&format!("{:?} render should succeed", mode));
     buffer.iter().filter(|&&p| p != 0).count()
 }
 
@@ -131,7 +131,7 @@ fn all_modes_produce_similar_output() {
     for &mode in &modes {
         renderer.set_rendering_mode(mode);
         let mut buffer = vec![0u32; TEST_W * TEST_H];
-        renderer.draw_model(&model, &shader, &mut buffer);
+        renderer.draw_model(&model, &shader, &mut buffer).expect("render failed");
         let nonzero = buffer.iter().filter(|&&p| p != 0).count();
         counts.push((mode, nonzero));
     }

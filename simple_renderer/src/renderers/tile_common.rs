@@ -44,11 +44,11 @@ pub struct TileTriangleRef {
 
 /// Transform all vertices through the vertex shader into SoA layout.
 ///
-/// Vertex shader is sequential (`&mut self`), perspective division and
+/// Vertex shader is `&self`, perspective division and
 /// viewport transform are applied, and all results are stored in `VertexSoA`.
 pub fn vertex_transform_soa(
     model: &Model,
-    shader: &mut Shader,
+    shader: &Shader,
     width: usize,
     height: usize,
 ) -> VertexSoA {
@@ -59,6 +59,7 @@ pub fn vertex_transform_soa(
     for (i, v) in vertices.iter().enumerate() {
         let clip = shader.vertex_shader(v);
         soa.pos_clip[i] = clip.position;
+        soa.world_pos[i] = clip.world_position;
         let ndc = base::perspective_division(&clip);
         let screen = base::viewport_transform(&ndc, width, height);
         soa.pos_screen[i] = screen.position;

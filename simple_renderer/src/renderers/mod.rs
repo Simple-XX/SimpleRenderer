@@ -14,7 +14,7 @@ use crate::shader::Shader;
 pub trait Renderer: Send {
     /// Render `model` into `out_buffer` (row-major, `width × height` pixels).
     ///
-    /// Returns `true` on success.
+    /// Returns `Ok(())` on success.
     fn render(
         &self,
         model: &Model,
@@ -22,5 +22,5 @@ pub trait Renderer: Send {
         out_buffer: &mut [u32],
         width: usize,
         height: usize,
-    ) -> bool;
+    ) -> crate::error::Result<()>;
 }

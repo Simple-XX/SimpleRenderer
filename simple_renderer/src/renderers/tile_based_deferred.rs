@@ -66,14 +66,14 @@ impl Renderer for TileBasedDeferredRenderer {
         out_buffer: &mut [u32],
         width: usize,
         height: usize,
-    ) -> bool {
+    ) -> crate::error::Result<()> {
         // 1. Clone shader + prepare caches
         let mut shader = shader.clone();
         shader.prepare_caches();
 
         let t = Instant::now();
         // 2. Vertex transform to SoA
-        let soa = tile_common::vertex_transform_soa(model, &mut shader, width, height);
+        let soa = tile_common::vertex_transform_soa(model, &shader, width, height);
         let vertex_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         let t = Instant::now();
@@ -175,7 +175,7 @@ impl Renderer for TileBasedDeferredRenderer {
             debug!("=================================================");
         }
 
-        true
+        Ok(())
     }
 }
 
@@ -368,6 +368,12 @@ fn rasterize_tile_deferred(
                 uv,
                 color,
                 depth: tile_depth[idx],
+                world_position: {
+                    let wp0 = grid.soa.world_pos[i0];
+                    let wp1 = grid.soa.world_pos[i1];
+                    let wp2 = grid.soa.world_pos[i2];
+                    wp0 * b0c + wp1 * b1c + wp2 * b2c
+                },
             };
 
             let out_color = shader.fragment_shader(&frag, &faces[tri.face_index].material);
@@ -457,7 +463,7 @@ mod tests {
 
         let mut buffer = vec![0u32; width * height];
         let result = renderer.render(&model, &shader, &mut buffer, width, height);
-        assert!(result);
+        assert!(result.is_ok());
 
         let nonzero_count = buffer.iter().filter(|&&p| p != 0).count();
         assert!(
@@ -483,7 +489,7 @@ mod tests {
         );
 
         let mut buffer = vec![0u32; width * height];
-        renderer.render(&model, &shader, &mut buffer, width, height);
+        let _ = renderer.render(&model, &shader, &mut buffer, width, height);
 
         let nonzero_count = buffer.iter().filter(|&&p| p != 0).count();
         assert_eq!(
@@ -510,7 +516,7 @@ mod tests {
 
         let mut buffer = vec![0u32; width * height];
         let result = renderer.render(&model, &shader, &mut buffer, width, height);
-        assert!(result);
+        assert!(result.is_ok());
 
         let nonzero_count = buffer.iter().filter(|&&p| p != 0).count();
         assert_eq!(
@@ -536,7 +542,7 @@ mod tests {
         );
 
         let mut buffer = vec![0u32; width * height];
-        renderer.render(&model, &shader, &mut buffer, width, height);
+        let _ = renderer.render(&model, &shader, &mut buffer, width, height);
 
         let nonzero_count = buffer.iter().filter(|&&p| p != 0).count();
         assert_eq!(
@@ -563,7 +569,7 @@ mod tests {
 
         let mut buffer = vec![0u32; width * height];
         let result = renderer.render(&model, &shader, &mut buffer, width, height);
-        assert!(result);
+        assert!(result.is_ok());
 
         let nonzero_count = buffer.iter().filter(|&&p| p != 0).count();
         assert!(
@@ -598,7 +604,7 @@ mod tests {
 
         let mut buffer = vec![0u32; width * height];
         let result = renderer.render(&model, &shader, &mut buffer, width, height);
-        assert!(result);
+        assert!(result.is_ok());
 
         let nonzero_count = buffer.iter().filter(|&&p| p != 0).count();
         assert!(

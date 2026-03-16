@@ -1,17 +1,17 @@
 pub mod buffer;
 pub mod color;
 pub mod error;
-pub mod face;
-pub mod fragment;
+pub(crate) mod face;
+pub(crate) mod fragment;
 pub mod light;
-pub mod material;
-pub mod math;
+pub(crate) mod material;
+pub(crate) mod math;
 pub mod model;
-pub mod rasterizer;
+pub(crate) mod rasterizer;
 pub mod renderer;
-pub mod renderers;
+pub(crate) mod renderers;
 pub mod shader;
-pub mod uniform;
+pub(crate) mod uniform;
 pub mod vertex;
 
 // Convenience re-exports

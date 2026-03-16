@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::sync::RwLock;
+use std::sync::{Arc, RwLock};
 
 use crate::color::Color;
 use crate::fragment::Fragment;
@@ -90,15 +90,14 @@ impl Default for FragmentUniformCache {
 ///
 /// Port of C++ `Shader` class.
 ///
-/// - `vertex_shader` takes `&mut self` (writes `frag_pos_varying`)
+/// - `vertex_shader` takes `&self` (world position stored on returned Vertex)
 /// - `fragment_shader` takes `&self` (interior mutability via `RwLock` for
 ///   specular LUT cache)
 pub struct Shader {
     uniform_buffer: UniformBuffer,
-    frag_pos_varying: Vec3,
     vertex_cache: VertexUniformCache,
     fragment_cache: FragmentUniformCache,
-    specular_lut_cache: RwLock<HashMap<u32, SpecularLut>>,
+    specular_lut_cache: Arc<RwLock<HashMap<u32, SpecularLut>>>,
 }
 
 impl Shader {
@@ -106,10 +105,9 @@ impl Shader {
     pub fn new() -> Self {
         Self {
             uniform_buffer: UniformBuffer::new(),
-            frag_pos_varying: Vec3::ZERO,
             vertex_cache: VertexUniformCache::default(),
             fragment_cache: FragmentUniformCache::default(),
-            specular_lut_cache: RwLock::new(HashMap::new()),
+            specular_lut_cache: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 
@@ -149,10 +147,10 @@ impl Shader {
 
     /// Transform a vertex from model space to clip space.
     ///
-    /// Writes `frag_pos_varying` (world-space position) for fragment shader.
+    /// Stores world-space position on the returned Vertex's `world_position` field.
     ///
     /// Port of C++ `Shader::VertexShader` (shader.cpp:54-101).
-    pub fn vertex_shader(&mut self, vertex: &Vertex) -> Vertex {
+    pub fn vertex_shader(&self, vertex: &Vertex) -> Vertex {
         let (model, mvp, normal_mat) = if self.vertex_cache.derived_valid {
             (
                 self.vertex_cache.model,
@@ -180,9 +178,6 @@ impl Shader {
         let position = vertex.position;
         let world_position = model * position;
 
-        // Store world-space position for fragment shader
-        self.frag_pos_varying = world_position.truncate();
-
         let clip_position = mvp * position;
         let transformed_normal = (normal_mat * vertex.normal).normalize_or_zero();
 
@@ -193,6 +188,7 @@ impl Shader {
             vertex.color,
         )
         .with_clip_position(clip_position)
+        .with_world_position(world_position.truncate())
     }
 
     // ── Fragment shader ───────────────────────────────────────────────
@@ -241,7 +237,7 @@ impl Shader {
         };
 
         // View direction (from camera toward fragment, matching C++)
-        let view_dir = (self.frag_pos_varying - camera_pos).normalize_or_zero();
+        let view_dir = (fragment.world_position - camera_pos).normalize_or_zero();
 
         // Ambient (once, using ambient texture or base color)
         let ambient_rgb = if let Some(ref tex) = material.ambient_texture {
@@ -531,10 +527,9 @@ impl Clone for Shader {
     fn clone(&self) -> Self {
         Self {
             uniform_buffer: self.uniform_buffer.clone(),
-            frag_pos_varying: self.frag_pos_varying,
             vertex_cache: self.vertex_cache.clone(),
             fragment_cache: self.fragment_cache.clone(),
-            specular_lut_cache: RwLock::new(self.specular_lut_cache.read().unwrap().clone()),
+            specular_lut_cache: Arc::clone(&self.specular_lut_cache),
         }
     }
 }
@@ -551,7 +546,6 @@ mod tests {
     #[test]
     fn shader_default() {
         let shader = Shader::new();
-        assert_eq!(shader.frag_pos_varying, Vec3::ZERO);
         assert!(!shader.vertex_cache.derived_valid);
         assert!(!shader.fragment_cache.derived_valid);
     }
@@ -609,8 +603,8 @@ mod tests {
         // Position translated by (10, 0, 0)
         assert!((result.position.x - 10.0).abs() < 1e-5);
 
-        // frag_pos_varying should hold world-space position
-        assert!((shader.frag_pos_varying.x - 10.0).abs() < 1e-5);
+        // world_position should hold world-space position
+        assert!((result.world_position.x - 10.0).abs() < 1e-5);
     }
 
     #[test]
@@ -653,6 +647,7 @@ mod tests {
             uv: Vec2::ZERO,
             color: Color::new(200, 200, 200, 255),
             depth: 0.5,
+            world_position: Vec3::ZERO,
         };
         let material = Material::default();
 
@@ -674,6 +669,7 @@ mod tests {
             uv: Vec2::ZERO,
             color: Color::new(255, 255, 255, 255),
             depth: 0.5,
+            world_position: Vec3::ZERO,
         };
         let material = Material::default();
 
@@ -705,6 +701,7 @@ mod tests {
             uv: Vec2::ZERO,
             color: Color::new(255, 255, 255, 255), // white base
             depth: 0.5,
+            world_position: Vec3::ZERO,
         };
         let material = Material {
             shininess: 32.0,
@@ -802,6 +799,27 @@ mod tests {
         // Verify cache has exactly one entry
         let cache = shader.specular_lut_cache.read().unwrap();
         assert_eq!(cache.len(), 1);
+    }
+
+    #[test]
+    fn specular_lut_shared_across_clones() {
+        let shader = Shader::new();
+        // Build a LUT entry
+        let _ = shader.evaluate_specular(0.5, 32.0);
+
+        // Clone shares the same Arc
+        let shader2 = shader.clone();
+        {
+            let cache = shader2.specular_lut_cache.read().unwrap();
+            assert_eq!(cache.len(), 1);
+        }
+
+        // Building a new entry via the clone is visible to original
+        let _ = shader2.evaluate_specular(0.5, 64.0);
+        {
+            let cache = shader.specular_lut_cache.read().unwrap();
+            assert_eq!(cache.len(), 2);
+        }
     }
 
     // ── Texture sampling ─────────────────────────────────────────────
