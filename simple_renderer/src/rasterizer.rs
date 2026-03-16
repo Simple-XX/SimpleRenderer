@@ -1,5 +1,3 @@
-use rayon::prelude::*;
-
 use crate::color::Color;
 use crate::fragment::Fragment;
 use crate::math::{Vec2, Vec3};
@@ -21,95 +19,89 @@ impl Rasterizer {
         Self { width, height }
     }
 
-    /// Rasterize a single triangle defined by three screen-space vertices.
+    /// Rasterize a triangle, calling `callback` for each fragment produced.
     ///
-    /// Returns a `Vec<Fragment>` for every pixel that falls inside the
-    /// triangle (after clamping to the screen bounds).
-    pub fn rasterize(&self, v0: &Vertex, v1: &Vertex, v2: &Vertex) -> Vec<Fragment> {
-        // Screen-space XY from the vertex position (already in screen coords).
-        let a = Vec2::new(v0.position.x, v0.position.y);
-        let b = Vec2::new(v1.position.x, v1.position.y);
-        let c = Vec2::new(v2.position.x, v2.position.y);
-
-        // Bounding box.
-        let bbox_min_x = a.x.min(b.x).min(c.x);
-        let bbox_min_y = a.y.min(b.y).min(c.y);
-        let bbox_max_x = a.x.max(b.x).max(c.x);
-        let bbox_max_y = a.y.max(b.y).max(c.y);
-
-        // Clamp to screen.
-        let x_min = bbox_min_x.max(0.0) as i32;
-        let y_min = bbox_min_y.max(0.0) as i32;
-        let x_max = bbox_max_x.min((self.width as f32) - 1.0) as i32;
-        let y_max = bbox_max_y.min((self.height as f32) - 1.0) as i32;
+    /// Zero allocation — no intermediate Vec. The outer renderer should
+    /// already be running in parallel (via `par_chunks` or `par_iter`), so
+    /// this method is intentionally sequential to avoid nested-rayon overhead.
+    #[inline]
+    pub fn rasterize_each<F>(&self, v0: &Vertex, v1: &Vertex, v2: &Vertex, mut callback: F)
+    where
+        F: FnMut(Fragment),
+    {
+        let x_min = v0.position.x.min(v1.position.x).min(v2.position.x).max(0.0) as i32;
+        let y_min = v0.position.y.min(v1.position.y).min(v2.position.y).max(0.0) as i32;
+        let x_max = v0
+            .position
+            .x
+            .max(v1.position.x)
+            .max(v2.position.x)
+            .min((self.width as f32) - 1.0) as i32;
+        let y_max = v0
+            .position
+            .y
+            .max(v1.position.y)
+            .max(v2.position.y)
+            .min((self.height as f32) - 1.0) as i32;
 
         if x_min > x_max || y_min > y_max {
-            return Vec::new();
+            return;
         }
 
-        // Positions as Vec3 for barycentric computation.
         let p0 = Vec3::new(v0.position.x, v0.position.y, v0.position.z);
         let p1 = Vec3::new(v1.position.x, v1.position.y, v1.position.z);
         let p2 = Vec3::new(v2.position.x, v2.position.y, v2.position.z);
 
-        // W components for perspective correction.
         let w0 = v0.position.w;
         let w1 = v1.position.w;
         let w2 = v2.position.w;
-
-        // Z components for depth interpolation.
         let z0 = v0.position.z;
         let z1 = v1.position.z;
         let z2 = v2.position.z;
 
-        // Vertex attributes.
         let n0 = v0.normal;
         let n1 = v1.normal;
         let n2 = v2.normal;
-
         let uv0 = v0.tex_coords;
         let uv1 = v1.tex_coords;
         let uv2 = v2.tex_coords;
-
         let c0 = v0.color;
         let c1 = v1.color;
         let c2 = v2.color;
-
         let wp0 = v0.world_position;
         let wp1 = v1.world_position;
         let wp2 = v2.world_position;
 
-        // Parallel over rows.
-        let rows: Vec<i32> = (y_min..=y_max).collect();
-        rows.par_iter()
-            .flat_map(|&y| {
-                let mut row_frags = Vec::new();
-                for x in x_min..=x_max {
-                    let point = Vec3::new(x as f32, y as f32, 0.0);
-                    let bary = match get_barycentric_coord(p0, p1, p2, point) {
-                        Some(b) => b,
-                        None => continue,
-                    };
+        for y in y_min..=y_max {
+            for x in x_min..=x_max {
+                let point = Vec3::new(x as f32, y as f32, 0.0);
+                let bary = match get_barycentric_coord(p0, p1, p2, point) {
+                    Some(b) => b,
+                    None => continue,
+                };
 
-                    let (corrected, depth) = perspective_correction(w0, w1, w2, z0, z1, z2, bary);
+                let (corrected, depth) = perspective_correction(w0, w1, w2, z0, z1, z2, bary);
 
-                    let normal = interpolate_vec3(n0, n1, n2, corrected);
-                    let uv = interpolate_vec2(uv0, uv1, uv2, corrected);
-                    let color = interpolate_color(c0, c1, c2, corrected);
-                    let world_position = interpolate_vec3(wp0, wp1, wp2, corrected);
+                callback(Fragment {
+                    screen_coord: [x, y],
+                    normal: interpolate_vec3(n0, n1, n2, corrected),
+                    uv: interpolate_vec2(uv0, uv1, uv2, corrected),
+                    color: interpolate_color(c0, c1, c2, corrected),
+                    depth,
+                    world_position: interpolate_vec3(wp0, wp1, wp2, corrected),
+                });
+            }
+        }
+    }
 
-                    row_frags.push(Fragment {
-                        screen_coord: [x, y],
-                        normal,
-                        uv,
-                        color,
-                        depth,
-                        world_position,
-                    });
-                }
-                row_frags
-            })
-            .collect()
+    /// Rasterize a single triangle, returning all fragments as a Vec.
+    ///
+    /// Prefer `rasterize_each` in hot paths to avoid allocation.
+    #[allow(dead_code)]
+    pub fn rasterize(&self, v0: &Vertex, v1: &Vertex, v2: &Vertex) -> Vec<Fragment> {
+        let mut fragments = Vec::new();
+        self.rasterize_each(v0, v1, v2, |frag| fragments.push(frag));
+        fragments
     }
 }
 

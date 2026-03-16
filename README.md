@@ -17,7 +17,7 @@ An educational Rust software renderer designed to help developers understand the
 
 SimpleRenderer is a software renderer built with the primary goal of educating developers about the fundamentals of 3D rendering and graphics pipelines. By providing a simplified yet functional rendering framework, it demystifies the complex processes involved in rendering graphics, mirroring how OpenGL and other graphics APIs work under the hood.
 
-The project is implemented in 100% safe Rust (zero `unsafe` blocks) as a Cargo workspace with two crates: `simple_renderer` (the core library) and `system_test` (the interactive demo binary).
+The project is implemented in minimal `unsafe` Rust as a Cargo workspace with two crates: `simple_renderer` (the core library) and `system_test` (the interactive demo binary).
 
 ### Purpose
 
@@ -31,9 +31,10 @@ The project is implemented in 100% safe Rust (zero `unsafe` blocks) as a Cargo w
 - **Simplified Rendering Pipeline**: Breaks down the rendering process into understandable stages, mirroring the OpenGL pipeline.
 - **Four Rendering Strategies**: Choose between `PerTriangle`, `TileBased`, `Deferred`, and `TileBasedDeferred` rendering modes at runtime.
 - **Blinn-Phong Shading**: Realistic lighting with ambient, diffuse, and specular components, including a specular LUT cache.
-- **Double-Buffered Framebuffer**: Flag-swap double buffering with no memcpy overhead.
+- **Multi-Buffered Framebuffer**: Lock-free triple buffering with dedicated render thread. Supports runtime switching between double-buffer (GPU-style VSync blocking) and triple-buffer (non-blocking) modes.
 - **Parallel Rendering**: Uses [rayon](https://github.com/rayon-rs/rayon) for scanline-parallel rasterization and chunk/tile-parallel rendering strategies.
-- **Safe Rust**: The entire codebase contains zero `unsafe` blocks.
+- **Multi-Threaded Architecture**: Dedicated render thread decoupled from input/display via lock-free triple buffer, simulating real GPU double/triple buffering behavior.
+- **Minimal Unsafe**: Only the lock-free triple buffer uses `unsafe` for `Send`/`Sync` impls with well-documented safety invariants. All rendering logic is 100% safe Rust.
 - **Cross-Platform Compatibility**: Compatible with Linux and macOS.
 
 ### Learning Objectives
@@ -45,6 +46,7 @@ By exploring SimpleRenderer, you will learn:
 - How rasterization converts vector information into pixels.
 - The fundamentals of shading models, including lighting calculations.
 - How depth buffering and backface culling optimize rendering.
+- How double and triple buffering decouple rendering from display output.
 
 ---
 
@@ -89,6 +91,8 @@ cargo run -p system_test -- ./obj        # Run demo (teapot)
 | `1` / `2` / `3` / `4` | Switch rendering mode (PerTriangle / TileBased / Deferred / TileBasedDeferred) |
 | `W` `A` `S` `D` | Move camera |
 | Right-click drag | Rotate camera |
+| `V` | Toggle VSync simulation (60 Hz) |
+| `B` | Toggle buffer mode (double / triple) |
 
 ---
 
@@ -100,7 +104,7 @@ cargo test -p simple_renderer            # Library unit tests only
 cargo test --test integration_test       # Integration tests only
 ```
 
-The test suite includes 171 unit tests and 7 integration tests. Integration tests render the bundled Utah teapot model in all four rendering modes.
+The test suite includes 178 unit tests and 7 integration tests. Integration tests render the bundled Utah teapot model in all four rendering modes.
 
 ---
 
@@ -148,6 +152,7 @@ The rendering pipeline in SimpleRenderer is designed to mirror the stages of a t
      - **Backface Culling**: Eliminates faces not visible to the camera.
      - **Parallel Rasterization**: Scanlines processed in parallel via rayon.
      - **Tile-Based Rendering**: Divides the screen into tiles for cache-friendly parallel processing.
+     - **Multi-Buffering**: Lock-free triple buffer allows the render thread to work independently of the display refresh, avoiding pipeline stalls.
 
 ### Code Structure
 
@@ -163,6 +168,7 @@ The project is a Cargo workspace with two crates:
 | `src/rasterizer.rs` | Barycentric interpolation, perspective-correct rasterization |
 | `src/model.rs` | OBJ model loader (via tobj) with texture cache |
 | `src/buffer.rs` | Double-buffered framebuffer (flag-swap, no copy) |
+| `src/triple_buffer.rs` | Lock-free triple buffer: `TripleBufferWriter` + `TripleBufferReader` for multi-threaded rendering |
 | `src/vertex.rs` | `Vertex` (AoS) and `VertexSoA` (SoA for tile renderers) |
 | `src/fragment.rs` | Fragment data passed from rasterizer to fragment shader |
 | `src/uniform.rs` | `UniformBuffer`: `HashMap`-based typed uniform storage |
@@ -177,9 +183,9 @@ The project is a Cargo workspace with two crates:
 
 | File | Role |
 |---|---|
-| `src/main.rs` | Render loop and FPS counter |
+| `src/main.rs` | Multi-threaded render loop: main thread (input/display) + render thread (shader/rasterizer) |
 | `src/camera.rs` | FPS-style free camera (Euler angles) |
-| `src/display.rs` | minifb window, keyboard/mouse input, rendering mode switching |
+| `src/display.rs` | minifb window, keyboard/mouse input, rendering mode and buffer mode switching |
 
 ### Dependencies
 

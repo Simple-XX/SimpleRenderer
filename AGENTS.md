@@ -6,7 +6,7 @@
 
 ## OVERVIEW
 
-Educational software renderer mimicking OpenGL's GPU pipeline in **Rust**. Workspace with `simple_renderer` library crate + `system_test` binary crate. Uses glam math, tobj model loading, rayon parallelism, minifb display.
+Educational software renderer mimicking OpenGL's GPU pipeline in **Rust**. Workspace with `simple_renderer` library crate + `system_test` binary crate. Uses glam math, tobj model loading, rayon parallelism, minifb display. Multi-threaded: dedicated render thread communicates with main (input/display) thread via lock-free triple buffer.
 
 ## STRUCTURE
 
@@ -22,6 +22,7 @@ SimpleRenderer/
 │   │   ├── rasterizer.rs   # Barycentric interpolation, perspective correction
 │   │   ├── model.rs        # tobj OBJ loader with texture cache
 │   │   ├── buffer.rs       # Double-buffered framebuffer (flag-swap, no copy)
+│   │   ├── triple_buffer.rs # Lock-free triple buffer (Writer+Reader, AtomicU8 state)
 │   │   ├── color.rs        # 32-bit RGBA, little-endian u32 compatible
 │   │   ├── vertex.rs       # AoS Vertex + SoA VertexSoA for tile renderers
 │   │   ├── fragment.rs     # Fragment (no material — passed separately for thread safety)
@@ -35,9 +36,9 @@ SimpleRenderer/
 │       └── integration_test.rs  # Renders teapot in all 4 modes
 ├── system_test/            # Visual demo binary
 │   └── src/
-│       ├── main.rs         # Render loop, FPS counter (Chinese comments)
+│       ├── main.rs         # Multi-threaded: main (input/display) + render thread via triple buffer
 │       ├── camera.rs       # FPS-style free camera (Euler angles)
-│       └── display.rs      # minifb window + input → RenderingMode/Camera
+│       └── display.rs      # minifb window + input → RenderingMode/Camera/VSync/BufferMode
 ├── obj/                    # Bundled 3D models (.obj/.mtl)
 ├── docs/plans/             # Implementation plans
 ├── .github/workflows/      # CI (currently C++-focused, needs Rust update)
@@ -69,6 +70,8 @@ SimpleRenderer/
 | `Rasterizer` | Struct | `rasterizer.rs` | Barycentric rasterization (rayon over scanlines) |
 | `Model` | Struct | `model.rs` | OBJ loader: vertices, faces, materials, texture cache |
 | `Buffer` | Struct | `buffer.rs` | Double-buffer with flag-swap (no memcpy) |
+| `TripleBufferWriter` | Struct | `triple_buffer.rs` | Render-thread half of lock-free triple buffer |
+| `TripleBufferReader` | Struct | `triple_buffer.rs` | Display-thread half of lock-free triple buffer |
 | `Vertex` / `VertexSoA` | Structs | `vertex.rs` | AoS for per-triangle path, SoA for tile-based path |
 | `Fragment` | Struct | `fragment.rs` | Rasterizer output → fragment shader input |
 | `UniformBuffer` | Struct | `uniform.rs` | `HashMap<String, UniformValue>` with typed getters |
@@ -127,4 +130,4 @@ cargo test --test integration_test       # Integration tests only
 - **Default mode**: `TileBased` (set in `SimpleRenderer::new`)
 - **CI workflow**: `.github/workflows/workflow.yml` still targets C++ build — needs Rust update
 - **Integration tests**: Depend on `obj/utah-teapot-texture/teapot.obj` at runtime
-- **No `unsafe`**: Entire codebase is safe Rust
+- **Minimal `unsafe`**: Only `triple_buffer.rs` uses `unsafe` for `Send`/`Sync` impls on the lock-free buffer. All rendering logic is safe Rust

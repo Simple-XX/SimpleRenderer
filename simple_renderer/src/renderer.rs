@@ -8,11 +8,12 @@ use crate::shader::Shader;
 use log::info;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
 pub enum RenderingMode {
-    PerTriangle,
-    TileBased,
-    Deferred,
-    TileBasedDeferred,
+    PerTriangle = 0,
+    TileBased = 1,
+    Deferred = 2,
+    TileBasedDeferred = 3,
 }
 
 impl std::fmt::Display for RenderingMode {

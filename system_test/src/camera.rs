@@ -76,7 +76,7 @@ impl Camera {
         self.position
     }
 
-    /// 获取当前移动速度
+    #[allow(dead_code)]
     pub fn movement_speed(&self) -> f32 {
         self.movement_speed
     }

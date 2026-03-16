@@ -83,26 +83,23 @@ impl Renderer for PerTriangleRenderer {
                         continue; // backface
                     }
 
-                    let fragments = rasterizer.rasterize(v0, v1, v2);
-
-                    for frag in &fragments {
+                    rasterizer.rasterize_each(v0, v1, v2, |frag| {
                         let x = frag.screen_coord[0];
                         let y = frag.screen_coord[1];
                         if x < 0 || y < 0 {
-                            continue;
+                            return;
                         }
-                        let x = x as usize;
-                        let y = y as usize;
+                        let (x, y) = (x as usize, y as usize);
                         if x >= width || y >= height {
-                            continue;
+                            return;
                         }
                         let idx = x + y * width;
                         if frag.depth < depth_buf[idx] {
                             depth_buf[idx] = frag.depth;
-                            let color = shader.fragment_shader(frag, &face.material);
+                            let color = shader.fragment_shader(&frag, &face.material);
                             color_buf[idx] = u32::from(color);
                         }
-                    }
+                    });
                 }
 
                 (depth_buf, color_buf)

@@ -98,28 +98,23 @@ impl Renderer for DeferredRenderer {
                     let v1 = &processed_vertices[face.indices[1]];
                     let v2 = &processed_vertices[face.indices[2]];
 
-                    // NO backface culling — collect all fragments
-                    let fragments = rasterizer.rasterize(v0, v1, v2);
-
-                    for frag in fragments {
+                    rasterizer.rasterize_each(v0, v1, v2, |frag| {
                         let x = frag.screen_coord[0];
                         let y = frag.screen_coord[1];
                         if x < 0 || y < 0 {
-                            continue;
+                            return;
                         }
-                        let x = x as usize;
-                        let y = y as usize;
+                        let (x, y) = (x as usize, y as usize);
                         if x >= width || y >= height {
-                            continue;
+                            return;
                         }
                         let idx = x + y * width;
-                        // Per-thread depth test: keep only the closest fragment
                         if frag.depth < depth_buf[idx] {
                             depth_buf[idx] = frag.depth;
                             frag_buf[idx] = frag;
                             face_buf[idx] = face_idx;
                         }
-                    }
+                    });
                 }
 
                 (depth_buf, frag_buf, face_buf)

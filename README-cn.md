@@ -17,7 +17,7 @@
 
 SimpleRenderer 是一个以教育为核心目标的软件渲染器，旨在帮助开发者掌握 3D 渲染和图形管线的基本原理。通过提供一个简化但功能完备的渲染框架，它揭示了渲染图形过程中的复杂机制，模拟了 OpenGL 等图形 API 的内部工作方式。
 
-本项目使用 100% 安全 Rust 实现（零 `unsafe` 代码块），采用 Cargo workspace 结构，包含两个 crate：`simple_renderer`（核心库）和 `system_test`（交互式演示程序）。
+本项目使用最小化 `unsafe` Rust 实现，采用 Cargo workspace 结构，包含两个 crate：`simple_renderer`（核心库）和 `system_test`（交互式演示程序）。
 
 ### 目的
 
@@ -31,9 +31,10 @@ SimpleRenderer 是一个以教育为核心目标的软件渲染器，旨在帮�
 - **简化的渲染管线**：将渲染过程分解为易于理解的阶段，模拟 OpenGL 管线。
 - **四种渲染策略**：运行时可在 `PerTriangle`、`TileBased`、`Deferred` 和 `TileBasedDeferred` 四种渲染模式之间切换。
 - **Blinn-Phong 着色**：真实光照效果，包含环境光、漫反射和镜面反射分量，以及高光 LUT 缓存。
-- **双缓冲帧缓冲**：标志位交换的双缓冲机制，零内存拷贝开销。
+- **多缓冲帧缓冲**：基于无锁三缓冲的独立渲染线程。支持运行时在双缓冲（GPU 风格 VSync 阻塞）和三缓冲（非阻塞）模式之间切换。
 - **并行渲染**：使用 [rayon](https://github.com/rayon-rs/rayon) 实现扫描线级并行光栅化和分块/分片并行渲染策略。
-- **安全 Rust**：整个代码库不包含任何 `unsafe` 代码块。
+- **多线程架构**：独立渲染线程通过无锁三缓冲与输入/显示解耦，模拟真实 GPU 双缓冲/三缓冲行为。
+- **最小化 Unsafe**：仅无锁三缓冲使用 `unsafe` 实现 `Send`/`Sync`，附完整安全不变量文档。所有渲染逻辑均为 100% 安全 Rust。
 - **跨平台兼容**：兼容 Linux 和 macOS。
 
 ### 学习目标
@@ -45,6 +46,7 @@ SimpleRenderer 是一个以教育为核心目标的软件渲染器，旨在帮�
 - 光栅化如何将矢量信息转换为像素。
 - 着色模型的基础知识，包括光照计算。
 - 深度缓冲和背面剔除如何优化渲染。
+- 双缓冲和三缓冲如何将渲染与显示输出解耦。
 
 ---
 
@@ -89,6 +91,8 @@ cargo run -p system_test -- ./obj        # 运行演示（犹他茶壶）
 | `1` / `2` / `3` / `4` | 切换渲染模式（PerTriangle / TileBased / Deferred / TileBasedDeferred） |
 | `W` `A` `S` `D` | 移动相机 |
 | 右键拖动 | 旋转相机 |
+| `V` | 切换 VSync 模拟（60 Hz） |
+| `B` | 切换缓冲模式（双缓冲 / 三缓冲） |
 
 ---
 
@@ -100,7 +104,7 @@ cargo test -p simple_renderer            # 仅运行库单元测试
 cargo test --test integration_test       # 仅运行集成测试
 ```
 
-测试套件包含 171 个单元测试和 7 个集成测试。集成测试使用内置的犹他茶壶模型在全部四种渲染模式下进行渲染验证。
+测试套件包含 178 个单元测试和 7 个集成测试。集成测试使用内置的犹他茶壶模型在全部四种渲染模式下进行渲染验证。
 
 ---
 
@@ -145,9 +149,10 @@ SimpleRenderer 的渲染管线模拟了典型的 GPU 渲染管线各阶段，清
 
    - **目标**：学习提高渲染效率的方法。
    - **关键概念**：
-     - **背面剔除**：消除相机不可见的面。
-     - **并行光栅化**：通过 rayon 并行处理扫描线。
-     - **分片渲染**：将屏幕划分为 tile，实现缓存友好的并行处理。
+      - **背面剔除**：消除相机不可见的面。
+      - **并行光栅化**：通过 rayon 并行处理扫描线。
+      - **分片渲染**：将屏幕划分为 tile，实现缓存友好的并行处理。
+      - **多缓冲**：无锁三缓冲允许渲染线程独立于显示刷新工作，避免管线停顿。
 
 ### 代码结构
 
@@ -163,6 +168,7 @@ SimpleRenderer 的渲染管线模拟了典型的 GPU 渲染管线各阶段，清
 | `src/rasterizer.rs` | 重心坐标插值，透视校正光栅化 |
 | `src/model.rs` | OBJ 模型加载器（基于 tobj），带纹理缓存 |
 | `src/buffer.rs` | 双缓冲帧缓冲（标志位交换，零拷贝） |
+| `src/triple_buffer.rs` | 无锁三缓冲：`TripleBufferWriter` + `TripleBufferReader`，用于多线程渲染 |
 | `src/vertex.rs` | `Vertex`（AoS）和 `VertexSoA`（SoA，供分片渲染器使用） |
 | `src/fragment.rs` | 从光栅化器传递到片段着色器的片段数据 |
 | `src/uniform.rs` | `UniformBuffer`：基于 `HashMap` 的类型化 uniform 存储 |
@@ -177,9 +183,9 @@ SimpleRenderer 的渲染管线模拟了典型的 GPU 渲染管线各阶段，清
 
 | 文件 | 作用 |
 |---|---|
-| `src/main.rs` | 渲染循环和 FPS 计数器 |
+| `src/main.rs` | 多线程渲染循环：主线程（输入/显示）+ 渲染线程（着色/光栅化） |
 | `src/camera.rs` | FPS 风格自由相机（欧拉角） |
-| `src/display.rs` | minifb 窗口、键盘/鼠标输入、渲染模式切换 |
+| `src/display.rs` | minifb 窗口、键盘/鼠标输入、渲染模式和缓冲模式切换 |
 
 ### 依赖
 

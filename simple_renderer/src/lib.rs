@@ -11,6 +11,7 @@ pub(crate) mod rasterizer;
 pub mod renderer;
 pub(crate) mod renderers;
 pub mod shader;
+pub mod triple_buffer;
 pub(crate) mod uniform;
 pub mod vertex;
 
