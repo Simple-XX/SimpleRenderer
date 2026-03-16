@@ -1,6 +1,8 @@
 pub mod base;
 pub mod deferred;
 pub mod per_triangle;
+#[cfg(test)]
+pub(crate) mod test_utils;
 pub mod tile_based;
 pub mod tile_based_deferred;
 pub mod tile_common;

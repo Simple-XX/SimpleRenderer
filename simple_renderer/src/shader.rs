@@ -250,8 +250,7 @@ impl Shader {
         let mut diffuse_accum = Vec3::ZERO;
         let mut specular_accum = Vec3::ZERO;
 
-        for (i, ldir) in light_dirs.iter().enumerate() {
-            let _ = i; // index used for lights[i] if needed
+        for ldir in light_dirs.iter() {
             let intensity = normal.dot(*ldir).max(0.0);
 
             // Diffuse
@@ -459,16 +458,21 @@ impl Shader {
 
         // Try read lock first
         {
-            let cache = self.specular_lut_cache.read().unwrap();
+            let cache = self
+                .specular_lut_cache
+                .read()
+                .unwrap_or_else(|e| e.into_inner());
             if let Some(lut) = cache.get(&key) {
                 return lut.values;
             }
         }
 
-        // Build and insert under write lock
         let lut = Self::build_specular_lut(shininess);
         let values = lut.values;
-        let mut cache = self.specular_lut_cache.write().unwrap();
+        let mut cache = self
+            .specular_lut_cache
+            .write()
+            .unwrap_or_else(|e| e.into_inner());
         cache.entry(key).or_insert(lut);
         values
     }

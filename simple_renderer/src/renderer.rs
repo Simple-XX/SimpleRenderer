@@ -51,7 +51,13 @@ impl SimpleRenderer {
         }
     }
 
-    pub fn draw_model(&self, model: &Model, shader: &Shader, buffer: &mut [u32]) -> crate::error::Result<()> {
+    pub fn draw_model(
+        &self,
+        model: &Model,
+        shader: &mut Shader,
+        buffer: &mut [u32],
+    ) -> crate::error::Result<()> {
+        shader.prepare_caches();
         self.renderer
             .render(model, shader, buffer, self.width, self.height)
     }

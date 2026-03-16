@@ -19,8 +19,8 @@ use crate::face::Face;
 use crate::fragment::Fragment;
 use crate::model::Model;
 use crate::renderers::tile_common::{
-    self, cross2, interpolate_color_bary, TileGridContext, TileTriangleRef, COLOR_CLEAR,
-    DEFAULT_TILE_SIZE, DEPTH_CLEAR, K_LANE,
+    self, cross2, interpolate_color_bary, TileBounds, TileGridContext, TileTriangleRef,
+    COLOR_CLEAR, DEFAULT_TILE_SIZE, DEPTH_CLEAR, K_LANE,
 };
 use crate::renderers::Renderer;
 use crate::shader::Shader;
@@ -39,20 +39,15 @@ struct TileResult {
 ///
 /// Mirrors C++ `TileBasedRenderer`: vertex transform → tile binning →
 /// parallel per-tile rasterization → copy to output.
-#[allow(dead_code)]
 pub struct TileBasedRenderer {
-    width: usize,
-    height: usize,
     tile_size: usize,
     early_z: bool,
 }
 
 impl TileBasedRenderer {
     /// Create a tile-based renderer with the given Early-Z flag and tile size.
-    pub fn new(width: usize, height: usize, early_z: bool, tile_size: usize) -> Self {
+    pub fn new(_width: usize, _height: usize, early_z: bool, tile_size: usize) -> Self {
         Self {
-            width,
-            height,
             tile_size: if tile_size > 0 {
                 tile_size
             } else {
@@ -62,7 +57,6 @@ impl TileBasedRenderer {
         }
     }
 
-    /// Create a tile-based renderer with default tile size (64) and Early-Z enabled.
     pub fn with_options(width: usize, height: usize, tile_size: usize, early_z: bool) -> Self {
         Self::new(width, height, early_z, tile_size)
     }
@@ -77,17 +71,13 @@ impl Renderer for TileBasedRenderer {
         width: usize,
         height: usize,
     ) -> crate::error::Result<()> {
-        // 1. Clone shader + prepare caches
-        let mut shader = shader.clone();
-        shader.prepare_caches();
-
         let t = Instant::now();
-        // 2. Vertex transform to SoA
-        let soa = tile_common::vertex_transform_soa(model, &shader, width, height);
+        // 1. Vertex transform to SoA
+        let soa = tile_common::vertex_transform_soa(model, shader, width, height);
         let vertex_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         let t = Instant::now();
-        // 3. Setup tile grid
+        // 2. Setup tile grid
         let tile_size = self.tile_size;
         let tiles_x = width.div_ceil(tile_size);
         let tiles_y = height.div_ceil(tile_size);
@@ -97,23 +87,21 @@ impl Renderer for TileBasedRenderer {
             tiles_x,
             tiles_y,
             tile_size,
-            width,
-            height,
         };
         let setup_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         let t = Instant::now();
-        // 4. Triangle-tile binning
+        // 3. Triangle-tile binning
         let tile_triangles = tile_common::triangle_tile_binning(model, &grid);
         let binning_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 5. Global framebuffer
+        // 4. Global framebuffer
         let num_pixels = width * height;
         let mut global_color = vec![COLOR_CLEAR; num_pixels];
         let mut global_depth = vec![DEPTH_CLEAR; num_pixels];
 
         let t = Instant::now();
-        // 6. Parallel rasterization per tile
+        // 5. Parallel rasterization per tile
         let total_tiles = tiles_x * tiles_y;
         let early_z = self.early_z;
 
@@ -132,21 +120,25 @@ impl Renderer for TileBasedRenderer {
                 let mut tile_depth = vec![DEPTH_CLEAR; tile_width * tile_height];
                 let mut tile_color = vec![COLOR_CLEAR; tile_width * tile_height];
 
-                rasterize_tile(
-                    &tile_triangles[tile_id],
-                    &grid,
-                    &mut tile_depth,
-                    &mut tile_color,
-                    &shader,
-                    model.faces(),
-                    early_z,
+                let bounds = TileBounds {
                     screen_x_start,
                     screen_y_start,
                     screen_x_end,
                     screen_y_end,
                     tile_width,
-                    width,
-                    height,
+                    tile_height: screen_y_end - screen_y_start,
+                    fb_width: width,
+                    fb_height: height,
+                };
+                rasterize_tile(
+                    &tile_triangles[tile_id],
+                    &grid,
+                    &mut tile_depth,
+                    &mut tile_color,
+                    shader,
+                    model.faces(),
+                    early_z,
+                    &bounds,
                 );
 
                 TileResult {
@@ -162,7 +154,7 @@ impl Renderer for TileBasedRenderer {
 
         let raster_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 7. Copy tile results to global framebuffer
+        // 6. Copy tile results to global framebuffer
         let t = Instant::now();
         for tile in &tile_results {
             for y in 0..tile.height {
@@ -176,7 +168,7 @@ impl Renderer for TileBasedRenderer {
         }
         let copy_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 8. Copy to output
+        // 7. Copy to output
         out_buffer[..num_pixels].copy_from_slice(&global_color);
 
         let sum_ms = vertex_ms + setup_ms + binning_ms + raster_ms + copy_ms;
@@ -210,14 +202,15 @@ fn rasterize_tile(
     shader: &Shader,
     faces: &[Face],
     use_early_z: bool,
-    screen_x_start: usize,
-    screen_y_start: usize,
-    screen_x_end: usize,
-    screen_y_end: usize,
-    tile_width: usize,
-    width: usize,
-    height: usize,
+    bounds: &TileBounds,
 ) {
+    let screen_x_start = bounds.screen_x_start;
+    let screen_y_start = bounds.screen_y_start;
+    let screen_x_end = bounds.screen_x_end;
+    let screen_y_end = bounds.screen_y_end;
+    let tile_width = bounds.tile_width;
+    let width = bounds.fb_width;
+    let height = bounds.fb_height;
     for tri in triangles {
         let i0 = tri.i0;
         let i1 = tri.i1;
@@ -403,18 +396,12 @@ fn rasterize_tile(
                         },
                     };
 
-                    if use_early_z {
+                    // Depth test first, shade only if closer (avoids wasted shading)
+                    if frag.depth < tile_depth[idx] {
                         let out_color =
                             shader.fragment_shader(&frag, &faces[tri.face_index].material);
                         tile_depth[idx] = frag.depth;
                         tile_color[idx] = u32::from(out_color);
-                    } else {
-                        let out_color =
-                            shader.fragment_shader(&frag, &faces[tri.face_index].material);
-                        if frag.depth < tile_depth[idx] {
-                            tile_depth[idx] = frag.depth;
-                            tile_color[idx] = u32::from(out_color);
-                        }
                     }
                 }
 
@@ -429,63 +416,7 @@ fn rasterize_tile(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::color::Color;
-    use crate::light::Light;
-    use crate::math::{Mat4, Vec3};
-
-    fn test_shader() -> Shader {
-        let mut shader = Shader::new();
-        shader.set_uniform("modelMatrix", Mat4::IDENTITY);
-        shader.set_uniform("viewMatrix", Mat4::IDENTITY);
-        shader.set_uniform("projectionMatrix", Mat4::IDENTITY);
-        shader.set_lights(&[Light {
-            name: "test".to_string(),
-            position: Vec3::ZERO,
-            direction: Vec3::new(0.0, 0.0, 1.0),
-            color: Color::WHITE,
-        }]);
-        shader.set_uniform("cameraPos", Vec3::new(0.0, 0.0, 5.0));
-        shader
-    }
-
-    fn create_test_model(
-        positions: &[[f32; 3]],
-        normal: [f32; 3],
-        face_indices: &[[usize; 3]],
-    ) -> crate::model::Model {
-        use std::io::Write;
-        use std::sync::atomic::{AtomicUsize, Ordering};
-
-        static COUNTER: AtomicUsize = AtomicUsize::new(2000);
-        let id = COUNTER.fetch_add(1, Ordering::SeqCst);
-        let path = std::env::temp_dir().join(format!("simple_renderer_tilebased_test_{}.obj", id));
-
-        let mut file = std::fs::File::create(&path).unwrap();
-        for pos in positions {
-            writeln!(file, "v {} {} {}", pos[0], pos[1], pos[2]).unwrap();
-        }
-        for _ in positions {
-            writeln!(file, "vn {} {} {}", normal[0], normal[1], normal[2]).unwrap();
-        }
-        for face in face_indices {
-            writeln!(
-                file,
-                "f {}//{} {}//{} {}//{}",
-                face[0] + 1,
-                face[0] + 1,
-                face[1] + 1,
-                face[1] + 1,
-                face[2] + 1,
-                face[2] + 1,
-            )
-            .unwrap();
-        }
-        drop(file);
-
-        let model = crate::model::Model::load(path.to_str().unwrap()).unwrap();
-        let _ = std::fs::remove_file(&path);
-        model
-    }
+    use crate::renderers::test_utils::{create_test_model, test_shader};
 
     // ── Visible triangle produces pixels ──────────────────────────────
 

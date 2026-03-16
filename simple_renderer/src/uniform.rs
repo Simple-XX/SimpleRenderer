@@ -115,6 +115,7 @@ pub struct UniformBuffer {
     uniforms: HashMap<String, UniformValue>,
 }
 
+#[allow(dead_code)]
 impl UniformBuffer {
     /// Create an empty uniform buffer.
     pub fn new() -> Self {

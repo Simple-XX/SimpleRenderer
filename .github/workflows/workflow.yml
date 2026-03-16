@@ -10,54 +10,44 @@ on:
   - pull_request
   - release
 
-env:
-  CMAKE_BUILD_TYPE: Release
-
 jobs:
-  build_docs:
-    name: Build and publish documentation
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install --fix-missing -y doxygen graphviz clang-format clang-tidy cppcheck lcov
-          sudo apt install --fix-missing -y gcc g++ libsdl2-dev libsdl2-ttf-dev libomp-dev libspdlog-dev libassimp-dev
-
-      - name: Build
-        run: |
-          cmake --preset=build
-          cmake --build build --target doc
-
-      - name: Publish
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{github.workspace}}/doc/html
-
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install --fix-missing -y doxygen graphviz clang-format clang-tidy cppcheck lcov
-          sudo apt install --fix-missing -y gcc g++ libsdl2-dev libsdl2-ttf-dev libomp-dev libspdlog-dev libassimp-dev
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-git-
+
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-target-
 
       - name: Build
-        run: |
-          cmake --preset=build
-          cmake --build build --target all
-          cmake --build build --target coverage
+        run: cargo build --workspace
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: build/coverage/coverage.info
-          verbose: true
+      - name: Run tests
+        run: cargo test --workspace
+
+      - name: Run clippy
+        run: cargo clippy --workspace -- -D warnings

@@ -11,11 +11,13 @@
 [![cn](https://img.shields.io/badge/language-Chinese-pink.svg)](https://github.com/Simple-XX/SimpleRenderer/blob/main/README-cn.md)
 [![en](https://img.shields.io/badge/language-English-lightblue.svg)](https://github.com/Simple-XX/SimpleRenderer/blob/main/README.md)
 
-An educational C++ software renderer designed to help developers understand the inner workings of rendering pipelines and how OpenGL operates behind the scenes.
+An educational Rust software renderer designed to help developers understand the inner workings of rendering pipelines and how OpenGL operates behind the scenes.
 
 ## Overview
 
 SimpleRenderer is a software renderer built with the primary goal of educating developers about the fundamentals of 3D rendering and graphics pipelines. By providing a simplified yet functional rendering framework, it demystifies the complex processes involved in rendering graphics, mirroring how OpenGL and other graphics APIs work under the hood.
+
+The project is implemented in 100% safe Rust (zero `unsafe` blocks) as a Cargo workspace with two crates: `simple_renderer` (the core library) and `system_test` (the interactive demo binary).
 
 ### Purpose
 
@@ -27,8 +29,12 @@ SimpleRenderer is a software renderer built with the primary goal of educating d
 
 - **Customizable Shaders**: Implemented vertex and fragment shaders to demonstrate how shading works at a fundamental level.
 - **Simplified Rendering Pipeline**: Breaks down the rendering process into understandable stages, mirroring the OpenGL pipeline.
-- **Cross-Platform Compatibility**: Compatible with Linux and macOS, facilitating learning across different environments.
-- **Extensive Documentation**: Provides detailed explanations of each component to aid learning and comprehension.
+- **Four Rendering Strategies**: Choose between `PerTriangle`, `TileBased`, `Deferred`, and `TileBasedDeferred` rendering modes at runtime.
+- **Blinn-Phong Shading**: Realistic lighting with ambient, diffuse, and specular components, including a specular LUT cache.
+- **Double-Buffered Framebuffer**: Flag-swap double buffering with no memcpy overhead.
+- **Parallel Rendering**: Uses [rayon](https://github.com/rayon-rs/rayon) for scanline-parallel rasterization and chunk/tile-parallel rendering strategies.
+- **Safe Rust**: The entire codebase contains zero `unsafe` blocks.
+- **Cross-Platform Compatibility**: Compatible with Linux and macOS.
 
 ### Learning Objectives
 
@@ -46,17 +52,13 @@ By exploring SimpleRenderer, you will learn:
 
 ### Prerequisites
 
-Ensure you have the following dependencies installed:
+Ensure you have Rust and Cargo installed. The recommended way is via [rustup](https://rustup.rs/):
 
 ```bash
-sudo apt install doxygen graphviz clang-format clang-tidy cppcheck lcov gcc g++ libsdl2-dev libsdl2-ttf-dev libomp-dev libspdlog-dev cmake libassimp-dev
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-For macOS users, install dependencies using Homebrew:
-
-```bash
-brew install doxygen graphviz clang-format clang-tidy cppcheck lcov gcc sdl2 sdl2_ttf libomp spdlog cmake assimp
-```
+No other system dependencies are required — all library dependencies are managed by Cargo.
 
 ### Building the Project
 
@@ -67,27 +69,38 @@ git clone https://github.com/Simple-XX/SimpleRenderer.git
 cd SimpleRenderer
 ```
 
-#### 2. Configure and Build Using CMake Presets
-
-For a standard build:
+#### 2. Build
 
 ```bash
-cmake --preset=build
-cmake --build build --target all
-```
-
-For macOS:
-
-```bash
-cmake --preset=build-macos
-cmake --build build-macos --target all
+cargo build                              # Debug build
+cargo build --release                    # Release build
 ```
 
 #### 3. Run the Example Application
 
 ```bash
-./build/bin/system_test ./obj
+cargo run -p system_test -- ./obj        # Run demo (teapot)
 ```
+
+### Controls
+
+| Key / Action | Effect |
+|---|---|
+| `1` / `2` / `3` / `4` | Switch rendering mode (PerTriangle / TileBased / Deferred / TileBasedDeferred) |
+| `W` `A` `S` `D` | Move camera |
+| Right-click drag | Rotate camera |
+
+---
+
+## Testing
+
+```bash
+cargo test                               # All tests
+cargo test -p simple_renderer            # Library unit tests only
+cargo test --test integration_test       # Integration tests only
+```
+
+The test suite includes 171 unit tests and 7 integration tests. Integration tests render the bundled Utah teapot model in all four rendering modes.
 
 ---
 
@@ -124,7 +137,7 @@ The rendering pipeline in SimpleRenderer is designed to mirror the stages of a t
 
    - **Objective**: Explore how lighting affects the appearance of surfaces.
    - **Key Concepts**:
-     - **Phong Shading Model**: Simulates realistic lighting with ambient, diffuse, and specular components.
+     - **Blinn-Phong Shading Model**: Simulates realistic lighting with ambient, diffuse, and specular components.
      - **Surface Normals**: Determine how light interacts with surfaces.
      - **Light Sources**: Understand different types of lights (directional, point, ambient).
 
@@ -133,29 +146,52 @@ The rendering pipeline in SimpleRenderer is designed to mirror the stages of a t
    - **Objective**: Learn methods to improve rendering efficiency.
    - **Key Concepts**:
      - **Backface Culling**: Eliminates faces not visible to the camera.
-     - **Spatial Partitioning**: Organizes objects to reduce rendering workload.
+     - **Parallel Rasterization**: Scanlines processed in parallel via rayon.
+     - **Tile-Based Rendering**: Divides the screen into tiles for cache-friendly parallel processing.
 
 ### Code Structure
 
-- **src/rasterizer.cpp**
+The project is a Cargo workspace with two crates:
 
-  Focuses on the rasterization process, converting vector data into raster images. Key learning points include:
+#### `simple_renderer/` — Core Library Crate
 
-  - Implementing barycentric interpolation.
-  - Managing depth buffering.
-  - Handling edge cases in rasterization.
+| File | Role |
+|---|---|
+| `src/renderer.rs` | `SimpleRenderer`: mode selection and `draw_model` entry point |
+| `src/renderers/` | Four rendering strategies implementing the `Renderer` trait |
+| `src/shader.rs` | Vertex and fragment shaders, uniform caching |
+| `src/rasterizer.rs` | Barycentric interpolation, perspective-correct rasterization |
+| `src/model.rs` | OBJ model loader (via tobj) with texture cache |
+| `src/buffer.rs` | Double-buffered framebuffer (flag-swap, no copy) |
+| `src/vertex.rs` | `Vertex` (AoS) and `VertexSoA` (SoA for tile renderers) |
+| `src/fragment.rs` | Fragment data passed from rasterizer to fragment shader |
+| `src/uniform.rs` | `UniformBuffer`: `HashMap`-based typed uniform storage |
+| `src/material.rs` | `Material` and `Texture` (loaded via the image crate) |
+| `src/math.rs` | Re-exports glam; `perspective_rh_gl`, `look_at_rh` helpers |
+| `src/light.rs` | `Light` (name, position, direction, color) |
+| `src/face.rs` | `Face` (3 vertex indices + `Arc<Material>`) |
+| `src/color.rs` | 32-bit RGBA color, little-endian u32 compatible |
+| `src/error.rs` | `RendererError` (thiserror) and `Result<T>` alias |
 
-- **src/renderer.cpp**
+#### `system_test/` — Interactive Demo Binary
 
-  Orchestrates the rendering process. Highlights include:
+| File | Role |
+|---|---|
+| `src/main.rs` | Render loop and FPS counter |
+| `src/camera.rs` | FPS-style free camera (Euler angles) |
+| `src/display.rs` | minifb window, keyboard/mouse input, rendering mode switching |
 
-  - Setting up transformation matrices.
-  - Managing the rendering loop.
-  - Integrating shaders and handling user input.
+### Dependencies
 
-- **src/include/**
-
-  Contains header files with detailed comments explaining the purpose and functionality of classes and methods.
+| Crate | Purpose |
+|---|---|
+| glam 0.29 | Vec3, Vec4, Mat4 math |
+| tobj 4.0 | OBJ model loading |
+| image 0.25 | Texture loading (PNG, JPEG, BMP, TGA) |
+| rayon 1.10 | Parallel iteration |
+| minifb 0.27 | Window and display (system_test only) |
+| thiserror 2 | Error derive macros |
+| log 0.4 + env_logger 0.11 | Logging |
 
 ---
 
@@ -165,7 +201,7 @@ To maximize learning, consider the following steps:
 
 - **Modify Shaders**
 
-  Experiment with the shader code to see how changes affect rendering.
+  Experiment with the shader code in `simple_renderer/src/shader.rs` to see how changes affect rendering.
 
 - **Adjust Transformations**
 
@@ -175,18 +211,9 @@ To maximize learning, consider the following steps:
 
   Try adding new lighting models, textures, or shading techniques.
 
----
+- **Add a Rendering Strategy**
 
-## Documentation
-
-Generate the documentation to delve deeper into the codebase:
-
-````bash
-cmake --build build --target doc
-xdg-open doc/html/index.html
-````
-
-The documentation provides detailed explanations and diagrams to enhance understanding.
+  Implement the `Renderer` trait in `simple_renderer/src/renderers/` and register it in `renderer.rs::create_renderer`.
 
 ---
 

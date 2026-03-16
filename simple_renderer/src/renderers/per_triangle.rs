@@ -23,16 +23,11 @@ use crate::shader::Shader;
 ///
 /// Mirrors C++ `PerTriangleRenderer`: vertex transform → parallel
 /// rasterization (backface culling + depth test) → merge.
-#[allow(dead_code)]
-pub struct PerTriangleRenderer {
-    width: usize,
-    height: usize,
-}
+pub struct PerTriangleRenderer;
 
 impl PerTriangleRenderer {
-    /// Create a renderer for a framebuffer of `width × height` pixels.
-    pub fn new(width: usize, height: usize) -> Self {
-        Self { width, height }
+    pub fn new(_width: usize, _height: usize) -> Self {
+        Self
     }
 }
 
@@ -45,12 +40,8 @@ impl Renderer for PerTriangleRenderer {
         width: usize,
         height: usize,
     ) -> crate::error::Result<()> {
-        // 1. Clone shader + prepare caches
-        let mut shader = shader.clone();
-        shader.prepare_caches();
-
         let t = Instant::now();
-        // 2. Vertex transform (sequential)
+        // 1. Vertex transform (sequential)
         let vertices = model.vertices();
         let processed_vertices: Vec<_> = vertices
             .iter()
@@ -62,7 +53,7 @@ impl Renderer for PerTriangleRenderer {
             .collect();
         let vertex_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 3. Parallel rasterization over face chunks
+        // 2. Parallel rasterization over face chunks
         let t = Instant::now();
         let num_pixels = width * height;
         let faces = model.faces();
@@ -120,7 +111,7 @@ impl Renderer for PerTriangleRenderer {
 
         let raster_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 4. Merge thread results — pick minimum depth per pixel
+        // 3. Merge thread results — pick minimum depth per pixel
         let t = Instant::now();
         for i in 0..num_pixels {
             let mut min_depth = f32::INFINITY;
@@ -167,67 +158,7 @@ impl Renderer for PerTriangleRenderer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::color::Color;
-    use crate::light::Light;
-    use crate::math::{Mat4, Vec3};
-
-    /// Set up a shader with identity matrices and a simple light for testing.
-    fn test_shader() -> Shader {
-        let mut shader = Shader::new();
-        shader.set_uniform("modelMatrix", Mat4::IDENTITY);
-        shader.set_uniform("viewMatrix", Mat4::IDENTITY);
-        shader.set_uniform("projectionMatrix", Mat4::IDENTITY);
-        shader.set_lights(&[Light {
-            name: "test".to_string(),
-            position: Vec3::ZERO,
-            direction: Vec3::new(0.0, 0.0, 1.0),
-            color: Color::WHITE,
-        }]);
-        shader.set_uniform("cameraPos", Vec3::new(0.0, 0.0, 5.0));
-        shader
-    }
-
-    /// Create a simple OBJ file and load it as a Model.
-    ///
-    /// Writes a temp file with the given vertices (with normals) and face.
-    fn create_test_model(
-        positions: &[[f32; 3]],
-        normal: [f32; 3],
-        face_indices: &[[usize; 3]],
-    ) -> Model {
-        use std::io::Write;
-        use std::sync::atomic::{AtomicUsize, Ordering};
-
-        static COUNTER: AtomicUsize = AtomicUsize::new(0);
-        let id = COUNTER.fetch_add(1, Ordering::SeqCst);
-        let path = std::env::temp_dir().join(format!("simple_renderer_test_{}.obj", id));
-
-        let mut file = std::fs::File::create(&path).unwrap();
-        for pos in positions {
-            writeln!(file, "v {} {} {}", pos[0], pos[1], pos[2]).unwrap();
-        }
-        for _ in positions {
-            writeln!(file, "vn {} {} {}", normal[0], normal[1], normal[2]).unwrap();
-        }
-        for face in face_indices {
-            writeln!(
-                file,
-                "f {}//{} {}//{} {}//{}",
-                face[0] + 1,
-                face[0] + 1,
-                face[1] + 1,
-                face[1] + 1,
-                face[2] + 1,
-                face[2] + 1,
-            )
-            .unwrap();
-        }
-        drop(file);
-
-        let model = Model::load(path.to_str().unwrap()).unwrap();
-        let _ = std::fs::remove_file(&path);
-        model
-    }
+    use crate::renderers::test_utils::{create_test_model, test_shader};
 
     // ── Visible triangle produces pixels ──────────────────────────────
 

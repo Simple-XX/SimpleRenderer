@@ -16,6 +16,17 @@ pub const K_LANE: usize = 8;
 pub const DEPTH_CLEAR: f32 = f32::INFINITY;
 pub const COLOR_CLEAR: u32 = 0;
 
+pub struct TileBounds {
+    pub screen_x_start: usize,
+    pub screen_y_start: usize,
+    pub screen_x_end: usize,
+    pub screen_y_end: usize,
+    pub tile_width: usize,
+    pub tile_height: usize,
+    pub fb_width: usize,
+    pub fb_height: usize,
+}
+
 // ── Tile grid context ─────────────────────────────────────────────────────
 
 /// Immutable context describing the tile grid and SoA vertex data.
@@ -24,8 +35,6 @@ pub struct TileGridContext {
     pub tiles_x: usize,
     pub tiles_y: usize,
     pub tile_size: usize,
-    pub width: usize,
-    pub height: usize,
 }
 
 // ── Triangle reference for tile binning ───────────────────────────────────
@@ -136,11 +145,11 @@ fn process_triangle_for_binning(
     let c2 = grid.soa.pos_clip[i2];
 
     let frustum_cull = (c0.x > c0.w && c1.x > c1.w && c2.x > c2.w)
-        || (c0.x < -c0.w && c1.x < -c0.w && c2.x < -c0.w)
+        || (c0.x < -c0.w && c1.x < -c1.w && c2.x < -c2.w)
         || (c0.y > c0.w && c1.y > c1.w && c2.y > c2.w)
-        || (c0.y < -c0.w && c1.y < -c0.w && c2.y < -c0.w)
+        || (c0.y < -c0.w && c1.y < -c1.w && c2.y < -c2.w)
         || (c0.z > c0.w && c1.z > c1.w && c2.z > c2.w)
-        || (c0.z < -c0.w && c1.z < -c0.w && c2.z < -c0.w);
+        || (c0.z < -c0.w && c1.z < -c1.w && c2.z < -c2.w);
     if frustum_cull {
         return;
     }

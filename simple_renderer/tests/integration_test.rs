@@ -53,12 +53,12 @@ fn setup_shader() -> Shader {
 
 fn render_with_mode(mode: RenderingMode) -> usize {
     let model = Model::load(TEAPOT_PATH).expect("Failed to load teapot");
-    let shader = setup_shader();
+    let mut shader = setup_shader();
     let mut renderer = SimpleRenderer::new(TEST_W, TEST_H);
     renderer.set_rendering_mode(mode);
 
     let mut buffer = vec![0u32; TEST_W * TEST_H];
-    let result = renderer.draw_model(&model, &shader, &mut buffer);
+    let result = renderer.draw_model(&model, &mut shader, &mut buffer);
     result.expect(&format!("{:?} render should succeed", mode));
     buffer.iter().filter(|&&p| p != 0).count()
 }
@@ -117,7 +117,7 @@ fn render_tile_based_deferred_produces_pixels() {
 #[test]
 fn all_modes_produce_similar_output() {
     let model = Model::load(TEAPOT_PATH).expect("Failed to load teapot");
-    let shader = setup_shader();
+    let mut shader = setup_shader();
     let mut renderer = SimpleRenderer::new(TEST_W, TEST_H);
 
     let modes = [
@@ -131,7 +131,9 @@ fn all_modes_produce_similar_output() {
     for &mode in &modes {
         renderer.set_rendering_mode(mode);
         let mut buffer = vec![0u32; TEST_W * TEST_H];
-        renderer.draw_model(&model, &shader, &mut buffer).expect("render failed");
+        renderer
+            .draw_model(&model, &mut shader, &mut buffer)
+            .expect("render failed");
         let nonzero = buffer.iter().filter(|&&p| p != 0).count();
         counts.push((mode, nonzero));
     }

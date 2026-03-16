@@ -85,7 +85,9 @@ fn main() {
 
         // 清空帧缓冲并渲染
         buffer.clear_draw_buffer(Color::BLACK);
-        renderer.draw_model(&model, &shader, buffer.draw_buffer_mut()).expect("渲染失败");
+        renderer
+            .draw_model(&model, &mut shader, buffer.draw_buffer_mut())
+            .expect("渲染失败");
         buffer.swap();
 
         // 显示到窗口
