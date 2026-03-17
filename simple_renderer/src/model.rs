@@ -205,8 +205,8 @@ impl Model {
 
         let full_path = PathBuf::from(directory).join(name);
 
-        if cache.contains_key(&full_path) {
-            return Some(Arc::clone(cache.get(&full_path).unwrap()));
+        if let Some(tex) = cache.get(&full_path) {
+            return Some(Arc::clone(tex));
         }
 
         match Texture::load_from_file(&full_path) {

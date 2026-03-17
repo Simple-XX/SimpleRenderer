@@ -1,6 +1,3 @@
-use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
-
 use super::Shader;
 
 // ── Constants ─────────────────────────────────────────────────────────────

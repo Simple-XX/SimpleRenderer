@@ -15,9 +15,7 @@ use std::time::Instant;
 
 use rayon::prelude::*;
 
-use crate::color::Color;
 use crate::fragment::Fragment;
-use crate::math::{Vec2, Vec3};
 use crate::model::Model;
 use crate::rasterizer::Rasterizer;
 use crate::renderers::base;
@@ -30,17 +28,23 @@ use crate::shader::Shader;
 /// - NO backface culling — all fragments are collected
 /// - Depth resolve happens after rasterization, not during
 /// - Fragment shader is called ONCE per pixel (on the winner only)
-pub struct DeferredRenderer;
+pub struct DeferredRenderer {
+    chunk_depth: Vec<Vec<f32>>,
+    chunk_frags: Vec<Vec<Option<(Fragment, usize)>>>,
+}
 
 impl DeferredRenderer {
     pub fn new(_width: usize, _height: usize) -> Self {
-        Self
+        Self {
+            chunk_depth: Vec::new(),
+            chunk_frags: Vec::new(),
+        }
     }
 }
 
 impl Renderer for DeferredRenderer {
     fn render(
-        &self,
+        &mut self,
         model: &Model,
         shader: &Shader,
         out_buffer: &mut [u32],
@@ -48,7 +52,7 @@ impl Renderer for DeferredRenderer {
         height: usize,
     ) -> crate::error::Result<()> {
         let t = Instant::now();
-        // 1. Vertex transform (sequential)
+        // 1. Vertex transform (sequential — Shader is not Sync yet)
         let vertices = model.vertices();
         let processed_vertices: Vec<_> = vertices
             .iter()
@@ -71,27 +75,30 @@ impl Renderer for DeferredRenderer {
         let rasterizer = Rasterizer::new(width, height);
         let num_threads = rayon::current_num_threads();
         let chunk_size = std::cmp::max(faces.len() / num_threads, 1);
+        let num_chunks = faces.chunks(chunk_size).len();
 
-        // Dummy fragment for buffer initialization (never read — only valid
-        // entries where depth_buf < INFINITY are accessed during merge).
-        let dummy = Fragment {
-            screen_coord: [0, 0],
-            normal: Vec3::ZERO,
-            uv: Vec2::ZERO,
-            color: Color::new(0, 0, 0, 0),
-            depth: f32::INFINITY,
-            world_position: Vec3::ZERO,
-        };
+        // Reuse chunk buffers across frames
+        self.chunk_depth.resize_with(num_chunks, Vec::new);
+        self.chunk_frags.resize_with(num_chunks, Vec::new);
+        self.chunk_depth.truncate(num_chunks);
+        self.chunk_frags.truncate(num_chunks);
+        for buf in &mut self.chunk_depth {
+            buf.resize(num_pixels, f32::INFINITY);
+            buf.fill(f32::INFINITY);
+        }
+        for buf in &mut self.chunk_frags {
+            buf.resize(num_pixels, None);
+            buf.fill(None);
+        }
 
-        // Per-thread result: (depth_buf, fragment_buf, face_index_buf)
-        let chunk_results: Vec<(Vec<f32>, Vec<Fragment>, Vec<usize>)> = faces
+        let chunk_depth = &mut self.chunk_depth;
+        let chunk_frags = &mut self.chunk_frags;
+
+        faces
             .par_chunks(chunk_size)
             .enumerate()
-            .map(|(chunk_idx, face_chunk)| {
-                let mut depth_buf = vec![f32::INFINITY; num_pixels];
-                let mut frag_buf = vec![dummy.clone(); num_pixels];
-                let mut face_buf = vec![0usize; num_pixels];
-
+            .zip(chunk_depth.par_iter_mut().zip(chunk_frags.par_iter_mut()))
+            .for_each(|((chunk_idx, face_chunk), (depth_buf, frag_buf))| {
                 for (local_idx, face) in face_chunk.iter().enumerate() {
                     let face_idx = chunk_idx * chunk_size + local_idx;
                     let v0 = &processed_vertices[face.indices[0]];
@@ -111,15 +118,11 @@ impl Renderer for DeferredRenderer {
                         let idx = x + y * width;
                         if frag.depth < depth_buf[idx] {
                             depth_buf[idx] = frag.depth;
-                            frag_buf[idx] = frag;
-                            face_buf[idx] = face_idx;
+                            frag_buf[idx] = Some((frag, face_idx));
                         }
                     });
                 }
-
-                (depth_buf, frag_buf, face_buf)
-            })
-            .collect();
+            });
 
         let collect_ms = t.elapsed().as_secs_f64() * 1000.0;
 
@@ -134,18 +137,20 @@ impl Renderer for DeferredRenderer {
                 let mut best_depth = f32::INFINITY;
                 let mut best_chunk: Option<usize> = None;
 
-                for (chunk_idx, (depth_buf, _, _)) in chunk_results.iter().enumerate() {
+                for (ci, depth_buf) in chunk_depth.iter().enumerate() {
                     if depth_buf[i] < best_depth {
                         best_depth = depth_buf[i];
-                        best_chunk = Some(chunk_idx);
+                        best_chunk = Some(ci);
                     }
                 }
 
-                if let Some(chunk_idx) = best_chunk {
-                    let winner_frag = &chunk_results[chunk_idx].1[i];
-                    let winner_face_idx = chunk_results[chunk_idx].2[i];
-                    let material = &faces[winner_face_idx].material;
-                    u32::from(shader.fragment_shader(winner_frag, material))
+                if let Some(ci) = best_chunk {
+                    if let Some((winner_frag, winner_face_idx)) = &chunk_frags[ci][i] {
+                        let material = &faces[*winner_face_idx].material;
+                        u32::from(shader.fragment_shader(winner_frag, material))
+                    } else {
+                        0u32
+                    }
                 } else {
                     0u32
                 }
@@ -185,7 +190,7 @@ mod tests {
     fn visible_triangle_produces_nonzero_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = DeferredRenderer::new(width, height);
+        let mut renderer = DeferredRenderer::new(width, height);
         let shader = test_shader();
 
         // Front-facing triangle
@@ -213,7 +218,7 @@ mod tests {
     fn backface_triangle_still_produces_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = DeferredRenderer::new(width, height);
+        let mut renderer = DeferredRenderer::new(width, height);
         let shader = test_shader();
 
         // Reversed winding: [0, 2, 1] — this is a backface
@@ -241,7 +246,7 @@ mod tests {
     fn empty_model_produces_no_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = DeferredRenderer::new(width, height);
+        let mut renderer = DeferredRenderer::new(width, height);
         let shader = test_shader();
 
         // Model with no faces
@@ -269,7 +274,7 @@ mod tests {
     fn offscreen_triangle_produces_no_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = DeferredRenderer::new(width, height);
+        let mut renderer = DeferredRenderer::new(width, height);
         let shader = test_shader();
 
         let model = create_test_model(
@@ -295,7 +300,7 @@ mod tests {
     fn closer_triangle_wins_depth_resolve() {
         let width = 100;
         let height = 100;
-        let renderer = DeferredRenderer::new(width, height);
+        let mut renderer = DeferredRenderer::new(width, height);
         let shader = test_shader();
 
         // Two overlapping triangles at different depths

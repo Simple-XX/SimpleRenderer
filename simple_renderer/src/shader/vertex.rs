@@ -1,4 +1,5 @@
-use crate::math::{Mat3, Mat4, Vec3};
+use crate::math::{Mat3, Mat4};
+use crate::uniform;
 use crate::vertex::Vertex;
 
 use super::Shader;
@@ -53,15 +54,15 @@ impl Shader {
         } else {
             let model = self
                 .uniform_buffer
-                .get_mat4("modelMatrix")
+                .get_mat4(uniform::names::MODEL_MATRIX)
                 .unwrap_or(Mat4::IDENTITY);
             let view = self
                 .uniform_buffer
-                .get_mat4("viewMatrix")
+                .get_mat4(uniform::names::VIEW_MATRIX)
                 .unwrap_or(Mat4::IDENTITY);
             let projection = self
                 .uniform_buffer
-                .get_mat4("projectionMatrix")
+                .get_mat4(uniform::names::PROJECTION_MATRIX)
                 .unwrap_or(Mat4::IDENTITY);
             let mvp = projection * view * model;
             let normal_mat = Mat3::from_mat4(model).inverse().transpose();
@@ -80,7 +81,6 @@ impl Shader {
             vertex.tex_coords,
             vertex.color,
         )
-        .with_clip_position(clip_position)
         .with_world_position(world_position.truncate())
     }
 
@@ -88,15 +88,15 @@ impl Shader {
 
     pub(super) fn update_matrix_cache(&mut self, name: &str, value: Mat4) {
         match name {
-            "modelMatrix" => {
+            uniform::names::MODEL_MATRIX => {
                 self.vertex_cache.model = value;
                 self.vertex_cache.has_model = true;
             }
-            "viewMatrix" => {
+            uniform::names::VIEW_MATRIX => {
                 self.vertex_cache.view = value;
                 self.vertex_cache.has_view = true;
             }
-            "projectionMatrix" => {
+            uniform::names::PROJECTION_MATRIX => {
                 self.vertex_cache.projection = value;
                 self.vertex_cache.has_projection = true;
             }
@@ -129,9 +129,10 @@ impl Shader {
             return;
         }
         if let (Some(model), Some(view), Some(proj)) = (
-            self.uniform_buffer.get_mat4("modelMatrix"),
-            self.uniform_buffer.get_mat4("viewMatrix"),
-            self.uniform_buffer.get_mat4("projectionMatrix"),
+            self.uniform_buffer.get_mat4(uniform::names::MODEL_MATRIX),
+            self.uniform_buffer.get_mat4(uniform::names::VIEW_MATRIX),
+            self.uniform_buffer
+                .get_mat4(uniform::names::PROJECTION_MATRIX),
         ) {
             self.vertex_cache.model = model;
             self.vertex_cache.view = view;

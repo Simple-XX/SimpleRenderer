@@ -5,6 +5,21 @@ use crate::light::Light;
 use crate::material::Material;
 use crate::math::{Mat3, Mat4, Vec2, Vec3, Vec4};
 
+// ── Well-known uniform names ──────────────────────────────────────────────
+
+/// Well-known uniform name constants to prevent typos in string keys.
+///
+/// Using these constants instead of raw strings ensures compile-time
+/// detection of misspelled uniform names.
+pub mod names {
+    pub const MODEL_MATRIX: &str = "modelMatrix";
+    pub const VIEW_MATRIX: &str = "viewMatrix";
+    pub const PROJECTION_MATRIX: &str = "projectionMatrix";
+    pub const CAMERA_POS: &str = "cameraPos";
+    pub const LIGHT: &str = "light";
+    pub const LIGHTS: &str = "lights";
+}
+
 // ── UniformValue ──────────────────────────────────────────────────────────
 
 /// A dynamically-typed value that can be stored in a [`UniformBuffer`].
@@ -128,14 +143,12 @@ impl UniformBuffer {
     }
 
     /// Check whether a uniform with the given name exists.
-    #[allow(dead_code)]
     pub fn has(&self, name: &str) -> bool {
         self.uniforms.contains_key(name)
     }
 
     // ── Typed getters ─────────────────────────────────────────────────
 
-    #[allow(dead_code)]
     pub fn get_int(&self, name: &str) -> Option<i32> {
         match self.uniforms.get(name)? {
             UniformValue::Int(v) => Some(*v),
@@ -143,7 +156,6 @@ impl UniformBuffer {
         }
     }
 
-    #[allow(dead_code)]
     pub fn get_float(&self, name: &str) -> Option<f32> {
         match self.uniforms.get(name)? {
             UniformValue::Float(v) => Some(*v),
@@ -151,7 +163,6 @@ impl UniformBuffer {
         }
     }
 
-    #[allow(dead_code)]
     pub fn get_vec2(&self, name: &str) -> Option<Vec2> {
         match self.uniforms.get(name)? {
             UniformValue::Vec2(v) => Some(*v),
@@ -166,7 +177,6 @@ impl UniformBuffer {
         }
     }
 
-    #[allow(dead_code)]
     pub fn get_vec4(&self, name: &str) -> Option<Vec4> {
         match self.uniforms.get(name)? {
             UniformValue::Vec4(v) => Some(*v),
@@ -174,7 +184,6 @@ impl UniformBuffer {
         }
     }
 
-    #[allow(dead_code)]
     pub fn get_mat3(&self, name: &str) -> Option<Mat3> {
         match self.uniforms.get(name)? {
             UniformValue::Mat3(v) => Some(*v),
@@ -203,7 +212,6 @@ impl UniformBuffer {
         }
     }
 
-    #[allow(dead_code)]
     pub fn get_material(&self, name: &str) -> Option<&Material> {
         match self.uniforms.get(name)? {
             UniformValue::Material(v) => Some(v),

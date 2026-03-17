@@ -3,6 +3,7 @@ mod display;
 
 use glam::{Mat4, Vec3};
 use log::info;
+use simple_renderer::uniform::names as u;
 use simple_renderer::{triple_buffer, Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
 use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
 use std::sync::{Arc, Mutex};
@@ -167,7 +168,7 @@ fn render_loop(
         * Mat4::from_rotation_x((-105.0_f32).to_radians());
 
     let mut shader = Shader::new();
-    shader.set_uniform("modelMatrix", model_matrix);
+    shader.set_uniform(u::MODEL_MATRIX, model_matrix);
     shader.set_lights(&[
         Light {
             direction: Vec3::new(1.0, 5.0, 1.0),
@@ -196,9 +197,9 @@ fn render_loop(
             renderer.set_rendering_mode(mode);
         }
 
-        shader.set_uniform("cameraPos", cmd.camera_pos);
-        shader.set_uniform("viewMatrix", cmd.view_matrix);
-        shader.set_uniform("projectionMatrix", cmd.projection_matrix);
+        shader.set_uniform(u::CAMERA_POS, cmd.camera_pos);
+        shader.set_uniform(u::VIEW_MATRIX, cmd.view_matrix);
+        shader.set_uniform(u::PROJECTION_MATRIX, cmd.projection_matrix);
 
         writer.clear(Color::BLACK);
         let buf = writer.render_buffer_mut();

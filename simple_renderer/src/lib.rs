@@ -10,7 +10,7 @@
 //! use simple_renderer::{SimpleRenderer, Model, Shader, Buffer, Light, RenderingMode};
 //! use simple_renderer::vertex::Vertex;
 //!
-//! let renderer = SimpleRenderer::new(800, 600);
+//! let mut renderer = SimpleRenderer::new(800, 600);
 //! let model = Model::load("path/to/model.obj").unwrap();
 //! let mut shader = Shader::new();
 //! let mut buffer = Buffer::new(800, 600);
@@ -42,7 +42,7 @@ pub mod renderer;
 pub(crate) mod renderers;
 pub mod shader;
 pub mod triple_buffer;
-pub(crate) mod uniform;
+pub mod uniform;
 pub mod vertex;
 
 // Convenience re-exports

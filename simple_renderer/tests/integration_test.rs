@@ -58,8 +58,9 @@ fn render_with_mode(mode: RenderingMode) -> usize {
     renderer.set_rendering_mode(mode);
 
     let mut buffer = vec![0u32; TEST_W * TEST_H];
-    let result = renderer.draw_model(&model, &mut shader, &mut buffer);
-    result.expect(&format!("{:?} render should succeed", mode));
+    renderer
+        .draw_model(&model, &mut shader, &mut buffer)
+        .unwrap_or_else(|e| panic!("{:?} render should succeed: {}", mode, e));
     buffer.iter().filter(|&&p| p != 0).count()
 }
 

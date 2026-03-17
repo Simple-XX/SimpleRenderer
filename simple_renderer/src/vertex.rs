@@ -8,7 +8,6 @@ pub struct Vertex {
     pub normal: Vec3,
     pub tex_coords: Vec2,
     pub color: Color,
-    pub clip_position: Option<Vec4>,
     pub world_position: Vec3,
 }
 
@@ -19,14 +18,13 @@ impl Default for Vertex {
             normal: Vec3::ZERO,
             tex_coords: Vec2::ZERO,
             color: Color::default(),
-            clip_position: None,
             world_position: Vec3::ZERO,
         }
     }
 }
 
 impl Vertex {
-    /// Create a new vertex with the given attributes. `clip_position` is `None`.
+    /// Create a new vertex with the given attributes.
     #[inline]
     pub fn new(position: Vec4, normal: Vec3, tex_coords: Vec2, color: Color) -> Self {
         Self {
@@ -34,16 +32,8 @@ impl Vertex {
             normal,
             tex_coords,
             color,
-            clip_position: None,
             world_position: Vec3::ZERO,
         }
-    }
-
-    /// Return a copy of this vertex with the given clip-space position set.
-    #[inline]
-    pub fn with_clip_position(mut self, clip: Vec4) -> Self {
-        self.clip_position = Some(clip);
-        self
     }
 
     /// Return a copy of this vertex with the given world-space position set.
@@ -66,7 +56,6 @@ impl Vertex {
             normal: (normal_mat * self.normal).normalize_or_zero(),
             tex_coords: self.tex_coords,
             color: self.color,
-            clip_position: self.clip_position,
             world_position: transformed_pos.truncate(),
         }
     }
@@ -117,7 +106,6 @@ mod tests {
         let v = Vertex::default();
         assert_eq!(v.position, Vec4::ZERO);
         assert_eq!(v.normal, Vec3::ZERO);
-        assert!(v.clip_position.is_none());
         assert_eq!(v.world_position, Vec3::ZERO);
     }
 
@@ -132,14 +120,7 @@ mod tests {
         assert_eq!(v.position, Vec4::new(1.0, 2.0, 3.0, 1.0));
         assert_eq!(v.normal, Vec3::Y);
         assert_eq!(v.color, Color::RED);
-        assert!(v.clip_position.is_none());
         assert_eq!(v.world_position, Vec3::ZERO);
-    }
-
-    #[test]
-    fn vertex_with_clip_position() {
-        let v = Vertex::default().with_clip_position(Vec4::new(1.0, 2.0, 3.0, 4.0));
-        assert_eq!(v.clip_position, Some(Vec4::new(1.0, 2.0, 3.0, 4.0)));
     }
 
     #[test]

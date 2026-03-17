@@ -101,7 +101,7 @@ impl Rasterizer {
     /// Rasterize a single triangle, returning all fragments as a Vec.
     ///
     /// Prefer `rasterize_each` in hot paths to avoid allocation.
-    #[allow(dead_code)]
+    #[cfg(test)]
     pub fn rasterize(&self, v0: &Vertex, v1: &Vertex, v2: &Vertex) -> Vec<Fragment> {
         let bbox_w = (v0.position.x.max(v1.position.x).max(v2.position.x)
             - v0.position.x.min(v1.position.x).min(v2.position.x))
@@ -213,7 +213,6 @@ mod tests {
             normal: Vec3::Y,
             tex_coords: Vec2::ZERO,
             color: Color::WHITE,
-            clip_position: None,
             world_position: Vec3::ZERO,
         }
     }

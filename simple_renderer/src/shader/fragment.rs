@@ -3,6 +3,7 @@ use crate::fragment::Fragment;
 use crate::light::Light;
 use crate::material::{Material, Texture};
 use crate::math::{Vec2, Vec3};
+use crate::uniform;
 
 use super::Shader;
 
@@ -58,11 +59,12 @@ impl Shader {
             &self.fragment_cache.light_dirs_normalized
         } else {
             // Fallback: read from uniform buffer
-            fallback_dirs = if let Some(ls) = self.uniform_buffer.get_lights("lights") {
+            fallback_dirs = if let Some(ls) = self.uniform_buffer.get_lights(uniform::names::LIGHTS)
+            {
                 ls.iter()
                     .map(|l| l.direction.normalize_or_zero())
                     .collect::<Vec<_>>()
-            } else if let Some(l) = self.uniform_buffer.get_light("light") {
+            } else if let Some(l) = self.uniform_buffer.get_light(uniform::names::LIGHT) {
                 vec![l.direction.normalize_or_zero()]
             } else {
                 Vec::new()
@@ -73,7 +75,7 @@ impl Shader {
             self.fragment_cache.camera_pos
         } else {
             self.uniform_buffer
-                .get_vec3("cameraPos")
+                .get_vec3(uniform::names::CAMERA_POS)
                 .unwrap_or(Vec3::ZERO)
         };
 
@@ -126,7 +128,7 @@ impl Shader {
     // ── Fragment cache updates (private) ──────────────────────────────
 
     pub(super) fn update_fragment_cache_light(&mut self, name: &str, value: &Light) {
-        if name != "light" {
+        if name != uniform::names::LIGHT {
             return;
         }
         self.fragment_cache.lights.clear();
@@ -139,7 +141,7 @@ impl Shader {
     }
 
     pub(super) fn update_fragment_cache_lights(&mut self, name: &str, value: &[Light]) {
-        if name != "lights" {
+        if name != uniform::names::LIGHTS {
             return;
         }
         self.fragment_cache.lights = value.to_vec();
@@ -151,7 +153,7 @@ impl Shader {
     }
 
     pub(super) fn update_fragment_cache_vec3(&mut self, name: &str, value: Vec3) {
-        if name != "cameraPos" {
+        if name != uniform::names::CAMERA_POS {
             return;
         }
         self.fragment_cache.camera_pos = value;
@@ -182,8 +184,8 @@ impl Shader {
 
         // Prefer multi-light path
         if let (Some(lights), Some(cam)) = (
-            self.uniform_buffer.get_lights("lights"),
-            self.uniform_buffer.get_vec3("cameraPos"),
+            self.uniform_buffer.get_lights(uniform::names::LIGHTS),
+            self.uniform_buffer.get_vec3(uniform::names::CAMERA_POS),
         ) {
             self.fragment_cache.lights = lights.clone();
             self.fragment_cache.has_lights = true;
@@ -195,8 +197,8 @@ impl Shader {
 
         // Single-light fallback
         if let (Some(light), Some(cam)) = (
-            self.uniform_buffer.get_light("light"),
-            self.uniform_buffer.get_vec3("cameraPos"),
+            self.uniform_buffer.get_light(uniform::names::LIGHT),
+            self.uniform_buffer.get_vec3(uniform::names::CAMERA_POS),
         ) {
             self.fragment_cache.lights = vec![light.clone()];
             self.fragment_cache.has_lights = true;

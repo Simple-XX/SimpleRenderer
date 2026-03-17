@@ -41,11 +41,14 @@ struct TileResult {
 pub struct TileBasedRenderer {
     tile_size: usize,
     early_z: bool,
+    global_depth: Vec<f32>,
+    global_color: Vec<u32>,
 }
 
 impl TileBasedRenderer {
     /// Create a tile-based renderer with the given Early-Z flag and tile size.
-    pub fn new(_width: usize, _height: usize, early_z: bool, tile_size: usize) -> Self {
+    pub fn new(width: usize, height: usize, early_z: bool, tile_size: usize) -> Self {
+        let num_pixels = width * height;
         Self {
             tile_size: if tile_size > 0 {
                 tile_size
@@ -53,6 +56,8 @@ impl TileBasedRenderer {
                 DEFAULT_TILE_SIZE
             },
             early_z,
+            global_depth: vec![DEPTH_CLEAR; num_pixels],
+            global_color: vec![COLOR_CLEAR; num_pixels],
         }
     }
 
@@ -63,7 +68,7 @@ impl TileBasedRenderer {
 
 impl Renderer for TileBasedRenderer {
     fn render(
-        &self,
+        &mut self,
         model: &Model,
         shader: &Shader,
         out_buffer: &mut [u32],
@@ -94,10 +99,12 @@ impl Renderer for TileBasedRenderer {
         let tile_triangles = tile_common::triangle_tile_binning(model, &grid);
         let binning_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 4. Global framebuffer
+        // 4. Global framebuffer (reuse across frames)
         let num_pixels = width * height;
-        let mut global_color = vec![COLOR_CLEAR; num_pixels];
-        let mut global_depth = vec![DEPTH_CLEAR; num_pixels];
+        self.global_depth.resize(num_pixels, DEPTH_CLEAR);
+        self.global_depth.fill(DEPTH_CLEAR);
+        self.global_color.resize(num_pixels, COLOR_CLEAR);
+        self.global_color.fill(COLOR_CLEAR);
 
         let t = Instant::now();
         // 5. Parallel rasterization per tile
@@ -159,16 +166,16 @@ impl Renderer for TileBasedRenderer {
             for y in 0..tile.height {
                 let tile_row_off = y * tile.width;
                 let global_row_off = (tile.screen_y + y) * width + tile.screen_x;
-                global_color[global_row_off..global_row_off + tile.width]
+                self.global_color[global_row_off..global_row_off + tile.width]
                     .copy_from_slice(&tile.color[tile_row_off..tile_row_off + tile.width]);
-                global_depth[global_row_off..global_row_off + tile.width]
+                self.global_depth[global_row_off..global_row_off + tile.width]
                     .copy_from_slice(&tile.depth[tile_row_off..tile_row_off + tile.width]);
             }
         }
         let copy_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         // 7. Copy to output
-        out_buffer[..num_pixels].copy_from_slice(&global_color);
+        out_buffer[..num_pixels].copy_from_slice(&self.global_color);
 
         let sum_ms = vertex_ms + setup_ms + binning_ms + raster_ms + copy_ms;
         if sum_ms > 0.0 {
@@ -431,7 +438,7 @@ mod tests {
     fn visible_triangle_produces_nonzero_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = TileBasedRenderer::new(width, height, true, DEFAULT_TILE_SIZE);
+        let mut renderer = TileBasedRenderer::new(width, height, true, DEFAULT_TILE_SIZE);
         let shader = test_shader();
 
         let model = create_test_model(
@@ -458,7 +465,7 @@ mod tests {
     fn backface_triangle_produces_no_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = TileBasedRenderer::new(width, height, true, DEFAULT_TILE_SIZE);
+        let mut renderer = TileBasedRenderer::new(width, height, true, DEFAULT_TILE_SIZE);
         let shader = test_shader();
 
         let model = create_test_model(
@@ -484,7 +491,7 @@ mod tests {
     fn empty_model_produces_no_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = TileBasedRenderer::new(width, height, true, DEFAULT_TILE_SIZE);
+        let mut renderer = TileBasedRenderer::new(width, height, true, DEFAULT_TILE_SIZE);
         let shader = test_shader();
 
         let model = create_test_model(
@@ -511,7 +518,7 @@ mod tests {
     fn early_z_disabled_still_renders() {
         let width = 100;
         let height = 100;
-        let renderer = TileBasedRenderer::with_options(width, height, 32, false);
+        let mut renderer = TileBasedRenderer::with_options(width, height, 32, false);
         let shader = test_shader();
 
         let model = create_test_model(
@@ -538,7 +545,7 @@ mod tests {
     fn offscreen_triangle_produces_no_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = TileBasedRenderer::new(width, height, true, DEFAULT_TILE_SIZE);
+        let mut renderer = TileBasedRenderer::new(width, height, true, DEFAULT_TILE_SIZE);
         let shader = test_shader();
 
         let model = create_test_model(
@@ -564,7 +571,7 @@ mod tests {
     fn custom_tile_size_works() {
         let width = 100;
         let height = 100;
-        let renderer = TileBasedRenderer::with_options(width, height, 16, true);
+        let mut renderer = TileBasedRenderer::with_options(width, height, 16, true);
         let shader = test_shader();
 
         let model = create_test_model(

@@ -76,6 +76,7 @@ impl Camera {
         self.position
     }
 
+    #[cfg(test)]
     pub fn movement_speed(&self) -> f32 {
         self.movement_speed
     }

@@ -22,17 +22,23 @@ use crate::shader::Shader;
 /// AoS per-triangle renderer with per-thread local framebuffers.
 ///
 /// Vertex transform → parallel rasterization (backface culling + depth test) → merge.
-pub struct PerTriangleRenderer;
+pub struct PerTriangleRenderer {
+    chunk_depth: Vec<Vec<f32>>,
+    chunk_color: Vec<Vec<u32>>,
+}
 
 impl PerTriangleRenderer {
     pub fn new(_width: usize, _height: usize) -> Self {
-        Self
+        Self {
+            chunk_depth: Vec::new(),
+            chunk_color: Vec::new(),
+        }
     }
 }
 
 impl Renderer for PerTriangleRenderer {
     fn render(
-        &self,
+        &mut self,
         model: &Model,
         shader: &Shader,
         out_buffer: &mut [u32],
@@ -40,7 +46,7 @@ impl Renderer for PerTriangleRenderer {
         height: usize,
     ) -> crate::error::Result<()> {
         let t = Instant::now();
-        // 1. Vertex transform (sequential)
+        // 1. Vertex transform (sequential — Shader is not Sync yet)
         let vertices = model.vertices();
         let processed_vertices: Vec<_> = vertices
             .iter()
@@ -59,13 +65,29 @@ impl Renderer for PerTriangleRenderer {
         let rasterizer = Rasterizer::new(width, height);
         let num_threads = rayon::current_num_threads();
         let chunk_size = std::cmp::max(faces.len() / num_threads, 1);
+        let num_chunks = faces.chunks(chunk_size).len();
 
-        let chunk_results: Vec<(Vec<f32>, Vec<u32>)> = faces
+        // Reuse chunk buffers across frames
+        self.chunk_depth.resize_with(num_chunks, Vec::new);
+        self.chunk_color.resize_with(num_chunks, Vec::new);
+        self.chunk_depth.truncate(num_chunks);
+        self.chunk_color.truncate(num_chunks);
+        for buf in &mut self.chunk_depth {
+            buf.resize(num_pixels, f32::INFINITY);
+            buf.fill(f32::INFINITY);
+        }
+        for buf in &mut self.chunk_color {
+            buf.resize(num_pixels, 0u32);
+            buf.fill(0u32);
+        }
+
+        let chunk_depth = &mut self.chunk_depth;
+        let chunk_color = &mut self.chunk_color;
+
+        faces
             .par_chunks(chunk_size)
-            .map(|face_chunk| {
-                let mut depth_buf = vec![f32::INFINITY; num_pixels];
-                let mut color_buf = vec![0u32; num_pixels];
-
+            .zip(chunk_depth.par_iter_mut().zip(chunk_color.par_iter_mut()))
+            .for_each(|(face_chunk, (depth_buf, color_buf))| {
                 for face in face_chunk {
                     let v0 = &processed_vertices[face.indices[0]];
                     let v1 = &processed_vertices[face.indices[1]];
@@ -100,28 +122,28 @@ impl Renderer for PerTriangleRenderer {
                         }
                     });
                 }
-
-                (depth_buf, color_buf)
-            })
-            .collect();
+            });
 
         let raster_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 3. Merge thread results — pick minimum depth per pixel
+        // 3. Merge thread results — pick minimum depth per pixel (parallel)
         let t = Instant::now();
-        for i in 0..num_pixels {
-            let mut min_depth = f32::INFINITY;
-            let mut final_color = 0u32;
-            for (depth_buf, color_buf) in &chunk_results {
-                if depth_buf[i] < min_depth {
-                    min_depth = depth_buf[i];
-                    final_color = color_buf[i];
+        out_buffer[..num_pixels]
+            .par_iter_mut()
+            .enumerate()
+            .for_each(|(i, pixel)| {
+                let mut min_depth = f32::INFINITY;
+                let mut final_color = 0u32;
+                for chunk_idx in 0..num_chunks {
+                    if chunk_depth[chunk_idx][i] < min_depth {
+                        min_depth = chunk_depth[chunk_idx][i];
+                        final_color = chunk_color[chunk_idx][i];
+                    }
                 }
-            }
-            if min_depth < f32::INFINITY {
-                out_buffer[i] = final_color;
-            }
-        }
+                if min_depth < f32::INFINITY {
+                    *pixel = final_color;
+                }
+            });
         let merge_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         let sum_ms = vertex_ms + raster_ms + merge_ms;
@@ -162,7 +184,7 @@ mod tests {
     fn visible_triangle_produces_nonzero_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = PerTriangleRenderer::new(width, height);
+        let mut renderer = PerTriangleRenderer::new(width, height);
         let shader = test_shader();
 
         // Triangle in clip space that maps to visible screen area
@@ -195,7 +217,7 @@ mod tests {
     fn backface_triangle_produces_no_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = PerTriangleRenderer::new(width, height);
+        let mut renderer = PerTriangleRenderer::new(width, height);
         let shader = test_shader();
 
         // Reversed winding: [0, 2, 1] instead of [0, 1, 2]
@@ -225,7 +247,7 @@ mod tests {
     fn offscreen_triangle_produces_no_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = PerTriangleRenderer::new(width, height);
+        let mut renderer = PerTriangleRenderer::new(width, height);
         let shader = test_shader();
 
         // Vertices far outside NDC range

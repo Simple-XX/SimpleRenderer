@@ -68,7 +68,7 @@ impl SimpleRenderer {
     }
 
     pub fn draw_model(
-        &self,
+        &mut self,
         model: &Model,
         shader: &mut Shader,
         buffer: &mut [u32],

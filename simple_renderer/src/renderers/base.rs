@@ -23,7 +23,6 @@ pub fn perspective_division(vertex: &Vertex) -> Vertex {
         normal: vertex.normal,
         tex_coords: vertex.tex_coords,
         color: vertex.color,
-        clip_position: vertex.clip_position,
         world_position: vertex.world_position,
     }
 }
@@ -46,7 +45,6 @@ pub fn viewport_transform(vertex: &Vertex, width: usize, height: usize) -> Verte
         normal: vertex.normal,
         tex_coords: vertex.tex_coords,
         color: vertex.color,
-        clip_position: vertex.clip_position,
         world_position: vertex.world_position,
     }
 }
@@ -67,7 +65,6 @@ mod tests {
             normal: Vec3::Z,
             tex_coords: Vec2::ZERO,
             color: Color::WHITE,
-            clip_position: Some(Vec4::new(x, y, z, w)),
             world_position: Vec3::ZERO,
         }
     }
@@ -122,14 +119,12 @@ mod tests {
             normal: Vec3::Y,
             tex_coords: Vec2::new(0.3, 0.7),
             color: Color::RED,
-            clip_position: Some(Vec4::new(1.0, 2.0, 3.0, 2.0)),
             world_position: Vec3::ZERO,
         };
         let ndc = perspective_division(&v);
         assert_eq!(ndc.normal, Vec3::Y);
         assert_eq!(ndc.tex_coords, Vec2::new(0.3, 0.7));
         assert_eq!(ndc.color, Color::RED);
-        assert_eq!(ndc.clip_position, v.clip_position);
     }
 
     // ── Viewport transform ────────────────────────────────────────────
@@ -187,7 +182,6 @@ mod tests {
             normal: Vec3::X,
             tex_coords: Vec2::new(0.1, 0.9),
             color: Color::BLUE,
-            clip_position: Some(Vec4::new(0.0, 0.0, 0.5, 1.0)),
             world_position: Vec3::ZERO,
         };
         let s = viewport_transform(&v, 200, 200);

@@ -134,10 +134,8 @@ mod tests {
         // Normal should be unchanged
         assert!((result.normal.y - 1.0).abs() < 1e-5);
 
-        // Clip position should be set
-        assert!(result.clip_position.is_some());
-        let clip = result.clip_position.unwrap();
-        assert!((clip.x - 1.0).abs() < 1e-5);
+        // Position IS the clip position after vertex shader
+        assert!((result.position.x - 1.0).abs() < 1e-5);
     }
 
     #[test]

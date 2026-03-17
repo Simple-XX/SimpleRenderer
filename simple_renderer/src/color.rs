@@ -1,3 +1,6 @@
+#[cfg(not(target_endian = "little"))]
+compile_error!("SimpleRenderer assumes little-endian byte order for Color ↔ u32 conversions");
+
 use std::fmt;
 use std::ops;
 
@@ -34,8 +37,9 @@ impl Color {
 
     /// Create a color from floats in the `[0.0, 255.0]` range.
     ///
-    /// Values are rounded via `+0.5` then truncated to `u8`.
-    /// Out-of-range values are clamped to `[0.0, 255.0]` before casting.
+    /// A bias of `+0.5` is added before truncation to compensate for
+    /// float→integer truncation (equivalent to rounding to nearest).
+    /// Out-of-range values are clamped to `[0.0, 255.0]`.
     /// Note: these are raw `[0, 255]` floats, NOT normalized `[0, 1]`.
     #[inline]
     pub fn from_f32(r: f32, g: f32, b: f32, a: f32) -> Self {

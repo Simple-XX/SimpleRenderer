@@ -2,6 +2,7 @@
 name = "system_test"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.73"
 
 [dependencies]
 simple_renderer = { path = "../simple_renderer" }

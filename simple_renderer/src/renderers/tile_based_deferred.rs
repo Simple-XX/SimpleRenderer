@@ -54,7 +54,7 @@ impl TileBasedDeferredRenderer {
 
 impl Renderer for TileBasedDeferredRenderer {
     fn render(
-        &self,
+        &mut self,
         model: &Model,
         shader: &Shader,
         out_buffer: &mut [u32],
@@ -391,7 +391,7 @@ mod tests {
     fn visible_triangle_produces_nonzero_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = TileBasedDeferredRenderer::new(width, height, DEFAULT_TILE_SIZE);
+        let mut renderer = TileBasedDeferredRenderer::new(width, height, DEFAULT_TILE_SIZE);
         let shader = test_shader();
 
         let model = create_test_model(
@@ -418,7 +418,7 @@ mod tests {
     fn backface_triangle_produces_no_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = TileBasedDeferredRenderer::new(width, height, DEFAULT_TILE_SIZE);
+        let mut renderer = TileBasedDeferredRenderer::new(width, height, DEFAULT_TILE_SIZE);
         let shader = test_shader();
 
         let model = create_test_model(
@@ -444,7 +444,7 @@ mod tests {
     fn empty_model_produces_no_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = TileBasedDeferredRenderer::new(width, height, DEFAULT_TILE_SIZE);
+        let mut renderer = TileBasedDeferredRenderer::new(width, height, DEFAULT_TILE_SIZE);
         let shader = test_shader();
 
         let model = create_test_model(
@@ -471,7 +471,7 @@ mod tests {
     fn offscreen_triangle_produces_no_pixels() {
         let width = 100;
         let height = 100;
-        let renderer = TileBasedDeferredRenderer::new(width, height, DEFAULT_TILE_SIZE);
+        let mut renderer = TileBasedDeferredRenderer::new(width, height, DEFAULT_TILE_SIZE);
         let shader = test_shader();
 
         let model = create_test_model(
@@ -497,7 +497,7 @@ mod tests {
     fn custom_tile_size_works() {
         let width = 100;
         let height = 100;
-        let renderer = TileBasedDeferredRenderer::with_tile_size(width, height, 16);
+        let mut renderer = TileBasedDeferredRenderer::with_tile_size(width, height, 16);
         let shader = test_shader();
 
         let model = create_test_model(
@@ -524,7 +524,7 @@ mod tests {
     fn two_pass_renders_overlapping_triangles() {
         let width = 100;
         let height = 100;
-        let renderer = TileBasedDeferredRenderer::new(width, height, DEFAULT_TILE_SIZE);
+        let mut renderer = TileBasedDeferredRenderer::new(width, height, DEFAULT_TILE_SIZE);
         let shader = test_shader();
 
         // Two overlapping triangles at different depths
