@@ -69,7 +69,8 @@ pub struct EditorApp {
 }
 
 impl EditorApp {
-    pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
+    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+        Self::configure_cjk_fonts(&cc.egui_ctx);
         let render_bridge = RenderBridge::new(DEFAULT_RENDER_WIDTH, DEFAULT_RENDER_HEIGHT);
 
         // 尝试加载默认茶壶模型
@@ -101,6 +102,39 @@ impl EditorApp {
             frame_count: 0,
             fps_timer: Instant::now(),
             last_frame: Instant::now(),
+        }
+    }
+
+    fn configure_cjk_fonts(ctx: &egui::Context) {
+        let font_paths = [
+            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+        ];
+
+        let font_data = font_paths.iter().find_map(|path| std::fs::read(path).ok());
+
+        if let Some(data) = font_data {
+            let mut fonts = egui::FontDefinitions::default();
+            fonts
+                .font_data
+                .insert("cjk".to_owned(), egui::FontData::from_owned(data).into());
+            fonts
+                .families
+                .entry(egui::FontFamily::Proportional)
+                .or_default()
+                .push("cjk".to_owned());
+            fonts
+                .families
+                .entry(egui::FontFamily::Monospace)
+                .or_default()
+                .push("cjk".to_owned());
+            ctx.set_fonts(fonts);
+        } else {
+            log::warn!(
+                "未找到 CJK 字体，中文可能无法显示。请安装: sudo apt install fonts-noto-cjk"
+            );
         }
     }
 
