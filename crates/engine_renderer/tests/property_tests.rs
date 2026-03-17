@@ -5,8 +5,8 @@
 
 use glam::{Mat4, Vec2, Vec3, Vec4};
 use proptest::prelude::*;
-use simple_renderer::vertex::Vertex;
-use simple_renderer::{Buffer, Color, Shader};
+use engine_renderer::vertex::Vertex;
+use engine_renderer::{Buffer, Color, Shader};
 
 
 proptest! {

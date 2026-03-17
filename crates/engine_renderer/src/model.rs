@@ -261,7 +261,7 @@ mod tests {
     /// 加载没有 MTL 文件的模型 ── 应仍能成功加载并使用默认材质。
     #[test]
     fn load_model_without_mtl_uses_defaults() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../obj/cube2.obj");
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../assets/models/cube2.obj");
         let result = Model::load(path);
         assert!(
             result.is_ok(),
@@ -276,7 +276,7 @@ mod tests {
     fn load_teapot_comprehensive() {
         let path = concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../obj/utah-teapot-texture/teapot.obj"
+            "/../../assets/models/utah-teapot-texture/teapot.obj"
         );
         let model = Model::load(path).expect("Failed to load teapot.obj");
 

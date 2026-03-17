@@ -1,16 +1,16 @@
 // Copyright (c) Simple-XX/SimpleRenderer
 // SPDX-License-Identifier: MIT
 
-//! simple_renderer 库的集成测试。
+//! engine_renderer 库的集成测试。
 //!
 //! 这些测试使用真实模型（茶壶）在全部 4 种渲染模式下进行渲染。
 //! 使用 `cargo test --test integration_test` 运行（可能占用较多内存）。
 
+use engine_renderer::{Buffer, Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
 use glam::{Mat4, Vec3};
-use simple_renderer::{Buffer, Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
 
 /// 相对于工作区根目录的测试模型路径
-const TEAPOT_PATH: &str = "../obj/utah-teapot-texture/teapot.obj";
+const TEAPOT_PATH: &str = "../../assets/models/utah-teapot-texture/teapot.obj";
 
 /// 较小的渲染分辨率，以避免测试环境中的内存溢出。
 const TEST_W: usize = 100;

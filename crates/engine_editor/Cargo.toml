@@ -1,0 +1,16 @@
+[package]
+name = "engine_editor"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.73"
+
+[dependencies]
+engine_core = { path = "../engine_core" }
+engine_renderer = { path = "../engine_renderer" }
+engine_scene = { path = "../engine_scene" }
+eframe = "0.31"
+egui = "0.31"
+rfd = "0.15"
+glam = "0.29"
+log = "0.4"
+env_logger = "0.11"

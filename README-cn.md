@@ -82,7 +82,8 @@ cargo build --release                    # Release 构建
 #### 3. 运行示例程序
 
 ```bash
-cargo run -p system_test -- ./obj        # 运行演示（犹他茶壶）
+cargo run -p engine_editor               # 运行 egui 编辑器
+cargo run -p system_test -- ./assets/models  # 运行旧版 minifb 演示
 ```
 
 ### 操作说明
@@ -100,14 +101,14 @@ cargo run -p system_test -- ./obj        # 运行演示（犹他茶壶）
 ## 测试
 
 ```bash
-cargo test                               # 运行所有测试（223 个）
-cargo test -p simple_renderer            # 仅运行库单元测试
-cargo test --test integration_test       # 仅运行集成测试
-cargo test --test property_tests         # 仅运行属性测试
+cargo test                               # 运行所有测试（245 个）
+cargo test -p engine_renderer            # 仅运行渲染器测试
+cargo test -p engine_core                # 仅运行 ECS 测试
+cargo test -p engine_scene               # 仅运行场景测试
 cargo clippy --workspace -- -D warnings  # Lint 检查（CI 要求零警告）
 ```
 
-测试套件包含 184 个单元测试、7 个集成测试、15 个属性测试（proptest）、16 个 system_test 测试和 1 个文档测试。集成测试使用内置的犹他茶壶模型在全部四种渲染模式下进行渲染验证。
+测试套件包含 245 个测试：engine_renderer（207）、engine_core（16）、engine_scene（6）、system_test（16）。集成测试使用内置的犹他茶壶模型在全部四种渲染模式下进行渲染验证。
 
 ---
 

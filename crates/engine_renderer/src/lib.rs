@@ -9,8 +9,8 @@
 //! ## 快速开始
 //!
 //! ```no_run
-//! use simple_renderer::{SimpleRenderer, Model, Shader, Buffer, Light, RenderingMode};
-//! use simple_renderer::vertex::Vertex;
+//! use engine_renderer::{SimpleRenderer, Model, Shader, Buffer, Light, RenderingMode};
+//! use engine_renderer::vertex::Vertex;
 //!
 //! let mut renderer = SimpleRenderer::new(800, 600);
 //! let model = Model::load("path/to/model.obj").unwrap();

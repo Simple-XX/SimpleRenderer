@@ -3,7 +3,7 @@
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use glam::{Mat4, Vec3};
-use simple_renderer::{Light, Model, RenderingMode, Shader, SimpleRenderer};
+use engine_renderer::{Light, Model, RenderingMode, Shader, SimpleRenderer};
 
 const BENCH_W: usize = 200;
 const BENCH_H: usize = 150;

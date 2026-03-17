@@ -34,7 +34,7 @@ mod tests {
 
         static COUNTER: AtomicUsize = AtomicUsize::new(0);
         let id = COUNTER.fetch_add(1, Ordering::SeqCst);
-        let path = std::env::temp_dir().join(format!("simple_renderer_test_{}.obj", id));
+        let path = std::env::temp_dir().join(format!("engine_renderer_test_{}.obj", id));
 
         let mut file = std::fs::File::create(&path).unwrap();
         for pos in positions {

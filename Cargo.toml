@@ -1,5 +1,11 @@
 [workspace]
-members = ["simple_renderer", "system_test"]
+members = [
+    "crates/engine_renderer",
+    "crates/engine_core",
+    "crates/engine_scene",
+    "crates/engine_editor",
+    "system_test",
+]
 resolver = "2"
 
 [profile.dev]
