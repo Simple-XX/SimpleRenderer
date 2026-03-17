@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 //! 所有渲染策略共享的顶点后处理工具函数。
 
@@ -51,7 +52,6 @@ pub fn viewport_transform(vertex: &Vertex, width: usize, height: usize) -> Verte
     }
 }
 
-// ── 测试 ──────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
@@ -71,7 +71,6 @@ mod tests {
         }
     }
 
-    // ── 透视除法 ──────────────────────────────────────────
 
     #[test]
     fn perspective_division_basic() {
@@ -129,7 +128,6 @@ mod tests {
         assert_eq!(ndc.color, Color::RED);
     }
 
-    // ── 视口变换 ────────────────────────────────────────────
 
     #[test]
     fn viewport_transform_center() {
@@ -192,7 +190,6 @@ mod tests {
         assert_eq!(s.color, Color::BLUE);
     }
 
-    // ── 组合管线 ─────────────────────────────────────────────
 
     #[test]
     fn perspective_division_then_viewport() {

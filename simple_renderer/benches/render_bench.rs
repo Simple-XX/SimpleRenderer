@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use glam::{Mat4, Vec3};

@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 mod camera;
 mod display;
@@ -17,7 +18,7 @@ use display::Display;
 const WIDTH: usize = 800;
 const HEIGHT: usize = 600;
 
-/// Per-frame state sent from main thread → render thread.
+/// 每帧从主线程发送到渲染线程的状态。
 #[derive(Clone)]
 struct RenderCommand {
     camera_pos: Vec3,
@@ -25,7 +26,7 @@ struct RenderCommand {
     projection_matrix: Mat4,
 }
 
-/// Shared state between main thread and render thread.
+/// 主线程与渲染线程之间的共享状态。
 struct SharedState {
     command: Mutex<RenderCommand>,
     rendering_mode: AtomicU8,
@@ -132,7 +133,7 @@ fn main() {
 
         if vsync_enabled {
             let frame_time = now.elapsed();
-            let target = Duration::from_micros(16_667); // ~60 Hz
+            let target = Duration::from_micros(16_667); // 约60 Hz
             if frame_time < target {
                 std::thread::sleep(target - frame_time);
             }

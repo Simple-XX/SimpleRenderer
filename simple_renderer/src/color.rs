@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 #[cfg(not(target_endian = "little"))]
 compile_error!("SimpleRenderer assumes little-endian byte order for Color ↔ u32 conversions");
@@ -16,7 +17,6 @@ pub struct Color {
     channels: [u8; 4],
 }
 
-// ── 常量 ───────────────────────────────────────────────────────────────────
 
 impl Color {
     pub const WHITE: Color = Color::new(255, 255, 255, 255);
@@ -26,7 +26,6 @@ impl Color {
     pub const BLUE: Color = Color::new(0, 0, 255, 255);
 }
 
-// ── 构造函数 ───────────────────────────────────────────────────────────────
 
 impl Color {
     /// 从单独的 RGBA 通道值创建颜色。
@@ -72,7 +71,6 @@ impl Color {
     }
 }
 
-// ── 访问器 ─────────────────────────────────────────────────────────────────
 
 impl Color {
     #[inline]
@@ -99,7 +97,6 @@ impl Color {
     }
 }
 
-// ── u32 转换 ───────────────────────────────────────────────────────────────
 //
 // 布局：R 占位 0-7，G 占位 8-15，B 占位 16-23，A 占位 24-31。
 // 4 字节结构体在小端序上重新解释为 u32。
@@ -128,7 +125,6 @@ impl From<Color> for u32 {
     }
 }
 
-// ── 运算符 ─────────────────────────────────────────────────────────────────
 
 /// 逐通道乘以标量，钳制到 `[0, 255]`。
 impl ops::Mul<f32> for Color {
@@ -184,7 +180,6 @@ impl ops::Index<usize> for Color {
     }
 }
 
-// ── 显示 ───────────────────────────────────────────────────────────────────
 
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -196,13 +191,11 @@ impl fmt::Display for Color {
     }
 }
 
-// ── 测试 ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    // ── 构造函数测试 ───────────────────────────────────────────────────
 
     #[test]
     fn new_stores_channels_correctly() {
@@ -288,7 +281,6 @@ mod tests {
         assert_eq!(c.a(), 255);
     }
 
-    // ── 常量测试 ───────────────────────────────────────────────────────
 
     #[test]
     fn constants_are_correct() {
@@ -299,7 +291,6 @@ mod tests {
         assert_eq!(Color::BLUE, Color::new(0, 0, 255, 255));
     }
 
-    // ── u32 转换测试 ───────────────────────────────────────────────────
 
     #[test]
     fn from_u32_little_endian_rgba() {
@@ -372,7 +363,6 @@ mod tests {
         assert_eq!(val, 0xFF000000);
     }
 
-    // ── 运算符测试 ─────────────────────────────────────────────────────
 
     #[test]
     fn mul_by_scalar() {
@@ -452,7 +442,6 @@ mod tests {
         assert_eq!(a + b, a);
     }
 
-    // ── 索引测试 ───────────────────────────────────────────────────────
 
     #[test]
     fn index_access() {
@@ -470,7 +459,6 @@ mod tests {
         let _ = c[4];
     }
 
-    // ── 杂项测试 ───────────────────────────────────────────────────────
 
     #[test]
     fn bpp_is_four() {
@@ -511,7 +499,6 @@ mod tests {
         assert_ne!(Color::new(1, 2, 3, 4), Color::new(1, 2, 3, 5));
     }
 
-    // ── u32 重新解释测试 ───────────────────────────────────────────────
 
     #[test]
     fn white_constant_is_fully_opaque() {

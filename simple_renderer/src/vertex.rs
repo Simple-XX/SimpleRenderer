@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 use crate::color::Color;
 use crate::math::{Mat3, Mat4, Vec2, Vec3, Vec4};

@@ -1,17 +1,18 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
-//! Integration tests for the simple_renderer library.
+//! simple_renderer 库的集成测试。
 //!
-//! These tests render a real model (teapot) with all 4 rendering modes.
-//! Run with `cargo test --test integration_test` (they may use significant memory).
+//! 这些测试使用真实模型（茶壶）在全部 4 种渲染模式下进行渲染。
+//! 使用 `cargo test --test integration_test` 运行（可能占用较多内存）。
 
 use glam::{Mat4, Vec3};
 use simple_renderer::{Buffer, Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
 
-/// Test model path relative to workspace root
+/// 相对于工作区根目录的测试模型路径
 const TEAPOT_PATH: &str = "../obj/utah-teapot-texture/teapot.obj";
 
-/// Small render resolution to avoid OOM in test environments.
+/// 较小的渲染分辨率，以避免测试环境中的内存溢出。
 const TEST_W: usize = 100;
 const TEST_H: usize = 75;
 
@@ -116,7 +117,7 @@ fn render_tile_based_deferred_produces_pixels() {
     );
 }
 
-/// Run all 4 modes sequentially and verify they produce comparable output.
+/// 依次运行全部 4 种模式，并验证它们产生的输出大致相似。
 #[test]
 fn all_modes_produce_similar_output() {
     let model = Model::load(TEAPOT_PATH).expect("Failed to load teapot");
@@ -148,7 +149,7 @@ fn all_modes_produce_similar_output() {
         "All modes should produce output. Counts: {:?}",
         counts
     );
-    // Allow generous variance between modes (different algorithms)
+    // 允许各模式之间存在较大差异（不同算法）
     assert!(
         min_count as f64 / max_count as f64 > 0.3,
         "Modes should produce broadly similar output. Counts: {:?}",
@@ -162,10 +163,10 @@ fn buffer_double_buffering() {
     buf.clear_draw_buffer(Color::RED);
     let draw_snapshot: Vec<u32> = buf.draw_buffer().to_vec();
     buf.swap();
-    // After swap, display should have what was draw
+    // 交换后，显示缓冲区应包含之前绘制缓冲区的内容
     let display = buf.display_buffer();
     assert_eq!(display, draw_snapshot.as_slice());
-    // New draw buffer should be zeroed (from initial state)
+    // 新的绘制缓冲区应为零（来自初始状态）
     let new_draw = buf.draw_buffer();
     assert_eq!(new_draw.iter().filter(|&&p| p != 0).count(), 0);
 }

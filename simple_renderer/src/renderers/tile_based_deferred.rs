@@ -1,18 +1,19 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
-//! Tile-based deferred renderer (TBDR) with 2-pass rasterization.
+//! 基于瓦片的延迟渲染器（TBDR），使用两遍光栅化。
 //!
-//! SoA tile-based deferred renderer with 2-pass (Z-prepass + shade winners) rasterization.
+//! SoA 瓦片式延迟渲染器，采用两遍（Z 预通道 + 仅着色胜出者）光栅化。
 //!
-//! Algorithm:
-//! 1. Vertex transform to SoA
-//! 2. Setup tile grid
-//! 3. Triangle-tile binning (2-pass: count then fill)
-//! 4. Per-tile 2-pass rasterization (rayon):
-//!    - Pass A (Z-prepass): edge function rasterization, update zmin + winner
-//!    - Pass B (Deferred shade): shade only winner fragments
-//! 5. Copy tile buffers to global framebuffer
-//! 6. Copy to output
+//! 算法流程：
+//! 1. 顶点变换为 SoA 格式
+//! 2. 设置瓦片网格
+//! 3. 三角形-瓦片分箱（两遍：先计数后填充）
+//! 4. 每瓦片两遍光栅化（rayon）：
+//!    - 通道 A（Z 预通道）：边缘函数光栅化，更新最小深度和胜出者
+//!    - 通道 B（延迟着色）：仅对胜出片段着色
+//! 5. 将瓦片缓冲区复制到全局帧缓冲
+//! 6. 复制到输出
 
 use log::debug;
 use std::time::Instant;
@@ -29,16 +30,16 @@ use crate::renderers::tile_common::{
 use crate::renderers::Renderer;
 use crate::shader::Shader;
 
-/// SoA tile-based deferred renderer (TBDR).
+/// SoA 瓦片式延迟渲染器（TBDR）。
 ///
-/// 2-pass per tile: Z-prepass determines winners, then shade only winners.
-/// This avoids shading pixels that would be overdrawn by closer triangles.
+/// 每瓦片两遍处理：Z 预通道确定胜出者，然后仅对胜出者着色。
+/// 这避免了对被更近三角形覆盖的像素进行无效着色。
 pub struct TileBasedDeferredRenderer {
     tile_size: usize,
 }
 
 impl TileBasedDeferredRenderer {
-    /// Create a TBDR renderer with the given tile size.
+    /// 创建一个指定瓦片大小的 TBDR 渲染器。
     pub fn new(_width: usize, _height: usize, tile_size: usize) -> Self {
         Self {
             tile_size: if tile_size > 0 {
@@ -64,12 +65,12 @@ impl Renderer for TileBasedDeferredRenderer {
         height: usize,
     ) -> crate::error::Result<()> {
         let t = Instant::now();
-        // 1. Vertex transform to SoA
+        // 1. 顶点变换为 SoA 格式
         let soa = tile_common::vertex_transform_soa(model, shader, width, height);
         let vertex_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         let t = Instant::now();
-        // 2. Setup tile grid
+        // 2. 设置瓦片网格
         let tile_size = self.tile_size;
         let tiles_x = width.div_ceil(tile_size);
         let tiles_y = height.div_ceil(tile_size);
@@ -83,12 +84,12 @@ impl Renderer for TileBasedDeferredRenderer {
         let setup_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         let t = Instant::now();
-        // 3. Triangle-tile binning
+        // 3. 三角形-瓦片分箱
         let tile_triangles = tile_common::triangle_tile_binning(model, &grid);
         let binning_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         let t = Instant::now();
-        // 4. Parallel 2-pass rasterization per tile
+        // 4. 每瓦片并行两遍光栅化
         let total_tiles = tiles_x * tiles_y;
 
         let tile_results: Vec<(Vec<u32>, usize, usize, usize, usize)> = (0..total_tiles)
@@ -126,8 +127,8 @@ impl Renderer for TileBasedDeferredRenderer {
                     &bounds,
                 );
 
-                // tile_depth is only used as z-buffer within
-                // rasterize_tile_deferred — no need to return it
+                // tile_depth 仅在 rasterize_tile_deferred 内部用作
+                // 深度缓冲——无需返回
                 (
                     tile_color,
                     screen_x_start,
@@ -140,7 +141,7 @@ impl Renderer for TileBasedDeferredRenderer {
 
         let raster_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 5. Copy tile results directly to output buffer
+        // 5. 将瓦片结果直接复制到输出缓冲区
         let t = Instant::now();
         for (tile_color, sx, sy, tw, th) in &tile_results {
             for y in 0..*th {
@@ -172,7 +173,6 @@ impl Renderer for TileBasedDeferredRenderer {
     }
 }
 
-// ── Per-tile 2-pass rasterization ─────────────────────────────────────────
 
 fn rasterize_tile_deferred(
     triangles: &[TileTriangleRef],
@@ -193,13 +193,12 @@ fn rasterize_tile_deferred(
     let height = bounds.fb_height;
     let tile_pixels = tile_width * tile_height;
 
-    // Per-pixel state for 2-pass
-    // tile_depth is used as zmin buffer (Pass A) and output depth (Pass B)
+    // 两遍处理的逐像素状态
+    // tile_depth 用作最小深度缓冲（通道 A）和输出深度（通道 B）
     let mut winner: Vec<i32> = vec![-1; tile_pixels];
     let mut b0c_buf = vec![0.0f32; tile_pixels];
     let mut b1c_buf = vec![0.0f32; tile_pixels];
 
-    // ── Pass A: Z-prepass ─────────────────────────────────────────────
 
     for (tri_local_idx, tri) in triangles.iter().enumerate() {
         let i0 = tri.i0;
@@ -210,7 +209,7 @@ fn rasterize_tile_deferred(
         let p1 = grid.soa.pos_screen[i1];
         let p2 = grid.soa.pos_screen[i2];
 
-        // Triangle AABB clipped to tile bounds
+        // 三角形 AABB 裁剪到瓦片范围
         let tri_minx = p0.x.min(p1.x).min(p2.x);
         let tri_miny = p0.y.min(p1.y).min(p2.y);
         let tri_maxx = p0.x.max(p1.x).max(p2.x);
@@ -225,7 +224,7 @@ fn rasterize_tile_deferred(
             continue;
         }
 
-        // Edge vectors and signed area
+        // 边缘向量和有符号面积
         let e01x = p1.x - p0.x;
         let e01y = p1.y - p0.y;
         let e12x = p2.x - p1.x;
@@ -271,7 +270,7 @@ fn rasterize_tile_deferred(
                     e20[j] = e20_base + de20dx * step;
                 }
 
-                // Coverage mask
+                // 覆盖掩码
                 let mut mask_cover = 0u32;
                 for j in 0..lane {
                     let inside = if positive {
@@ -289,7 +288,7 @@ fn rasterize_tile_deferred(
                     continue;
                 }
 
-                // Z-test: update zmin and winner
+                // 深度测试：更新最小深度和胜出者
                 for j in 0..lane {
                     if (mask_cover >> j) & 1 == 0 {
                         continue;
@@ -325,7 +324,6 @@ fn rasterize_tile_deferred(
         }
     }
 
-    // ── Pass B: Deferred shade (winners only) ─────────────────────────
 
     for y in 0..tile_height {
         for x in 0..tile_width {
@@ -343,7 +341,7 @@ fn rasterize_tile_deferred(
             let b1c = b1c_buf[idx];
             let b2c = 1.0 - b0c - b1c;
 
-            // Interpolate attributes
+            // 插值属性
             let n0 = grid.soa.normal[i0];
             let n1 = grid.soa.normal[i1];
             let n2 = grid.soa.normal[i2];
@@ -374,20 +372,18 @@ fn rasterize_tile_deferred(
             };
 
             let out_color = shader.fragment_shader(&frag, &faces[tri.face_index].material);
-            // tile_depth[idx] already set in Pass A
+            // tile_depth[idx] 已在通道 A 中设置
             tile_color[idx] = u32::from(out_color);
         }
     }
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::renderers::test_utils::{create_test_model, test_shader};
 
-    // ── Visible triangle produces pixels ──────────────────────────────
 
     #[test]
     fn visible_triangle_produces_nonzero_pixels() {
@@ -414,7 +410,6 @@ mod tests {
         );
     }
 
-    // ── Backface culling ──────────────────────────────────────────────
 
     #[test]
     fn backface_triangle_produces_no_pixels() {
@@ -426,7 +421,7 @@ mod tests {
         let model = create_test_model(
             &[[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [0.0, 0.5, 0.0]],
             [0.0, 0.0, 1.0],
-            &[[0, 2, 1]], // reversed winding
+            &[[0, 2, 1]], // 反向绕序
         );
 
         let mut buffer = vec![0u32; width * height];
@@ -440,7 +435,6 @@ mod tests {
         );
     }
 
-    // ── Empty model ──────────────────────────────────────────────────
 
     #[test]
     fn empty_model_produces_no_pixels() {
@@ -467,7 +461,6 @@ mod tests {
         );
     }
 
-    // ── Off-screen triangle ──────────────────────────────────────────
 
     #[test]
     fn offscreen_triangle_produces_no_pixels() {
@@ -493,7 +486,6 @@ mod tests {
         );
     }
 
-    // ── Custom tile size ─────────────────────────────────────────────
 
     #[test]
     fn custom_tile_size_works() {
@@ -520,7 +512,6 @@ mod tests {
         );
     }
 
-    // ── 2-pass advantage: only winners get shaded ────────────────────
 
     #[test]
     fn two_pass_renders_overlapping_triangles() {
@@ -529,7 +520,7 @@ mod tests {
         let mut renderer = TileBasedDeferredRenderer::new(width, height, DEFAULT_TILE_SIZE);
         let shader = test_shader();
 
-        // Two overlapping triangles at different depths
+        // 两个不同深度的重叠三角形
         let model = create_test_model(
             &[
                 [0.0, 0.0, 0.0],

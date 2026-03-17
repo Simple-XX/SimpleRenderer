@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 use std::collections::HashMap;
 
@@ -7,7 +8,6 @@ use crate::light::Light;
 use crate::material::Material;
 use crate::math::{Mat3, Mat4, Vec2, Vec3, Vec4};
 
-// ── 预定义 uniform 名称 ──────────────────────────────────────────────
 
 /// 预定义的 uniform 名称常量，防止字符串键拼写错误。
 ///
@@ -22,7 +22,6 @@ pub mod names {
     pub const LIGHTS: &str = "lights";
 }
 
-// ── UniformValue ──────────────────────────────────────────────────────────
 
 /// 可存储在 [`UniformBuffer`] 中的动态类型值。
 #[derive(Debug, Clone)]
@@ -40,7 +39,6 @@ pub enum UniformValue {
     Lights(Vec<Light>),
 }
 
-// ── From<T> 实现 ─────────────────────────────────────────────────────────
 
 impl From<i32> for UniformValue {
     #[inline]
@@ -119,7 +117,6 @@ impl From<Vec<Light>> for UniformValue {
     }
 }
 
-// ── UniformBuffer ─────────────────────────────────────────────────────────
 
 /// 按名称存储的 uniform 容器，提供类型化的访问方法。
 ///
@@ -148,7 +145,6 @@ impl UniformBuffer {
         self.uniforms.contains_key(name)
     }
 
-    // ── 类型化访问方法 ─────────────────────────────────────────────────
 
     pub fn get_int(&self, name: &str) -> Option<i32> {
         match self.uniforms.get(name)? {
@@ -221,7 +217,6 @@ impl UniformBuffer {
     }
 }
 
-// ── 测试 ─────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {

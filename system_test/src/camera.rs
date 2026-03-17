@@ -1,62 +1,63 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 use glam::{Mat4, Vec3};
 
-/// Camera movement direction
+/// 相机移动方向
 pub enum CameraMovement {
-    /// Move forward along the view direction
+    /// 沿视线方向前进
     Forward,
-    /// Move backward along the view direction
+    /// 沿视线方向后退
     Backward,
-    /// Strafe left
+    /// 向左平移
     Left,
-    /// Strafe right
+    /// 向右平移
     Right,
-    /// Move up along the world up axis
+    /// 沿世界上方轴向上移动
     Up,
-    /// Move down along the world up axis
+    /// 沿世界上方轴向下移动
     Down,
 }
 
-/// Free-look camera (FPS style)
+/// 自由视角相机（FPS 风格）
 ///
-/// Uses Euler angles to control orientation, supports:
-/// - WASD / arrow keys: move forward/backward/left/right
-/// - Space / Left Shift: move up / move down
-/// - Right-click drag: rotate view
-/// - Mouse wheel: adjust movement speed
+/// 使用欧拉角控制朝向，支持：
+/// - WASD / 方向键：前后左右移动
+/// - 空格 / 左 Shift：上移 / 下移
+/// - 右键拖拽：旋转视角
+/// - 鼠标滚轮：调整移动速度
 pub struct Camera {
-    /// Camera world position
+    /// 相机世界坐标位置
     position: Vec3,
-    /// Forward direction (unit vector)
+    /// 前方方向（单位向量）
     front: Vec3,
-    /// Local up direction (unit vector)
+    /// 局部上方向（单位向量）
     up: Vec3,
-    /// Local right direction (unit vector)
+    /// 局部右方向（单位向量）
     right: Vec3,
-    /// World up direction (fixed to +Y axis)
+    /// 世界上方向（固定为 +Y 轴）
     world_up: Vec3,
-    /// Yaw angle (horizontal rotation, degrees)
+    /// 偏航角（水平旋转，单位：度）
     yaw: f32,
-    /// Pitch angle (vertical rotation, degrees, clamped to ±89°)
+    /// 俯仰角（垂直旋转，单位：度，限制在 ±89°）
     pitch: f32,
-    /// Movement speed (units per second)
+    /// 移动速度（单位/秒）
     movement_speed: f32,
-    /// Mouse sensitivity
+    /// 鼠标灵敏度
     mouse_sensitivity: f32,
 }
 
 impl Camera {
-    /// Default movement speed (units per second)
+    /// 默认移动速度（单位/秒）
     const DEFAULT_SPEED: f32 = 2.5;
-    /// Default mouse sensitivity
+    /// 默认鼠标灵敏度
     const DEFAULT_SENSITIVITY: f32 = 0.1;
-    /// Default yaw angle (facing -Z direction)
+    /// 默认偏航角（朝向 -Z 方向）
     const DEFAULT_YAW: f32 = -90.0;
-    /// Default pitch angle (horizontal)
+    /// 默认俯仰角（水平）
     const DEFAULT_PITCH: f32 = 0.0;
 
-    /// Create a free-look camera at the specified position, initially facing -Z direction
+    /// 在指定位置创建自由视角相机，初始朝向 -Z 方向
     pub fn new(position: Vec3) -> Self {
         let mut camera = Self {
             position,
@@ -73,7 +74,7 @@ impl Camera {
         camera
     }
 
-    /// Get camera world position
+    /// 获取相机世界坐标位置
     pub fn position(&self) -> Vec3 {
         self.position
     }
@@ -83,24 +84,24 @@ impl Camera {
         self.movement_speed
     }
 
-    /// Adjust movement speed (multiply by factor), clamped to 0.1 ~ 50.0
+    /// 调整移动速度（乘以系数），限制在 0.1 ~ 50.0 范围内
     pub fn adjust_speed(&mut self, factor: f32) {
         self.movement_speed = (self.movement_speed * factor).clamp(0.1, 50.0);
     }
 
-    /// Compute view matrix (right-handed coordinate system)
+    /// 计算视图矩阵（右手坐标系）
     pub fn view_matrix(&self) -> Mat4 {
         Mat4::look_at_rh(self.position, self.position + self.front, self.up)
     }
 
-    /// Compute perspective projection matrix (right-handed, OpenGL depth range)
+    /// 计算透视投影矩阵（右手坐标系，OpenGL 深度范围）
     pub fn projection_matrix(&self, fov_deg: f32, aspect: f32, near: f32, far: f32) -> Mat4 {
         Mat4::perspective_rh_gl(fov_deg.to_radians(), aspect, near, far)
     }
 
-    /// Process keyboard movement input
+    /// 处理键盘移动输入
     ///
-    /// `delta_time` is the frame interval time (seconds), ensuring movement speed is frame-rate independent
+    /// `delta_time` 为帧间隔时间（秒），确保移动速度与帧率无关
     pub fn process_keyboard(&mut self, direction: CameraMovement, delta_time: f32) {
         let velocity = self.movement_speed * delta_time;
         match direction {
@@ -113,22 +114,22 @@ impl Camera {
         }
     }
 
-    /// Process mouse movement input
+    /// 处理鼠标移动输入
     ///
-    /// `x_offset` and `y_offset` are mouse displacement in pixels.
-    /// Internally multiplied by sensitivity coefficient to update Euler angles.
+    /// `x_offset` 和 `y_offset` 为鼠标位移（像素）。
+    /// 内部乘以灵敏度系数后更新欧拉角。
     pub fn process_mouse(&mut self, x_offset: f32, y_offset: f32) {
         self.yaw += x_offset * self.mouse_sensitivity;
         self.pitch = (self.pitch + y_offset * self.mouse_sensitivity).clamp(-89.0, 89.0);
         self.update_vectors();
     }
 
-    /// Recalculate camera direction vectors (forward, right, up) based on current Euler angles
+    /// 根据当前欧拉角重新计算相机方向向量（前方、右方、上方）
     fn update_vectors(&mut self) {
         let yaw_rad = self.yaw.to_radians();
         let pitch_rad = self.pitch.to_radians();
 
-        // Calculate forward direction from yaw and pitch angles
+        // 根据偏航角和俯仰角计算前方方向
         self.front = Vec3::new(
             yaw_rad.cos() * pitch_rad.cos(),
             pitch_rad.sin(),
@@ -136,9 +137,9 @@ impl Camera {
         )
         .normalize();
 
-        // Right direction = forward direction × world up direction (normalized)
+        // 右方向 = 前方方向 × 世界上方向（归一化）
         self.right = self.front.cross(self.world_up).normalize();
-        // Up direction = right direction × forward direction (normalized)
+        // 上方向 = 右方向 × 前方方向（归一化）
         self.up = self.right.cross(self.front).normalize();
     }
 }
@@ -162,11 +163,11 @@ mod tests {
 
     #[test]
     fn default_faces_negative_z() {
-        // Default yaw is -90 degrees, pitch is 0
-        // front should be approximately (0, 0, -1)
+        // 默认偏航角为 -90 度，俯仰角为 0
+        // front 应近似为 (0, 0, -1)
         let cam = Camera::new(Vec3::ZERO);
         let view = cam.view_matrix();
-        // Looking at (0,0,-1) from origin: the view matrix should be valid
+        // 从原点看向 (0,0,-1)：视图矩阵应有效
         assert!(
             view.determinant().abs() > EPSILON,
             "view matrix should be non-singular"
@@ -220,7 +221,7 @@ mod tests {
         let mut cam2 = Camera::new(Vec3::ZERO);
         cam1.process_keyboard(CameraMovement::Forward, 1.0);
         cam2.process_keyboard(CameraMovement::Backward, 1.0);
-        // Forward and backward should move in opposite directions
+        // 前进和后退应朝相反方向移动
         let fwd = cam1.position();
         let bwd = cam2.position();
         assert!(
@@ -272,7 +273,7 @@ mod tests {
     fn process_mouse_yaw_changes_direction() {
         let mut cam = Camera::new(Vec3::ZERO);
         let view_before = cam.view_matrix();
-        cam.process_mouse(10.0, 0.0); // yaw right
+        cam.process_mouse(10.0, 0.0); // 向右偏航
         let view_after = cam.view_matrix();
         assert_ne!(view_before, view_after, "yaw should change view matrix");
     }
@@ -280,9 +281,9 @@ mod tests {
     #[test]
     fn process_mouse_pitch_clamps_at_89() {
         let mut cam = Camera::new(Vec3::ZERO);
-        // Try to pitch way beyond 89 degrees
+        // 尝试将俯仰角推到远超 89 度
         cam.process_mouse(0.0, 10000.0);
-        // Pitch should be clamped, view matrix should still be valid
+        // 俯仰角应被限制，视图矩阵仍应有效
         let view = cam.view_matrix();
         assert!(
             view.determinant().abs() > EPSILON,

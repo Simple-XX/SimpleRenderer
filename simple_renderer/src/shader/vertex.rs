@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 use crate::math::{Mat3, Mat4};
 use crate::uniform;
@@ -6,7 +7,6 @@ use crate::vertex::Vertex;
 
 use super::Shader;
 
-// ── 缓存 ──────────────────────────────────────────────────────────────────
 
 /// 缓存的顶点着色器矩阵，避免每个顶点都进行 HashMap 查找。
 #[derive(Clone)]
@@ -41,7 +41,6 @@ impl Default for VertexUniformCache {
 }
 
 impl Shader {
-    // ── 顶点着色器 ───────────────────────────────────────────────────
 
     /// 将顶点从模型空间变换到裁剪空间。
     ///
@@ -86,7 +85,6 @@ impl Shader {
         .with_world_position(world_position.truncate())
     }
 
-    // ── 顶点缓存更新（私有）──────────────────────────────────────────
 
     pub(super) fn update_matrix_cache(&mut self, name: &str, value: Mat4) {
         match name {
@@ -124,7 +122,6 @@ impl Shader {
         self.vertex_cache.derived_valid = true;
     }
 
-    // ── 顶点缓存准备（渲染前）─────────────────────────────────────────
 
     pub(super) fn prepare_vertex_cache(&mut self) {
         if self.vertex_cache.derived_valid {

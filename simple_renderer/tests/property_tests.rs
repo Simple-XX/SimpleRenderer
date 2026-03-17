@@ -1,13 +1,13 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
-//! Property-based tests for mathematical correctness.
+//! 数学正确性的属性测试。
 
 use glam::{Mat4, Vec2, Vec3, Vec4};
 use proptest::prelude::*;
 use simple_renderer::vertex::Vertex;
 use simple_renderer::{Buffer, Color, Shader};
 
-// ── Color roundtrip properties ──────────────────────────────────────
 
 proptest! {
     #[test]
@@ -51,7 +51,7 @@ proptest! {
     #[test]
     fn color_from_f32_clamped(r in -100.0f32..400.0, g in -100.0f32..400.0, b in -100.0f32..400.0, a in -100.0f32..400.0) {
         let color = Color::from_f32(r, g, b, a);
-        // All channels should be in [0, 255] regardless of input
+        // 无论输入如何，所有通道都应在 [0, 255] 范围内
         prop_assert!(color.r() <= 255);
         prop_assert!(color.g() <= 255);
         prop_assert!(color.b() <= 255);
@@ -67,7 +67,6 @@ proptest! {
         prop_assert!(color.a() <= 255);
     }
 
-    // ── Vertex property tests ────────────────────────────────────────────
 
     #[test]
     fn vertex_transform_identity_preserves_position(
@@ -122,7 +121,6 @@ proptest! {
         prop_assert_eq!(transformed.tex_coords, tex);
     }
 
-    // ── Shader vertex_shader property tests ─────────────────────────────
 
     #[test]
     fn vertex_shader_identity_matrices_preserve_position(
@@ -181,7 +179,6 @@ proptest! {
         prop_assert_eq!(result.tex_coords, tex);
     }
 
-    // ── Buffer property tests ────────────────────────────────────────────
 
     #[test]
     fn buffer_double_swap_draw_buffer_unchanged(
@@ -229,7 +226,6 @@ proptest! {
         prop_assert!(buf.draw_buffer().iter().all(|&p| p == 0));
     }
 
-    // ── Additional Color property tests ─────────────────────────────────
 
     #[test]
     fn color_normalized_roundtrip_in_range(

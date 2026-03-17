@@ -1,16 +1,17 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
-//! Tile-based renderer (SoA layout) with edge function rasterization.
+//! 基于瓦片的渲染器（SoA 布局），使用边缘函数光栅化。
 //!
-//! SoA tile-based forward renderer with edge-function rasterization.
+//! SoA 瓦片式前向渲染器，采用边缘函数光栅化。
 //!
-//! Algorithm:
-//! 1. Vertex transform to SoA
-//! 2. Setup tile grid
-//! 3. Triangle-tile binning (2-pass: count then fill)
-//! 4. Parallel rasterization per tile (rayon) with edge functions
-//! 5. Copy tile buffers to global framebuffer
-//! 6. Copy to output
+//! 算法流程：
+//! 1. 顶点变换为 SoA 格式
+//! 2. 设置瓦片网格
+//! 3. 三角形-瓦片分箱（两遍：先计数后填充）
+//! 4. 每瓦片并行光栅化（rayon），使用边缘函数
+//! 5. 将瓦片缓冲区复制到全局帧缓冲
+//! 6. 复制到输出
 
 use log::debug;
 use std::time::Instant;
@@ -27,7 +28,7 @@ use crate::renderers::tile_common::{
 use crate::renderers::Renderer;
 use crate::shader::Shader;
 
-/// Result of rasterizing a single tile.
+/// 单个瓦片的光栅化结果。
 struct TileResult {
     depth: Vec<f32>,
     color: Vec<u32>,
@@ -37,9 +38,9 @@ struct TileResult {
     height: usize,
 }
 
-/// SoA tile-based renderer with edge function rasterization and optional Early-Z.
+/// SoA 瓦片式渲染器，使用边缘函数光栅化，支持可选的 Early-Z。
 ///
-/// Vertex transform → tile binning → parallel per-tile rasterization → copy to output.
+/// 顶点变换 → 瓦片分箱 → 每瓦片并行光栅化 → 复制到输出。
 pub struct TileBasedRenderer {
     tile_size: usize,
     early_z: bool,
@@ -48,7 +49,7 @@ pub struct TileBasedRenderer {
 }
 
 impl TileBasedRenderer {
-    /// Create a tile-based renderer with the given Early-Z flag and tile size.
+    /// 创建一个指定 Early-Z 标志和瓦片大小的瓦片式渲染器。
     pub fn new(width: usize, height: usize, early_z: bool, tile_size: usize) -> Self {
         let num_pixels = width * height;
         Self {
@@ -78,12 +79,12 @@ impl Renderer for TileBasedRenderer {
         height: usize,
     ) -> crate::error::Result<()> {
         let t = Instant::now();
-        // 1. Vertex transform to SoA
+        // 1. 顶点变换为 SoA 格式
         let soa = tile_common::vertex_transform_soa(model, shader, width, height);
         let vertex_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         let t = Instant::now();
-        // 2. Setup tile grid
+        // 2. 设置瓦片网格
         let tile_size = self.tile_size;
         let tiles_x = width.div_ceil(tile_size);
         let tiles_y = height.div_ceil(tile_size);
@@ -97,11 +98,11 @@ impl Renderer for TileBasedRenderer {
         let setup_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         let t = Instant::now();
-        // 3. Triangle-tile binning
+        // 3. 三角形-瓦片分箱
         let tile_triangles = tile_common::triangle_tile_binning(model, &grid);
         let binning_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 4. Global framebuffer (reuse across frames)
+        // 4. 全局帧缓冲（跨帧复用）
         let num_pixels = width * height;
         self.global_depth.resize(num_pixels, DEPTH_CLEAR);
         self.global_depth.fill(DEPTH_CLEAR);
@@ -109,7 +110,7 @@ impl Renderer for TileBasedRenderer {
         self.global_color.fill(COLOR_CLEAR);
 
         let t = Instant::now();
-        // 5. Parallel rasterization per tile
+        // 5. 每瓦片并行光栅化
         let total_tiles = tiles_x * tiles_y;
         let early_z = self.early_z;
 
@@ -162,7 +163,7 @@ impl Renderer for TileBasedRenderer {
 
         let raster_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 6. Copy tile results to global framebuffer
+        // 6. 将瓦片结果复制到全局帧缓冲
         let t = Instant::now();
         for tile in &tile_results {
             for y in 0..tile.height {
@@ -176,7 +177,7 @@ impl Renderer for TileBasedRenderer {
         }
         let copy_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 7. Copy to output
+        // 7. 复制到输出
         out_buffer[..num_pixels].copy_from_slice(&self.global_color);
 
         let sum_ms = vertex_ms + setup_ms + binning_ms + raster_ms + copy_ms;
@@ -199,7 +200,6 @@ impl Renderer for TileBasedRenderer {
     }
 }
 
-// ── Per-tile rasterization with edge functions ────────────────────────────
 
 #[allow(clippy::too_many_arguments)]
 fn rasterize_tile(
@@ -228,7 +228,7 @@ fn rasterize_tile(
         let p1 = grid.soa.pos_screen[i1];
         let p2 = grid.soa.pos_screen[i2];
 
-        // Triangle AABB clipped to tile bounds
+        // 三角形 AABB 裁剪到瓦片范围
         let tri_minx = p0.x.min(p1.x).min(p2.x);
         let tri_miny = p0.y.min(p1.y).min(p2.y);
         let tri_maxx = p0.x.max(p1.x).max(p2.x);
@@ -243,7 +243,7 @@ fn rasterize_tile(
             continue;
         }
 
-        // Edge vectors and signed area
+        // 边缘向量和有符号面积
         let e01x = p1.x - p0.x;
         let e01y = p1.y - p0.y;
         let e12x = p2.x - p1.x;
@@ -252,11 +252,11 @@ fn rasterize_tile(
         let e20y = p0.y - p2.y;
         let area2 = cross2(e01x, e01y, p2.x - p0.x, p2.y - p0.y);
         if area2.abs() < 1e-6 {
-            continue; // degenerate
+            continue; // 退化三角形
         }
         let positive = area2 > 0.0;
 
-        // Z and 1/w for perspective correction
+        // 用于透视校正的 Z 和 1/w
         let z0 = p0.z;
         let z1 = p1.z;
         let z2 = p2.z;
@@ -264,17 +264,17 @@ fn rasterize_tile(
         let w1_inv = 1.0 / p1.w;
         let w2_inv = 1.0 / p2.w;
 
-        // dE/dx for stepping
+        // 用于步进的 dE/dx
         let de01dx = -e01y;
         let de12dx = -e12y;
         let de20dx = -e20y;
 
-        // Row-major scanline
+        // 行优先扫描线
         for y in sy..=ey {
             let yf = y as f32;
             let x0f = sx as f32;
 
-            // Edge function values at scanline start
+            // 扫描线起点处的边缘函数值
             let e01_base = cross2(e01x, e01y, x0f - p0.x, yf - p0.y);
             let e12_base = cross2(e12x, e12y, x0f - p1.x, yf - p1.y);
             let e20_base = cross2(e20x, e20y, x0f - p2.x, yf - p2.y);
@@ -283,7 +283,7 @@ fn rasterize_tile(
             while xb <= ex {
                 let lane = K_LANE.min((ex - xb + 1) as usize);
 
-                // Compute edge functions for this lane
+                // 计算当前通道的边缘函数
                 let mut e01 = [0.0f32; K_LANE];
                 let mut e12 = [0.0f32; K_LANE];
                 let mut e20 = [0.0f32; K_LANE];
@@ -294,7 +294,7 @@ fn rasterize_tile(
                     e20[j] = e20_base + de20dx * step;
                 }
 
-                // Coverage mask
+                // 覆盖掩码
                 let mut mask_cover = 0u32;
                 for j in 0..lane {
                     let inside = if positive {
@@ -312,7 +312,7 @@ fn rasterize_tile(
                     continue;
                 }
 
-                // Compute z and perspective-corrected barycentric coords
+                // 计算 z 和透视校正的重心坐标
                 let mut mask_zpass = 0u32;
                 let mut zvals = [0.0f32; K_LANE];
                 let mut b0c_arr = [0.0f32; K_LANE];
@@ -349,7 +349,7 @@ fn rasterize_tile(
                     }
                 }
 
-                // Final mask
+                // 最终掩码
                 let mask_final = if use_early_z {
                     mask_cover & mask_zpass
                 } else {
@@ -360,7 +360,7 @@ fn rasterize_tile(
                     continue;
                 }
 
-                // Shade and write
+                // 着色并写入
                 for j in 0..lane {
                     if use_early_z && (mask_final >> j) & 1 == 0 {
                         continue;
@@ -382,7 +382,7 @@ fn rasterize_tile(
                     let b1c = b1c_arr[j];
                     let b2c = b2c_arr[j];
 
-                    // Interpolate attributes
+                    // 插值属性
                     let n0 = grid.soa.normal[i0];
                     let n1 = grid.soa.normal[i1];
                     let n2 = grid.soa.normal[i2];
@@ -412,7 +412,7 @@ fn rasterize_tile(
                         },
                     };
 
-                    // Depth test first, shade only if closer (avoids wasted shading)
+                    // 先进行深度测试，仅在更近时着色（避免无效着色）
                     if frag.depth < tile_depth[idx] {
                         let out_color =
                             shader.fragment_shader(&frag, &faces[tri.face_index].material);
@@ -427,14 +427,12 @@ fn rasterize_tile(
     }
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::renderers::test_utils::{create_test_model, test_shader};
 
-    // ── Visible triangle produces pixels ──────────────────────────────
 
     #[test]
     fn visible_triangle_produces_nonzero_pixels() {
@@ -461,7 +459,6 @@ mod tests {
         );
     }
 
-    // ── Backface culling ──────────────────────────────────────────────
 
     #[test]
     fn backface_triangle_produces_no_pixels() {
@@ -473,7 +470,7 @@ mod tests {
         let model = create_test_model(
             &[[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [0.0, 0.5, 0.0]],
             [0.0, 0.0, 1.0],
-            &[[0, 2, 1]], // reversed winding
+            &[[0, 2, 1]], // 反向绕序
         );
 
         let mut buffer = vec![0u32; width * height];
@@ -487,7 +484,6 @@ mod tests {
         );
     }
 
-    // ── Empty model ──────────────────────────────────────────────────
 
     #[test]
     fn empty_model_produces_no_pixels() {
@@ -514,7 +510,6 @@ mod tests {
         );
     }
 
-    // ── Early-Z flag ─────────────────────────────────────────────────
 
     #[test]
     fn early_z_disabled_still_renders() {
@@ -541,7 +536,6 @@ mod tests {
         );
     }
 
-    // ── Off-screen triangle ──────────────────────────────────────────
 
     #[test]
     fn offscreen_triangle_produces_no_pixels() {
@@ -567,7 +561,6 @@ mod tests {
         );
     }
 
-    // ── Custom tile size ─────────────────────────────────────────────
 
     #[test]
     fn custom_tile_size_works() {

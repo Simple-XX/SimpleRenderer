@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 use crate::color::Color;
 
@@ -80,7 +81,6 @@ impl Buffer {
     }
 }
 
-// ── 测试 ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {

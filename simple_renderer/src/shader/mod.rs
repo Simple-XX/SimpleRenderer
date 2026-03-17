@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 mod fragment;
 mod specular_lut;
@@ -14,7 +15,6 @@ use fragment::FragmentUniformCache;
 use specular_lut::SpecularLut;
 use vertex::VertexUniformCache;
 
-// ── 着色器 ────────────────────────────────────────────────────────────────
 
 /// 顶点 + 片段着色器，带有 uniform 缓存和高光查找表。
 ///
@@ -39,7 +39,6 @@ impl Shader {
         }
     }
 
-    // ── Uniform 管理 ──────────────────────────────────────────────────
 
     /// 存储一个 uniform 并更新相关缓存。
     pub fn set_uniform(&mut self, name: &str, value: impl Into<UniformValue>) {
@@ -86,7 +85,6 @@ impl Clone for Shader {
     }
 }
 
-// ── 测试 ─────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
@@ -100,7 +98,6 @@ mod tests {
 
     use specular_lut::SPECULAR_LUT_RESOLUTION;
 
-    // ── 通过 Shader 操作 UniformBuffer ────────────────────────────────
 
     #[test]
     fn shader_default() {
@@ -109,7 +106,6 @@ mod tests {
         assert!(!shader.fragment_cache.derived_valid);
     }
 
-    // ── 顶点着色器 ──────────────────────────────────────────────────
 
     #[test]
     fn vertex_shader_identity_matrices() {
@@ -183,7 +179,6 @@ mod tests {
         assert_eq!(result.color, Color::RED);
     }
 
-    // ── 片段着色器 ──────────────────────────────────────────────────
 
     #[test]
     fn fragment_shader_produces_non_zero_color() {
@@ -271,7 +266,6 @@ mod tests {
         assert!(color.r() > 100);
     }
 
-    // ── 高光查找表 ───────────────────────────────────────────────────
 
     #[test]
     fn specular_lut_shininess_zero_all_ones() {
@@ -388,7 +382,6 @@ mod tests {
         }
     }
 
-    // ── 纹理采样 ─────────────────────────────────────────────────────
 
     #[test]
     fn sample_texture_basic() {
@@ -431,7 +424,6 @@ mod tests {
         assert_eq!(c, Color::new(42, 43, 44, 255));
     }
 
-    // ── 缓存失效 ─────────────────────────────────────────────────────
 
     #[test]
     fn cache_invalidation_on_matrix_update() {
@@ -542,7 +534,6 @@ mod tests {
         assert_eq!(shader.fragment_cache.lights.len(), 1);
     }
 
-    // ── set_lights 便捷方法 ─────────────────────────────────────────
 
     #[test]
     fn set_lights_stores_in_buffer() {

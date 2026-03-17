@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 use minifb::{Key, MouseButton, MouseMode, Window, WindowOptions};
 use simple_renderer::RenderingMode;
@@ -48,7 +49,7 @@ impl Display {
             && !self.window.is_key_down(Key::Q)
     }
 
-    /// RGBA → minifb 0x00RRGGBB
+    /// 将 RGBA 像素格式转换为 minifb 所需的 0x00RRGGBB 格式
     pub fn update(&mut self, buffer: &[u32]) {
         for (i, &pixel) in buffer.iter().enumerate() {
             let r = pixel & 0xFF;
@@ -106,7 +107,7 @@ impl Display {
             }
         }
 
-        // is_key_pressed: triggers once per keypress (not held)
+        // is_key_pressed：每次按键只触发一次（非持续按住）
         if self.window.is_key_pressed(Key::V, minifb::KeyRepeat::No) {
             return Some(InputAction::ToggleVSync);
         }

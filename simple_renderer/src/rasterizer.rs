@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 use crate::color::Color;
 use crate::fragment::Fragment;
@@ -118,7 +119,6 @@ impl Rasterizer {
     }
 }
 
-// ── 重心坐标 ───────────────────────────────────────────────────────────────
 //
 // 通过叉积方法计算重心坐标。
 
@@ -144,7 +144,6 @@ fn get_barycentric_coord(p0: Vec3, p1: Vec3, p2: Vec3, pa: Vec3) -> Option<Vec3>
     Some(Vec3::new(x, y, z))
 }
 
-// ── 透视校正 ───────────────────────────────────────────────────────────────
 //
 // 对透视投影的三角形校正重心权重。
 
@@ -173,7 +172,6 @@ fn perspective_correction(
     (corrected, z)
 }
 
-// ── 插值辅助函数 ───────────────────────────────────────────────────────────
 
 #[inline]
 fn interpolate_f32(v0: f32, v1: f32, v2: f32, bary: Vec3) -> f32 {
@@ -199,7 +197,6 @@ fn interpolate_color(c0: Color, c1: Color, c2: Color, bary: Vec3) -> Color {
     Color::from_f32(r, g, b, 255.0)
 }
 
-// ── 测试 ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
@@ -218,7 +215,6 @@ mod tests {
         }
     }
 
-    // ── 已知三角形 ─────────────────────────────────────────────────────
 
     #[test]
     fn known_triangle_produces_fragments() {
@@ -258,7 +254,6 @@ mod tests {
         }
     }
 
-    // ── 退化三角形 ─────────────────────────────────────────────────────
 
     #[test]
     fn degenerate_triangle_returns_empty() {
@@ -275,7 +270,6 @@ mod tests {
         );
     }
 
-    // ── 重心坐标 ───────────────────────────────────────────────────────
 
     #[test]
     fn barycentric_coords_sum_to_one() {
@@ -315,7 +309,6 @@ mod tests {
         assert!(get_barycentric_coord(p0, p1, p2, pa).is_none());
     }
 
-    // ── 屏幕外三角形 ──────────────────────────────────────────────────
 
     #[test]
     fn offscreen_triangle_returns_empty() {
@@ -347,7 +340,6 @@ mod tests {
         );
     }
 
-    // ── 透视校正 ───────────────────────────────────────────────────────
 
     #[test]
     fn perspective_correction_uniform_w() {
@@ -366,7 +358,6 @@ mod tests {
         assert!((depth - 0.1).abs() < 1e-5, "depth at v0 should be z0");
     }
 
-    // ── 颜色插值 ───────────────────────────────────────────────────────
 
     #[test]
     fn color_interpolation_uniform() {
@@ -392,7 +383,6 @@ mod tests {
         assert_eq!(result.b(), 0);
     }
 
-    // ── 插值辅助函数 ──────────────────────────────────────────────────
 
     #[test]
     fn interpolate_f32_basic() {

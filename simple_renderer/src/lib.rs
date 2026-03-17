@@ -1,12 +1,12 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 //! # SimpleRenderer
 //!
-//! An educational software renderer that implements a simplified GPU rendering
-//! pipeline entirely in safe Rust. Demonstrates vertex processing, rasterization,
-//! fragment shading, and multi-buffered display output.
+//! 一个教育用途的软件渲染器，完全使用安全 Rust 实现了简化的 GPU 渲染
+//! 管线。展示了顶点处理、光栅化、片段着色和多缓冲显示输出。
 //!
-//! ## Quick Start
+//! ## 快速开始
 //!
 //! ```no_run
 //! use simple_renderer::{SimpleRenderer, Model, Shader, Buffer, Light, RenderingMode};
@@ -19,16 +19,16 @@
 //! renderer.draw_model(&model, &mut shader, buffer.draw_buffer_mut()).unwrap();
 //! ```
 //!
-//! ## Architecture
+//! ## 架构
 //!
-//! The pipeline mirrors a typical GPU: **Vertex Shader → Perspective Division →
-//! Viewport Transform → Rasterization → Fragment Shader → Depth Test → Framebuffer**.
+//! 该管线模拟了典型的 GPU 流程：**顶点着色器 → 透视除法 →
+//! 视口变换 → 光栅化 → 片段着色器 → 深度测试 → 帧缓冲**。
 //!
-//! Four rendering strategies are available via [`RenderingMode`]:
-//! - [`RenderingMode::PerTriangle`] — chunk-parallel forward rendering
-//! - [`RenderingMode::TileBased`] — tile-parallel with optional early-Z
-//! - [`RenderingMode::Deferred`] — deferred shading (shade only depth winners)
-//! - [`RenderingMode::TileBasedDeferred`] — tile-parallel deferred (best of both)
+//! 通过 [`RenderingMode`] 可选择四种渲染策略：
+//! - [`RenderingMode::PerTriangle`] — 按三角形分块并行的前向渲染
+//! - [`RenderingMode::TileBased`] — 基于瓦片并行，支持可选的 Early-Z
+//! - [`RenderingMode::Deferred`] — 延迟着色（仅对通过深度测试的像素着色）
+//! - [`RenderingMode::TileBasedDeferred`] — 基于瓦片的延迟渲染（结合两者优势）
 
 pub mod buffer;
 pub mod color;
@@ -47,7 +47,7 @@ pub mod triple_buffer;
 pub mod uniform;
 pub mod vertex;
 
-// Convenience re-exports
+// 便捷的重导出
 pub use buffer::Buffer;
 pub use color::Color;
 pub use error::{RendererError, Result};

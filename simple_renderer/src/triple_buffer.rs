@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 use std::cell::UnsafeCell;
 use std::sync::atomic::{AtomicU8, Ordering};
@@ -176,7 +177,6 @@ impl TripleBufferReader {
     }
 }
 
-// ── 测试 ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {

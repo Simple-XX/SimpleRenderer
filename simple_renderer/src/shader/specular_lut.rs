@@ -1,12 +1,11 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 use super::Shader;
 
-// ── 常量 ──────────────────────────────────────────────────────────────────
 
 pub(crate) const SPECULAR_LUT_RESOLUTION: usize = 256;
 
-// ── 高光查找表 ────────────────────────────────────────────────────────────
 
 /// 预计算的 `cos_theta^shininess` 查找表。
 #[derive(Clone)]
@@ -15,7 +14,6 @@ pub(crate) struct SpecularLut {
 }
 
 impl Shader {
-    // ── 高光查找表（私有）─────────────────────────────────────────────
 
     /// 构建 `cos_theta^shininess` 的查找表。
     pub(super) fn build_specular_lut(shininess: f32) -> SpecularLut {

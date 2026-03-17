@@ -1,4 +1,5 @@
-// Copyright The SimpleRenderer Contributors
+// Copyright (c) Simple-XX/SimpleRenderer
+// SPDX-License-Identifier: MIT
 
 //! 延迟渲染器（AoS 布局）。
 //!
@@ -179,14 +180,12 @@ impl Renderer for DeferredRenderer {
     }
 }
 
-// ── 测试 ──────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::renderers::test_utils::{create_test_model, test_shader};
 
-    // ── 可见三角形产生像素 ──────────────────────────────────────
 
     #[test]
     fn visible_triangle_produces_nonzero_pixels() {
@@ -214,7 +213,6 @@ mod tests {
         );
     }
 
-    // ── 无背面剔除（与 PerTriangle 的关键区别）─────────────────
 
     #[test]
     fn backface_triangle_still_produces_pixels() {
@@ -242,7 +240,6 @@ mod tests {
         );
     }
 
-    // ── 空模型 ──────────────────────────────────────────────────
 
     #[test]
     fn empty_model_produces_no_pixels() {
@@ -270,7 +267,6 @@ mod tests {
         );
     }
 
-    // ── 屏幕外三角形 ────────────────────────────────────────────
 
     #[test]
     fn offscreen_triangle_produces_no_pixels() {
@@ -296,7 +292,6 @@ mod tests {
         );
     }
 
-    // ── 深度解析：较近三角形获胜 ────────────────────────────────
 
     #[test]
     fn closer_triangle_wins_depth_resolve() {
