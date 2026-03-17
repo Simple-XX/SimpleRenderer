@@ -107,10 +107,9 @@ impl EditorApp {
 
     fn configure_cjk_fonts(ctx: &egui::Context) {
         let font_paths = [
+            "3rd/LxgwWenKai-Lite/fonts/TTF/LXGWWenKaiLite-Regular.ttf",
             "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
             "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
-            "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
-            "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
         ];
 
         let font_data = font_paths.iter().find_map(|path| std::fs::read(path).ok());
@@ -132,9 +131,7 @@ impl EditorApp {
                 .push("cjk".to_owned());
             ctx.set_fonts(fonts);
         } else {
-            log::warn!(
-                "未找到 CJK 字体，中文可能无法显示。请安装: sudo apt install fonts-noto-cjk"
-            );
+            log::warn!("未找到 CJK 字体，中文可能无法显示。请运行: git submodule update --init");
         }
     }
 

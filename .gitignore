@@ -7,13 +7,7 @@
 *.o
 .DS_Store
 build
-cmake-build*
-.gdbinit
 .vscode
 .idea
-3rd
 Doxyfile
-cpp/src/include/config.h
-
-# Rust
 target/

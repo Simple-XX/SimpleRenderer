@@ -1,0 +1,3 @@
+[submodule "3rd/LxgwWenKai-Lite"]
+	path = 3rd/LxgwWenKai-Lite
+	url = https://github.com/lxgw/LxgwWenKai-Lite.git
