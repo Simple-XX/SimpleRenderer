@@ -17,7 +17,7 @@
 
 SimpleRenderer 是一个以教育为核心目标的软件渲染器，旨在帮助开发者掌握 3D 渲染和图形管线的基本原理。通过提供一个简化但功能完备的渲染框架，它揭示了渲染图形过程中的复杂机制，模拟了 OpenGL 等图形 API 的内部工作方式。
 
-本项目使用最小化 `unsafe` Rust 实现，采用 Cargo workspace 结构，包含两个 crate：`simple_renderer`（核心库）和 `system_test`（交互式演示程序）。
+本项目使用最小化 `unsafe` Rust 实现，采用 Cargo workspace 结构，包含两个 crate：`simple_renderer`（核心库）和 `system_test`（交互式演示程序）。最低支持 Rust 1.73+。
 
 ### 目的
 
@@ -27,15 +27,16 @@ SimpleRenderer 是一个以教育为核心目标的软件渲染器，旨在帮�
 
 ### 主要功能
 
-- **可定制的着色器**：实现了顶点和片段着色器，展示着色的基本工作原理。
+- **可定制的着色器**：实现了顶点和片段着色器（`shader/` 模块），展示着色的基本工作原理。
 - **简化的渲染管线**：将渲染过程分解为易于理解的阶段，模拟 OpenGL 管线。
 - **四种渲染策略**：运行时可在 `PerTriangle`、`TileBased`、`Deferred` 和 `TileBasedDeferred` 四种渲染模式之间切换。
 - **Blinn-Phong 着色**：真实光照效果，包含环境光、漫反射和镜面反射分量，以及高光 LUT 缓存。
 - **多缓冲帧缓冲**：基于无锁三缓冲的独立渲染线程。支持运行时在双缓冲（GPU 风格 VSync 阻塞）和三缓冲（非阻塞）模式之间切换。
 - **并行渲染**：使用 [rayon](https://github.com/rayon-rs/rayon) 实现扫描线级并行光栅化和分块/分片并行渲染策略。
+- **缓冲区复用**：渲染器结构体持有深度/颜色缓冲区，每帧通过 `fill()` 重置，避免重复分配。
 - **多线程架构**：独立渲染线程通过无锁三缓冲与输入/显示解耦，模拟真实 GPU 双缓冲/三缓冲行为。
 - **最小化 Unsafe**：仅无锁三缓冲使用 `unsafe` 实现 `Send`/`Sync`，附完整安全不变量文档。所有渲染逻辑均为 100% 安全 Rust。
-- **跨平台兼容**：兼容 Linux 和 macOS。
+- **跨平台兼容**：兼容 Linux 和 macOS。仅支持小端字节序（编译期校验）。
 
 ### 学习目标
 
@@ -54,7 +55,7 @@ SimpleRenderer 是一个以教育为核心目标的软件渲染器，旨在帮�
 
 ### 前置条件
 
-确保已安装 Rust 和 Cargo。推荐通过 [rustup](https://rustup.rs/) 安装：
+确保已安装 Rust 1.73+ 和 Cargo。推荐通过 [rustup](https://rustup.rs/) 安装：
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -99,12 +100,14 @@ cargo run -p system_test -- ./obj        # 运行演示（犹他茶壶）
 ## 测试
 
 ```bash
-cargo test                               # 运行所有测试
+cargo test                               # 运行所有测试（223 个）
 cargo test -p simple_renderer            # 仅运行库单元测试
 cargo test --test integration_test       # 仅运行集成测试
+cargo test --test property_tests         # 仅运行属性测试
+cargo clippy --workspace -- -D warnings  # Lint 检查（CI 要求零警告）
 ```
 
-测试套件包含 178 个单元测试和 7 个集成测试。集成测试使用内置的犹他茶壶模型在全部四种渲染模式下进行渲染验证。
+测试套件包含 184 个单元测试、7 个集成测试、15 个属性测试（proptest）、16 个 system_test 测试和 1 个文档测试。集成测试使用内置的犹他茶壶模型在全部四种渲染模式下进行渲染验证。
 
 ---
 
@@ -152,6 +155,7 @@ SimpleRenderer 的渲染管线模拟了典型的 GPU 渲染管线各阶段，清
       - **背面剔除**：消除相机不可见的面。
       - **并行光栅化**：通过 rayon 并行处理扫描线。
       - **分片渲染**：将屏幕划分为 tile，实现缓存友好的并行处理。
+      - **缓冲区复用**：渲染器持有深度/颜色缓冲区，每帧 `fill()` 重置而非重新分配。
       - **多缓冲**：无锁三缓冲允许渲染线程独立于显示刷新工作，避免管线停顿。
 
 ### 代码结构
@@ -162,21 +166,25 @@ SimpleRenderer 的渲染管线模拟了典型的 GPU 渲染管线各阶段，清
 
 | 文件 | 作用 |
 |---|---|
-| `src/renderer.rs` | `SimpleRenderer`：模式选择和 `draw_model` 入口 |
-| `src/renderers/` | 四种渲染策略，均实现 `Renderer` trait |
-| `src/shader.rs` | 顶点和片段着色器，uniform 缓存 |
+| `src/renderer.rs` | `SimpleRenderer`：模式选择和 `draw_model(&mut self)` 入口 |
+| `src/renderers/` | 四种渲染策略，均实现 `Renderer` trait（`&mut self`） |
+| `src/shader/` | 着色器模块目录 |
+| `src/shader/mod.rs` | `Shader` 结构体、uniform 管理、Clone/Default |
+| `src/shader/vertex.rs` | `vertex_shader(&self)`、矩阵缓存 |
+| `src/shader/fragment.rs` | `fragment_shader(&self)`、Blinn-Phong 光照 |
+| `src/shader/specular_lut.rs` | 高光 LUT 查找表、`RwLock` 缓存 |
 | `src/rasterizer.rs` | 重心坐标插值，透视校正光栅化 |
 | `src/model.rs` | OBJ 模型加载器（基于 tobj），带纹理缓存 |
 | `src/buffer.rs` | 双缓冲帧缓冲（标志位交换，零拷贝） |
 | `src/triple_buffer.rs` | 无锁三缓冲：`TripleBufferWriter` + `TripleBufferReader`，用于多线程渲染 |
 | `src/vertex.rs` | `Vertex`（AoS）和 `VertexSoA`（SoA，供分片渲染器使用） |
 | `src/fragment.rs` | 从光栅化器传递到片段着色器的片段数据 |
-| `src/uniform.rs` | `UniformBuffer`：基于 `HashMap` 的类型化 uniform 存储 |
+| `src/uniform.rs` | `UniformBuffer` + `uniform::names` 类型安全常量 |
 | `src/material.rs` | `Material` 和 `Texture`（通过 image crate 加载） |
 | `src/math.rs` | 重导出 glam 类型 |
 | `src/light.rs` | `Light`（名称、位置、方向、颜色） |
 | `src/face.rs` | `Face`（3 个顶点索引 + `Arc<Material>`） |
-| `src/color.rs` | 32 位 RGBA 颜色，小端 u32 兼容 |
+| `src/color.rs` | 32 位 RGBA 颜色，小端 u32 兼容（非小端编译报错） |
 | `src/error.rs` | `RendererError`（thiserror）和 `Result<T>` 别名 |
 
 #### `system_test/` — 交互式演示程序
@@ -198,6 +206,8 @@ SimpleRenderer 的渲染管线模拟了典型的 GPU 渲染管线各阶段，清
 | minifb 0.27 | 窗口和显示（仅 system_test 使用） |
 | thiserror 2 | 错误派生宏 |
 | log 0.4 + env_logger 0.11 | 日志 |
+| proptest 1（dev） | 属性测试 |
+| criterion 0.5（dev） | 基准测试 |
 
 ---
 
@@ -207,11 +217,11 @@ SimpleRenderer 的渲染管线模拟了典型的 GPU 渲染管线各阶段，清
 
 - **修改着色器**
 
-  在 `simple_renderer/src/shader.rs` 中实验着色器代码，观察更改如何影响渲染效果。
+  在 `simple_renderer/src/shader/` 目录中实验着色器代码，`vertex.rs` 控制顶点变换，`fragment.rs` 控制光照计算。
 
 - **调整变换**
 
-  修改模型、视图和投影矩阵，理解它们对场景的影响。
+  修改模型、视图和投影矩阵，理解它们对场景的影响。设置 uniform 时使用 `uniform::names` 常量避免拼写错误。
 
 - **实现新功能**
 
@@ -219,7 +229,7 @@ SimpleRenderer 的渲染管线模拟了典型的 GPU 渲染管线各阶段，清
 
 - **添加渲染策略**
 
-  在 `simple_renderer/src/renderers/` 中实现 `Renderer` trait，并在 `renderer.rs::create_renderer` 中注册。
+  在 `simple_renderer/src/renderers/` 中实现 `Renderer` trait（`&mut self`），并在 `renderer.rs::create_renderer` 中注册。
 
 ---
 
