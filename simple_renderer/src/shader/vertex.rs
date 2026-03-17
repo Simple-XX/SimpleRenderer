@@ -1,12 +1,14 @@
+// Copyright The SimpleRenderer Contributors
+
 use crate::math::{Mat3, Mat4};
 use crate::uniform;
 use crate::vertex::Vertex;
 
 use super::Shader;
 
-// ── Caches ────────────────────────────────────────────────────────────────
+// ── 缓存 ──────────────────────────────────────────────────────────────────
 
-/// Cached vertex-shader matrices, avoiding per-vertex HashMap lookups.
+/// 缓存的顶点着色器矩阵，避免每个顶点都进行 HashMap 查找。
 #[derive(Clone)]
 pub(crate) struct VertexUniformCache {
     pub(crate) model: Mat4,
@@ -39,11 +41,11 @@ impl Default for VertexUniformCache {
 }
 
 impl Shader {
-    // ── Vertex shader ─────────────────────────────────────────────────
+    // ── 顶点着色器 ───────────────────────────────────────────────────
 
-    /// Transform a vertex from model space to clip space.
+    /// 将顶点从模型空间变换到裁剪空间。
     ///
-    /// Stores world-space position on the returned Vertex's `world_position` field.
+    /// 将世界空间坐标存储在返回的 Vertex 的 `world_position` 字段中。
     pub fn vertex_shader(&self, vertex: &Vertex) -> Vertex {
         let (model, mvp, normal_mat) = if self.vertex_cache.derived_valid {
             (
@@ -84,7 +86,7 @@ impl Shader {
         .with_world_position(world_position.truncate())
     }
 
-    // ── Vertex cache updates (private) ────────────────────────────────
+    // ── 顶点缓存更新（私有）──────────────────────────────────────────
 
     pub(super) fn update_matrix_cache(&mut self, name: &str, value: Mat4) {
         match name {
@@ -103,7 +105,7 @@ impl Shader {
             _ => return,
         }
 
-        // Any base matrix update invalidates derived matrices
+        // 任何基础矩阵的更新都会使派生矩阵失效
         self.vertex_cache.derived_valid = false;
         if self.vertex_cache.has_model
             && self.vertex_cache.has_view
@@ -122,7 +124,7 @@ impl Shader {
         self.vertex_cache.derived_valid = true;
     }
 
-    // ── Vertex cache preparation (pre-render) ─────────────────────────
+    // ── 顶点缓存准备（渲染前）─────────────────────────────────────────
 
     pub(super) fn prepare_vertex_cache(&mut self) {
         if self.vertex_cache.derived_valid {

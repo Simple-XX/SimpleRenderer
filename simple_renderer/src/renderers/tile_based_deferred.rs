@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 //! Tile-based deferred renderer (TBDR) with 2-pass rasterization.
 //!
 //! SoA tile-based deferred renderer with 2-pass (Z-prepass + shade winners) rasterization.

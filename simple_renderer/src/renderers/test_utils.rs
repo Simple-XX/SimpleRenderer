@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 #[cfg(test)]
 mod tests {
     use crate::color::Color;

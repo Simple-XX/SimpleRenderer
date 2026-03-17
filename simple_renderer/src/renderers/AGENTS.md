@@ -19,7 +19,7 @@ renderers/
 
 | Renderer | Rasterization | Shading | Parallelism | Key Tradeoff |
 |----------|--------------|---------|-------------|--------------|
-| `PerTriangle` | `Rasterizer` (barycentric) | Immediate per-fragment | `par_chunks` over faces | Simple but shades occluded pixels |
+| `PerTriangle` | `Rasterizer` (barycentric) | Immediate per-fragment | `par_chunks` over faces, parallel merge | Simple but shades occluded pixels |
 | `TileBased` | Edge functions (inline) | Immediate per-pixel | `par_iter` over tiles | Cache-friendly, optional Early-Z reduces overdraw |
 | `Deferred` | `Rasterizer` (barycentric) | Deferred (winners only) | `par_chunks` + pixel-parallel merge | Zero wasted shading, higher memory |
 | `TileBasedDeferred` | Edge functions (inline) | 2-pass deferred | `par_iter` over tiles | Best of both: tiling + zero overdraw |
@@ -37,16 +37,17 @@ renderers/
 
 ## CONVENTIONS
 
-- **Renderer trait**: `fn render(&self, model, shader, buffer, w, h) -> bool` — `&self` because renderers use local buffers for thread safety
+- **Renderer trait**: `fn render(&mut self, model, shader, buffer, w, h) -> Result<()>` — `&mut self` enables buffer reuse across frames
+- **Buffer reuse**: Renderer structs own depth/color buffers as fields, reused each frame with `resize()+fill()` instead of per-frame `vec![]`
 - **Two rasterization paths**: `Rasterizer` struct (barycentric, used by PerTriangle/Deferred) vs inline edge functions (used by tile renderers)
 - **SoA layout**: Tile renderers convert vertices to `VertexSoA` for cache-friendly access during tile rasterization
 - **Edge function lanes**: `K_LANE=8` pixels processed per step in tile renderers — SIMD-style but scalar
-- **Per-thread local buffers**: All renderers allocate thread-local depth/color buffers, then merge — avoids synchronization
 - **Backface culling**: PerTriangle/TileBased do screen-space culling; Deferred/TBDR skip it (collect all, resolve at depth test)
 - **Material thread safety**: `Arc<Material>` on faces, material passed separately to `fragment_shader` (not stored in Fragment)
+- **Deferred memory**: `DeferredRenderer` uses `Option<(Fragment, usize)>` per pixel per thread — only stores winner, not dummy Fragments
 
 ## ANTI-PATTERNS
 
 - Do NOT call `Rasterizer` from tile-based renderers — they use inline edge functions for cache locality
-- Do NOT store mutable state in `Renderer` struct — use thread-local buffers instead
+- Do NOT allocate `vec![]` per frame inside `render()` — use struct-owned buffers with `fill()` reset
 - Do NOT skip `shader.prepare_caches()` before rendering — caches must be valid for vertex/fragment shaders

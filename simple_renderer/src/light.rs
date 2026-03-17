@@ -1,7 +1,9 @@
+// Copyright The SimpleRenderer Contributors
+
 use crate::color::Color;
 use crate::math::Vec3;
 
-/// A light source with position, direction, and color.
+/// 具有位置、方向和颜色的光源。
 #[derive(Debug, Clone)]
 pub struct Light {
     pub name: String,

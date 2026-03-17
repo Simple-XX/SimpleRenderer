@@ -1,10 +1,12 @@
+// Copyright The SimpleRenderer Contributors
+
 use crate::color::Color;
 
-/// Double-buffered framebuffer.
+/// 双缓冲帧缓冲区。
 ///
-/// Maintains two `Vec<u32>` buffers. One is the *draw* buffer (written to by
-/// the renderer) and the other is the *display* buffer (read by the display
-/// subsystem). `swap` simply toggles which is which — no data is copied.
+/// 维护两个 `Vec<u32>` 缓冲区。一个是*绘制*缓冲区（由渲染器写入），
+/// 另一个是*显示*缓冲区（由显示子系统读取）。`swap` 只是切换两者的角色——
+/// 不进行任何数据拷贝。
 pub struct Buffer {
     width: usize,
     height: usize,
@@ -14,8 +16,8 @@ pub struct Buffer {
 }
 
 impl Buffer {
-    /// Create a new double-buffered framebuffer of `width × height` pixels.
-    /// Both buffers are zero-initialised.
+    /// 创建一个 `width × height` 像素的双缓冲帧缓冲区。
+    /// 两个缓冲区均初始化为零。
     pub fn new(width: usize, height: usize) -> Self {
         let size = width * height;
         Self {
@@ -27,18 +29,18 @@ impl Buffer {
         }
     }
 
-    /// Fill every pixel in the draw buffer with `color`.
+    /// 用 `color` 填充绘制缓冲区的每个像素。
     pub fn clear_draw_buffer(&mut self, color: Color) {
         let val: u32 = color.into();
         self.draw_buffer_mut().fill(val);
     }
 
-    /// Swap draw and display buffers (no data movement — just flips a flag).
+    /// 交换绘制缓冲区和显示缓冲区（不移动数据——只是翻转一个标志位）。
     pub fn swap(&mut self) {
         self.draw_is_first = !self.draw_is_first;
     }
 
-    /// Immutable view of the current draw buffer.
+    /// 当前绘制缓冲区的不可变视图。
     pub fn draw_buffer(&self) -> &[u32] {
         if self.draw_is_first {
             &self.framebuffer_1
@@ -47,7 +49,7 @@ impl Buffer {
         }
     }
 
-    /// Mutable view of the current draw buffer.
+    /// 当前绘制缓冲区的可变视图。
     pub fn draw_buffer_mut(&mut self) -> &mut [u32] {
         if self.draw_is_first {
             &mut self.framebuffer_1
@@ -56,7 +58,7 @@ impl Buffer {
         }
     }
 
-    /// Immutable view of the current display buffer.
+    /// 当前显示缓冲区的不可变视图。
     pub fn display_buffer(&self) -> &[u32] {
         if self.draw_is_first {
             &self.framebuffer_2
@@ -65,20 +67,20 @@ impl Buffer {
         }
     }
 
-    /// Buffer width in pixels.
+    /// 缓冲区宽度（像素）。
     #[inline]
     pub fn width(&self) -> usize {
         self.width
     }
 
-    /// Buffer height in pixels.
+    /// 缓冲区高度（像素）。
     #[inline]
     pub fn height(&self) -> usize {
         self.height
     }
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────
+// ── 测试 ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
@@ -107,7 +109,7 @@ mod tests {
         let red_u32: u32 = red.into();
         buf.clear_draw_buffer(red);
         assert!(buf.draw_buffer().iter().all(|&p| p == red_u32));
-        // Display buffer should still be zeroed.
+        // 显示缓冲区应该仍然是零。
         assert!(buf.display_buffer().iter().all(|&p| p == 0));
     }
 
@@ -117,12 +119,12 @@ mod tests {
         let white = Color::WHITE;
         let white_u32: u32 = white.into();
 
-        // Fill draw buffer with white.
+        // 用白色填充绘制缓冲区。
         buf.clear_draw_buffer(white);
         assert!(buf.draw_buffer().iter().all(|&p| p == white_u32));
         assert!(buf.display_buffer().iter().all(|&p| p == 0));
 
-        // After swap, the old draw buffer becomes display.
+        // 交换后，旧的绘制缓冲区变为显示缓冲区。
         buf.swap();
         assert!(buf.display_buffer().iter().all(|&p| p == white_u32));
         assert!(buf.draw_buffer().iter().all(|&p| p == 0));
@@ -138,7 +140,7 @@ mod tests {
         buf.swap();
         buf.swap();
 
-        // Draw buffer should still have the blue we wrote.
+        // 绘制缓冲区应该仍然包含我们写入的蓝色。
         assert!(buf.draw_buffer().iter().all(|&p| p == blue_u32));
     }
 

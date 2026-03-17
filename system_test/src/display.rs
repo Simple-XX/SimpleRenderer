@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 use minifb::{Key, MouseButton, MouseMode, Window, WindowOptions};
 use simple_renderer::RenderingMode;
 

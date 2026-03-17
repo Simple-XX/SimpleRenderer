@@ -1,29 +1,30 @@
+// Copyright The SimpleRenderer Contributors
+
 use crate::color::Color;
 use crate::fragment::Fragment;
 use crate::math::{Vec2, Vec3};
 use crate::vertex::Vertex;
 
-/// Triangle rasterizer.
+/// 三角形光栅化器。
 ///
-/// Converts screen-space triangles into fragments via barycentric interpolation
-/// with perspective-correct attribute interpolation.  The pixel loop is
-/// parallelised over rows with `rayon`.
+/// 通过重心坐标插值将屏幕空间三角形转换为片段，
+/// 并进行透视校正的属性插值。像素循环通过 `rayon` 按行并行化。
 pub struct Rasterizer {
     width: usize,
     height: usize,
 }
 
 impl Rasterizer {
-    /// Create a rasterizer for a framebuffer of `width × height` pixels.
+    /// 为 `width × height` 像素的帧缓冲区创建光栅化器。
     pub fn new(width: usize, height: usize) -> Self {
         Self { width, height }
     }
 
-    /// Rasterize a triangle, calling `callback` for each fragment produced.
+    /// 光栅化一个三角形，对每个生成的片段调用 `callback`。
     ///
-    /// Zero allocation — no intermediate Vec. The outer renderer should
-    /// already be running in parallel (via `par_chunks` or `par_iter`), so
-    /// this method is intentionally sequential to avoid nested-rayon overhead.
+    /// 零分配——没有中间 Vec。外层渲染器应该已经在并行运行
+    /// （通过 `par_chunks` 或 `par_iter`），因此该方法有意设计为
+    /// 顺序执行，以避免嵌套 rayon 的开销。
     #[inline]
     pub fn rasterize_each<F>(&self, v0: &Vertex, v1: &Vertex, v2: &Vertex, mut callback: F)
     where
@@ -98,9 +99,9 @@ impl Rasterizer {
         }
     }
 
-    /// Rasterize a single triangle, returning all fragments as a Vec.
+    /// 光栅化单个三角形，将所有片段作为 Vec 返回。
     ///
-    /// Prefer `rasterize_each` in hot paths to avoid allocation.
+    /// 在热路径中优先使用 `rasterize_each` 以避免分配。
     #[cfg(test)]
     pub fn rasterize(&self, v0: &Vertex, v1: &Vertex, v2: &Vertex) -> Vec<Fragment> {
         let bbox_w = (v0.position.x.max(v1.position.x).max(v2.position.x)
@@ -117,9 +118,9 @@ impl Rasterizer {
     }
 }
 
-// ── Barycentric coordinates ────────────────────────────────────────────────
+// ── 重心坐标 ───────────────────────────────────────────────────────────────
 //
-// Barycentric coordinates via cross-product method.
+// 通过叉积方法计算重心坐标。
 
 fn get_barycentric_coord(p0: Vec3, p1: Vec3, p2: Vec3, pa: Vec3) -> Option<Vec3> {
     let v0 = Vec3::new(p2.x - p0.x, p1.x - p0.x, p0.x - pa.x);
@@ -129,7 +130,7 @@ fn get_barycentric_coord(p0: Vec3, p1: Vec3, p2: Vec3, pa: Vec3) -> Option<Vec3>
 
     const EPSILON: f32 = 1e-6;
     if u.z.abs() < EPSILON {
-        return None; // degenerate triangle
+        return None; // 退化三角形
     }
 
     let x = 1.0 - (u.x + u.y) / u.z;
@@ -137,15 +138,15 @@ fn get_barycentric_coord(p0: Vec3, p1: Vec3, p2: Vec3, pa: Vec3) -> Option<Vec3>
     let z = u.x / u.z;
 
     if x < 0.0 || y < 0.0 || z < 0.0 || x > 1.0 || y > 1.0 || z > 1.0 {
-        return None; // outside triangle
+        return None; // 在三角形外部
     }
 
     Some(Vec3::new(x, y, z))
 }
 
-// ── Perspective correction ─────────────────────────────────────────────────
+// ── 透视校正 ───────────────────────────────────────────────────────────────
 //
-// Correct barycentric weights for perspective-projected triangles.
+// 对透视投影的三角形校正重心权重。
 
 fn perspective_correction(
     w0: f32,
@@ -172,7 +173,7 @@ fn perspective_correction(
     (corrected, z)
 }
 
-// ── Interpolation helpers ──────────────────────────────────────────────────
+// ── 插值辅助函数 ───────────────────────────────────────────────────────────
 
 #[inline]
 fn interpolate_f32(v0: f32, v1: f32, v2: f32, bary: Vec3) -> f32 {
@@ -189,7 +190,7 @@ fn interpolate_vec3(v0: Vec3, v1: Vec3, v2: Vec3, bary: Vec3) -> Vec3 {
     v0 * bary.x + v1 * bary.y + v2 * bary.z
 }
 
-/// Per-channel float interpolation with `(val + 0.5) as u8` rounding.
+/// 逐通道浮点插值，使用 `(val + 0.5) as u8` 舍入。
 #[inline]
 fn interpolate_color(c0: Color, c1: Color, c2: Color, bary: Vec3) -> Color {
     let r = c0.r() as f32 * bary.x + c1.r() as f32 * bary.y + c2.r() as f32 * bary.z;
@@ -198,15 +199,15 @@ fn interpolate_color(c0: Color, c1: Color, c2: Color, bary: Vec3) -> Color {
     Color::from_f32(r, g, b, 255.0)
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────
+// ── 测试 ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::math::Vec4;
 
-    /// Helper: create a screen-space vertex at `(x, y, z, w)` with basic
-    /// attributes (normal = +Y, uv = (0,0), color = WHITE).
+    /// 辅助函数：在 `(x, y, z, w)` 处创建屏幕空间顶点，
+    /// 带有基本属性（法线 = +Y，uv = (0,0)，颜色 = 白色）。
     fn screen_vertex(x: f32, y: f32, z: f32, w: f32) -> Vertex {
         Vertex {
             position: Vec4::new(x, y, z, w),
@@ -217,7 +218,7 @@ mod tests {
         }
     }
 
-    // ── Known triangle ─────────────────────────────────────────────────
+    // ── 已知三角形 ─────────────────────────────────────────────────────
 
     #[test]
     fn known_triangle_produces_fragments() {
@@ -232,7 +233,7 @@ mod tests {
             "should produce fragments for a valid triangle"
         );
 
-        // All fragments must lie within the triangle bounding box.
+        // 所有片段必须位于三角形的包围盒内。
         for f in &frags {
             assert!(f.screen_coord[0] >= 100 && f.screen_coord[0] <= 200);
             assert!(f.screen_coord[1] >= 100 && f.screen_coord[1] <= 200);
@@ -247,7 +248,7 @@ mod tests {
         let v2 = screen_vertex(150.0, 200.0, 0.5, 1.0);
 
         let frags = rast.rasterize(&v0, &v1, &v2);
-        // With uniform z=0.5 and w=1, all fragments should have depth ≈ 0.5.
+        // 当 z=0.5 且 w=1 均匀分布时，所有片段的深度应约为 0.5。
         for f in &frags {
             assert!(
                 (f.depth - 0.5).abs() < 1e-4,
@@ -257,12 +258,12 @@ mod tests {
         }
     }
 
-    // ── Degenerate triangle ────────────────────────────────────────────
+    // ── 退化三角形 ─────────────────────────────────────────────────────
 
     #[test]
     fn degenerate_triangle_returns_empty() {
         let rast = Rasterizer::new(400, 400);
-        // Collinear points.
+        // 共线点。
         let v0 = screen_vertex(100.0, 100.0, 0.5, 1.0);
         let v1 = screen_vertex(200.0, 100.0, 0.5, 1.0);
         let v2 = screen_vertex(300.0, 100.0, 0.5, 1.0);
@@ -274,11 +275,11 @@ mod tests {
         );
     }
 
-    // ── Barycentric coords ─────────────────────────────────────────────
+    // ── 重心坐标 ───────────────────────────────────────────────────────
 
     #[test]
     fn barycentric_coords_sum_to_one() {
-        // Centroid of a triangle is guaranteed to be inside.
+        // 三角形的重心一定在三角形内部。
         let p0 = Vec3::new(100.0, 100.0, 0.0);
         let p1 = Vec3::new(200.0, 100.0, 0.0);
         let p2 = Vec3::new(150.0, 200.0, 0.0);
@@ -299,14 +300,14 @@ mod tests {
         let p0 = Vec3::new(100.0, 100.0, 0.0);
         let p1 = Vec3::new(200.0, 100.0, 0.0);
         let p2 = Vec3::new(150.0, 200.0, 0.0);
-        // Point clearly outside the triangle.
+        // 明显在三角形外部的点。
         let outside = Vec3::new(0.0, 0.0, 0.0);
         assert!(get_barycentric_coord(p0, p1, p2, outside).is_none());
     }
 
     #[test]
     fn barycentric_degenerate_returns_none() {
-        // Collinear points → degenerate.
+        // 共线点 → 退化。
         let p0 = Vec3::new(0.0, 0.0, 0.0);
         let p1 = Vec3::new(1.0, 0.0, 0.0);
         let p2 = Vec3::new(2.0, 0.0, 0.0);
@@ -314,12 +315,12 @@ mod tests {
         assert!(get_barycentric_coord(p0, p1, p2, pa).is_none());
     }
 
-    // ── Off-screen triangle ────────────────────────────────────────────
+    // ── 屏幕外三角形 ──────────────────────────────────────────────────
 
     #[test]
     fn offscreen_triangle_returns_empty() {
         let rast = Rasterizer::new(400, 400);
-        // Entirely to the left of the screen.
+        // 完全在屏幕左侧之外。
         let v0 = screen_vertex(-300.0, 100.0, 0.5, 1.0);
         let v1 = screen_vertex(-200.0, 100.0, 0.5, 1.0);
         let v2 = screen_vertex(-250.0, 200.0, 0.5, 1.0);
@@ -334,7 +335,7 @@ mod tests {
     #[test]
     fn offscreen_triangle_below_returns_empty() {
         let rast = Rasterizer::new(400, 400);
-        // Entirely below the screen.
+        // 完全在屏幕下方之外。
         let v0 = screen_vertex(100.0, 500.0, 0.5, 1.0);
         let v1 = screen_vertex(200.0, 500.0, 0.5, 1.0);
         let v2 = screen_vertex(150.0, 600.0, 0.5, 1.0);
@@ -346,11 +347,11 @@ mod tests {
         );
     }
 
-    // ── Perspective correction ─────────────────────────────────────────
+    // ── 透视校正 ───────────────────────────────────────────────────────
 
     #[test]
     fn perspective_correction_uniform_w() {
-        // With uniform w, corrected bary should equal original bary.
+        // 当 w 均匀时，校正后的重心坐标应等于原始重心坐标。
         let bary = Vec3::new(0.3, 0.4, 0.3);
         let (corrected, _depth) = perspective_correction(1.0, 1.0, 1.0, 0.5, 0.5, 0.5, bary);
         assert!((corrected.x - bary.x).abs() < 1e-5);
@@ -365,7 +366,7 @@ mod tests {
         assert!((depth - 0.1).abs() < 1e-5, "depth at v0 should be z0");
     }
 
-    // ── Color interpolation ────────────────────────────────────────────
+    // ── 颜色插值 ───────────────────────────────────────────────────────
 
     #[test]
     fn color_interpolation_uniform() {
@@ -383,7 +384,7 @@ mod tests {
         let c0 = Color::new(255, 0, 0, 255);
         let c1 = Color::new(0, 255, 0, 255);
         let c2 = Color::new(0, 0, 255, 255);
-        // Full weight on v0.
+        // 全部权重在 v0 上。
         let bary = Vec3::new(1.0, 0.0, 0.0);
         let result = interpolate_color(c0, c1, c2, bary);
         assert_eq!(result.r(), 255);
@@ -391,7 +392,7 @@ mod tests {
         assert_eq!(result.b(), 0);
     }
 
-    // ── Interpolation helpers ──────────────────────────────────────────
+    // ── 插值辅助函数 ──────────────────────────────────────────────────
 
     #[test]
     fn interpolate_f32_basic() {

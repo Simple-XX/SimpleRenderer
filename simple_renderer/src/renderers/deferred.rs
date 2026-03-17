@@ -1,14 +1,16 @@
-//! Deferred renderer (AoS layout).
+// Copyright The SimpleRenderer Contributors
+
+//! 延迟渲染器（AoS 布局）。
 //!
-//! Deferred renderer: collect closest fragments, then shade only depth winners.
+//! 延迟渲染器：收集最近片元，然后仅对深度优胜者着色。
 //!
-//! Algorithm:
-//! 1. Vertex transform (sequential — `vertex_shader` needs `&mut self`)
-//! 2. Parallel rasterization with per-thread depth testing:
-//!    each thread keeps only the closest fragment per pixel (NO backface culling)
-//! 3. Parallel merge + deferred shading:
-//!    find closest fragment across threads and shade only winners (in parallel)
-//! 4. Write to output buffer
+//! 算法：
+//! 1. 顶点变换（串行 — `vertex_shader` 需要 `&mut self`）
+//! 2. 带有逐线程深度测试的并行光栅化：
+//!    每个线程仅保留每像素最近的片元（不进行背面剔除）
+//! 3. 并行合并 + 延迟着色：
+//!    在所有线程中找到最近片元，仅对优胜者着色（并行）
+//! 4. 写入输出缓冲区
 
 use log::debug;
 use std::time::Instant;
@@ -22,12 +24,12 @@ use crate::renderers::base;
 use crate::renderers::Renderer;
 use crate::shader::Shader;
 
-/// AoS deferred renderer: collect closest fragments per thread, then shade only the winners.
+/// AoS 延迟渲染器：收集每线程最近片元，然后仅对优胜者着色。
 ///
-/// Key difference from `PerTriangleRenderer`:
-/// - NO backface culling — all fragments are collected
-/// - Depth resolve happens after rasterization, not during
-/// - Fragment shader is called ONCE per pixel (on the winner only)
+/// 与 `PerTriangleRenderer` 的关键区别：
+/// - 不进行背面剔除 — 收集所有片元
+/// - 深度解析发生在光栅化之后，而非光栅化期间
+/// - 片元着色器每像素仅调用一次（仅对优胜者）
 pub struct DeferredRenderer {
     chunk_depth: Vec<Vec<f32>>,
     chunk_frags: Vec<Vec<Option<(Fragment, usize)>>>,
@@ -52,7 +54,7 @@ impl Renderer for DeferredRenderer {
         height: usize,
     ) -> crate::error::Result<()> {
         let t = Instant::now();
-        // 1. Vertex transform (sequential — Shader is not Sync yet)
+        // 1. 顶点变换（串行 — Shader 尚未实现 Sync）
         let vertices = model.vertices();
         let processed_vertices: Vec<_> = vertices
             .iter()
@@ -65,11 +67,11 @@ impl Renderer for DeferredRenderer {
         let vertex_ms = t.elapsed().as_secs_f64() * 1000.0;
 
         let t = Instant::now();
-        // 2. Parallel rasterization with per-thread depth testing
+        // 2. 带有逐线程深度测试的并行光栅化
         //
-        // Each thread keeps only the CLOSEST fragment per pixel, drastically
-        // reducing memory from O(threads × pixels × fragments_per_pixel) to
-        // O(threads × pixels).
+        // 每个线程仅保留每像素最近的片元，将内存占用从
+        // O(线程数 × 像素数 × 每像素片元数) 大幅降低到
+        // O(线程数 × 像素数)。
         let num_pixels = width * height;
         let faces = model.faces();
         let rasterizer = Rasterizer::new(width, height);
@@ -77,7 +79,7 @@ impl Renderer for DeferredRenderer {
         let chunk_size = std::cmp::max(faces.len() / num_threads, 1);
         let num_chunks = faces.chunks(chunk_size).len();
 
-        // Reuse chunk buffers across frames
+        // 跨帧复用分块缓冲区
         self.chunk_depth.resize_with(num_chunks, Vec::new);
         self.chunk_frags.resize_with(num_chunks, Vec::new);
         self.chunk_depth.truncate(num_chunks);
@@ -126,10 +128,10 @@ impl Renderer for DeferredRenderer {
 
         let collect_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 3. Parallel merge + deferred shading
+        // 3. 并行合并 + 延迟着色
         //
-        // For each pixel, find the closest fragment across all threads,
-        // then shade only that winner. Both merge and shade run in parallel.
+        // 对每个像素，在所有线程中找到最近的片元，
+        // 然后仅对该优胜者着色。合并和着色均并行执行。
         let t = Instant::now();
         let final_buffer: Vec<u32> = (0..num_pixels)
             .into_par_iter()
@@ -177,14 +179,14 @@ impl Renderer for DeferredRenderer {
     }
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────
+// ── 测试 ──────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::renderers::test_utils::{create_test_model, test_shader};
 
-    // ── Visible triangle produces pixels ──────────────────────────────
+    // ── 可见三角形产生像素 ──────────────────────────────────────
 
     #[test]
     fn visible_triangle_produces_nonzero_pixels() {
@@ -193,7 +195,7 @@ mod tests {
         let mut renderer = DeferredRenderer::new(width, height);
         let shader = test_shader();
 
-        // Front-facing triangle
+        // 正面三角形
         let model = create_test_model(
             &[[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [0.0, 0.5, 0.0]],
             [0.0, 0.0, 1.0],
@@ -212,7 +214,7 @@ mod tests {
         );
     }
 
-    // ── No backface culling (key difference from PerTriangle) ─────────
+    // ── 无背面剔除（与 PerTriangle 的关键区别）─────────────────
 
     #[test]
     fn backface_triangle_still_produces_pixels() {
@@ -221,8 +223,8 @@ mod tests {
         let mut renderer = DeferredRenderer::new(width, height);
         let shader = test_shader();
 
-        // Reversed winding: [0, 2, 1] — this is a backface
-        // DeferredRenderer does NOT cull backfaces, so it should still produce pixels
+        // 反转绕序：[0, 2, 1] — 这是一个背面
+        // DeferredRenderer 不剔除背面，所以仍应产生像素
         let model = create_test_model(
             &[[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [0.0, 0.5, 0.0]],
             [0.0, 0.0, 1.0],
@@ -240,7 +242,7 @@ mod tests {
         );
     }
 
-    // ── Empty model ──────────────────────────────────────────────────
+    // ── 空模型 ──────────────────────────────────────────────────
 
     #[test]
     fn empty_model_produces_no_pixels() {
@@ -249,11 +251,11 @@ mod tests {
         let mut renderer = DeferredRenderer::new(width, height);
         let shader = test_shader();
 
-        // Model with no faces
+        // 没有面片的模型
         let model = create_test_model(
             &[[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [0.0, 0.5, 0.0]],
             [0.0, 0.0, 1.0],
-            &[], // no faces
+            &[], // 无面片
         );
 
         let mut buffer = vec![0u32; width * height];
@@ -268,7 +270,7 @@ mod tests {
         );
     }
 
-    // ── Off-screen triangle ──────────────────────────────────────────
+    // ── 屏幕外三角形 ────────────────────────────────────────────
 
     #[test]
     fn offscreen_triangle_produces_no_pixels() {
@@ -294,7 +296,7 @@ mod tests {
         );
     }
 
-    // ── Depth resolve: closer triangle wins ──────────────────────────
+    // ── 深度解析：较近三角形获胜 ────────────────────────────────
 
     #[test]
     fn closer_triangle_wins_depth_resolve() {
@@ -303,9 +305,9 @@ mod tests {
         let mut renderer = DeferredRenderer::new(width, height);
         let shader = test_shader();
 
-        // Two overlapping triangles at different depths
-        // Triangle 1: closer (z=0.0)
-        // Triangle 2: farther (z=0.5)
+        // 两个重叠的不同深度三角形
+        // 三角形 1：较近（z=0.0）
+        // 三角形 2：较远（z=0.5）
         let model = create_test_model(
             &[
                 [0.0, 0.0, 0.0],

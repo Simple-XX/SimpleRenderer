@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 //! # SimpleRenderer
 //!
 //! An educational software renderer that implements a simplified GPU rendering

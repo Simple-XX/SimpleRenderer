@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 use crate::model::Model;
 use crate::renderers::deferred::DeferredRenderer;
 use crate::renderers::per_triangle::PerTriangleRenderer;

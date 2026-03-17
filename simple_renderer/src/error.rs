@@ -1,6 +1,8 @@
+// Copyright The SimpleRenderer Contributors
+
 use thiserror::Error;
 
-/// Errors that can occur in the renderer.
+/// 渲染器中可能出现的错误。
 #[non_exhaustive]
 #[derive(Debug, Error)]
 pub enum RendererError {
@@ -25,7 +27,7 @@ pub enum RendererError {
     Io(#[from] std::io::Error),
 }
 
-/// Convenience result type for renderer operations.
+/// 渲染器操作的便捷 Result 类型别名。
 pub type Result<T> = std::result::Result<T, RendererError>;
 
 #[cfg(test)]

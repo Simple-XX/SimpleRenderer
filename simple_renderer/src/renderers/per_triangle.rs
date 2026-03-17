@@ -1,11 +1,13 @@
-//! Per-triangle forward renderer (AoS layout).
+// Copyright The SimpleRenderer Contributors
+
+//! 逐三角形前向渲染器（AoS 布局）。
 //!
-//! Per-triangle forward renderer with chunk-parallel rasterization.
+//! 基于分块并行光栅化的逐三角形前向渲染器。
 //!
-//! Algorithm:
-//! 1. Vertex transform (sequential — `vertex_shader` needs `&mut self`)
-//! 2. Parallel rasterization over face chunks (rayon `par_chunks`)
-//! 3. Per-chunk depth + color buffers, merged at the end
+//! 算法：
+//! 1. 顶点变换（串行 — `vertex_shader` 需要 `&mut self`）
+//! 2. 对面片分块进行并行光栅化（rayon `par_chunks`）
+//! 3. 每个分块拥有独立的深度和颜色缓冲区，最后合并结果
 
 use log::debug;
 use std::time::Instant;
@@ -19,9 +21,9 @@ use crate::renderers::base;
 use crate::renderers::Renderer;
 use crate::shader::Shader;
 
-/// AoS per-triangle renderer with per-thread local framebuffers.
+/// AoS 逐三角形渲染器，每线程拥有独立的帧缓冲区。
 ///
-/// Vertex transform → parallel rasterization (backface culling + depth test) → merge.
+/// 顶点变换 → 并行光栅化（背面剔除 + 深度测试）→ 合并。
 pub struct PerTriangleRenderer {
     chunk_depth: Vec<Vec<f32>>,
     chunk_color: Vec<Vec<u32>>,
@@ -46,7 +48,7 @@ impl Renderer for PerTriangleRenderer {
         height: usize,
     ) -> crate::error::Result<()> {
         let t = Instant::now();
-        // 1. Vertex transform (sequential — Shader is not Sync yet)
+        // 1. 顶点变换（串行 — Shader 尚未实现 Sync）
         let vertices = model.vertices();
         let processed_vertices: Vec<_> = vertices
             .iter()
@@ -58,7 +60,7 @@ impl Renderer for PerTriangleRenderer {
             .collect();
         let vertex_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 2. Parallel rasterization over face chunks
+        // 2. 对面片分块进行并行光栅化
         let t = Instant::now();
         let num_pixels = width * height;
         let faces = model.faces();
@@ -67,7 +69,7 @@ impl Renderer for PerTriangleRenderer {
         let chunk_size = std::cmp::max(faces.len() / num_threads, 1);
         let num_chunks = faces.chunks(chunk_size).len();
 
-        // Reuse chunk buffers across frames
+        // 跨帧复用分块缓冲区
         self.chunk_depth.resize_with(num_chunks, Vec::new);
         self.chunk_color.resize_with(num_chunks, Vec::new);
         self.chunk_depth.truncate(num_chunks);
@@ -93,7 +95,7 @@ impl Renderer for PerTriangleRenderer {
                     let v1 = &processed_vertices[face.indices[1]];
                     let v2 = &processed_vertices[face.indices[2]];
 
-                    // Backface culling (screen-space cross product)
+                    // 背面剔除（屏幕空间叉积）
                     let s0 = Vec2::new(v0.position.x, v0.position.y);
                     let s1 = Vec2::new(v1.position.x, v1.position.y);
                     let s2 = Vec2::new(v2.position.x, v2.position.y);
@@ -101,7 +103,7 @@ impl Renderer for PerTriangleRenderer {
                     let edge2 = s2 - s0;
                     let cross = edge1.x * edge2.y - edge1.y * edge2.x;
                     if cross > 0.0 {
-                        continue; // backface
+                        continue; // 背面
                     }
 
                     rasterizer.rasterize_each(v0, v1, v2, |frag| {
@@ -126,7 +128,7 @@ impl Renderer for PerTriangleRenderer {
 
         let raster_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        // 3. Merge thread results — pick minimum depth per pixel (parallel)
+        // 3. 合并线程结果 — 逐像素取最小深度（并行）
         let t = Instant::now();
         out_buffer[..num_pixels]
             .par_iter_mut()
@@ -171,14 +173,14 @@ impl Renderer for PerTriangleRenderer {
     }
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────
+// ── 测试 ──────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::renderers::test_utils::{create_test_model, test_shader};
 
-    // ── Visible triangle produces pixels ──────────────────────────────
+    // ── 可见三角形产生像素 ──────────────────────────────────────
 
     #[test]
     fn visible_triangle_produces_nonzero_pixels() {
@@ -187,12 +189,12 @@ mod tests {
         let mut renderer = PerTriangleRenderer::new(width, height);
         let shader = test_shader();
 
-        // Triangle in clip space that maps to visible screen area
-        // With identity MVP: clip == model positions
-        // After persp div (w=1): unchanged
-        // After viewport (100x100):
+        // 裁剪空间中映射到可见屏幕区域的三角形
+        // 使用单位 MVP：裁剪坐标 == 模型坐标
+        // 透视除法后（w=1）：不变
+        // 视口变换后（100x100）：
         //   (0,0) → (50, 50), (0.5,0) → (75, 50), (0,0.5) → (50, 25)
-        // Cross product: edge1=(25,0), edge2=(0,-25), cross=-625 → front face
+        // 叉积：edge1=(25,0), edge2=(0,-25), cross=-625 → 正面
         let model = create_test_model(
             &[[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [0.0, 0.5, 0.0]],
             [0.0, 0.0, 1.0],
@@ -211,7 +213,7 @@ mod tests {
         );
     }
 
-    // ── Backface culling ──────────────────────────────────────────────
+    // ── 背面剔除 ──────────────────────────────────────────────────
 
     #[test]
     fn backface_triangle_produces_no_pixels() {
@@ -220,10 +222,10 @@ mod tests {
         let mut renderer = PerTriangleRenderer::new(width, height);
         let shader = test_shader();
 
-        // Reversed winding: [0, 2, 1] instead of [0, 1, 2]
-        // After viewport:
+        // 反转绕序：[0, 2, 1] 而非 [0, 1, 2]
+        // 视口变换后：
         //   v0=(50,50), v2=(50,25), v1=(75,50)
-        //   edge1=(0,-25), edge2=(25,0), cross=625 > 0 → backface
+        //   edge1=(0,-25), edge2=(25,0), cross=625 > 0 → 背面
         let model = create_test_model(
             &[[0.0, 0.0, 0.0], [0.5, 0.0, 0.0], [0.0, 0.5, 0.0]],
             [0.0, 0.0, 1.0],
@@ -241,7 +243,7 @@ mod tests {
         );
     }
 
-    // ── Off-screen triangle ───────────────────────────────────────────
+    // ── 屏幕外三角形 ─────────────────────────────────────────────
 
     #[test]
     fn offscreen_triangle_produces_no_pixels() {
@@ -250,9 +252,9 @@ mod tests {
         let mut renderer = PerTriangleRenderer::new(width, height);
         let shader = test_shader();
 
-        // Vertices far outside NDC range
-        // After viewport (100x100):
-        //   (5,5) → (300, -200), all way off screen
+        // 顶点远超 NDC 范围
+        // 视口变换后（100x100）：
+        //   (5,5) → (300, -200)，全部在屏幕外
         let model = create_test_model(
             &[[5.0, 5.0, 0.0], [6.0, 5.0, 0.0], [5.0, 6.0, 0.0]],
             [0.0, 0.0, 1.0],

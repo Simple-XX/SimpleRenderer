@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 //! Property-based tests for mathematical correctness.
 
 use glam::{Mat4, Vec2, Vec3, Vec4};

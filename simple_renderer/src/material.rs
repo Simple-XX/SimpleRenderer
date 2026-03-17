@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 use std::path::Path;
 use std::sync::Arc;
 
@@ -5,7 +7,7 @@ use crate::color::Color;
 use crate::error::{RendererError, Result};
 use crate::math::Vec3;
 
-/// An image texture with pixel data stored in a flat `Vec<u8>`.
+/// 图像纹理，像素数据以扁平 `Vec<u8>` 存储。
 #[derive(Debug, Clone, Default)]
 pub struct Texture {
     pub data: Vec<u8>,
@@ -15,7 +17,7 @@ pub struct Texture {
 }
 
 impl Texture {
-    /// Load a texture from an image file (PNG, JPEG, BMP, TGA).
+    /// 从图像文件加载纹理（PNG、JPEG、BMP、TGA）。
     pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Texture> {
         let path = path.as_ref();
         let img = image::open(path).map_err(|e| RendererError::TextureLoad {
@@ -34,10 +36,10 @@ impl Texture {
         })
     }
 
-    /// Get the color of a pixel at `(x, y)`.
+    /// 获取 `(x, y)` 处像素的颜色。
     ///
-    /// Coordinates are clamped to texture bounds.
-    /// Handles 3-channel (RGB) and 4-channel (RGBA) data.
+    /// 坐标会被钳制到纹理范围内。
+    /// 支持 3 通道（RGB）和 4 通道（RGBA）数据。
     pub fn get_pixel(&self, x: i32, y: i32) -> Color {
         if self.width == 0 || self.height == 0 || self.data.is_empty() {
             return Color::default();
@@ -60,7 +62,7 @@ impl Texture {
     }
 }
 
-/// Material properties for Phong lighting.
+/// Phong 光照的材质属性。
 #[derive(Debug, Clone)]
 pub struct Material {
     pub shininess: f32,
@@ -137,7 +139,7 @@ mod tests {
             height: 1,
             channels: 4,
         };
-        // Out-of-bounds coords should clamp to valid range
+        // 越界坐标应被钳制到有效范围
         assert_eq!(t.get_pixel(-5, -5), Color::new(10, 20, 30, 40));
         assert_eq!(t.get_pixel(100, 100), Color::new(10, 20, 30, 40));
     }

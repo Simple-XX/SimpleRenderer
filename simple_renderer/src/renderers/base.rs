@@ -1,14 +1,16 @@
-//! Shared vertex post-processing utilities for all rendering strategies.
+// Copyright The SimpleRenderer Contributors
+
+//! 所有渲染策略共享的顶点后处理工具函数。
 
 use crate::math::Vec4;
 use crate::vertex::Vertex;
 
 const MIN_W_VALUE: f32 = 1e-6;
 
-/// Perspective division: clip space → NDC.
+/// 透视除法：裁剪空间 → NDC。
 ///
-/// Divides x, y, z by w.  Stores `1/w` in the w component for later
-/// perspective-correct interpolation.
+/// 将 x、y、z 除以 w。将 `1/w` 存储在 w 分量中，
+/// 用于后续的透视校正插值。
 pub fn perspective_division(vertex: &Vertex) -> Vertex {
     let pos = vertex.position;
     let w = if pos.w.abs() < MIN_W_VALUE {
@@ -27,9 +29,9 @@ pub fn perspective_division(vertex: &Vertex) -> Vertex {
     }
 }
 
-/// Viewport transform: NDC `[-1, 1]` → screen coordinates `[0, width/height]`.
+/// 视口变换：NDC `[-1, 1]` → 屏幕坐标 `[0, width/height]`。
 ///
-/// Y is flipped (NDC +Y is up, screen +Y is down).
+/// Y 轴翻转（NDC 中 +Y 朝上，屏幕中 +Y 朝下）。
 pub fn viewport_transform(vertex: &Vertex, width: usize, height: usize) -> Vertex {
     let pos = vertex.position;
     let w = width as f32;
@@ -38,9 +40,9 @@ pub fn viewport_transform(vertex: &Vertex, width: usize, height: usize) -> Verte
     Vertex {
         position: Vec4::new(
             (pos.x + 1.0) * w / 2.0, // x: [-1,1] → [0, width]
-            (1.0 - pos.y) * h / 2.0, // y: [-1,1] → [height, 0] (flipped)
-            pos.z,                   // z: preserved for depth testing
-            pos.w,                   // w: preserved (1/w from perspective division)
+            (1.0 - pos.y) * h / 2.0, // y: [-1,1] → [height, 0]（翻转）
+            pos.z,                   // z: 保留用于深度测试
+            pos.w,                   // w: 保留（来自透视除法的 1/w）
         ),
         normal: vertex.normal,
         tex_coords: vertex.tex_coords,
@@ -49,7 +51,7 @@ pub fn viewport_transform(vertex: &Vertex, width: usize, height: usize) -> Verte
     }
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────
+// ── 测试 ──────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
@@ -57,8 +59,8 @@ mod tests {
     use crate::color::Color;
     use crate::math::{Vec2, Vec3};
 
-    /// Helper: create a clip-space vertex at `(x, y, z, w)` with basic
-    /// attributes (normal = +Z, uv = (0,0), color = WHITE).
+    /// 辅助函数：创建位于 `(x, y, z, w)` 的裁剪空间顶点，
+    /// 附带基本属性（法线 = +Z，uv = (0,0)，颜色 = WHITE）。
     fn clip_vertex(x: f32, y: f32, z: f32, w: f32) -> Vertex {
         Vertex {
             position: Vec4::new(x, y, z, w),
@@ -69,7 +71,7 @@ mod tests {
         }
     }
 
-    // ── Perspective division ──────────────────────────────────────────
+    // ── 透视除法 ──────────────────────────────────────────
 
     #[test]
     fn perspective_division_basic() {
@@ -93,10 +95,10 @@ mod tests {
 
     #[test]
     fn perspective_division_near_zero_w() {
-        // w near zero should be clamped to MIN_W_VALUE
+        // 接近零的 w 应被钳制为 MIN_W_VALUE
         let v = clip_vertex(1.0, 2.0, 3.0, 1e-10);
         let ndc = perspective_division(&v);
-        // Should not be inf/nan
+        // 不应为 inf/nan
         assert!(ndc.position.x.is_finite());
         assert!(ndc.position.y.is_finite());
         assert!(ndc.position.z.is_finite());
@@ -105,7 +107,7 @@ mod tests {
 
     #[test]
     fn perspective_division_negative_w() {
-        // Negative w near zero should also be clamped
+        // 接近零的负 w 也应被钳制
         let v = clip_vertex(1.0, 2.0, 3.0, -1e-10);
         let ndc = perspective_division(&v);
         assert!(ndc.position.x.is_finite());
@@ -127,28 +129,28 @@ mod tests {
         assert_eq!(ndc.color, Color::RED);
     }
 
-    // ── Viewport transform ────────────────────────────────────────────
+    // ── 视口变换 ────────────────────────────────────────────
 
     #[test]
     fn viewport_transform_center() {
-        // NDC (0, 0) → screen center
+        // NDC (0, 0) → 屏幕中心
         let v = clip_vertex(0.0, 0.0, 0.5, 1.0);
         let screen = viewport_transform(&v, 800, 600);
         assert!((screen.position.x - 400.0).abs() < 1e-4);
         assert!((screen.position.y - 300.0).abs() < 1e-4);
-        assert!((screen.position.z - 0.5).abs() < 1e-6); // z preserved
-        assert!((screen.position.w - 1.0).abs() < 1e-6); // w preserved
+        assert!((screen.position.z - 0.5).abs() < 1e-6); // z 保留
+        assert!((screen.position.w - 1.0).abs() < 1e-6); // w 保留
     }
 
     #[test]
     fn viewport_transform_corners() {
-        // NDC (-1, -1) → screen (0, height) — bottom-left in NDC → bottom of screen
+        // NDC (-1, -1) → 屏幕 (0, height) — NDC 左下角 → 屏幕底部
         let bl = clip_vertex(-1.0, -1.0, 0.0, 1.0);
         let s = viewport_transform(&bl, 100, 100);
         assert!((s.position.x - 0.0).abs() < 1e-4);
         assert!((s.position.y - 100.0).abs() < 1e-4);
 
-        // NDC (1, 1) → screen (width, 0) — top-right in NDC → top of screen
+        // NDC (1, 1) → 屏幕 (width, 0) — NDC 右上角 → 屏幕顶部
         let tr = clip_vertex(1.0, 1.0, 0.0, 1.0);
         let s = viewport_transform(&tr, 100, 100);
         assert!((s.position.x - 100.0).abs() < 1e-4);
@@ -157,8 +159,8 @@ mod tests {
 
     #[test]
     fn viewport_transform_y_flip() {
-        // NDC +Y is up, screen +Y is down
-        // NDC (0, 0.5) should map to screen y < center
+        // NDC 中 +Y 朝上，屏幕中 +Y 朝下
+        // NDC (0, 0.5) 应映射到屏幕 y < 中心
         let v = clip_vertex(0.0, 0.5, 0.0, 1.0);
         let s = viewport_transform(&v, 100, 100);
         assert!(
@@ -166,7 +168,7 @@ mod tests {
             "positive NDC y should map above center"
         );
 
-        // NDC (0, -0.5) should map to screen y > center
+        // NDC (0, -0.5) 应映射到屏幕 y > 中心
         let v = clip_vertex(0.0, -0.5, 0.0, 1.0);
         let s = viewport_transform(&v, 100, 100);
         assert!(
@@ -190,13 +192,13 @@ mod tests {
         assert_eq!(s.color, Color::BLUE);
     }
 
-    // ── Combined pipeline ─────────────────────────────────────────────
+    // ── 组合管线 ─────────────────────────────────────────────
 
     #[test]
     fn perspective_division_then_viewport() {
-        // Clip-space vertex at (1, 1, 1, 2)
-        // After perspective division: NDC (0.5, 0.5, 0.5, 0.5)
-        // After viewport (100x100): screen ((0.5+1)*50, (1-0.5)*50) = (75, 25)
+        // 裁剪空间顶点 (1, 1, 1, 2)
+        // 透视除法后：NDC (0.5, 0.5, 0.5, 0.5)
+        // 视口变换后 (100x100)：屏幕 ((0.5+1)*50, (1-0.5)*50) = (75, 25)
         let v = clip_vertex(1.0, 1.0, 1.0, 2.0);
         let ndc = perspective_division(&v);
         let screen = viewport_transform(&ndc, 100, 100);

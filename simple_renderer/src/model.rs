@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -11,9 +13,9 @@ use crate::material::{Material, Texture};
 use crate::math::{Vec2, Vec3, Vec4};
 use crate::vertex::Vertex;
 
-/// An OBJ/MTL model loaded via tobj.
+/// 通过 tobj 加载的 OBJ/MTL 模型。
 ///
-/// OBJ model loader: vertices, faces, and materials from Wavefront .obj files.
+/// OBJ 模型加载器：从 Wavefront .obj 文件中加载顶点、面和材质。
 #[derive(Debug, Clone)]
 pub struct Model {
     vertices: Vec<Vertex>,
@@ -22,11 +24,11 @@ pub struct Model {
 }
 
 impl Model {
-    /// Load an OBJ model from `path`.
+    /// 从 `path` 加载 OBJ 模型。
     ///
-    /// Uses `tobj` with triangulation and single-index enabled.
-    /// Materials and textures are loaded from the same directory.
-    /// A texture cache prevents duplicate image loads.
+    /// 使用 `tobj` 并启用三角化和单索引模式。
+    /// 材质和纹理从同一目录加载。
+    /// 纹理缓存可防止重复加载图像。
     pub fn load(path: &str) -> Result<Self> {
         let obj_path = Path::new(path);
         let directory = obj_path
@@ -47,7 +49,7 @@ impl Model {
                 source: Box::new(e),
             })?;
 
-        // Load materials — warn on failure, fall back to empty vec.
+        // 加载材质 ── 失败时发出警告，回退到空向量。
         let materials = match materials_result {
             Ok(mats) => mats,
             Err(e) => {
@@ -67,7 +69,7 @@ impl Model {
             let has_normals = !mesh.normals.is_empty();
             let has_texcoords = !mesh.texcoords.is_empty();
 
-            // Build vertices for this mesh
+            // 为此网格构建顶点
             for i in 0..num_vertices {
                 let px = mesh.positions[i * 3];
                 let py = mesh.positions[i * 3 + 1];
@@ -97,7 +99,7 @@ impl Model {
                 ));
             }
 
-            // Build material for this mesh (shared across all faces)
+            // 为此网格构建材质（所有面共享）
             let material = Arc::new(Self::build_material(
                 mesh.material_id,
                 &materials,
@@ -105,7 +107,7 @@ impl Model {
                 &mut texture_cache,
             ));
 
-            // Build faces (triangles) from indices
+            // 从索引构建面（三角形）
             let num_faces = mesh.indices.len() / 3;
             for i in 0..num_faces {
                 let i0 = mesh.indices[i * 3] as usize + vertex_offset;
@@ -132,7 +134,7 @@ impl Model {
         })
     }
 
-    /// Build a `Material` from tobj material data, loading textures via cache.
+    /// 从 tobj 材质数据构建 `Material`，通过缓存加载纹理。
     fn build_material(
         material_id: Option<usize>,
         materials: &[tobj::Material],
@@ -192,7 +194,7 @@ impl Model {
         }
     }
 
-    /// Load a texture from a relative path, using a cache to avoid duplicates.
+    /// 从相对路径加载纹理，使用缓存避免重复加载。
     fn load_texture_cached(
         texture_name: Option<&str>,
         directory: &str,
@@ -222,17 +224,17 @@ impl Model {
         }
     }
 
-    /// All vertices in the model.
+    /// 模型中的所有顶点。
     pub fn vertices(&self) -> &[Vertex] {
         &self.vertices
     }
 
-    /// All triangle faces in the model.
+    /// 模型中的所有三角形面。
     pub fn faces(&self) -> &[Face] {
         &self.faces
     }
 
-    /// Directory containing the model file.
+    /// 模型文件所在的目录。
     pub fn model_path(&self) -> &str {
         &self.directory
     }
@@ -242,7 +244,7 @@ impl Model {
 mod tests {
     use super::*;
 
-    /// Loading a nonexistent path must return Err, not panic.
+    /// 加载不存在的路径必须返回 Err，不能 panic。
     #[test]
     fn load_nonexistent_file_returns_error() {
         let result = Model::load("/nonexistent/path/model.obj");
@@ -255,7 +257,7 @@ mod tests {
         }
     }
 
-    /// Load a model without MTL file — should still succeed with default materials.
+    /// 加载没有 MTL 文件的模型 ── 应仍能成功加载并使用默认材质。
     #[test]
     fn load_model_without_mtl_uses_defaults() {
         let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../obj/cube2.obj");
@@ -267,8 +269,8 @@ mod tests {
         );
     }
 
-    /// Comprehensive test for teapot loading — single load, many assertions.
-    /// Avoids loading the model 11 times in parallel (OOM risk).
+    /// 茶壶加载综合测试 ── 单次加载，多项断言。
+    /// 避免并行加载模型 11 次（有 OOM 风险）。
     #[test]
     fn load_teapot_comprehensive() {
         let path = concat!(
@@ -277,11 +279,11 @@ mod tests {
         );
         let model = Model::load(path).expect("Failed to load teapot.obj");
 
-        // Basic structure
+        // 基本结构
         assert!(!model.vertices().is_empty(), "Model should have vertices");
         assert!(!model.faces().is_empty(), "Model should have faces");
 
-        // Face indices must be valid
+        // 面索引必须有效
         let n = model.vertices().len();
         for (i, face) in model.faces().iter().enumerate() {
             for &idx in &face.indices {
@@ -295,7 +297,7 @@ mod tests {
             }
         }
 
-        // Vertices: w=1.0, color=WHITE
+        // 顶点：w=1.0，颜色=WHITE
         for (i, v) in model.vertices().iter().enumerate() {
             assert!(
                 (v.position.w - 1.0).abs() < f32::EPSILON,
@@ -306,7 +308,7 @@ mod tests {
             assert_eq!(v.color, Color::WHITE, "Vertex {} color should be WHITE", i);
         }
 
-        // Normals and UVs present
+        // 法线和 UV 存在
         let has_nonzero_normal = model.vertices().iter().any(|v| v.normal.length() > 0.0);
         assert!(
             has_nonzero_normal,
@@ -319,11 +321,11 @@ mod tests {
             "At least some vertices should have non-zero UVs"
         );
 
-        // Materials: shininess > 0 (teapot.mtl has Ns 20.0)
+        // 材质：shininess > 0（teapot.mtl 中 Ns 为 20.0）
         let mat = &model.faces()[0].material;
         assert!(mat.shininess > 0.0, "shininess should be > 0");
 
-        // Textures: ambient (brick.png), diffuse (brick.png), specular (brick-specular.png)
+        // 纹理：环境光（brick.png）、漫反射（brick.png）、镜面反射（brick-specular.png）
         assert!(
             mat.ambient_texture.is_some(),
             "Teapot should have an ambient texture"
@@ -341,7 +343,7 @@ mod tests {
             "Teapot should have a specular texture"
         );
 
-        // Directory
+        // 目录
         assert!(
             model.model_path().contains("utah-teapot-texture"),
             "Directory '{}' should contain 'utah-teapot-texture'",

@@ -1,6 +1,8 @@
-//! Shared types and functions for tile-based renderers.
+// Copyright The SimpleRenderer Contributors
+
+//! 瓦片渲染器共享的类型和函数。
 //!
-//! Used by both `TileBasedRenderer` and `TileBasedDeferredRenderer`.
+//! 由 `TileBasedRenderer` 和 `TileBasedDeferredRenderer` 共同使用。
 
 use crate::color::Color;
 
@@ -9,7 +11,7 @@ use crate::renderers::base;
 use crate::shader::Shader;
 use crate::vertex::VertexSoA;
 
-// ── Constants ─────────────────────────────────────────────────────────────
+// ── 常量 ─────────────────────────────────────────────────────────────
 
 pub const DEFAULT_TILE_SIZE: usize = 64;
 pub const K_LANE: usize = 8;
@@ -27,9 +29,9 @@ pub struct TileBounds {
     pub fb_height: usize,
 }
 
-// ── Tile grid context ─────────────────────────────────────────────────────
+// ── 瓦片网格上下文 ─────────────────────────────────────────────────────
 
-/// Immutable context describing the tile grid and SoA vertex data.
+/// 描述瓦片网格和 SoA 顶点数据的不可变上下文。
 pub struct TileGridContext {
     pub soa: VertexSoA,
     pub tiles_x: usize,
@@ -37,9 +39,9 @@ pub struct TileGridContext {
     pub tile_size: usize,
 }
 
-// ── Triangle reference for tile binning ───────────────────────────────────
+// ── 瓦片分箱的三角形引用 ───────────────────────────────────────────────
 
-/// A lightweight reference to a triangle stored in a tile's triangle list.
+/// 存储在瓦片三角形列表中的轻量级三角形引用。
 pub struct TileTriangleRef {
     pub i0: usize,
     pub i1: usize,
@@ -47,12 +49,12 @@ pub struct TileTriangleRef {
     pub face_index: usize,
 }
 
-// ── Vertex transform to SoA ──────────────────────────────────────────────
+// ── 顶点变换为 SoA ──────────────────────────────────────────────────
 
-/// Transform all vertices through the vertex shader into SoA layout.
+/// 将所有顶点通过顶点着色器变换为 SoA 布局。
 ///
-/// Vertex shader is `&self`, perspective division and
-/// viewport transform are applied, and all results are stored in `VertexSoA`.
+/// 顶点着色器为 `&self`，透视除法和
+/// 视口变换会被应用，所有结果存储在 `VertexSoA` 中。
 pub fn vertex_transform_soa(
     model: &Model,
     shader: &Shader,
@@ -78,11 +80,11 @@ pub fn vertex_transform_soa(
     soa
 }
 
-// ── Triangle-tile binning ─────────────────────────────────────────────────
+// ── 三角形-瓦片分箱 ─────────────────────────────────────────────────
 
-/// Bin triangles into tiles using a 2-pass approach (count then fill).
+/// 使用两遍方法（先计数后填充）将三角形分箱到瓦片中。
 ///
-/// Includes frustum culling (clip space) and backface culling (screen space).
+/// 包含视锥体剔除（裁剪空间）和背面剔除（屏幕空间）。
 pub fn triangle_tile_binning(model: &Model, grid: &TileGridContext) -> Vec<Vec<TileTriangleRef>> {
     let total_tiles = grid.tiles_x * grid.tiles_y;
     let mut tile_triangles: Vec<Vec<TileTriangleRef>> =
@@ -91,7 +93,7 @@ pub fn triangle_tile_binning(model: &Model, grid: &TileGridContext) -> Vec<Vec<T
 
     let faces = model.faces();
 
-    // Pass 1: count triangles per tile
+    // 第一遍：统计每个瓦片的三角形数量
     for (tri_idx, face) in faces.iter().enumerate() {
         process_triangle_for_binning(
             tri_idx,
@@ -103,14 +105,14 @@ pub fn triangle_tile_binning(model: &Model, grid: &TileGridContext) -> Vec<Vec<T
         );
     }
 
-    // Pre-allocate
+    // 预分配
     for tile_id in 0..total_tiles {
         if tile_counts[tile_id] > 0 {
             tile_triangles[tile_id].reserve(tile_counts[tile_id]);
         }
     }
 
-    // Pass 2: fill
+    // 第二遍：填充
     for (tri_idx, face) in faces.iter().enumerate() {
         process_triangle_for_binning(
             tri_idx,
@@ -137,7 +139,7 @@ fn process_triangle_for_binning(
     let i1 = face.indices[1];
     let i2 = face.indices[2];
 
-    // Frustum culling (conservative clip-space test)
+    // 视锥体剔除（保守的裁剪空间测试）
     let c0 = grid.soa.pos_clip[i0];
     let c1 = grid.soa.pos_clip[i1];
     let c2 = grid.soa.pos_clip[i2];
@@ -156,7 +158,7 @@ fn process_triangle_for_binning(
     let pos1 = grid.soa.pos_screen[i1];
     let pos2 = grid.soa.pos_screen[i2];
 
-    // Backface culling (screen-space cross product > 0 → backface)
+    // 背面剔除（屏幕空间叉积 > 0 → 背面）
     let edge1_x = pos1.x - pos0.x;
     let edge1_y = pos1.y - pos0.y;
     let edge2_x = pos2.x - pos0.x;
@@ -166,13 +168,13 @@ fn process_triangle_for_binning(
         return;
     }
 
-    // Compute screen-space AABB
+    // 计算屏幕空间 AABB
     let min_x = pos0.x.min(pos1.x).min(pos2.x);
     let max_x = pos0.x.max(pos1.x).max(pos2.x);
     let min_y = pos0.y.min(pos1.y).min(pos2.y);
     let max_y = pos0.y.max(pos1.y).max(pos2.y);
 
-    // Find overlapping tiles
+    // 查找重叠的瓦片
     let clamped_min_x = (min_x as i32).max(0);
     let clamped_min_y = (min_y as i32).max(0);
     let clamped_max_x = (max_x as i32).max(0);
@@ -218,17 +220,17 @@ fn process_triangle_for_binning(
     }
 }
 
-// ── Edge function helpers ─────────────────────────────────────────────────
+// ── 边函数辅助工具 ─────────────────────────────────────────────────────
 
-/// 2D cross product: `ax*by - ay*bx`.
+/// 二维叉积：`ax*by - ay*bx`。
 #[inline]
 pub fn cross2(ax: f32, ay: f32, bx: f32, by: f32) -> f32 {
     ax * by - ay * bx
 }
 
-/// Interpolate color using perspective-corrected barycentric coordinates.
+/// 使用透视校正的重心坐标插值颜色。
 ///
-/// Uses `Color::from_f32` which does `(val + 0.5) as u8` rounding.
+/// 使用 `Color::from_f32`，其执行 `(val + 0.5) as u8` 舍入。
 #[inline]
 pub fn interpolate_color_bary(c0: Color, c1: Color, c2: Color, b0: f32, b1: f32, b2: f32) -> Color {
     let r = c0.r() as f32 * b0 + c1.r() as f32 * b1 + c2.r() as f32 * b2;
@@ -237,7 +239,7 @@ pub fn interpolate_color_bary(c0: Color, c1: Color, c2: Color, b0: f32, b1: f32,
     Color::from_f32(r, g, b, 255.0)
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────
+// ── 测试 ─────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {

@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 use crate::color::Color;
 use crate::fragment::Fragment;
 use crate::light::Light;
@@ -7,10 +9,9 @@ use crate::uniform;
 
 use super::Shader;
 
-// ── Caches ────────────────────────────────────────────────────────────────
+// ── 缓存 ──────────────────────────────────────────────────────────────────
 
-/// Cached fragment-shader uniforms (lights + camera), avoiding per-fragment
-/// HashMap lookups.
+/// 缓存的片段着色器 uniform（光源 + 相机），避免逐片段的 HashMap 查找。
 #[derive(Clone)]
 pub(crate) struct FragmentUniformCache {
     pub(crate) lights: Vec<Light>,
@@ -35,11 +36,11 @@ impl Default for FragmentUniformCache {
 }
 
 impl Shader {
-    // ── Fragment shader ───────────────────────────────────────────────
+    // ── 片段着色器 ────────────────────────────────────────────────────
 
-    /// Compute the final color of a fragment using Blinn-Phong shading.
+    /// 使用 Blinn-Phong 着色模型计算片段的最终颜色。
     pub fn fragment_shader(&self, fragment: &Fragment, material: &Material) -> Color {
-        // Helper: Color → normalized Vec3 in [0, 1]
+        // 辅助函数：Color → 归一化 Vec3，范围 [0, 1]
         let color_to_vec = |c: &Color| -> Vec3 {
             const INV255: f32 = 1.0 / 255.0;
             Vec3::new(
@@ -53,12 +54,12 @@ impl Shader {
         let normal = fragment.normal.normalize_or_zero();
         let uv = fragment.uv;
 
-        // Get lights + camera from cache or uniform buffer
+        // 从缓存或 uniform 缓冲区获取光源和相机
         let fallback_dirs;
         let light_dirs: &[Vec3] = if self.fragment_cache.derived_valid {
             &self.fragment_cache.light_dirs_normalized
         } else {
-            // Fallback: read from uniform buffer
+            // 回退：从 uniform 缓冲区读取
             fallback_dirs = if let Some(ls) = self.uniform_buffer.get_lights(uniform::names::LIGHTS)
             {
                 ls.iter()
@@ -79,24 +80,24 @@ impl Shader {
                 .unwrap_or(Vec3::ZERO)
         };
 
-        // View direction (from camera toward fragment)
+        // 视线方向（从相机指向片段）
         let view_dir = (fragment.world_position - camera_pos).normalize_or_zero();
 
-        // Ambient (once, using ambient texture or base color)
+        // 环境光（仅一次，使用环境光纹理或基础颜色）
         let ambient_rgb = if let Some(ref tex) = material.ambient_texture {
             color_to_vec(&Self::sample_texture(tex, uv))
         } else {
             base_color
         };
 
-        // Accumulate diffuse + specular per light
+        // 逐光源累加漫反射 + 高光
         let mut diffuse_accum = Vec3::ZERO;
         let mut specular_accum = Vec3::ZERO;
 
         for ldir in light_dirs.iter() {
             let intensity = normal.dot(*ldir).max(0.0);
 
-            // Diffuse
+            // 漫反射
             let kd = if let Some(ref tex) = material.diffuse_texture {
                 color_to_vec(&Self::sample_texture(tex, uv))
             } else {
@@ -104,7 +105,7 @@ impl Shader {
             };
             diffuse_accum += kd * intensity;
 
-            // Specular (Blinn-Phong)
+            // 高光（Blinn-Phong）
             let half_vector = (*ldir + view_dir).normalize_or_zero();
             let cos_theta = normal.dot(half_vector).max(0.0);
             let spec = self.evaluate_specular(cos_theta, material.shininess);
@@ -116,7 +117,7 @@ impl Shader {
             specular_accum += ks * spec;
         }
 
-        // Final color: ambient * 0.1 + diffuse + specular * 0.2
+        // 最终颜色：ambient * 0.1 + diffuse + specular * 0.2
         let out_rgb = ambient_rgb * 0.1 + diffuse_accum + specular_accum * 0.2;
         let r = out_rgb.x.clamp(0.0, 1.0);
         let g = out_rgb.y.clamp(0.0, 1.0);
@@ -125,7 +126,7 @@ impl Shader {
         Color::from_normalized(r, g, b, 1.0)
     }
 
-    // ── Fragment cache updates (private) ──────────────────────────────
+    // ── 片段缓存更新（私有）───────────────────────────────────────────
 
     pub(super) fn update_fragment_cache_light(&mut self, name: &str, value: &Light) {
         if name != uniform::names::LIGHT {
@@ -164,7 +165,7 @@ impl Shader {
         }
     }
 
-    /// Precompute normalized light directions.
+    /// 预计算归一化的光源方向。
     fn recalculate_fragment_derived(&mut self) {
         self.fragment_cache.light_dirs_normalized = self
             .fragment_cache
@@ -175,14 +176,14 @@ impl Shader {
         self.fragment_cache.derived_valid = true;
     }
 
-    // ── Fragment cache preparation (pre-render) ───────────────────────
+    // ── 片段缓存准备（渲染前）─────────────────────────────────────────
 
     pub(super) fn prepare_fragment_cache(&mut self) {
         if self.fragment_cache.derived_valid {
             return;
         }
 
-        // Prefer multi-light path
+        // 优先使用多光源路径
         if let (Some(lights), Some(cam)) = (
             self.uniform_buffer.get_lights(uniform::names::LIGHTS),
             self.uniform_buffer.get_vec3(uniform::names::CAMERA_POS),
@@ -195,7 +196,7 @@ impl Shader {
             return;
         }
 
-        // Single-light fallback
+        // 单光源回退
         if let (Some(light), Some(cam)) = (
             self.uniform_buffer.get_light(uniform::names::LIGHT),
             self.uniform_buffer.get_vec3(uniform::names::CAMERA_POS),
@@ -208,19 +209,19 @@ impl Shader {
         }
     }
 
-    // ── Texture sampling (private static) ─────────────────────────────
+    // ── 纹理采样（私有静态）───────────────────────────────────────────
 
-    /// Sample a texture at the given UV coordinates with wrapping.
+    /// 在给定 UV 坐标处对纹理进行采样（带环绕寻址）。
     pub(super) fn sample_texture(texture: &Texture, uv: Vec2) -> Color {
-        // Wrap to [0, 1]
+        // 环绕到 [0, 1]
         let u = uv.x - uv.x.floor();
         let v = uv.y - uv.y.floor();
 
-        // Convert to pixel space
+        // 转换到像素空间
         let x = (u * texture.width as f32) as i32;
         let y = (v * texture.height as f32) as i32;
 
-        // Clamp to bounds
+        // 钳制到边界范围
         let x = x.clamp(0, texture.width as i32 - 1);
         let y = y.clamp(0, texture.height as i32 - 1);
 

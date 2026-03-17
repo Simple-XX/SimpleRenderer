@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 use std::collections::HashMap;
 
 use crate::color::Color;
@@ -5,12 +7,12 @@ use crate::light::Light;
 use crate::material::Material;
 use crate::math::{Mat3, Mat4, Vec2, Vec3, Vec4};
 
-// ── Well-known uniform names ──────────────────────────────────────────────
+// ── 预定义 uniform 名称 ──────────────────────────────────────────────
 
-/// Well-known uniform name constants to prevent typos in string keys.
+/// 预定义的 uniform 名称常量，防止字符串键拼写错误。
 ///
-/// Using these constants instead of raw strings ensures compile-time
-/// detection of misspelled uniform names.
+/// 使用这些常量代替原始字符串，可在编译期检测出
+/// 拼写错误的 uniform 名称。
 pub mod names {
     pub const MODEL_MATRIX: &str = "modelMatrix";
     pub const VIEW_MATRIX: &str = "viewMatrix";
@@ -22,7 +24,7 @@ pub mod names {
 
 // ── UniformValue ──────────────────────────────────────────────────────────
 
-/// A dynamically-typed value that can be stored in a [`UniformBuffer`].
+/// 可存储在 [`UniformBuffer`] 中的动态类型值。
 #[derive(Debug, Clone)]
 pub enum UniformValue {
     Int(i32),
@@ -38,7 +40,7 @@ pub enum UniformValue {
     Lights(Vec<Light>),
 }
 
-// ── From<T> impls ─────────────────────────────────────────────────────────
+// ── From<T> 实现 ─────────────────────────────────────────────────────────
 
 impl From<i32> for UniformValue {
     #[inline]
@@ -119,35 +121,34 @@ impl From<Vec<Light>> for UniformValue {
 
 // ── UniformBuffer ─────────────────────────────────────────────────────────
 
-/// Named uniform storage with typed getters.
+/// 按名称存储的 uniform 容器，提供类型化的访问方法。
 ///
-/// Stores uniforms by string key and provides typed getters that return
-/// `Option<T>` (rather than panicking on type mismatch).
+/// 通过字符串键存储 uniform，并提供返回 `Option<T>`
+/// 的类型化访问方法（而非在类型不匹配时 panic）。
 #[derive(Debug, Clone, Default)]
 pub struct UniformBuffer {
     uniforms: HashMap<String, UniformValue>,
 }
 
 impl UniformBuffer {
-    /// Create an empty uniform buffer.
+    /// 创建一个空的 uniform 缓冲区。
     pub fn new() -> Self {
         Self {
             uniforms: HashMap::new(),
         }
     }
 
-    /// Set a uniform value. Any type implementing `Into<UniformValue>` is
-    /// accepted.
+    /// 设置 uniform 值。接受任何实现了 `Into<UniformValue>` 的类型。
     pub fn set(&mut self, name: &str, value: impl Into<UniformValue>) {
         self.uniforms.insert(name.to_string(), value.into());
     }
 
-    /// Check whether a uniform with the given name exists.
+    /// 检查是否存在指定名称的 uniform。
     pub fn has(&self, name: &str) -> bool {
         self.uniforms.contains_key(name)
     }
 
-    // ── Typed getters ─────────────────────────────────────────────────
+    // ── 类型化访问方法 ─────────────────────────────────────────────────
 
     pub fn get_int(&self, name: &str) -> Option<i32> {
         match self.uniforms.get(name)? {
@@ -220,7 +221,7 @@ impl UniformBuffer {
     }
 }
 
-// ── Tests ─────────────────────────────────────────────────────────────────
+// ── 测试 ─────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
@@ -335,7 +336,7 @@ mod tests {
     fn wrong_type_returns_none() {
         let mut buf = UniformBuffer::new();
         buf.set("value", 42_i32);
-        // Stored as Int, but requesting Float
+        // 存储为 Int，但请求 Float
         assert_eq!(buf.get_float("value"), None);
         assert_eq!(buf.get_mat4("value"), None);
     }

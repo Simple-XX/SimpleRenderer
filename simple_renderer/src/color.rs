@@ -1,20 +1,22 @@
+// Copyright The SimpleRenderer Contributors
+
 #[cfg(not(target_endian = "little"))]
 compile_error!("SimpleRenderer assumes little-endian byte order for Color ↔ u32 conversions");
 
 use std::fmt;
 use std::ops;
 
-/// 32-bit RGBA color.
+/// 32 位 RGBA 颜色。
 ///
-/// Internal storage is `[u8; 4]` as `[R, G, B, A]`.
-/// Memory layout is u32-reinterpret compatible (little-endian RGBA):
-/// R in bits 0–7, G in bits 8–15, B in bits 16–23, A in bits 24–31.
+/// 内部存储为 `[u8; 4]`，排列为 `[R, G, B, A]`。
+/// 内存布局与 u32 重新解释兼容（小端序 RGBA）：
+/// R 占位 0–7，G 占位 8–15，B 占位 16–23，A 占位 24–31。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Color {
     channels: [u8; 4],
 }
 
-// ── Constants ──────────────────────────────────────────────────────────────
+// ── 常量 ───────────────────────────────────────────────────────────────────
 
 impl Color {
     pub const WHITE: Color = Color::new(255, 255, 255, 255);
@@ -24,10 +26,10 @@ impl Color {
     pub const BLUE: Color = Color::new(0, 0, 255, 255);
 }
 
-// ── Constructors ───────────────────────────────────────────────────────────
+// ── 构造函数 ───────────────────────────────────────────────────────────────
 
 impl Color {
-    /// Create a color from individual RGBA channel values.
+    /// 从单独的 RGBA 通道值创建颜色。
     #[inline]
     pub const fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self {
@@ -35,12 +37,12 @@ impl Color {
         }
     }
 
-    /// Create a color from floats in the `[0.0, 255.0]` range.
+    /// 从 `[0.0, 255.0]` 范围内的浮点数创建颜色。
     ///
-    /// A bias of `+0.5` is added before truncation to compensate for
-    /// float→integer truncation (equivalent to rounding to nearest).
-    /// Out-of-range values are clamped to `[0.0, 255.0]`.
-    /// Note: these are raw `[0, 255]` floats, NOT normalized `[0, 1]`.
+    /// 截断前会加上 `+0.5` 的偏移量，以补偿浮点→整数截断
+    /// （等效于四舍五入到最近整数）。
+    /// 超出范围的值会被钳制到 `[0.0, 255.0]`。
+    /// 注意：这些是原始的 `[0, 255]` 浮点数，而非归一化的 `[0, 1]`。
     #[inline]
     pub fn from_f32(r: f32, g: f32, b: f32, a: f32) -> Self {
         Self {
@@ -53,10 +55,10 @@ impl Color {
         }
     }
 
-    /// Create a color from normalized floats in the `[0.0, 1.0]` range.
+    /// 从 `[0.0, 1.0]` 范围内的归一化浮点数创建颜色。
     ///
-    /// Each component is multiplied by 255.0, then truncated to `u8`.
-    /// Out-of-range values are clamped to `[0.0, 255.0]` before casting.
+    /// 每个分量乘以 255.0，然后截断为 `u8`。
+    /// 超出范围的值在转换前会被钳制到 `[0.0, 255.0]`。
     #[inline]
     pub fn from_normalized(r: f32, g: f32, b: f32, a: f32) -> Self {
         Self {
@@ -70,7 +72,7 @@ impl Color {
     }
 }
 
-// ── Accessors ──────────────────────────────────────────────────────────────
+// ── 访问器 ─────────────────────────────────────────────────────────────────
 
 impl Color {
     #[inline]
@@ -90,17 +92,17 @@ impl Color {
         self.channels[3]
     }
 
-    /// Bytes per pixel (always 4).
+    /// 每像素字节数（始终为 4）。
     #[inline]
     pub const fn bpp() -> usize {
         4
     }
 }
 
-// ── u32 conversions ────────────────────────────────────────────────────────
+// ── u32 转换 ───────────────────────────────────────────────────────────────
 //
-// Layout: R in bits 0-7, G in bits 8-15, B in bits 16-23, A in bits 24-31.
-// 4-byte struct reinterpreted as u32 on little-endian.
+// 布局：R 占位 0-7，G 占位 8-15，B 占位 16-23，A 占位 24-31。
+// 4 字节结构体在小端序上重新解释为 u32。
 
 impl From<u32> for Color {
     #[inline]
@@ -126,9 +128,9 @@ impl From<Color> for u32 {
     }
 }
 
-// ── Operators ──────────────────────────────────────────────────────────────
+// ── 运算符 ─────────────────────────────────────────────────────────────────
 
-/// Per-channel multiply by scalar, clamped to `[0, 255]`.
+/// 逐通道乘以标量，钳制到 `[0, 255]`。
 impl ops::Mul<f32> for Color {
     type Output = Color;
 
@@ -145,7 +147,7 @@ impl ops::Mul<f32> for Color {
     }
 }
 
-/// Per-channel multiply-assign by scalar, clamped to `[0, 255]`.
+/// 逐通道乘赋值标量，钳制到 `[0, 255]`。
 impl ops::MulAssign<f32> for Color {
     #[inline]
     fn mul_assign(&mut self, rhs: f32) {
@@ -155,7 +157,7 @@ impl ops::MulAssign<f32> for Color {
     }
 }
 
-/// Per-channel addition, clamped to `[0, 255]`.
+/// 逐通道加法，钳制到 `[0, 255]`。
 impl ops::Add for Color {
     type Output = Color;
 
@@ -172,7 +174,7 @@ impl ops::Add for Color {
     }
 }
 
-/// Channel access by index: 0=R, 1=G, 2=B, 3=A.
+/// 按索引访问通道：0=R, 1=G, 2=B, 3=A。
 impl ops::Index<usize> for Color {
     type Output = u8;
 
@@ -182,7 +184,7 @@ impl ops::Index<usize> for Color {
     }
 }
 
-// ── Display ────────────────────────────────────────────────────────────────
+// ── 显示 ───────────────────────────────────────────────────────────────────
 
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -194,13 +196,13 @@ impl fmt::Display for Color {
     }
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────
+// ── 测试 ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    // ── Constructor tests ──────────────────────────────────────────────
+    // ── 构造函数测试 ───────────────────────────────────────────────────
 
     #[test]
     fn new_stores_channels_correctly() {
@@ -219,9 +221,9 @@ mod tests {
 
     #[test]
     fn from_f32_rounds_with_half() {
-        // 128.3 + 0.5 = 128.8 → 128 as u8
-        // 0.0 + 0.5 = 0.5 → 0 as u8
-        // 254.6 + 0.5 = 255.1 → 255 as u8
+        // 128.3 + 0.5 = 128.8 → 截断为 u8 得 128
+        // 0.0 + 0.5 = 0.5 → 截断为 u8 得 0
+        // 254.6 + 0.5 = 255.1 → 截断为 u8 得 255
         let c = Color::from_f32(128.3, 0.0, 254.6, 200.0);
         assert_eq!(c.r(), 128);
         assert_eq!(c.g(), 0);
@@ -286,7 +288,7 @@ mod tests {
         assert_eq!(c.a(), 255);
     }
 
-    // ── Constant tests ─────────────────────────────────────────────────
+    // ── 常量测试 ───────────────────────────────────────────────────────
 
     #[test]
     fn constants_are_correct() {
@@ -297,12 +299,12 @@ mod tests {
         assert_eq!(Color::BLUE, Color::new(0, 0, 255, 255));
     }
 
-    // ── u32 conversion tests ───────────────────────────────────────────
+    // ── u32 转换测试 ───────────────────────────────────────────────────
 
     #[test]
     fn from_u32_little_endian_rgba() {
-        // R=0xAA in bits 0-7, G=0xBB in bits 8-15,
-        // B=0xCC in bits 16-23, A=0xDD in bits 24-31
+        // R=0xAA 占位 0-7，G=0xBB 占位 8-15，
+        // B=0xCC 占位 16-23，A=0xDD 占位 24-31
         let val: u32 = 0xDDCCBBAA;
         let c = Color::from(val);
         assert_eq!(c.r(), 0xAA);
@@ -370,7 +372,7 @@ mod tests {
         assert_eq!(val, 0xFF000000);
     }
 
-    // ── Operator tests ─────────────────────────────────────────────────
+    // ── 运算符测试 ─────────────────────────────────────────────────────
 
     #[test]
     fn mul_by_scalar() {
@@ -450,7 +452,7 @@ mod tests {
         assert_eq!(a + b, a);
     }
 
-    // ── Index tests ────────────────────────────────────────────────────
+    // ── 索引测试 ───────────────────────────────────────────────────────
 
     #[test]
     fn index_access() {
@@ -468,7 +470,7 @@ mod tests {
         let _ = c[4];
     }
 
-    // ── Misc tests ─────────────────────────────────────────────────────
+    // ── 杂项测试 ───────────────────────────────────────────────────────
 
     #[test]
     fn bpp_is_four() {
@@ -509,7 +511,7 @@ mod tests {
         assert_ne!(Color::new(1, 2, 3, 4), Color::new(1, 2, 3, 5));
     }
 
-    // ── u32 reinterpret tests ─────────────────────────────────────────
+    // ── u32 重新解释测试 ───────────────────────────────────────────────
 
     #[test]
     fn white_constant_is_fully_opaque() {
@@ -518,8 +520,8 @@ mod tests {
 
     #[test]
     fn u32_reinterpret_roundtrip() {
-        // 4-byte struct reinterpreted as u32 on little-endian
-        // [R, G, B, A] → R is lowest byte
+        // 4 字节结构体在小端序上重新解释为 u32
+        // [R, G, B, A] → R 是最低字节
         let c = Color::new(0x12, 0x34, 0x56, 0x78);
         let val: u32 = c.into();
         assert_eq!(val, 0x78563412);

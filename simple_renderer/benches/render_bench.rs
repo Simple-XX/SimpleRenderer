@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use glam::{Mat4, Vec3};
 use simple_renderer::{Light, Model, RenderingMode, Shader, SimpleRenderer};

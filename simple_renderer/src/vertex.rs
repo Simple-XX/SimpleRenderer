@@ -1,7 +1,9 @@
+// Copyright The SimpleRenderer Contributors
+
 use crate::color::Color;
 use crate::math::{Mat3, Mat4, Vec2, Vec3, Vec4};
 
-/// A single vertex in Array-of-Structures (AoS) layout.
+/// 结构体数组（AoS）布局的单个顶点。
 #[derive(Debug, Clone, Copy)]
 pub struct Vertex {
     pub position: Vec4,
@@ -24,7 +26,7 @@ impl Default for Vertex {
 }
 
 impl Vertex {
-    /// Create a new vertex with the given attributes.
+    /// 使用给定的属性创建一个新顶点。
     #[inline]
     pub fn new(position: Vec4, normal: Vec3, tex_coords: Vec2, color: Color) -> Self {
         Self {
@@ -36,18 +38,18 @@ impl Vertex {
         }
     }
 
-    /// Return a copy of this vertex with the given world-space position set.
+    /// 返回此顶点的副本，并设置给定的世界空间位置。
     #[inline]
     pub fn with_world_position(mut self, wp: Vec3) -> Self {
         self.world_position = wp;
         self
     }
 
-    /// Transform this vertex by a 4×4 matrix.
+    /// 使用 4×4 矩阵变换此顶点。
     ///
-    /// Applies `mat` to `position` and the inverse-transpose of the upper-left 3×3 of `mat` to `normal`.
-    /// This correctly handles non-uniform scaling.
-    /// Also transforms `world_position` as `(mat * position).truncate()`.
+    /// 将 `mat` 应用于 `position`，并将 `mat` 左上角 3×3 子矩阵的逆转置应用于 `normal`。
+    /// 这能正确处理非均匀缩放。
+    /// 同时将 `world_position` 变换为 `(mat * position).truncate()`。
     pub fn transform(&self, mat: &Mat4) -> Vertex {
         let normal_mat = Mat3::from_mat4(*mat).inverse().transpose();
         let transformed_pos = *mat * self.position;
@@ -61,8 +63,8 @@ impl Vertex {
     }
 }
 
-/// Vertex data in Structure-of-Arrays (SoA) layout for cache-friendly
-/// tile-based rendering.
+/// 数组结构体（SoA）布局的顶点数据，用于缓存友好的
+/// 基于图块的渲染。
 #[derive(Debug, Clone, Default)]
 pub struct VertexSoA {
     pub pos_screen: Vec<Vec4>,
@@ -74,19 +76,19 @@ pub struct VertexSoA {
 }
 
 impl VertexSoA {
-    /// Number of vertices stored.
+    /// 存储的顶点数量。
     #[inline]
     pub fn len(&self) -> usize {
         self.pos_screen.len()
     }
 
-    /// Whether the SoA is empty.
+    /// SoA 是否为空。
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.pos_screen.is_empty()
     }
 
-    /// Resize all arrays to hold `n` elements, using default values.
+    /// 将所有数组调整为 `n` 个元素的大小，使用默认值填充。
     pub fn resize(&mut self, n: usize) {
         self.pos_screen.resize(n, Vec4::ZERO);
         self.pos_clip.resize(n, Vec4::ZERO);
@@ -163,15 +165,15 @@ mod tests {
     fn vertex_transform_nonuniform_scale_normal() {
         let v = Vertex::new(
             Vec4::new(0.0, 0.0, 0.0, 1.0),
-            Vec3::new(0.0, 1.0, 0.0), // +Y normal
+            Vec3::new(0.0, 1.0, 0.0), // +Y 法线
             Vec2::ZERO,
             Color::WHITE,
         );
-        // Non-uniform scale: stretch X by 2, keep Y and Z
+        // 非均匀缩放：X 轴拉伸 2 倍，Y 和 Z 保持不变
         let mat = Mat4::from_scale(Vec3::new(2.0, 1.0, 1.0));
         let t = v.transform(&mat);
-        // With correct inverse-transpose, normal should remain (0, 1, 0) normalized
-        // (stretching X doesn't affect Y normal)
+        // 使用正确的逆转置，法线应保持归一化的 (0, 1, 0)
+        // （拉伸 X 不影响 Y 法线）
         assert!(
             (t.normal.y - 1.0).abs() < 1e-5,
             "normal Y should be ~1.0, got {}",

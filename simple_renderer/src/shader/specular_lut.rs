@@ -1,21 +1,23 @@
+// Copyright The SimpleRenderer Contributors
+
 use super::Shader;
 
-// ── Constants ─────────────────────────────────────────────────────────────
+// ── 常量 ──────────────────────────────────────────────────────────────────
 
 pub(crate) const SPECULAR_LUT_RESOLUTION: usize = 256;
 
-// ── Specular LUT ──────────────────────────────────────────────────────────
+// ── 高光查找表 ────────────────────────────────────────────────────────────
 
-/// Precomputed lookup table for `cos_theta^shininess`.
+/// 预计算的 `cos_theta^shininess` 查找表。
 #[derive(Clone)]
 pub(crate) struct SpecularLut {
     pub(crate) values: [f32; SPECULAR_LUT_RESOLUTION],
 }
 
 impl Shader {
-    // ── Specular LUT (private) ────────────────────────────────────────
+    // ── 高光查找表（私有）─────────────────────────────────────────────
 
-    /// Build a lookup table for `cos_theta^shininess`.
+    /// 构建 `cos_theta^shininess` 的查找表。
     pub(super) fn build_specular_lut(shininess: f32) -> SpecularLut {
         let mut values = [0.0_f32; SPECULAR_LUT_RESOLUTION];
         if shininess <= 0.0 {
@@ -33,13 +35,13 @@ impl Shader {
         SpecularLut { values }
     }
 
-    /// Get or create a cached specular LUT for the given shininess.
+    /// 获取或创建给定 shininess 的缓存高光查找表。
     ///
-    /// Returns a clone of the LUT values (`RwLock` prevents returning a reference).
+    /// 返回 LUT 值的克隆（`RwLock` 不允许返回引用）。
     pub(super) fn get_specular_lut(&self, shininess: f32) -> [f32; SPECULAR_LUT_RESOLUTION] {
         let key = shininess.to_bits();
 
-        // Try read lock first
+        // 先尝试读锁
         {
             let cache = self
                 .specular_lut_cache
@@ -60,7 +62,7 @@ impl Shader {
         values
     }
 
-    /// Evaluate specular contribution using cached LUT with linear interpolation.
+    /// 使用缓存的查找表通过线性插值计算高光贡献。
     pub(super) fn evaluate_specular(&self, cos_theta: f32, shininess: f32) -> f32 {
         let cos_theta = cos_theta.clamp(0.0, 1.0);
         if shininess <= 0.0 {

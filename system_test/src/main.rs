@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 mod camera;
 mod display;
 

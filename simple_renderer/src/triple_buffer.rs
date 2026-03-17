@@ -1,12 +1,14 @@
+// Copyright The SimpleRenderer Contributors
+
 use std::cell::UnsafeCell;
 use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
 
 use crate::color::Color;
 
-// State encoding in AtomicU8:
-//   bits [1:0] = back buffer index (0, 1, or 2)
-//   bit  [2]   = fresh flag (1 = back contains a new frame not yet consumed)
+// AtomicU8 中的状态编码：
+//   位 [1:0] = 后台缓冲区索引（0、1 或 2）
+//   位 [2]   = 新鲜标志（1 = 后台包含一帧尚未被消费的新帧）
 const FRESH_BIT: u8 = 0b100;
 const INDEX_MASK: u8 = 0b011;
 
@@ -17,9 +19,8 @@ struct SharedBuffers {
     height: usize,
 }
 
-// Safety: at any instant each buffer is accessed by at most one thread.
-// The atomic state variable ensures the writer and reader never touch
-// the same buffer simultaneously.
+// 安全性：在任意时刻，每个缓冲区最多只被一个线程访问。
+// 原子状态变量确保写入者和读取者不会同时触及同一个缓冲区。
 unsafe impl Sync for SharedBuffers {}
 
 pub struct TripleBufferWriter {
@@ -27,7 +28,7 @@ pub struct TripleBufferWriter {
     render_idx: u8,
 }
 
-// Safety: TripleBufferWriter is only used from the render thread.
+// 安全性：TripleBufferWriter 仅在渲染线程中使用。
 unsafe impl Send for TripleBufferWriter {}
 
 pub struct TripleBufferReader {
@@ -46,7 +47,7 @@ pub fn create_triple_buffer(
             UnsafeCell::new(vec![0u32; size]),
             UnsafeCell::new(vec![0u32; size]),
         ],
-        // Initial assignment: front=0, back=1, render=2
+        // 初始分配：front=0, back=1, render=2
         state: AtomicU8::new(1), // back_idx=1, fresh=false
         width,
         height,
@@ -65,8 +66,8 @@ pub fn create_triple_buffer(
 
 impl TripleBufferWriter {
     pub fn render_buffer_mut(&mut self) -> &mut [u32] {
-        // Safety: render_idx is exclusively owned by this thread
-        // and never equals back_idx or front_idx at this point.
+        // 安全性：render_idx 由本线程独占拥有，
+        // 且在此时刻不会等于 back_idx 或 front_idx。
         unsafe { &mut *self.shared.bufs[self.render_idx as usize].get() }
     }
 
@@ -75,24 +76,23 @@ impl TripleBufferWriter {
         self.render_buffer_mut().fill(val);
     }
 
-    /// Publish the completed render buffer as the new back buffer.
-    /// Returns the old back buffer index (now the writer's new render target).
-    /// This never blocks — if the reader hasn't consumed the previous back
-    /// buffer, it gets overwritten (dropped frame). This is triple-buffer
-    /// semantics.
+    /// 将已完成的渲染缓冲区发布为新的后台缓冲区。
+    /// 返回旧的后台缓冲区索引（现在成为写入者的新渲染目标）。
+    /// 此操作永不阻塞——如果读取者尚未消费上一个后台缓冲区，
+    /// 它会被覆盖（丢帧）。这是三重缓冲的语义。
     pub fn publish(&mut self) {
         let new_state = (self.render_idx & INDEX_MASK) | FRESH_BIT;
         let old_state = self.shared.state.swap(new_state, Ordering::AcqRel);
-        // Reclaim the old back buffer as our new render target.
+        // 回收旧的后台缓冲区作为新的渲染目标。
         self.render_idx = old_state & INDEX_MASK;
     }
 
-    /// Publish and then wait until the reader consumes the back buffer.
-    /// This simulates double-buffer + VSync behavior where the GPU blocks
-    /// until the display has swapped.
+    /// 发布后等待读取者消费后台缓冲区。
+    /// 这模拟了双缓冲 + VSync 的行为，即 GPU 阻塞直到
+    /// 显示器完成交换。
     pub fn publish_and_wait(&mut self) {
         self.publish();
-        // Hybrid wait: spin briefly for low-latency, then yield to avoid burning CPU.
+        // 混合等待：先短暂自旋以降低延迟，然后让出 CPU 以避免空转。
         const SPIN_ITERS: u32 = 64;
         let mut spins = 0u32;
         while self.shared.state.load(Ordering::Acquire) & FRESH_BIT != 0 {
@@ -117,15 +117,15 @@ impl TripleBufferWriter {
 }
 
 impl TripleBufferReader {
-    /// If a new frame is available in the back buffer, swap it to front.
-    /// Returns true if a new frame was obtained.
+    /// 如果后台缓冲区有新帧可用，将其交换到前台。
+    /// 返回 true 表示获取到了新帧。
     pub fn update(&mut self) -> bool {
         let old_state = self.shared.state.load(Ordering::Acquire);
         if old_state & FRESH_BIT == 0 {
-            return false; // no new frame
+            return false; // 没有新帧
         }
 
-        // Swap: our front becomes the new back, we take back as new front.
+        // 交换：我们的前台变为新的后台，我们取后台作为新的前台。
         let new_state = self.front_idx & INDEX_MASK; // fresh=false
         match self.shared.state.compare_exchange(
             old_state,
@@ -138,8 +138,8 @@ impl TripleBufferReader {
                 true
             }
             Err(current) => {
-                // Writer published again between our load and CAS.
-                // Retry once — the new back is even fresher.
+                // 在我们的 load 和 CAS 之间写入者又发布了一帧。
+                // 重试一次——新的后台帧更新鲜。
                 if current & FRESH_BIT == 0 {
                     return false;
                 }
@@ -154,14 +154,14 @@ impl TripleBufferReader {
                         self.front_idx = current & INDEX_MASK;
                         true
                     }
-                    Err(_) => false, // give up this tick, try next frame
+                    Err(_) => false, // 本轮放弃，下一帧再试
                 }
             }
         }
     }
 
     pub fn front_buffer(&self) -> &[u32] {
-        // Safety: front_idx is exclusively owned by this thread.
+        // 安全性：front_idx 由本线程独占拥有。
         unsafe { &*self.shared.bufs[self.front_idx as usize].get() }
     }
 
@@ -176,7 +176,7 @@ impl TripleBufferReader {
     }
 }
 
-// ── Tests ──────────────────────────────────────────────────────────────────
+// ── 测试 ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
 mod tests {
@@ -222,22 +222,22 @@ mod tests {
         writer.render_buffer_mut().fill(1);
         writer.publish();
         assert!(reader.update());
-        assert!(!reader.update()); // no new frame
+        assert!(!reader.update()); // 没有新帧
     }
 
     #[test]
     fn triple_buffer_overwrites_unconsumed_back() {
         let (mut writer, mut reader) = create_triple_buffer(2, 2);
 
-        // Publish frame A (value 0xAA)
+        // 发布帧 A（值 0xAA）
         writer.render_buffer_mut().fill(0xAA);
         writer.publish();
 
-        // Publish frame B (value 0xBB) without reader consuming A
+        // 在读取者未消费 A 的情况下发布帧 B（值 0xBB）
         writer.render_buffer_mut().fill(0xBB);
         writer.publish();
 
-        // Reader should get the latest (B), not A
+        // 读取者应该获取到最新的帧（B），而不是 A
         assert!(reader.update());
         assert!(reader.front_buffer().iter().all(|&p| p == 0xBB));
     }
@@ -252,10 +252,10 @@ mod tests {
             writer
         });
 
-        // Give writer time to publish and start waiting
+        // 给写入者时间去发布并开始等待
         std::thread::sleep(std::time::Duration::from_millis(10));
 
-        // Consume the frame — this unblocks the writer
+        // 消费该帧——这会解除写入者的阻塞
         assert!(reader.update());
         assert!(reader.front_buffer().iter().all(|&p| p == 42));
 
@@ -272,9 +272,9 @@ mod tests {
 
             if reader.update() {
                 let val = reader.front_buffer()[0];
-                // Value must be one of the published frames, not garbage
+                // 值必须是已发布帧中的某一帧，而不是垃圾数据
                 assert!(val <= frame);
-                // All pixels in the front buffer must be the same value
+                // 前台缓冲区中所有像素的值必须相同
                 assert!(reader.front_buffer().iter().all(|&p| p == val));
             }
         }

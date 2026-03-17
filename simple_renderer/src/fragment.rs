@@ -1,9 +1,11 @@
+// Copyright The SimpleRenderer Contributors
+
 use crate::color::Color;
 use crate::math::{Vec2, Vec3};
 
-/// A fragment produced by rasterization, ready for fragment shading.
+/// 光栅化产生的片元，等待片元着色。
 ///
-/// Note: material is NOT stored here (passed separately for thread safety).
+/// 注意：材质不存储在此处（为线程安全而单独传递）。
 #[derive(Debug, Clone)]
 pub struct Fragment {
     pub screen_coord: [i32; 2],

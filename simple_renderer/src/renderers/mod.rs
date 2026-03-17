@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 pub(crate) mod base;
 pub(crate) mod deferred;
 pub(crate) mod per_triangle;
@@ -10,11 +12,11 @@ pub(crate) mod tile_common;
 use crate::model::Model;
 use crate::shader::Shader;
 
-/// Common interface for all rendering strategies.
+/// 所有渲染策略的公共接口。
 pub trait Renderer: Send {
-    /// Render `model` into `out_buffer` (row-major, `width × height` pixels).
+    /// 将 `model` 渲染到 `out_buffer` 中（行优先，`width × height` 像素）。
     ///
-    /// Returns `Ok(())` on success.
+    /// 成功时返回 `Ok(())`。
     fn render(
         &mut self,
         model: &Model,

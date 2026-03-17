@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 //! Integration tests for the simple_renderer library.
 //!
 //! These tests render a real model (teapot) with all 4 rendering modes.

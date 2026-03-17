@@ -1,3 +1,5 @@
+// Copyright The SimpleRenderer Contributors
+
 //! Tile-based renderer (SoA layout) with edge function rasterization.
 //!
 //! SoA tile-based forward renderer with edge-function rasterization.

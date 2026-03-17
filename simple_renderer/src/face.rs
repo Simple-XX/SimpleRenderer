@@ -1,8 +1,10 @@
+// Copyright The SimpleRenderer Contributors
+
 use std::sync::Arc;
 
 use crate::material::Material;
 
-/// A triangle face defined by three vertex indices and an associated material.
+/// 由三个顶点索引和关联材质定义的三角面。
 #[derive(Debug, Clone)]
 pub struct Face {
     pub indices: [usize; 3],
