@@ -1,5 +1,5 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 use crate::color::Color;
 use crate::math::{Mat3, Mat4, Vec2, Vec3, Vec4};

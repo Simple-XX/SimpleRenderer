@@ -1,5 +1,5 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 //! 最小化的 Entity-Component-System 实现。
 //!

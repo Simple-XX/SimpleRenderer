@@ -1,5 +1,5 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 use std::collections::HashMap;
 use std::marker::PhantomData;

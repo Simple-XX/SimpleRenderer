@@ -1,5 +1,5 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 use engine_core::{Entity, World};
 use glam::Vec3;

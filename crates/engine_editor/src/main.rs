@@ -1,5 +1,5 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 mod app;
 mod camera_control;
@@ -17,7 +17,7 @@ fn main() -> eframe::Result<()> {
     };
 
     eframe::run_native(
-        "SimpleRenderer 编辑器",
+        "SimpleGameEngine 编辑器",
         options,
         Box::new(|cc| Ok(Box::new(app::EditorApp::new(cc)))),
     )

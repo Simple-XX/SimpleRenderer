@@ -1,4 +1,4 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 pub use glam::{Mat3, Mat4, Vec2, Vec3, Vec4};

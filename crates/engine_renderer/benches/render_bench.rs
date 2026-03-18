@@ -1,5 +1,5 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use glam::{Mat4, Vec3};
@@ -7,7 +7,7 @@ use engine_renderer::{Light, Model, RenderingMode, Shader, SimpleRenderer};
 
 const BENCH_W: usize = 200;
 const BENCH_H: usize = 150;
-const TEAPOT_PATH: &str = "../obj/utah-teapot-texture/teapot.obj";
+const TEAPOT_PATH: &str = "../../assets/models/utah-teapot-texture/teapot.obj";
 
 fn setup_shader() -> Shader {
     let model_matrix = Mat4::from_scale(Vec3::splat(0.02))

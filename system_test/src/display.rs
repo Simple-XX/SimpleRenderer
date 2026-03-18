@@ -1,8 +1,8 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 use minifb::{Key, MouseButton, MouseMode, Window, WindowOptions};
-use simple_renderer::RenderingMode;
+use engine_renderer::RenderingMode;
 
 use crate::camera::{Camera, CameraMovement};
 
@@ -25,7 +25,7 @@ pub struct Display {
 impl Display {
     pub fn new(width: usize, height: usize) -> Self {
         let window = Window::new(
-            "SimpleRenderer (Rust)",
+            "SimpleGameEngine",
             width,
             height,
             WindowOptions::default(),

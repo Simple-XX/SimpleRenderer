@@ -1,5 +1,5 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 //! 基于瓦片的渲染器（SoA 布局），使用边缘函数光栅化。
 //!

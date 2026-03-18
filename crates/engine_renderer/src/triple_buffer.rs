@@ -1,5 +1,5 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 use std::cell::UnsafeCell;
 use std::sync::atomic::{AtomicU8, Ordering};

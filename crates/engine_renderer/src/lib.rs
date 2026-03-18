@@ -1,7 +1,7 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
 
-//! # SimpleRenderer
+
+//! # SimpleGameEngine Renderer
 //!
 //! 一个教育用途的软件渲染器，完全使用安全 Rust 实现了简化的 GPU 渲染
 //! 管线。展示了顶点处理、光栅化、片段着色和多缓冲显示输出。

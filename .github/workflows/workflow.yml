@@ -1,7 +1,7 @@
-# This file is a part of Simple-XX/SimpleRenderer
-# (https://github.com/Simple-XX/SimpleRenderer).
+# This file is a part of Simple-XX/SimpleGameEngine
+# (https://github.com/Simple-XX/SimpleGameEngine).
 #
-# workflow.yml for Simple-XX/SimpleRenderer.
+# workflow.yml for Simple-XX/SimpleGameEngine.
 
 name: build
 

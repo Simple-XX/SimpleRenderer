@@ -1,8 +1,8 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 #[cfg(not(target_endian = "little"))]
-compile_error!("SimpleRenderer assumes little-endian byte order for Color ↔ u32 conversions");
+compile_error!("SimpleGameEngine assumes little-endian byte order for Color ↔ u32 conversions");
 
 use std::fmt;
 use std::ops;

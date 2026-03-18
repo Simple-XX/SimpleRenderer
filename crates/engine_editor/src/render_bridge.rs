@@ -1,5 +1,5 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 //! 渲染桥接层：在独立线程中运行软件渲染器，
 //! 通过 mpsc 通道接收命令，通过三重缓冲输出像素。

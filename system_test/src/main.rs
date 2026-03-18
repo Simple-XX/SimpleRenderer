@@ -1,13 +1,13 @@
-// Copyright (c) Simple-XX/SimpleRenderer
-// SPDX-License-Identifier: MIT
+// Copyright The SimpleGameEngine Contributors
+
 
 mod camera;
 mod display;
 
 use glam::{Mat4, Vec3};
 use log::info;
-use simple_renderer::uniform::names as u;
-use simple_renderer::{triple_buffer, Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
+use engine_renderer::uniform::names as u;
+use engine_renderer::{triple_buffer, Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
 use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -147,7 +147,7 @@ fn main() {
             let buf_mode = if double_buffer { "Double" } else { "Triple" };
             let vs = if vsync_enabled { " VSync" } else { "" };
             display.set_title(&format!(
-                "SimpleRenderer | {} | Display {:.0} Render {:.0} FPS | {}{}",
+                "SimpleGameEngine | {} | Display {:.0} Render {:.0} FPS | {}{}",
                 current_mode, display_fps, render_fps, buf_mode, vs,
             ));
             frame_count = 0;
