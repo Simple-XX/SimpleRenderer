@@ -12,3 +12,4 @@ build
 Doxyfile
 target/
 obj/
+.sisyphus/

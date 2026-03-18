@@ -10,8 +10,8 @@
 //!    在所有线程中找到最近片元，仅对优胜者着色（并行）
 //! 4. 写入输出缓冲区
 
-use log::debug;
 use std::time::Instant;
+use tracing::debug;
 
 use rayon::prelude::*;
 

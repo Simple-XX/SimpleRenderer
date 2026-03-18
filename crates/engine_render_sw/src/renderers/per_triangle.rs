@@ -7,8 +7,8 @@
 //! 2. 对面片分块进行并行光栅化（rayon `par_chunks`）
 //! 3. 每个分块拥有独立的深度和颜色缓冲区，最后合并结果
 
-use log::debug;
 use std::time::Instant;
+use tracing::debug;
 
 use rayon::prelude::*;
 

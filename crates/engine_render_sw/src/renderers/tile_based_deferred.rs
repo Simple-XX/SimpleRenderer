@@ -12,8 +12,8 @@
 //! 5. 将瓦片缓冲区复制到全局帧缓冲
 //! 6. 复制到输出
 
-use log::debug;
 use std::time::Instant;
+use tracing::debug;
 
 use rayon::prelude::*;
 

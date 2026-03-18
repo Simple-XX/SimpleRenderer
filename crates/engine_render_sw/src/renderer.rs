@@ -5,7 +5,7 @@ use crate::renderers::tile_based::TileBasedRenderer;
 use crate::renderers::tile_based_deferred::TileBasedDeferredRenderer;
 use crate::renderers::Renderer;
 use crate::shader::Shader;
-use log::info;
+use tracing::info;
 
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

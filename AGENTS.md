@@ -205,6 +205,7 @@ Editor (main thread, egui)
 - **Plugin system**: Impl `Plugin` trait, register via `AppBuilder::add_plugin`
 - **Systems**: `FnMut(&mut SystemContext)` closures, registered to a `Phase`
 - **Uniform names**: Always use `uniform::names::*` constants
+- **Logging**: `tracing` crate for all logging (`tracing::info!` etc.); `tracing-subscriber` for subscriber init in binary crates only
 - **Error handling**: `thiserror` → `RendererError`, propagate with `?`
 - **Parallelism**: `rayon` in renderers, parallel merge in PerTriangle
 - **Buffer reuse**: Renderer structs own depth/color buffers, reuse with `fill()`
@@ -219,7 +220,7 @@ Editor (main thread, egui)
 ```bash
 cargo build --workspace                  # Build all crates
 cargo run -p engine_editor               # Run egui editor
-cargo test --workspace                   # All tests (363)
+cargo test --workspace                   # All tests (354)
 cargo test -p engine_render_sw           # Renderer tests (207)
 cargo test -p engine_core                # ECS + Plugin + Schedule tests (63)
 cargo test -p engine_math                # Math tests (39)
@@ -239,8 +240,8 @@ cargo clippy --workspace -- -D warnings  # Lint (CI requires zero warnings)
 | image 0.25 | Texture loading | engine_render_sw |
 | rayon 1.10 | Parallel iteration | engine_render_sw |
 | thiserror 2 | Error derive macros | engine_render_sw, engine_render_api |
-| log 0.4 | Logging | engine_render_sw, engine_editor |
-| env_logger 0.11 | Log output | engine_editor |
+| tracing 0.1 | Structured logging | engine_render_sw, engine_editor |
+| tracing-subscriber 0.3 | Tracing output backend | engine_editor |
 | eframe 0.31 | egui native window | engine_editor |
 | egui 0.31 | Immediate-mode GUI | engine_editor |
 | rfd 0.15 | Native file dialogs | engine_editor |

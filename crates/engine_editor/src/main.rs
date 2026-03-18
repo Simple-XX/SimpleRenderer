@@ -1,10 +1,12 @@
 mod app;
 mod camera_control;
+mod logger;
 mod panels;
+mod project;
 mod render_bridge;
 
 fn main() -> eframe::Result<()> {
-    env_logger::init();
+    let log_buffer = logger::init_logger(2000);
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -16,6 +18,6 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         "SimpleGameEngine 编辑器",
         options,
-        Box::new(|cc| Ok(Box::new(app::EditorApp::new(cc)))),
+        Box::new(move |cc| Ok(Box::new(app::EditorApp::new(cc, log_buffer)))),
     )
 }

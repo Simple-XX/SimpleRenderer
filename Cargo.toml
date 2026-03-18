@@ -15,6 +15,10 @@ license = "MIT"
 authors = ["Simple-XX"]
 repository = "https://github.com/Simple-XX/SimpleGameEngine"
 
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+
 [profile.dev]
 opt-level = 2
 

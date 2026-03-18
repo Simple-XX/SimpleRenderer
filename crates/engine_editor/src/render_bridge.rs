@@ -157,11 +157,11 @@ fn render_loop(
             match cmd {
                 RenderCommand::LoadModel(path) => match Model::load(&path.to_string_lossy()) {
                     Ok(m) => {
-                        log::info!("模型加载成功: {}", path.display());
+                        tracing::info!("模型加载成功: {}", path.display());
                         model = Some(m);
                     }
                     Err(e) => {
-                        log::error!("模型加载失败: {}", e);
+                        tracing::error!("模型加载失败: {}", e);
                     }
                 },
                 RenderCommand::SetCamera {
@@ -210,7 +210,7 @@ fn render_loop(
             // 确保缓冲区尺寸匹配
             if buf.len() == width * height {
                 if let Err(e) = renderer.draw_model(m, &mut shader, buf) {
-                    log::error!("渲染失败: {}", e);
+                    tracing::error!("渲染失败: {}", e);
                 }
             }
 

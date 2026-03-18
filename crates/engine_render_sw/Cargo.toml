@@ -9,11 +9,10 @@ glam = "0.29"
 tobj = "4.0"
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "bmp", "tga"] }
 rayon = "1.10"
-log = "0.4"
+tracing = "0.1"
 thiserror = "2"
 
 [dev-dependencies]
-env_logger = "0.11"
 proptest = "1"
 criterion = { version = "0.5", features = ["html_reports"] }
 

@@ -12,5 +12,7 @@ eframe = "0.31"
 egui = "0.31"
 rfd = "0.15"
 glam = "0.29"
-log = "0.4"
-env_logger = "0.11"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
+serde = { workspace = true }
+toml = { workspace = true }

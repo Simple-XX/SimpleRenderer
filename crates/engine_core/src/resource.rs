@@ -117,11 +117,11 @@ mod tests {
     fn 多种类型互不干扰() {
         let mut map = ResourceMap::new();
         map.insert(42_i32);
-        map.insert(3.14_f64);
+        map.insert(std::f64::consts::PI);
         map.insert(String::from("test"));
 
         assert_eq!(*map.get::<i32>().unwrap(), 42);
-        assert!((*map.get::<f64>().unwrap() - 3.14).abs() < f64::EPSILON);
+        assert!((*map.get::<f64>().unwrap() - std::f64::consts::PI).abs() < f64::EPSILON);
         assert_eq!(map.get::<String>().unwrap(), "test");
     }
 

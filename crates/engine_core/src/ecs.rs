@@ -12,7 +12,7 @@ mod tests {
     #[test]
     fn 创建世界并生成实体() {
         let mut world = World::new();
-        let entity = world.spawn((42_i32, 3.14_f64));
+        let entity = world.spawn((42_i32, std::f64::consts::PI));
         assert!(world.contains(entity));
     }
 

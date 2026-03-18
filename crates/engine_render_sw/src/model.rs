@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use log::warn;
+use tracing::warn;
 
 use crate::color::Color;
 use crate::error::{RendererError, Result};
@@ -118,7 +118,7 @@ impl Model {
             }
         }
 
-        log::info!(
+        tracing::info!(
             "Loaded model: {}, vertices: {}, faces: {}",
             path,
             vertices.len(),

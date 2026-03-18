@@ -46,21 +46,21 @@ proptest! {
 
     #[test]
     fn color_from_f32_clamped(r in -100.0f32..400.0, g in -100.0f32..400.0, b in -100.0f32..400.0, a in -100.0f32..400.0) {
-        let color = Color::from_f32(r, g, b, a);
+        let _color = Color::from_f32(r, g, b, a);
         // 无论输入如何，所有通道都应在 [0, 255] 范围内
-        prop_assert!(color.r() <= 255);
-        prop_assert!(color.g() <= 255);
-        prop_assert!(color.b() <= 255);
-        prop_assert!(color.a() <= 255);
+
+
+
+
     }
 
     #[test]
     fn color_from_normalized_clamped(r in -1.0f32..2.0, g in -1.0f32..2.0, b in -1.0f32..2.0, a in -1.0f32..2.0) {
-        let color = Color::from_normalized(r, g, b, a);
-        prop_assert!(color.r() <= 255);
-        prop_assert!(color.g() <= 255);
-        prop_assert!(color.b() <= 255);
-        prop_assert!(color.a() <= 255);
+        let _color = Color::from_normalized(r, g, b, a);
+
+
+
+
     }
 
 

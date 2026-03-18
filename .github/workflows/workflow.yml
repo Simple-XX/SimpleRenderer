@@ -43,6 +43,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-build-target-
 
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
       - name: Build
         run: cargo build --workspace
 

@@ -68,9 +68,19 @@ impl EditorCamera {
         camera
     }
 
-    /// 获取相机世界坐标位置
     pub fn position(&self) -> Vec3 {
         self.position
+    }
+
+    pub fn set_position(&mut self, pos: Vec3) {
+        self.position = pos;
+        self.update_vectors();
+    }
+
+    pub fn set_rotation(&mut self, yaw: f32, pitch: f32) {
+        self.yaw = yaw;
+        self.pitch = pitch.clamp(-89.0, 89.0);
+        self.update_vectors();
     }
 
     /// 计算视图矩阵（右手坐标系）

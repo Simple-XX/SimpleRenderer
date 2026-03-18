@@ -460,7 +460,7 @@ mod tests {
     #[test]
     fn clone_semantics() {
         let a = Color::new(1, 2, 3, 4);
-        let b = a.clone();
+        let b = a;
         assert_eq!(a, b);
     }
 

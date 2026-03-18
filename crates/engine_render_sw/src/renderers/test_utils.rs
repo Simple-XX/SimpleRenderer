@@ -1,4 +1,7 @@
 #[cfg(test)]
+pub use tests::{create_test_model, test_shader};
+
+#[cfg(test)]
 mod tests {
     use crate::color::Color;
     use crate::light::Light;
@@ -60,5 +63,3 @@ mod tests {
         model
     }
 }
-
-pub use tests::{create_test_model, test_shader};
