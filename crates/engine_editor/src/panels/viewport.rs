@@ -34,6 +34,37 @@ pub fn upload_frame(
     }
 }
 
+/// 在视口上绘制信息覆盖层
+#[allow(dead_code)]
+pub fn show_overlay(
+    ui: &mut egui::Ui,
+    viewport_rect: egui::Rect,
+    camera_pos: [f32; 3],
+    show_grid: bool,
+) {
+    let painter = ui.painter_at(viewport_rect);
+    let text = format!(
+        "相机: ({:.1}, {:.1}, {:.1})",
+        camera_pos[0], camera_pos[1], camera_pos[2]
+    );
+    painter.text(
+        viewport_rect.left_top() + egui::vec2(8.0, 8.0),
+        egui::Align2::LEFT_TOP,
+        text,
+        egui::FontId::proportional(12.0),
+        egui::Color32::from_rgba_unmultiplied(200, 200, 200, 180),
+    );
+    if show_grid {
+        painter.text(
+            viewport_rect.left_top() + egui::vec2(8.0, 24.0),
+            egui::Align2::LEFT_TOP,
+            "网格: 开",
+            egui::FontId::proportional(12.0),
+            egui::Color32::from_rgba_unmultiplied(200, 200, 200, 180),
+        );
+    }
+}
+
 /// 显示视口面板，返回视口区域的 Response（用于检测鼠标交互）
 pub fn show(ui: &mut egui::Ui, texture: &Option<TextureHandle>) -> Option<egui::Response> {
     texture.as_ref().map(|tex| {

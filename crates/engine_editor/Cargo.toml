@@ -8,8 +8,11 @@ rust-version = "1.73"
 engine_core = { path = "../engine_core" }
 engine_render_sw = { path = "../engine_render_sw" }
 engine_scene = { path = "../engine_scene" }
+engine_math = { path = "../engine_math" }
+engine_input = { path = "../engine_input" }
 eframe = "0.31"
 egui = "0.31"
+
 rfd = "0.15"
 glam = "0.29"
 tracing = "0.1"

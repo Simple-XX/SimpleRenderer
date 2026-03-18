@@ -8,6 +8,7 @@ use crate::logger::{self, LogBuffer};
 pub struct ConsoleState {
     pub min_level: Level,
     pub auto_scroll: bool,
+    pub search_text: String, // 搜索过滤文本
 }
 
 impl Default for ConsoleState {
@@ -15,11 +16,13 @@ impl Default for ConsoleState {
         Self {
             min_level: Level::TRACE,
             auto_scroll: true,
+            search_text: String::new(),
         }
     }
 }
 
 pub fn show(ui: &mut egui::Ui, log_buffer: &LogBuffer, state: &mut ConsoleState) {
+    // 头部行：标题、级别过滤、自动滚动、清空
     ui.horizontal(|ui| {
         ui.heading("控制台");
         ui.separator();
@@ -48,6 +51,21 @@ pub fn show(ui: &mut egui::Ui, log_buffer: &LogBuffer, state: &mut ConsoleState)
 
     ui.separator();
 
+    // 搜索过滤栏
+    ui.horizontal(|ui| {
+        ui.label("🔍");
+        ui.add(
+            egui::TextEdit::singleline(&mut state.search_text)
+                .hint_text("搜索日志...")
+                .desired_width(200.0),
+        );
+        if !state.search_text.is_empty() && ui.small_button("✕").clicked() {
+            state.search_text.clear();
+        }
+    });
+
+    ui.separator();
+
     let scroll = egui::ScrollArea::vertical()
         .auto_shrink([false, false])
         .stick_to_bottom(state.auto_scroll);
@@ -55,8 +73,19 @@ pub fn show(ui: &mut egui::Ui, log_buffer: &LogBuffer, state: &mut ConsoleState)
     scroll.show(ui, |ui| {
         if let Ok(entries) = log_buffer.lock() {
             for entry in entries.iter() {
+                // 级别过滤
                 if entry.level > state.min_level {
                     continue;
+                }
+
+                // 搜索过滤：检查消息和目标是否包含搜索文本（不区分大小写）
+                if !state.search_text.is_empty() {
+                    let search_lower = state.search_text.to_lowercase();
+                    if !entry.message.to_lowercase().contains(&search_lower)
+                        && !entry.target.to_lowercase().contains(&search_lower)
+                    {
+                        continue;
+                    }
                 }
 
                 let color = level_color(entry.level);
@@ -73,7 +102,14 @@ pub fn show(ui: &mut egui::Ui, log_buffer: &LogBuffer, state: &mut ConsoleState)
                     entry.timestamp, level_tag, entry.target, entry.message
                 );
 
-                ui.colored_label(color, text);
+                // 右键菜单：复制此条日志
+                let response = ui.colored_label(color, &text);
+                response.context_menu(|ui| {
+                    if ui.button("📋 复制此条").clicked() {
+                        ui.ctx().copy_text(text.clone());
+                        ui.close_menu();
+                    }
+                });
             }
 
             if entries.is_empty() {

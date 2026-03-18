@@ -7,15 +7,32 @@ use std::sync::mpsc::{self, Receiver, Sender};
 use std::sync::Arc;
 use std::time::Instant;
 
+use std::collections::HashMap;
+
 use engine_render_sw::triple_buffer::{self, TripleBufferReader, TripleBufferWriter};
 use engine_render_sw::uniform::names as u;
 use engine_render_sw::{Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
 use glam::{Mat4, Vec3};
 
+#[derive(Debug, Clone)]
+pub struct DrawCallData {
+    pub model_id: u64,
+    pub model_matrix: Mat4,
+    pub entity_id: u32,
+}
+
 /// 从 UI 线程发送到渲染线程的命令
 #[allow(dead_code)]
 pub enum RenderCommand {
     LoadModel(PathBuf),
+    RegisterModel {
+        id: u64,
+        model: Model,
+    },
+    UnregisterModel {
+        id: u64,
+    },
+    SubmitFrame(Vec<DrawCallData>),
     SetCamera {
         view: Mat4,
         projection: Mat4,
@@ -117,7 +134,9 @@ fn render_loop(
 ) {
     let mut renderer = SimpleRenderer::new(init_width, init_height);
     let mut shader = Shader::new();
-    let mut model: Option<Model> = None;
+    let mut legacy_model: Option<Model> = None;
+    let mut models: HashMap<u64, Model> = HashMap::new();
+    let mut pending_frame: Option<Vec<DrawCallData>> = None;
     let mut width = init_width;
     let mut height = init_height;
 
@@ -158,12 +177,22 @@ fn render_loop(
                 RenderCommand::LoadModel(path) => match Model::load(&path.to_string_lossy()) {
                     Ok(m) => {
                         tracing::info!("模型加载成功: {}", path.display());
-                        model = Some(m);
+                        models.insert(0, m.clone());
+                        legacy_model = Some(m);
                     }
                     Err(e) => {
                         tracing::error!("模型加载失败: {}", e);
                     }
                 },
+                RenderCommand::RegisterModel { id, model } => {
+                    models.insert(id, model);
+                }
+                RenderCommand::UnregisterModel { id } => {
+                    models.remove(&id);
+                }
+                RenderCommand::SubmitFrame(draw_calls) => {
+                    pending_frame = Some(draw_calls);
+                }
                 RenderCommand::SetCamera {
                     view,
                     projection,
@@ -200,14 +229,33 @@ fn render_loop(
             }
         }
 
-        // 渲染一帧
-        if let Some(ref m) = model {
+        // 多实体 SubmitFrame 渲染路径
+        if let Some(ref draw_calls) = pending_frame {
+            let frame_start = Instant::now();
+            writer.clear(Color::BLACK);
+            let buf = writer.render_buffer_mut();
+
+            if buf.len() == width * height {
+                for dc in draw_calls {
+                    if let Some(m) = models.get(&dc.model_id) {
+                        shader.set_uniform(u::MODEL_MATRIX, dc.model_matrix);
+                        if let Err(e) = renderer.draw_model(m, &mut shader, buf) {
+                            tracing::error!("渲染实体 {} 失败: {}", dc.entity_id, e);
+                        }
+                    }
+                }
+            }
+
+            writer.publish();
+            let elapsed = frame_start.elapsed().as_micros() as u64;
+            frame_time_us.store(elapsed, Ordering::Relaxed);
+        } else if let Some(ref m) = legacy_model {
+            // 兼容旧的单模型渲染路径
             let frame_start = Instant::now();
 
             writer.clear(Color::BLACK);
             let buf = writer.render_buffer_mut();
 
-            // 确保缓冲区尺寸匹配
             if buf.len() == width * height {
                 if let Err(e) = renderer.draw_model(m, &mut shader, buf) {
                     tracing::error!("渲染失败: {}", e);

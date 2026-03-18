@@ -6,11 +6,15 @@ use engine_render_sw::{Color, Light, RenderingMode};
 use glam::Vec3;
 
 use crate::camera_control::EditorCamera;
+use crate::commands::CommandHistory;
+use crate::gizmo::GizmoState;
 use crate::logger::LogBuffer;
 use crate::panels;
 use crate::panels::console::ConsoleState;
+use crate::panels::scene_tree::SceneTreeState;
 use crate::project::ProjectState;
-use crate::render_bridge::{RenderBridge, RenderCommand};
+use crate::render_bridge::{DrawCallData, RenderBridge, RenderCommand};
+use crate::selection::SelectionState;
 
 const DEFAULT_RENDER_WIDTH: usize = 800;
 const DEFAULT_RENDER_HEIGHT: usize = 600;
@@ -30,6 +34,8 @@ pub struct EditorState {
     pub shininess_changed: bool,
     pub camera_speed: f32,
     pub camera_fov: f32,
+    #[allow(dead_code)]
+    pub show_grid: bool,
 }
 
 impl Default for EditorState {
@@ -49,6 +55,7 @@ impl Default for EditorState {
             shininess_changed: false,
             camera_speed: 2.5,
             camera_fov: 60.0,
+            show_grid: true,
         }
     }
 }
@@ -58,9 +65,12 @@ pub struct EditorApp {
     texture: Option<TextureHandle>,
     camera: EditorCamera,
     state: EditorState,
-    scene_entities: Vec<String>,
-    selected_entity: Option<usize>,
-    model_loaded: bool,
+    scene: engine_scene::Scene,
+    selection: SelectionState,
+    gizmo: GizmoState,
+    commands: CommandHistory,
+    show_scene_tree: bool,
+    show_properties: bool,
     display_fps: f32,
     frame_count: u32,
     fps_timer: Instant,
@@ -68,8 +78,12 @@ pub struct EditorApp {
 
     log_buffer: LogBuffer,
     console_state: ConsoleState,
+    scene_tree_state: SceneTreeState,
     project: Option<ProjectState>,
     show_console: bool,
+
+    shortcuts_help_state: crate::panels::shortcuts_help::ShortcutsHelpState,
+    toast_manager: crate::panels::toast::ToastManager,
 }
 
 impl EditorApp {
@@ -77,21 +91,39 @@ impl EditorApp {
         Self::configure_cjk_fonts(&cc.egui_ctx);
         let render_bridge = RenderBridge::new(DEFAULT_RENDER_WIDTH, DEFAULT_RENDER_HEIGHT);
 
+        let mut scene = engine_scene::Scene::new();
+
         let default_model = PathBuf::from("assets/models/utah-teapot-texture/teapot.obj");
-        let model_loaded = if default_model.exists() {
-            render_bridge.send(RenderCommand::LoadModel(default_model));
-            true
+        if default_model.exists() {
+            let path_str = default_model.to_string_lossy().to_string();
+            match scene.spawn_model("Teapot", &path_str) {
+                Ok(entity) => {
+                    let model_handle = scene
+                        .world
+                        .get::<&engine_scene::MeshRenderer>(entity)
+                        .unwrap()
+                        .model_handle;
+                    if let Some(model) = scene.assets.get_model(model_handle) {
+                        render_bridge.send(RenderCommand::RegisterModel {
+                            id: model_handle.id(),
+                            model: model.clone(),
+                        });
+                    }
+                }
+                Err(e) => {
+                    tracing::warn!("默认模型加载失败: {}", e);
+                }
+            }
         } else {
             tracing::warn!("默认模型路径不存在，等待用户手动加载");
-            false
-        };
-
-        let mut scene_entities = Vec::new();
-        if model_loaded {
-            scene_entities.push("🫖 Teapot".to_string());
         }
-        scene_entities.push("💡 主光源".to_string());
-        scene_entities.push("📷 编辑器相机".to_string());
+
+        scene.spawn_light(
+            "主光源",
+            Vec3::new(1.0, 5.0, 1.0),
+            Color::new(255, 255, 255, 255),
+        );
+        scene.spawn_camera("编辑器相机");
 
         tracing::info!("编辑器启动完成");
 
@@ -100,17 +132,23 @@ impl EditorApp {
             texture: None,
             camera: EditorCamera::default(),
             state: EditorState::default(),
-            scene_entities,
-            selected_entity: None,
-            model_loaded,
+            scene,
+            selection: SelectionState::default(),
+            gizmo: GizmoState::new(),
+            commands: CommandHistory::default(),
+            show_scene_tree: true,
+            show_properties: true,
             display_fps: 0.0,
             frame_count: 0,
             fps_timer: Instant::now(),
             last_frame: Instant::now(),
             log_buffer,
             console_state: ConsoleState::default(),
+            scene_tree_state: SceneTreeState::default(),
             project: None,
             show_console: true,
+            shortcuts_help_state: crate::panels::shortcuts_help::ShortcutsHelpState::default(),
+            toast_manager: crate::panels::toast::ToastManager::default(),
         }
     }
 
@@ -193,14 +231,88 @@ impl EditorApp {
                     }
                 });
 
+                ui.menu_button("编辑", |ui| {
+                    if ui
+                        .add_enabled(self.commands.can_undo(), egui::Button::new("↩️ 撤销"))
+                        .clicked()
+                    {
+                        self.commands.undo(&mut self.scene);
+                        ui.close_menu();
+                    }
+                    if ui
+                        .add_enabled(self.commands.can_redo(), egui::Button::new("↪️ 重做"))
+                        .clicked()
+                    {
+                        self.commands.redo(&mut self.scene);
+                        ui.close_menu();
+                    }
+                    ui.separator();
+                    if ui
+                        .add_enabled(
+                            self.selection.selected.is_some(),
+                            egui::Button::new("🗑 删除"),
+                        )
+                        .clicked()
+                    {
+                        if let Some(entity) = self.selection.selected {
+                            let _ = self.scene.world.despawn(entity);
+                            self.selection.clear();
+                        }
+                        ui.close_menu();
+                    }
+                });
+
+                ui.menu_button("实体", |ui| {
+                    if ui.button("📦 空实体").clicked() {
+                        let name = format!("实体 {}", self.scene.world.len());
+                        self.scene
+                            .world
+                            .spawn((engine_scene::Name(name), engine_core::Transform::default()));
+                        ui.close_menu();
+                    }
+                    if ui.button("💡 灯光").clicked() {
+                        self.scene.spawn_light(
+                            "灯光",
+                            glam::Vec3::new(0.0, -1.0, 0.0),
+                            engine_render_sw::Color::WHITE,
+                        );
+                        ui.close_menu();
+                    }
+                    if ui.button("📷 相机").clicked() {
+                        self.scene.spawn_camera("相机");
+                        ui.close_menu();
+                    }
+                });
+
                 ui.menu_button("视图", |ui| {
+                    if ui
+                        .selectable_label(self.show_scene_tree, "场景树")
+                        .clicked()
+                    {
+                        self.show_scene_tree = !self.show_scene_tree;
+                        ui.close_menu();
+                    }
+                    if ui
+                        .selectable_label(self.show_properties, "属性面板")
+                        .clicked()
+                    {
+                        self.show_properties = !self.show_properties;
+                        ui.close_menu();
+                    }
+                    if ui.selectable_label(self.show_console, "控制台").clicked() {
+                        self.show_console = !self.show_console;
+                        ui.close_menu();
+                    }
+                    ui.separator();
                     if ui.button("重置相机").clicked() {
                         self.camera = EditorCamera::default();
                         ui.close_menu();
                     }
-                    ui.separator();
-                    if ui.selectable_label(self.show_console, "控制台").clicked() {
-                        self.show_console = !self.show_console;
+                });
+
+                ui.menu_button("帮助", |ui| {
+                    if ui.button("⌨ 快捷键参考 (F1)").clicked() {
+                        self.shortcuts_help_state.open = true;
                         ui.close_menu();
                     }
                 });
@@ -273,15 +385,26 @@ impl EditorApp {
                 match proj.import_model(&path) {
                     Ok(entry) => {
                         let model_path = proj.resolve_model_path(&entry);
-                        self.render_bridge
-                            .send(RenderCommand::LoadModel(model_path));
-
-                        if !self.model_loaded {
-                            self.scene_entities.insert(0, format!("🧊 {}", entry.name));
-                        } else {
-                            self.scene_entities[0] = format!("🧊 {}", entry.name);
+                        let path_str = model_path.to_string_lossy().to_string();
+                        match self.scene.spawn_model(&entry.name, &path_str) {
+                            Ok(entity) => {
+                                let model_handle = self
+                                    .scene
+                                    .world
+                                    .get::<&engine_scene::MeshRenderer>(entity)
+                                    .unwrap()
+                                    .model_handle;
+                                if let Some(model) = self.scene.assets.get_model(model_handle) {
+                                    self.render_bridge.send(RenderCommand::RegisterModel {
+                                        id: model_handle.id(),
+                                        model: model.clone(),
+                                    });
+                                }
+                            }
+                            Err(e) => {
+                                tracing::error!("加载导入模型失败: {}", e);
+                            }
                         }
-                        self.model_loaded = true;
                     }
                     Err(e) => {
                         tracing::error!("导入模型失败: {}", e);
@@ -320,37 +443,49 @@ impl EditorApp {
                 .map(|s| s.to_string_lossy().to_string())
                 .unwrap_or_else(|| "Model".to_string());
 
-            self.render_bridge.send(RenderCommand::LoadModel(path));
-
-            if !self.model_loaded {
-                self.scene_entities.insert(0, format!("🧊 {}", name));
-            } else {
-                self.scene_entities[0] = format!("🧊 {}", name);
+            let path_str = path.to_string_lossy().to_string();
+            match self.scene.spawn_model(&name, &path_str) {
+                Ok(entity) => {
+                    let model_handle = self
+                        .scene
+                        .world
+                        .get::<&engine_scene::MeshRenderer>(entity)
+                        .unwrap()
+                        .model_handle;
+                    if let Some(model) = self.scene.assets.get_model(model_handle) {
+                        self.render_bridge.send(RenderCommand::RegisterModel {
+                            id: model_handle.id(),
+                            model: model.clone(),
+                        });
+                    }
+                }
+                Err(e) => {
+                    tracing::error!("模型加载失败: {}", e);
+                }
             }
-            self.model_loaded = true;
         }
     }
 
     fn apply_project_config(&mut self, proj: &ProjectState) {
-        let scene = &proj.project.scene;
+        let scene_cfg = &proj.project.scene;
 
         self.camera
-            .set_position(Vec3::from_array(scene.camera.position));
+            .set_position(Vec3::from_array(scene_cfg.camera.position));
         self.camera
-            .set_rotation(scene.camera.yaw, scene.camera.pitch);
-        self.state.camera_speed = scene.camera.speed;
-        self.state.camera_fov = scene.camera.fov;
+            .set_rotation(scene_cfg.camera.yaw, scene_cfg.camera.pitch);
+        self.state.camera_speed = scene_cfg.camera.speed;
+        self.state.camera_fov = scene_cfg.camera.fov;
 
-        self.state.light_direction = scene.light.direction;
+        self.state.light_direction = scene_cfg.light.direction;
         self.state.light_color = egui::Color32::from_rgba_premultiplied(
-            scene.light.color[0],
-            scene.light.color[1],
-            scene.light.color[2],
-            scene.light.color[3],
+            scene_cfg.light.color[0],
+            scene_cfg.light.color[1],
+            scene_cfg.light.color[2],
+            scene_cfg.light.color[3],
         );
         self.state.light_changed = true;
 
-        self.state.rendering_mode_index = match scene.render.mode.as_str() {
+        self.state.rendering_mode_index = match scene_cfg.render.mode.as_str() {
             "PerTriangle" => 0,
             "TileBased" => 1,
             "Deferred" => 2,
@@ -358,25 +493,36 @@ impl EditorApp {
             _ => 1,
         };
         self.state.rendering_mode_changed = true;
-        self.state.tile_size = scene.render.tile_size;
+        self.state.tile_size = scene_cfg.render.tile_size;
         self.state.tile_size_changed = true;
-        self.state.early_z = scene.render.early_z;
+        self.state.early_z = scene_cfg.render.early_z;
         self.state.early_z_changed = true;
-        self.state.shininess = scene.render.shininess;
+        self.state.shininess = scene_cfg.render.shininess;
         self.state.shininess_changed = true;
 
         if let Some(entry) = proj.project.assets.models.first() {
             let model_path = proj.resolve_model_path(entry);
             if model_path.exists() {
-                self.render_bridge
-                    .send(RenderCommand::LoadModel(model_path));
-
-                if !self.model_loaded {
-                    self.scene_entities.insert(0, format!("🧊 {}", entry.name));
-                } else {
-                    self.scene_entities[0] = format!("🧊 {}", entry.name);
+                let path_str = model_path.to_string_lossy().to_string();
+                match self.scene.spawn_model(&entry.name, &path_str) {
+                    Ok(entity) => {
+                        let model_handle = self
+                            .scene
+                            .world
+                            .get::<&engine_scene::MeshRenderer>(entity)
+                            .unwrap()
+                            .model_handle;
+                        if let Some(model) = self.scene.assets.get_model(model_handle) {
+                            self.render_bridge.send(RenderCommand::RegisterModel {
+                                id: model_handle.id(),
+                                model: model.clone(),
+                            });
+                        }
+                    }
+                    Err(e) => {
+                        tracing::error!("项目模型加载失败: {}", e);
+                    }
                 }
-                self.model_loaded = true;
             }
         }
     }
@@ -396,6 +542,29 @@ impl EditorApp {
         ];
         proj.project.scene.camera.fov = state.camera_fov;
         proj.project.scene.camera.speed = state.camera_speed;
+    }
+
+    fn collect_and_submit_frame(&self) {
+        use engine_core::Transform;
+        use engine_scene::MeshRenderer;
+
+        let mut draw_calls = Vec::new();
+        for (entity, (transform, mesh_renderer)) in self
+            .scene
+            .world
+            .query::<(&Transform, &MeshRenderer)>()
+            .iter()
+        {
+            draw_calls.push(DrawCallData {
+                model_id: mesh_renderer.model_handle.id(),
+                model_matrix: transform.to_mat4(),
+                entity_id: entity.to_bits().get() as u32,
+            });
+        }
+        if !draw_calls.is_empty() {
+            self.render_bridge
+                .send(RenderCommand::SubmitFrame(draw_calls));
+        }
     }
 
     fn send_state_changes(&mut self) {
@@ -501,6 +670,15 @@ impl EditorApp {
             self.fps_timer = Instant::now();
         }
     }
+
+    fn has_model_loaded(&self) -> bool {
+        self.scene
+            .world
+            .query::<&engine_scene::MeshRenderer>()
+            .iter()
+            .next()
+            .is_some()
+    }
 }
 
 impl eframe::App for EditorApp {
@@ -518,6 +696,10 @@ impl eframe::App for EditorApp {
 
         self.handle_menu_bar(ctx);
 
+        egui::TopBottomPanel::top("toolbar").show(ctx, |ui| {
+            panels::toolbar::show(ui, &mut self.gizmo);
+        });
+
         let render_time_ms = self.render_bridge.frame_time_us() as f32 / 1000.0;
         let mode_names = ["PerTriangle", "TileBased", "Deferred", "TileBasedDeferred"];
         let mode_name = mode_names[self.state.rendering_mode_index];
@@ -527,6 +709,26 @@ impl eframe::App for EditorApp {
             .map(|p| p.name().to_string())
             .unwrap_or_default();
         let project_dirty = self.project.as_ref().map(|p| p.dirty).unwrap_or(false);
+        let model_loaded = self.has_model_loaded();
+
+        // 提取选中实体信息
+        let selected_name = self.selection.selected.and_then(|e| {
+            self.scene
+                .world
+                .get::<&engine_scene::Name>(e)
+                .ok()
+                .map(|n| n.0.clone())
+        });
+        let selected_pos = self.selection.selected.and_then(|e| {
+            self.scene
+                .world
+                .get::<&engine_core::Transform>(e)
+                .ok()
+                .map(|t| t.translation.to_array())
+        });
+        let undo_desc = self.commands.undo_description().map(|s| s.to_string());
+        let redo_desc = self.commands.redo_description().map(|s| s.to_string());
+
         egui::TopBottomPanel::bottom("status_bar")
             .exact_height(24.0)
             .show(ctx, |ui| {
@@ -535,9 +737,13 @@ impl eframe::App for EditorApp {
                     self.display_fps,
                     render_time_ms,
                     mode_name,
-                    self.model_loaded,
+                    model_loaded,
                     &project_name,
                     project_dirty,
+                    selected_name.as_deref(),
+                    selected_pos.as_ref().copied(),
+                    undo_desc.as_deref(),
+                    redo_desc.as_deref(),
                 );
             });
 
@@ -551,17 +757,26 @@ impl eframe::App for EditorApp {
                 });
         }
 
-        egui::SidePanel::left("scene_tree")
-            .default_width(180.0)
-            .show(ctx, |ui| {
-                panels::scene_tree::show(ui, &self.scene_entities, &mut self.selected_entity);
-            });
+        if self.show_scene_tree {
+            egui::SidePanel::left("scene_tree")
+                .default_width(180.0)
+                .show(ctx, |ui| {
+                    panels::scene_tree::show(
+                        ui,
+                        &mut self.scene,
+                        &mut self.selection,
+                        &mut self.scene_tree_state,
+                    );
+                });
+        }
 
-        egui::SidePanel::right("properties")
-            .default_width(240.0)
-            .show(ctx, |ui| {
-                panels::properties::show(ui, &mut self.state);
-            });
+        if self.show_properties {
+            egui::SidePanel::right("properties")
+                .default_width(240.0)
+                .show(ctx, |ui| {
+                    panels::properties::show(ui, &mut self.scene, &self.selection, &mut self.state);
+                });
+        }
 
         let mut viewport_response = None;
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -569,6 +784,61 @@ impl eframe::App for EditorApp {
         });
 
         self.handle_camera_input(ctx, viewport_response.as_ref());
+
+        // 快捷键处理
+        if !ctx.wants_keyboard_input() {
+            let input = ctx.input(|i| {
+                let q = i.key_pressed(egui::Key::Q);
+                let w = i.key_pressed(egui::Key::W);
+                let e = i.key_pressed(egui::Key::E);
+                let r = i.key_pressed(egui::Key::R);
+                let ctrl_z =
+                    i.modifiers.command && i.key_pressed(egui::Key::Z) && !i.modifiers.shift;
+                let ctrl_shift_z =
+                    i.modifiers.command && i.key_pressed(egui::Key::Z) && i.modifiers.shift;
+                let delete =
+                    i.key_pressed(egui::Key::Delete) || i.key_pressed(egui::Key::Backspace);
+                let escape = i.key_pressed(egui::Key::Escape);
+                let f1 = i.key_pressed(egui::Key::F1);
+                (q, w, e, r, ctrl_z, ctrl_shift_z, delete, escape, f1)
+            });
+
+            if input.0 {
+                self.gizmo.tool = crate::gizmo::GizmoTool::Select;
+            }
+            if input.1 {
+                self.gizmo.tool = crate::gizmo::GizmoTool::Translate;
+            }
+            if input.2 {
+                self.gizmo.tool = crate::gizmo::GizmoTool::Rotate;
+            }
+            if input.3 {
+                self.gizmo.tool = crate::gizmo::GizmoTool::Scale;
+            }
+            if input.4 {
+                self.commands.undo(&mut self.scene);
+            }
+            if input.5 {
+                self.commands.redo(&mut self.scene);
+            }
+            if input.6 {
+                if let Some(entity) = self.selection.selected {
+                    let _ = self.scene.world.despawn(entity);
+                    self.selection.clear();
+                }
+            }
+            if input.7 {
+                self.selection.clear();
+            }
+            if input.8 {
+                self.shortcuts_help_state.open = true;
+            }
+        }
+
+        panels::shortcuts_help::show(ctx, &mut self.shortcuts_help_state);
+        panels::toast::show(ctx, &mut self.toast_manager);
+
+        self.collect_and_submit_frame();
         self.send_state_changes();
     }
 }

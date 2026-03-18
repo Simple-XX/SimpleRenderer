@@ -23,6 +23,22 @@ impl Default for CameraComponent {
     }
 }
 
+/// 包围盒组件 — 用于射线拾取和碰撞检测
+pub struct BoundingBox {
+    pub aabb: engine_math::AABB,
+}
+
+impl Default for BoundingBox {
+    fn default() -> Self {
+        Self {
+            aabb: engine_math::AABB::new(
+                glam::Vec3::new(-0.5, -0.5, -0.5),
+                glam::Vec3::new(0.5, 0.5, 0.5),
+            ),
+        }
+    }
+}
+
 pub struct LightComponent {
     pub direction: Vec3,
     pub color: engine_render_sw::Color,

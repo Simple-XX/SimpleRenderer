@@ -1,9 +1,15 @@
 mod app;
 mod camera_control;
+#[allow(dead_code)]
+mod commands;
+#[allow(dead_code)]
+mod gizmo;
 mod logger;
 mod panels;
 mod project;
 mod render_bridge;
+#[allow(dead_code)]
+mod selection;
 
 fn main() -> eframe::Result<()> {
     let log_buffer = logger::init_logger(2000);

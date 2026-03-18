@@ -6,6 +6,7 @@ rust-version = "1.73"
 
 [dependencies]
 engine_core = { path = "../engine_core" }
+engine_math = { path = "../engine_math" }
 engine_render_sw = { path = "../engine_render_sw" }
 glam = "0.29"
 hecs = "0.10"

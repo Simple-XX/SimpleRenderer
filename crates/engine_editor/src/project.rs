@@ -33,6 +33,8 @@ pub struct SceneConfig {
     pub light: LightConfig,
     #[serde(default)]
     pub render: RenderConfig,
+    #[serde(default)]
+    pub layout: EditorLayout,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -88,6 +90,23 @@ impl Default for RenderConfig {
             tile_size: 64,
             early_z: true,
             shininess: 32.0,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct EditorLayout {
+    pub scene_tree_width: f32,
+    pub properties_width: f32,
+    pub console_height: f32,
+}
+
+impl Default for EditorLayout {
+    fn default() -> Self {
+        Self {
+            scene_tree_width: 200.0,
+            properties_width: 280.0,
+            console_height: 150.0,
         }
     }
 }
