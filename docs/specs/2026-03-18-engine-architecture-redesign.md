@@ -832,7 +832,7 @@ struct WgpuRenderer {
 
 **问题**: 设计中未定义独立的输入系统（键盘/鼠标/手柄状态管理）和游戏内 UI 系统（不同于编辑器的 egui）。
 
-**修复**: 
+**修复**:
 - 新增 `engine_input` crate (Layer 1)：统一的输入状态管理，支持键盘/鼠标/手柄，与窗口后端解耦
 - Game UI 可暂时复用 egui（egui 可同时用于编辑器和游戏内 UI），后续迭代考虑专用方案
 
@@ -880,7 +880,7 @@ AppBuilder 在调用 `build()` 前进行拓扑排序。
 
 **问题**: `quinn` 基于 `tokio` 异步运行时。将 async QUIC 集成到同步的 Phase-based 游戏循环中会引入巨大的复杂度（tokio Runtime 桥接、跨线程状态同步）。
 
-**修复**: 
+**修复**:
 - 方案 A: 替换 `quinn` 为 `renet`（同步的可靠 UDP 网络库，专为游戏设计）
 - 方案 B: 替换为 `std::net::UdpSocket` + 自建可靠层
 - 方案 C: 保留 `quinn`，但在独立线程运行 tokio runtime，通过 channel 与游戏循环通信
@@ -893,7 +893,7 @@ AppBuilder 在调用 `build()` 前进行拓扑排序。
 
 **问题**: Phase 2 包含 7 个大任务（物理、音频、动画、骨骼、脚本、2D、编辑器扩展），对单人开发不现实。
 
-**修复**: 
+**修复**:
 - 将基础物理移到 Phase 1（与 Transform 层级一起验证）
 - Phase 2 拆分为 2a（物理+音频）和 2b（动画+脚本+2D）
 - 编辑器扩展移到各子系统实现之后的独立步骤
