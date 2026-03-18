@@ -12,7 +12,7 @@ A modular educational game engine built on a software renderer, helping develope
 
 SimpleGameEngine is a modular game engine with education as its primary goal. It uses a layered architecture that decouples ECS, rendering, input, and scene management into independent crates. The built-in software renderer fully simulates the GPU rendering pipeline (vertex shading → rasterization → fragment shading → depth testing), helping developers understand 3D graphics from the ground up.
 
-Implemented in minimal `unsafe` Rust as a Cargo workspace with 8 crates. MSRV: Rust 1.73+.
+Implemented in minimal `unsafe` Rust as a Cargo workspace with 7 crates. MSRV: Rust 1.73+.
 
 ### Design Goals
 
@@ -64,7 +64,6 @@ Layer 1 — Foundation (no inter-dependencies)
 | `engine_render_sw` | Software renderer: 4 rendering modes, Blinn-Phong shading, triple buffering |
 | `engine_scene` | Scene (hecs World + AssetManager), MeshRenderer/Camera/Light components |
 | `engine_editor` | eframe/egui editor: render viewport, scene tree, properties panel, FPS camera |
-| `system_test` | Legacy minifb interactive demo (retained) |
 
 ---
 
@@ -86,7 +85,6 @@ cd SimpleGameEngine
 
 cargo build --workspace               # Build all crates
 cargo run -p engine_editor             # Run egui editor
-cargo run -p system_test -- ./assets/models  # Run legacy minifb demo
 ```
 
 ### Controls

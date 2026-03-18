@@ -1,6 +1,5 @@
 //! 编辑器相机控制器（FPS 风格）
 //!
-//! 从 system_test/src/camera.rs 迁移而来，适配 egui 输入系统。
 //! 支持右键拖拽旋转视角、WASD 键移动。
 
 use glam::{Mat4, Vec3};

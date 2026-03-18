@@ -7,7 +7,6 @@ members = [
     "crates/engine_render_sw",
     "crates/engine_scene",
     "crates/engine_editor",
-    "system_test",
 ]
 resolver = "2"
 

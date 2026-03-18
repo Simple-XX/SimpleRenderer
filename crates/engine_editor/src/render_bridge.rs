@@ -121,7 +121,7 @@ fn render_loop(
     let mut width = init_width;
     let mut height = init_height;
 
-    // 设置默认模型矩阵（与 system_test 一致的茶壶变换）
+    // 设置默认模型矩阵（茶壶变换）
     let model_matrix = Mat4::from_scale(Vec3::splat(0.02))
         * Mat4::from_translation(Vec3::new(0.0, -5.0, 0.0))
         * Mat4::from_rotation_x((-105.0_f32).to_radians());

@@ -12,7 +12,7 @@
 
 SimpleGameEngine 是一个以教育为核心目标的模块化游戏引擎，采用分层架构设计，将 ECS、渲染、输入、场景管理等子系统解耦为独立 crate。内置的软件渲染器完整模拟了 GPU 渲染管线（顶点着色 → 光栅化 → 片段着色 → 深度测试），帮助开发者从底层理解 3D 图形学原理。
 
-本项目使用最小化 `unsafe` Rust 实现，采用 Cargo workspace 结构，包含 8 个 crate。最低支持 Rust 1.73+。
+本项目使用最小化 `unsafe` Rust 实现，采用 Cargo workspace 结构，包含 7 个 crate。最低支持 Rust 1.73+。
 
 ### 设计目标
 
@@ -66,7 +66,6 @@ Layer 1 的 4 个基础 crate **互不依赖**，上层只依赖下层。
 | `engine_render_sw` | 软件渲染器：4 种渲染模式、Blinn-Phong 着色、三缓冲 |
 | `engine_scene` | Scene（hecs World + AssetManager）、MeshRenderer/Camera/Light 组件 |
 | `engine_editor` | eframe/egui 编辑器：渲染视口、场景树、属性面板、FPS 相机 |
-| `system_test` | 旧版 minifb 交互式演示（保留） |
 
 ---
 
@@ -88,7 +87,6 @@ cd SimpleGameEngine
 
 cargo build --workspace               # 构建全部 crate
 cargo run -p engine_editor             # 运行 egui 编辑器
-cargo run -p system_test -- ./assets/models  # 运行旧版 minifb 演示
 ```
 
 ### 操作说明
@@ -131,7 +129,6 @@ SimpleGameEngine/
 │   ├── engine_render_sw/         # 软件渲染后端（4 种渲染策略）
 │   ├── engine_scene/             # Scene + AssetManager + Components
 │   └── engine_editor/            # egui 编辑器 GUI
-├── system_test/                  # 旧版 minifb 演示
 ├── assets/models/                # 内置 3D 模型 (.obj/.mtl)
 └── docs/                         # 设计文档 + 实施计划
 ```
@@ -167,7 +164,6 @@ SimpleGameEngine/
 | thiserror 2 | 错误派生 |
 | eframe/egui 0.31 | 编辑器 GUI |
 | rfd 0.15 | 原生文件对话框 |
-| minifb 0.27 | 窗口显示（旧版演示） |
 
 ---
 

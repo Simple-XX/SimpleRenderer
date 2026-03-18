@@ -5,12 +5,11 @@
 
 ## OVERVIEW
 
-Modular game engine built on a software renderer mimicking OpenGL's GPU pipeline in **Rust**. Cargo workspace with 8 crates organized in a layered architecture:
+Modular game engine built on a software renderer mimicking OpenGL's GPU pipeline in **Rust**. Cargo workspace with 7 crates organized in a layered architecture:
 
 - **Layer 1 (Foundation):** `engine_core` (hecs ECS + Plugin/Schedule/EventBus/ResourceMap), `engine_math` (glam re-export + AABB/Ray/Frustum), `engine_render_api` (RenderBackend trait + data types), `engine_input` (keyboard/mouse state)
 - **Layer 2 (Infrastructure):** `engine_render_sw` (software rendering backend), `engine_scene` (assets + components)
 - **Layer 4 (Application):** `engine_editor` (egui GUI)
-- **Legacy:** `system_test` (minifb demo, retained)
 
 Uses hecs ECS, glam math, tobj model loading, rayon parallelism, eframe/egui editor GUI. Multi-threaded: dedicated render thread communicates with editor via lock-free triple buffer.
 
@@ -95,7 +94,6 @@ SimpleGameEngine/
 │               ├── scene_tree.rs # Entity list (left panel)
 │               ├── properties.rs # Parameter sliders (right panel)
 │               └── status_bar.rs # FPS/stats (bottom)
-├── system_test/                  # Legacy minifb demo (retained)
 ├── assets/models/                # Bundled 3D models (.obj/.mtl)
 ├── docs/specs/                   # Design specs
 ├── docs/plans/                   # Implementation plans
@@ -122,7 +120,6 @@ SimpleGameEngine/
 | Add input binding | `crates/engine_input/src/` | KeyCode, MouseButton enums |
 | Define render backend | `crates/engine_render_api/src/backend.rs` | Impl RenderBackend trait |
 | Run editor | `cargo run -p engine_editor` | egui window with render viewport |
-| Run legacy demo | `cargo run -p system_test -- ./assets/models` | minifb window |
 
 ## CODE MAP
 
@@ -222,7 +219,6 @@ Editor (main thread, egui)
 ```bash
 cargo build --workspace                  # Build all crates
 cargo run -p engine_editor               # Run egui editor
-cargo run -p system_test -- ./assets/models  # Run legacy minifb demo
 cargo test --workspace                   # All tests (363)
 cargo test -p engine_render_sw           # Renderer tests (207)
 cargo test -p engine_core                # ECS + Plugin + Schedule tests (63)
@@ -248,6 +244,5 @@ cargo clippy --workspace -- -D warnings  # Lint (CI requires zero warnings)
 | eframe 0.31 | egui native window | engine_editor |
 | egui 0.31 | Immediate-mode GUI | engine_editor |
 | rfd 0.15 | Native file dialogs | engine_editor |
-| minifb 0.27 | Window/display | system_test (legacy) |
 | proptest 1 (dev) | Property testing | engine_render_sw |
 | criterion 0.5 (dev) | Benchmarking | engine_render_sw |
