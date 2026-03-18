@@ -7,7 +7,6 @@ use crate::uniform;
 
 use super::Shader;
 
-
 /// 缓存的片段着色器 uniform（光源 + 相机），避免逐片段的 HashMap 查找。
 #[derive(Clone)]
 pub(crate) struct FragmentUniformCache {
@@ -33,7 +32,6 @@ impl Default for FragmentUniformCache {
 }
 
 impl Shader {
-
     /// 使用 Blinn-Phong 着色模型计算片段的最终颜色。
     pub fn fragment_shader(&self, fragment: &Fragment, material: &Material) -> Color {
         // 辅助函数：Color → 归一化 Vec3，范围 [0, 1]
@@ -122,7 +120,6 @@ impl Shader {
         Color::from_normalized(r, g, b, 1.0)
     }
 
-
     pub(super) fn update_fragment_cache_light(&mut self, name: &str, value: &Light) {
         if name != uniform::names::LIGHT {
             return;
@@ -171,7 +168,6 @@ impl Shader {
         self.fragment_cache.derived_valid = true;
     }
 
-
     pub(super) fn prepare_fragment_cache(&mut self) {
         if self.fragment_cache.derived_valid {
             return;
@@ -202,7 +198,6 @@ impl Shader {
             self.recalculate_fragment_derived();
         }
     }
-
 
     /// 在给定 UV 坐标处对纹理进行采样（带环绕寻址）。
     pub(super) fn sample_texture(texture: &Texture, uv: Vec2) -> Color {

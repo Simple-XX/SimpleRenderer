@@ -1,8 +1,6 @@
 use super::Shader;
 
-
 pub(crate) const SPECULAR_LUT_RESOLUTION: usize = 256;
-
 
 /// 预计算的 `cos_theta^shininess` 查找表。
 #[derive(Clone)]
@@ -11,7 +9,6 @@ pub(crate) struct SpecularLut {
 }
 
 impl Shader {
-
     /// 构建 `cos_theta^shininess` 的查找表。
     pub(super) fn build_specular_lut(shininess: f32) -> SpecularLut {
         let mut values = [0.0_f32; SPECULAR_LUT_RESOLUTION];

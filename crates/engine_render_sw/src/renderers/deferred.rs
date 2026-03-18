@@ -177,12 +177,10 @@ impl Renderer for DeferredRenderer {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::renderers::test_utils::{create_test_model, test_shader};
-
 
     #[test]
     fn visible_triangle_produces_nonzero_pixels() {
@@ -210,7 +208,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn backface_triangle_still_produces_pixels() {
         let width = 100;
@@ -236,7 +233,6 @@ mod tests {
             nonzero_count
         );
     }
-
 
     #[test]
     fn empty_model_produces_no_pixels() {
@@ -264,7 +260,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn offscreen_triangle_produces_no_pixels() {
         let width = 100;
@@ -288,7 +283,6 @@ mod tests {
             nonzero_count
         );
     }
-
 
     #[test]
     fn closer_triangle_wins_depth_resolve() {

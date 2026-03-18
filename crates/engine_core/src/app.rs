@@ -100,7 +100,11 @@ impl AppBuilder {
 fn topological_sort(plugins: &[Box<dyn Plugin>], names: &[String]) -> Vec<usize> {
     use std::collections::{HashMap, VecDeque};
 
-    let name_to_idx: HashMap<&str, usize> = names.iter().enumerate().map(|(i, n)| (n.as_str(), i)).collect();
+    let name_to_idx: HashMap<&str, usize> = names
+        .iter()
+        .enumerate()
+        .map(|(i, n)| (n.as_str(), i))
+        .collect();
 
     let n = plugins.len();
     let mut in_degree = vec![0_usize; n];
@@ -135,11 +139,7 @@ fn topological_sort(plugins: &[Box<dyn Plugin>], names: &[String]) -> Vec<usize>
         }
     }
 
-    assert_eq!(
-        order.len(),
-        n,
-        "插件存在循环依赖，无法完成拓扑排序"
-    );
+    assert_eq!(order.len(), n, "插件存在循环依赖，无法完成拓扑排序");
 
     order
 }

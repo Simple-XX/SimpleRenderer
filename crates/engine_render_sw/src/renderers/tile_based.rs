@@ -197,7 +197,6 @@ impl Renderer for TileBasedRenderer {
     }
 }
 
-
 #[allow(clippy::too_many_arguments)]
 fn rasterize_tile(
     triangles: &[TileTriangleRef],
@@ -424,12 +423,10 @@ fn rasterize_tile(
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::renderers::test_utils::{create_test_model, test_shader};
-
 
     #[test]
     fn visible_triangle_produces_nonzero_pixels() {
@@ -456,7 +453,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn backface_triangle_produces_no_pixels() {
         let width = 100;
@@ -480,7 +476,6 @@ mod tests {
             nonzero_count
         );
     }
-
 
     #[test]
     fn empty_model_produces_no_pixels() {
@@ -507,7 +502,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn early_z_disabled_still_renders() {
         let width = 100;
@@ -533,7 +527,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn offscreen_triangle_produces_no_pixels() {
         let width = 100;
@@ -557,7 +550,6 @@ mod tests {
             nonzero_count
         );
     }
-
 
     #[test]
     fn custom_tile_size_works() {

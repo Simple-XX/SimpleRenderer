@@ -12,7 +12,6 @@ use fragment::FragmentUniformCache;
 use specular_lut::SpecularLut;
 use vertex::VertexUniformCache;
 
-
 /// 顶点 + 片段着色器，带有 uniform 缓存和高光查找表。
 ///
 /// - `vertex_shader` 接受 `&self`（世界坐标存储在返回的 Vertex 上）
@@ -35,7 +34,6 @@ impl Shader {
             specular_lut_cache: Arc::new(RwLock::new(HashMap::new())),
         }
     }
-
 
     /// 存储一个 uniform 并更新相关缓存。
     pub fn set_uniform(&mut self, name: &str, value: impl Into<UniformValue>) {
@@ -82,7 +80,6 @@ impl Clone for Shader {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -95,14 +92,12 @@ mod tests {
 
     use specular_lut::SPECULAR_LUT_RESOLUTION;
 
-
     #[test]
     fn shader_default() {
         let shader = Shader::new();
         assert!(!shader.vertex_cache.derived_valid);
         assert!(!shader.fragment_cache.derived_valid);
     }
-
 
     #[test]
     fn vertex_shader_identity_matrices() {
@@ -175,7 +170,6 @@ mod tests {
         assert_eq!(result.tex_coords, Vec2::new(0.3, 0.7));
         assert_eq!(result.color, Color::RED);
     }
-
 
     #[test]
     fn fragment_shader_produces_non_zero_color() {
@@ -262,7 +256,6 @@ mod tests {
         // 环境光*0.1 + 漫反射 + 高光*0.2 应产生明显的亮度
         assert!(color.r() > 100);
     }
-
 
     #[test]
     fn specular_lut_shininess_zero_all_ones() {
@@ -379,7 +372,6 @@ mod tests {
         }
     }
 
-
     #[test]
     fn sample_texture_basic() {
         let texture = Texture {
@@ -420,7 +412,6 @@ mod tests {
         let c = Shader::sample_texture(&texture, Vec2::new(-0.3, -0.3));
         assert_eq!(c, Color::new(42, 43, 44, 255));
     }
-
 
     #[test]
     fn cache_invalidation_on_matrix_update() {
@@ -530,7 +521,6 @@ mod tests {
         assert!(shader.fragment_cache.derived_valid);
         assert_eq!(shader.fragment_cache.lights.len(), 1);
     }
-
 
     #[test]
     fn set_lights_stores_in_buffer() {

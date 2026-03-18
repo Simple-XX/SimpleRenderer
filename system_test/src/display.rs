@@ -1,5 +1,5 @@
-use minifb::{Key, MouseButton, MouseMode, Window, WindowOptions};
 use engine_render_sw::RenderingMode;
+use minifb::{Key, MouseButton, MouseMode, Window, WindowOptions};
 
 use crate::camera::{Camera, CameraMovement};
 
@@ -21,13 +21,8 @@ pub struct Display {
 
 impl Display {
     pub fn new(width: usize, height: usize) -> Self {
-        let window = Window::new(
-            "SimpleGameEngine",
-            width,
-            height,
-            WindowOptions::default(),
-        )
-        .expect("failed to create window");
+        let window = Window::new("SimpleGameEngine", width, height, WindowOptions::default())
+            .expect("failed to create window");
 
         Self {
             window,

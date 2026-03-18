@@ -4,7 +4,6 @@ use crate::vertex::Vertex;
 
 use super::Shader;
 
-
 /// 缓存的顶点着色器矩阵，避免每个顶点都进行 HashMap 查找。
 #[derive(Clone)]
 pub(crate) struct VertexUniformCache {
@@ -38,7 +37,6 @@ impl Default for VertexUniformCache {
 }
 
 impl Shader {
-
     /// 将顶点从模型空间变换到裁剪空间。
     ///
     /// 将世界空间坐标存储在返回的 Vertex 的 `world_position` 字段中。
@@ -82,7 +80,6 @@ impl Shader {
         .with_world_position(world_position.truncate())
     }
 
-
     pub(super) fn update_matrix_cache(&mut self, name: &str, value: Mat4) {
         match name {
             uniform::names::MODEL_MATRIX => {
@@ -118,7 +115,6 @@ impl Shader {
             .transpose();
         self.vertex_cache.derived_valid = true;
     }
-
 
     pub(super) fn prepare_vertex_cache(&mut self) {
         if self.vertex_cache.derived_valid {

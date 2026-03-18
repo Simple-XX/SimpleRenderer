@@ -174,7 +174,6 @@ impl TripleBufferReader {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;

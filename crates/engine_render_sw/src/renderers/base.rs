@@ -49,7 +49,6 @@ pub fn viewport_transform(vertex: &Vertex, width: usize, height: usize) -> Verte
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -67,7 +66,6 @@ mod tests {
             world_position: Vec3::ZERO,
         }
     }
-
 
     #[test]
     fn perspective_division_basic() {
@@ -124,7 +122,6 @@ mod tests {
         assert_eq!(ndc.tex_coords, Vec2::new(0.3, 0.7));
         assert_eq!(ndc.color, Color::RED);
     }
-
 
     #[test]
     fn viewport_transform_center() {
@@ -186,7 +183,6 @@ mod tests {
         assert_eq!(s.tex_coords, Vec2::new(0.1, 0.9));
         assert_eq!(s.color, Color::BLUE);
     }
-
 
     #[test]
     fn perspective_division_then_viewport() {

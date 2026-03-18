@@ -171,12 +171,10 @@ impl Renderer for PerTriangleRenderer {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::renderers::test_utils::{create_test_model, test_shader};
-
 
     #[test]
     fn visible_triangle_produces_nonzero_pixels() {
@@ -209,7 +207,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn backface_triangle_produces_no_pixels() {
         let width = 100;
@@ -237,7 +234,6 @@ mod tests {
             nonzero_count
         );
     }
-
 
     #[test]
     fn offscreen_triangle_produces_no_pixels() {

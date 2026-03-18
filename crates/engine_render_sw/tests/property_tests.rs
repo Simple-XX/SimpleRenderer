@@ -1,10 +1,9 @@
 //! 数学正确性的属性测试。
 
-use glam::{Mat4, Vec2, Vec3, Vec4};
-use proptest::prelude::*;
 use engine_render_sw::vertex::Vertex;
 use engine_render_sw::{Buffer, Color, Shader};
-
+use glam::{Mat4, Vec2, Vec3, Vec4};
+use proptest::prelude::*;
 
 proptest! {
     #[test]

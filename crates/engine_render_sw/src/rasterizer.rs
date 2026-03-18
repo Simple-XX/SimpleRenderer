@@ -169,7 +169,6 @@ fn perspective_correction(
     (corrected, z)
 }
 
-
 #[inline]
 fn interpolate_f32(v0: f32, v1: f32, v2: f32, bary: Vec3) -> f32 {
     v0 * bary.x + v1 * bary.y + v2 * bary.z
@@ -194,7 +193,6 @@ fn interpolate_color(c0: Color, c1: Color, c2: Color, bary: Vec3) -> Color {
     Color::from_f32(r, g, b, 255.0)
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -211,7 +209,6 @@ mod tests {
             world_position: Vec3::ZERO,
         }
     }
-
 
     #[test]
     fn known_triangle_produces_fragments() {
@@ -251,7 +248,6 @@ mod tests {
         }
     }
 
-
     #[test]
     fn degenerate_triangle_returns_empty() {
         let rast = Rasterizer::new(400, 400);
@@ -266,7 +262,6 @@ mod tests {
             "collinear points should yield no fragments"
         );
     }
-
 
     #[test]
     fn barycentric_coords_sum_to_one() {
@@ -306,7 +301,6 @@ mod tests {
         assert!(get_barycentric_coord(p0, p1, p2, pa).is_none());
     }
 
-
     #[test]
     fn offscreen_triangle_returns_empty() {
         let rast = Rasterizer::new(400, 400);
@@ -337,7 +331,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn perspective_correction_uniform_w() {
         // 当 w 均匀时，校正后的重心坐标应等于原始重心坐标。
@@ -354,7 +347,6 @@ mod tests {
         let (_corrected, depth) = perspective_correction(1.0, 1.0, 1.0, 0.1, 0.5, 0.9, bary);
         assert!((depth - 0.1).abs() < 1e-5, "depth at v0 should be z0");
     }
-
 
     #[test]
     fn color_interpolation_uniform() {
@@ -379,7 +371,6 @@ mod tests {
         assert_eq!(result.g(), 0);
         assert_eq!(result.b(), 0);
     }
-
 
     #[test]
     fn interpolate_f32_basic() {

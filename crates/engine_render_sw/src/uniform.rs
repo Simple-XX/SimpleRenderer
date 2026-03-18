@@ -5,7 +5,6 @@ use crate::light::Light;
 use crate::material::Material;
 use crate::math::{Mat3, Mat4, Vec2, Vec3, Vec4};
 
-
 /// 预定义的 uniform 名称常量，防止字符串键拼写错误。
 ///
 /// 使用这些常量代替原始字符串，可在编译期检测出
@@ -18,7 +17,6 @@ pub mod names {
     pub const LIGHT: &str = "light";
     pub const LIGHTS: &str = "lights";
 }
-
 
 /// 可存储在 [`UniformBuffer`] 中的动态类型值。
 #[derive(Debug, Clone)]
@@ -35,7 +33,6 @@ pub enum UniformValue {
     Light(Light),
     Lights(Vec<Light>),
 }
-
 
 impl From<i32> for UniformValue {
     #[inline]
@@ -114,7 +111,6 @@ impl From<Vec<Light>> for UniformValue {
     }
 }
 
-
 /// 按名称存储的 uniform 容器，提供类型化的访问方法。
 ///
 /// 通过字符串键存储 uniform，并提供返回 `Option<T>`
@@ -141,7 +137,6 @@ impl UniformBuffer {
     pub fn has(&self, name: &str) -> bool {
         self.uniforms.contains_key(name)
     }
-
 
     pub fn get_int(&self, name: &str) -> Option<i32> {
         match self.uniforms.get(name)? {
@@ -213,7 +208,6 @@ impl UniformBuffer {
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {

@@ -170,7 +170,6 @@ impl Renderer for TileBasedDeferredRenderer {
     }
 }
 
-
 fn rasterize_tile_deferred(
     triangles: &[TileTriangleRef],
     grid: &TileGridContext,
@@ -195,7 +194,6 @@ fn rasterize_tile_deferred(
     let mut winner: Vec<i32> = vec![-1; tile_pixels];
     let mut b0c_buf = vec![0.0f32; tile_pixels];
     let mut b1c_buf = vec![0.0f32; tile_pixels];
-
 
     for (tri_local_idx, tri) in triangles.iter().enumerate() {
         let i0 = tri.i0;
@@ -321,7 +319,6 @@ fn rasterize_tile_deferred(
         }
     }
 
-
     for y in 0..tile_height {
         for x in 0..tile_width {
             let idx = x + y * tile_width;
@@ -375,12 +372,10 @@ fn rasterize_tile_deferred(
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::renderers::test_utils::{create_test_model, test_shader};
-
 
     #[test]
     fn visible_triangle_produces_nonzero_pixels() {
@@ -407,7 +402,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn backface_triangle_produces_no_pixels() {
         let width = 100;
@@ -431,7 +425,6 @@ mod tests {
             nonzero_count
         );
     }
-
 
     #[test]
     fn empty_model_produces_no_pixels() {
@@ -458,7 +451,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn offscreen_triangle_produces_no_pixels() {
         let width = 100;
@@ -482,7 +474,6 @@ mod tests {
             nonzero_count
         );
     }
-
 
     #[test]
     fn custom_tile_size_works() {
@@ -508,7 +499,6 @@ mod tests {
             nonzero_count
         );
     }
-
 
     #[test]
     fn two_pass_renders_overlapping_triangles() {

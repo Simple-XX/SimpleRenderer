@@ -9,7 +9,6 @@ use crate::renderers::base;
 use crate::shader::Shader;
 use crate::vertex::VertexSoA;
 
-
 pub const DEFAULT_TILE_SIZE: usize = 64;
 pub const K_LANE: usize = 8;
 pub const DEPTH_CLEAR: f32 = f32::INFINITY;
@@ -26,7 +25,6 @@ pub struct TileBounds {
     pub fb_height: usize,
 }
 
-
 /// 描述瓦片网格和 SoA 顶点数据的不可变上下文。
 pub struct TileGridContext {
     pub soa: VertexSoA,
@@ -35,7 +33,6 @@ pub struct TileGridContext {
     pub tile_size: usize,
 }
 
-
 /// 存储在瓦片三角形列表中的轻量级三角形引用。
 pub struct TileTriangleRef {
     pub i0: usize,
@@ -43,7 +40,6 @@ pub struct TileTriangleRef {
     pub i2: usize,
     pub face_index: usize,
 }
-
 
 /// 将所有顶点通过顶点着色器变换为 SoA 布局。
 ///
@@ -73,7 +69,6 @@ pub fn vertex_transform_soa(
 
     soa
 }
-
 
 /// 使用两遍方法（先计数后填充）将三角形分箱到瓦片中。
 ///
@@ -213,7 +208,6 @@ fn process_triangle_for_binning(
     }
 }
 
-
 /// 二维叉积：`ax*by - ay*bx`。
 #[inline]
 pub fn cross2(ax: f32, ay: f32, bx: f32, by: f32) -> f32 {
@@ -230,7 +224,6 @@ pub fn interpolate_color_bary(c0: Color, c1: Color, c2: Color, b0: f32, b1: f32,
     let b = c0.b() as f32 * b0 + c1.b() as f32 * b1 + c2.b() as f32 * b2;
     Color::from_f32(r, g, b, 255.0)
 }
-
 
 #[cfg(test)]
 mod tests {

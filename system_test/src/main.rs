@@ -1,10 +1,10 @@
 mod camera;
 mod display;
 
-use glam::{Mat4, Vec3};
-use log::info;
 use engine_render_sw::uniform::names as u;
 use engine_render_sw::{triple_buffer, Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
+use glam::{Mat4, Vec3};
+use log::info;
 use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};

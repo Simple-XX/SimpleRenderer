@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use glam::{Mat4, Vec3};
 use engine_render_sw::{Light, Model, RenderingMode, Shader, SimpleRenderer};
+use glam::{Mat4, Vec3};
 
 const BENCH_W: usize = 200;
 const BENCH_H: usize = 150;

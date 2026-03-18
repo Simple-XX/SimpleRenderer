@@ -14,7 +14,6 @@ pub struct Color {
     channels: [u8; 4],
 }
 
-
 impl Color {
     pub const WHITE: Color = Color::new(255, 255, 255, 255);
     pub const BLACK: Color = Color::new(0, 0, 0, 255);
@@ -22,7 +21,6 @@ impl Color {
     pub const GREEN: Color = Color::new(0, 255, 0, 255);
     pub const BLUE: Color = Color::new(0, 0, 255, 255);
 }
-
 
 impl Color {
     /// 从单独的 RGBA 通道值创建颜色。
@@ -67,7 +65,6 @@ impl Color {
         }
     }
 }
-
 
 impl Color {
     #[inline]
@@ -121,7 +118,6 @@ impl From<Color> for u32 {
             | ((c.channels[3] as u32) << 24)
     }
 }
-
 
 /// 逐通道乘以标量，钳制到 `[0, 255]`。
 impl ops::Mul<f32> for Color {
@@ -177,7 +173,6 @@ impl ops::Index<usize> for Color {
     }
 }
 
-
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -188,11 +183,9 @@ impl fmt::Display for Color {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
 
     #[test]
     fn new_stores_channels_correctly() {
@@ -278,7 +271,6 @@ mod tests {
         assert_eq!(c.a(), 255);
     }
 
-
     #[test]
     fn constants_are_correct() {
         assert_eq!(Color::WHITE, Color::new(255, 255, 255, 255));
@@ -287,7 +279,6 @@ mod tests {
         assert_eq!(Color::GREEN, Color::new(0, 255, 0, 255));
         assert_eq!(Color::BLUE, Color::new(0, 0, 255, 255));
     }
-
 
     #[test]
     fn from_u32_little_endian_rgba() {
@@ -359,7 +350,6 @@ mod tests {
         let val: u32 = c.into();
         assert_eq!(val, 0xFF000000);
     }
-
 
     #[test]
     fn mul_by_scalar() {
@@ -439,7 +429,6 @@ mod tests {
         assert_eq!(a + b, a);
     }
 
-
     #[test]
     fn index_access() {
         let c = Color::new(10, 20, 30, 40);
@@ -455,7 +444,6 @@ mod tests {
         let c = Color::new(10, 20, 30, 40);
         let _ = c[4];
     }
-
 
     #[test]
     fn bpp_is_four() {
@@ -495,7 +483,6 @@ mod tests {
         assert_eq!(Color::new(1, 2, 3, 4), Color::new(1, 2, 3, 4));
         assert_ne!(Color::new(1, 2, 3, 4), Color::new(1, 2, 3, 5));
     }
-
 
     #[test]
     fn white_constant_is_fully_opaque() {

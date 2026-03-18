@@ -141,9 +141,9 @@ mod tests {
         // 使用标准透视投影矩阵
         let proj = Mat4::perspective_rh(
             std::f32::consts::FRAC_PI_4, // 45° FOV
-            1.0,                          // 宽高比
-            0.1,                          // 近平面
-            100.0,                        // 远平面
+            1.0,                         // 宽高比
+            0.1,                         // 近平面
+            100.0,                       // 远平面
         );
         // 相机在原点，看向 -Z
         let view = Mat4::look_at_rh(Vec3::ZERO, Vec3::NEG_Z, Vec3::Y);
@@ -218,10 +218,7 @@ mod tests {
     fn frustum_does_not_intersect_aabb_beyond_far_plane() {
         let frustum = make_test_frustum();
         // 远平面之外的 AABB
-        let aabb = AABB::new(
-            Vec3::new(-1.0, -1.0, -200.0),
-            Vec3::new(1.0, 1.0, -150.0),
-        );
+        let aabb = AABB::new(Vec3::new(-1.0, -1.0, -200.0), Vec3::new(1.0, 1.0, -150.0));
         assert!(!frustum.intersects_aabb(&aabb));
     }
 
