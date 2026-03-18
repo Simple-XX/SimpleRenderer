@@ -5,7 +5,7 @@ edition = "2021"
 rust-version = "1.73"
 
 [dependencies]
-engine_renderer = { path = "../crates/engine_renderer" }
+engine_render_sw = { path = "../crates/engine_render_sw" }
 minifb = "0.27"
 log = "0.4"
 env_logger = "0.11"

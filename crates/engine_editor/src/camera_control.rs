@@ -1,6 +1,3 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 //! 编辑器相机控制器（FPS 风格）
 //!
 //! 从 system_test/src/camera.rs 迁移而来，适配 egui 输入系统。

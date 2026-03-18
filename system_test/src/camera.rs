@@ -1,6 +1,3 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 use glam::{Mat4, Vec3};
 
 /// 相机移动方向

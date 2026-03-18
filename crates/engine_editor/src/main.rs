@@ -1,6 +1,3 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 mod app;
 mod camera_control;
 mod panels;

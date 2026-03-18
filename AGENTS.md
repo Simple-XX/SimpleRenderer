@@ -5,20 +5,57 @@
 
 ## OVERVIEW
 
-Game engine built on a software renderer mimicking OpenGL's GPU pipeline in **Rust**. Cargo workspace with 5 crates: `engine_core` (ECS), `engine_renderer` (software rendering), `engine_scene` (assets + components), `engine_editor` (egui GUI), and legacy `system_test` (minifb demo). Uses glam math, tobj model loading, rayon parallelism, eframe/egui editor GUI. Multi-threaded: dedicated render thread communicates with editor via lock-free triple buffer.
+Modular game engine built on a software renderer mimicking OpenGL's GPU pipeline in **Rust**. Cargo workspace with 8 crates organized in a layered architecture:
+
+- **Layer 1 (Foundation):** `engine_core` (hecs ECS + Plugin/Schedule/EventBus/ResourceMap), `engine_math` (glam re-export + AABB/Ray/Frustum), `engine_render_api` (RenderBackend trait + data types), `engine_input` (keyboard/mouse state)
+- **Layer 2 (Infrastructure):** `engine_render_sw` (software rendering backend), `engine_scene` (assets + components)
+- **Layer 4 (Application):** `engine_editor` (egui GUI)
+- **Legacy:** `system_test` (minifb demo, retained)
+
+Uses hecs ECS, glam math, tobj model loading, rayon parallelism, eframe/egui editor GUI. Multi-threaded: dedicated render thread communicates with editor via lock-free triple buffer.
 
 ## STRUCTURE
 
 ```
-SimpleRenderer/
+SimpleGameEngine/
 ├── Cargo.toml                    # Workspace root (resolver=2, dev opt-level=2)
 ├── crates/
-│   ├── engine_core/              # ECS + Time
+│   ├── engine_math/              # Layer 1: Math utilities
 │   │   └── src/
-│   │       ├── lib.rs
-│   │       ├── ecs.rs            # Entity(u64), Component, World (HashMap storage)
-│   │       └── time.rs           # Time (delta, total, frame_count)
-│   ├── engine_renderer/          # Software renderer (原 simple_renderer)
+│   │       ├── lib.rs            # glam re-export (pub use glam::*)
+│   │       ├── aabb.rs           # AABB (contains, intersects, center, size)
+│   │       ├── ray.rs            # Ray (point_at, intersects_aabb slab method)
+│   │       └── frustum.rs        # Plane + Frustum (from_view_projection, contains_point, intersects_aabb)
+│   ├── engine_core/              # Layer 1: ECS + Plugin + Schedule + Events + Resources
+│   │   └── src/
+│   │       ├── lib.rs            # Module declarations + pub re-exports
+│   │       ├── ecs.rs            # hecs re-exports (Entity, World)
+│   │       ├── time.rs           # Time (delta, total, frame_count)
+│   │       ├── resource.rs       # ResourceMap (TypeMap pattern)
+│   │       ├── event.rs          # Event trait + EventBus
+│   │       ├── schedule.rs       # Phase enum (6 phases) + Schedule + SystemContext
+│   │       ├── plugin.rs         # Plugin trait (name, dependencies, build, cleanup)
+│   │       ├── app.rs            # AppBuilder (world + resources + events + schedule + plugins)
+│   │       ├── transform.rs      # Transform, Parent, Children, GlobalTransform
+│   │       ├── despawn.rs        # DespawnQueue (mark/drain for entity cleanup)
+│   │       └── asset.rs          # AssetId, Handle<T>, AssetLoader trait
+│   ├── engine_render_api/        # Layer 1: Render backend abstraction
+│   │   └── src/
+│   │       ├── lib.rs            # re-exports
+│   │       ├── backend.rs        # RenderBackend trait + RenderError
+│   │       ├── frame.rs          # FrameData, DrawCall, CameraData, LightData, FrameOutput
+│   │       ├── mesh.rs           # MeshData, MeshHandle
+│   │       ├── texture.rs        # TextureData, TextureHandle, TextureFormat
+│   │       ├── material.rs       # MaterialData, MaterialHandle
+│   │       ├── color.rs          # Color (f32 RGBA)
+│   │       └── viewport.rs       # Viewport, RenderConfig
+│   ├── engine_input/             # Layer 1: Input state management
+│   │   └── src/
+│   │       ├── lib.rs            # re-exports
+│   │       ├── keyboard.rs       # KeyCode enum + KeyboardState (press/release/just_pressed)
+│   │       ├── mouse.rs          # MouseButton + MouseState (position/delta/scroll)
+│   │       └── input_state.rs    # InputState (aggregates keyboard + mouse)
+│   ├── engine_render_sw/         # Layer 2: Software renderer (原 engine_renderer)
 │   │   ├── src/
 │   │   │   ├── lib.rs            # Module declarations + pub re-exports
 │   │   │   ├── renderer.rs       # SimpleRenderer: draw_model(&mut self)
@@ -40,13 +77,13 @@ SimpleRenderer/
 │   │   └── tests/
 │   │       ├── integration_test.rs
 │   │       └── property_tests.rs
-│   ├── engine_scene/             # Scene management + Assets
+│   ├── engine_scene/             # Layer 2: Scene management + Assets
 │   │   └── src/
 │   │       ├── lib.rs
-│   │       ├── asset.rs          # AssetId, Handle<T>, AssetManager
-│   │       ├── components.rs     # Transform, Name, MeshRenderer, CameraComponent, LightComponent
-│   │       └── scene.rs          # Scene (World + AssetManager)
-│   └── engine_editor/            # egui editor GUI
+│   │       ├── asset.rs          # AssetManager (uses engine_core::Handle<T>)
+│   │       ├── components.rs     # Name, MeshRenderer, CameraComponent, LightComponent
+│   │       └── scene.rs          # Scene (hecs::World + AssetManager)
+│   └── engine_editor/            # Layer 4: egui editor GUI
 │       └── src/
 │           ├── main.rs           # eframe entry point
 │           ├── app.rs            # EditorApp: eframe::App impl
@@ -69,14 +106,21 @@ SimpleRenderer/
 
 | Task | Location | Notes |
 |------|----------|-------|
-| Add ECS component | `crates/engine_scene/src/components.rs` | Impl `engine_core::Component` trait |
-| Add rendering algorithm | `crates/engine_renderer/src/renderers/` | Impl `Renderer` trait (`&mut self`) |
-| Change vertex shader | `crates/engine_renderer/src/shader/vertex.rs` | `vertex_shader(&self)` |
-| Change fragment shader | `crates/engine_renderer/src/shader/fragment.rs` | `fragment_shader(&self)` Blinn-Phong |
-| Add uniform | `crates/engine_renderer/src/uniform.rs` | Add variant + constant to `uniform::names` |
+| Add ECS component | `crates/engine_scene/src/components.rs` | hecs components = any Send+Sync+'static type |
+| Add rendering algorithm | `crates/engine_render_sw/src/renderers/` | Impl `Renderer` trait (`&mut self`) |
+| Change vertex shader | `crates/engine_render_sw/src/shader/vertex.rs` | `vertex_shader(&self)` |
+| Change fragment shader | `crates/engine_render_sw/src/shader/fragment.rs` | `fragment_shader(&self)` Blinn-Phong |
+| Add uniform | `crates/engine_render_sw/src/uniform.rs` | Add variant + constant to `uniform::names` |
 | Add editor panel | `crates/engine_editor/src/panels/` | New panel file + integrate in `app.rs` |
 | Modify editor menu | `crates/engine_editor/src/app.rs` | `egui::menu::bar` in `update()` |
-| Add asset type | `crates/engine_scene/src/asset.rs` | Add HashMap + Handle methods |
+| Add asset type | `crates/engine_scene/src/asset.rs` | Uses engine_core::Handle<T> |
+| Add plugin | `crates/engine_core/src/plugin.rs` | Impl Plugin trait (name, build, dependencies) |
+| Add system | `crates/engine_core/src/schedule.rs` | Use Phase enum + Schedule::add_system |
+| Add resource | `crates/engine_core/src/resource.rs` | ResourceMap::insert/get |
+| Add event | `crates/engine_core/src/event.rs` | Impl Event trait, use EventBus::send/read |
+| Add math utility | `crates/engine_math/src/` | AABB, Ray, Frustum already available |
+| Add input binding | `crates/engine_input/src/` | KeyCode, MouseButton enums |
+| Define render backend | `crates/engine_render_api/src/backend.rs` | Impl RenderBackend trait |
 | Run editor | `cargo run -p engine_editor` | egui window with render viewport |
 | Run legacy demo | `cargo run -p system_test -- ./assets/models` | minifb window |
 
@@ -84,16 +128,33 @@ SimpleRenderer/
 
 | Symbol | Type | Crate | Role |
 |--------|------|-------|------|
-| `World` | Struct | engine_core | ECS: entity storage, typed component maps |
-| `Entity` | Type alias (u64) | engine_core | Unique entity ID |
-| `Component` | Trait | engine_core | Marker for ECS components |
+| `World` | Struct (hecs) | engine_core | ECS: archetype entity storage |
+| `Entity` | Struct (hecs) | engine_core | Opaque entity handle |
+| `AppBuilder` | Struct | engine_core | Plugin registration + main loop |
+| `Plugin` | Trait | engine_core | Modular engine extension point |
+| `Schedule` | Struct | engine_core | Phase-based system execution |
+| `Phase` | Enum | engine_core | PreUpdate/Update/PostUpdate/PreRender/Render/PostRender |
+| `SystemContext` | Struct | engine_core | World + Resources + Events access for systems |
+| `ResourceMap` | Struct | engine_core | Type-keyed global resource storage |
+| `EventBus` | Struct | engine_core | Type-keyed per-frame event channels |
+| `Transform` | Struct | engine_core | Translation/rotation/scale component |
+| `DespawnQueue` | Struct | engine_core | Deferred entity destruction |
+| `Handle<T>` | Struct | engine_core | Type-safe asset reference |
+| `AssetLoader` | Trait | engine_core | Extensible asset loading |
 | `Time` | Struct | engine_core | Frame timing |
+| `AABB` | Struct | engine_math | Axis-aligned bounding box |
+| `Ray` | Struct | engine_math | Ray for intersection tests |
+| `Frustum` | Struct | engine_math | View frustum culling |
+| `RenderBackend` | Trait | engine_render_api | Backend-agnostic render interface |
+| `FrameData` | Struct | engine_render_api | Per-frame render data |
+| `DrawCall` | Struct | engine_render_api | Single draw command |
+| `InputState` | Struct | engine_input | Unified keyboard + mouse state |
+| `KeyCode` | Enum | engine_input | Keyboard key identifiers |
 | `Scene` | Struct | engine_scene | World + AssetManager bundle |
 | `AssetManager` | Struct | engine_scene | Model loading + Handle<T> |
-| `Transform` | Struct | engine_scene | Position/rotation/scale component |
-| `SimpleRenderer` | Struct | engine_renderer | Mode dispatch → `Box<dyn Renderer>` |
-| `Renderer` | Trait | engine_renderer | `fn render(&mut self, ...)` |
-| `Shader` | Struct | engine_renderer | Vertex/fragment shader + uniform caching |
+| `SimpleRenderer` | Struct | engine_render_sw | Mode dispatch → `Box<dyn Renderer>` |
+| `Renderer` | Trait | engine_render_sw | `fn render(&mut self, ...)` |
+| `Shader` | Struct | engine_render_sw | Vertex/fragment shader + uniform caching |
 | `EditorApp` | Struct | engine_editor | eframe::App impl, orchestrates GUI |
 | `RenderBridge` | Struct | engine_editor | Render thread + triple buffer communication |
 | `EditorCamera` | Struct | engine_editor | FPS-style viewport camera control |
@@ -101,19 +162,33 @@ SimpleRenderer/
 
 ## ARCHITECTURE
 
-### Engine Layers
+### Layered Architecture
 
 ```
-engine_editor (egui GUI, top-level binary)
-    ↓ depends on
-engine_scene (Scene, AssetManager, Components)
-    ↓ depends on
-engine_core (ECS)    engine_renderer (software rendering)
-    ↓                    ↓
-    glam                 glam, tobj, image, rayon
+Layer 4 — Application
+  engine_editor       egui 编辑器 GUI
+
+Layer 2 — Infrastructure
+  engine_scene        Scene + AssetManager + Components
+  engine_render_sw    Software rendering backend
+
+Layer 1 — Foundation (互不依赖)
+  engine_core         hecs ECS + Plugin + Schedule + EventBus + ResourceMap
+  engine_math         glam re-export + AABB/Ray/Frustum
+  engine_render_api   RenderBackend trait + FrameData + data types
+  engine_input        Keyboard/Mouse state management
 ```
 
-`engine_core` and `engine_renderer` are parallel base crates with NO dependency on each other. `engine_scene` bridges them. `engine_editor` depends on all.
+### Dependency Graph
+
+```
+engine_editor ──┬── engine_scene ──┬── engine_core
+                │                  └── engine_render_sw
+                ├── engine_render_sw ── engine_render_api
+                └── engine_core
+```
+
+Layer 1 crates have NO inter-dependencies. Upper layers depend on lower layers only.
 
 ### Render Pipeline
 
@@ -129,14 +204,16 @@ Editor (main thread, egui)
 
 ## CONVENTIONS
 
+- **ECS**: hecs archetype storage. Components = any `Send + Sync + 'static` type
+- **Plugin system**: Impl `Plugin` trait, register via `AppBuilder::add_plugin`
+- **Systems**: `FnMut(&mut SystemContext)` closures, registered to a `Phase`
 - **Uniform names**: Always use `uniform::names::*` constants
 - **Error handling**: `thiserror` → `RendererError`, propagate with `?`
 - **Parallelism**: `rayon` in renderers, parallel merge in PerTriangle
 - **Buffer reuse**: Renderer structs own depth/color buffers, reuse with `fill()`
-- **ECS**: `HashMap<TypeId, HashMap<Entity, Box<dyn Any>>>` storage (simple, not optimized)
 - **Testing**: Every `.rs` file has `#[cfg(test)]` module; proptest for properties
 - **Comments**: Chinese (中文注释)
-- **Copyright**: Every `.rs` file starts with `// Copyright (c) Simple-XX/SimpleRenderer`
+- **License**: MIT, declared in workspace `Cargo.toml` `[workspace.package]`; no per-file copyright headers
 - **Platform**: Little-endian only (`compile_error!` guard)
 - **MSRV**: Rust 1.73+
 
@@ -146,10 +223,13 @@ Editor (main thread, egui)
 cargo build --workspace                  # Build all crates
 cargo run -p engine_editor               # Run egui editor
 cargo run -p system_test -- ./assets/models  # Run legacy minifb demo
-cargo test --workspace                   # All tests (245)
-cargo test -p engine_renderer            # Renderer tests (207)
-cargo test -p engine_core                # ECS tests (16)
-cargo test -p engine_scene               # Scene tests (6)
+cargo test --workspace                   # All tests (363)
+cargo test -p engine_render_sw           # Renderer tests (207)
+cargo test -p engine_core                # ECS + Plugin + Schedule tests (63)
+cargo test -p engine_math                # Math tests (39)
+cargo test -p engine_input               # Input tests (20)
+cargo test -p engine_render_api          # Render API tests (13)
+cargo test -p engine_scene               # Scene tests (5)
 cargo clippy --workspace -- -D warnings  # Lint (CI requires zero warnings)
 ```
 
@@ -157,16 +237,17 @@ cargo clippy --workspace -- -D warnings  # Lint (CI requires zero warnings)
 
 | Crate | Purpose | Used by |
 |-------|---------|---------|
+| hecs 0.10 | Archetype ECS | engine_core |
 | glam 0.29 | Vec3, Vec4, Mat4 math | all |
-| tobj 4.0 | OBJ model loading | engine_renderer |
-| image 0.25 | Texture loading | engine_renderer |
-| rayon 1.10 | Parallel iteration | engine_renderer |
-| thiserror 2 | Error derive macros | engine_renderer |
-| log 0.4 | Logging | engine_renderer, engine_editor |
+| tobj 4.0 | OBJ model loading | engine_render_sw |
+| image 0.25 | Texture loading | engine_render_sw |
+| rayon 1.10 | Parallel iteration | engine_render_sw |
+| thiserror 2 | Error derive macros | engine_render_sw, engine_render_api |
+| log 0.4 | Logging | engine_render_sw, engine_editor |
 | env_logger 0.11 | Log output | engine_editor |
 | eframe 0.31 | egui native window | engine_editor |
 | egui 0.31 | Immediate-mode GUI | engine_editor |
 | rfd 0.15 | Native file dialogs | engine_editor |
 | minifb 0.27 | Window/display | system_test (legacy) |
-| proptest 1 (dev) | Property testing | engine_renderer |
-| criterion 0.5 (dev) | Benchmarking | engine_renderer |
+| proptest 1 (dev) | Property testing | engine_render_sw |
+| criterion 0.5 (dev) | Benchmarking | engine_render_sw |

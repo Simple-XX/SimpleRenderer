@@ -1,6 +1,3 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 use egui::{ColorImage, TextureHandle, TextureOptions};
 
 /// 将渲染器输出的 `&[u32]` RGBA 像素缓冲区转换为 egui 可用的 ColorImage。

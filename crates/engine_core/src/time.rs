@@ -1,6 +1,3 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 /// 帧计时信息。
 pub struct Time {
     /// 上一帧到当前帧的时间间隔（秒）

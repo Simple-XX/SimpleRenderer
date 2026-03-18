@@ -1,6 +1,3 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 use crate::app::EditorState;
 
 /// 显示右侧属性面板，返回是否有属性被修改

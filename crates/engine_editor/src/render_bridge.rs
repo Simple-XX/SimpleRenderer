@@ -1,6 +1,3 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 //! 渲染桥接层：在独立线程中运行软件渲染器，
 //! 通过 mpsc 通道接收命令，通过三重缓冲输出像素。
 
@@ -10,9 +7,9 @@ use std::sync::mpsc::{self, Receiver, Sender};
 use std::sync::Arc;
 use std::time::Instant;
 
-use engine_renderer::triple_buffer::{self, TripleBufferReader, TripleBufferWriter};
-use engine_renderer::uniform::names as u;
-use engine_renderer::{Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
+use engine_render_sw::triple_buffer::{self, TripleBufferReader, TripleBufferWriter};
+use engine_render_sw::uniform::names as u;
+use engine_render_sw::{Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
 use glam::{Mat4, Vec3};
 
 /// 从 UI 线程发送到渲染线程的命令

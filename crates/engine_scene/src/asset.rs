@@ -1,26 +1,10 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 use std::collections::HashMap;
-use std::marker::PhantomData;
 
-pub type AssetId = u64;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Handle<T> {
-    id: AssetId,
-    _marker: PhantomData<T>,
-}
-
-impl<T> Handle<T> {
-    pub fn id(&self) -> AssetId {
-        self.id
-    }
-}
+use engine_core::{AssetId, Handle};
 
 pub struct AssetManager {
     next_id: AssetId,
-    models: HashMap<AssetId, engine_renderer::Model>,
+    models: HashMap<AssetId, engine_render_sw::Model>,
 }
 
 impl AssetManager {
@@ -34,22 +18,19 @@ impl AssetManager {
     pub fn load_model(
         &mut self,
         path: &str,
-    ) -> engine_renderer::Result<Handle<engine_renderer::Model>> {
-        let model = engine_renderer::Model::load(path)?;
+    ) -> engine_render_sw::Result<Handle<engine_render_sw::Model>> {
+        let model = engine_render_sw::Model::load(path)?;
         let id = self.next_id;
         self.next_id += 1;
         self.models.insert(id, model);
-        Ok(Handle {
-            id,
-            _marker: PhantomData,
-        })
+        Ok(Handle::new(id))
     }
 
     pub fn get_model(
         &self,
-        handle: Handle<engine_renderer::Model>,
-    ) -> Option<&engine_renderer::Model> {
-        self.models.get(&handle.id)
+        handle: Handle<engine_render_sw::Model>,
+    ) -> Option<&engine_render_sw::Model> {
+        self.models.get(&handle.id())
     }
 }
 
@@ -74,7 +55,7 @@ mod tests {
         let mut mgr = AssetManager::new();
         let path = concat!(
             env!("CARGO_MANIFEST_DIR"),
-            "/../engine_renderer/../../assets/models/utah-teapot-texture/teapot.obj"
+            "/../engine_render_sw/../../assets/models/utah-teapot-texture/teapot.obj"
         );
         if let Ok(h1) = mgr.load_model(path) {
             if let Ok(h2) = mgr.load_model(path) {

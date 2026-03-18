@@ -1,13 +1,10 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 mod camera;
 mod display;
 
 use glam::{Mat4, Vec3};
 use log::info;
-use engine_renderer::uniform::names as u;
-use engine_renderer::{triple_buffer, Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
+use engine_render_sw::uniform::names as u;
+use engine_render_sw::{triple_buffer, Color, Light, Model, RenderingMode, Shader, SimpleRenderer};
 use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};

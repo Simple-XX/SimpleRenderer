@@ -1,6 +1,3 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 /// 显示底部状态栏（FPS、渲染耗时等）
 pub fn show(
     ui: &mut egui::Ui,

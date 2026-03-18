@@ -1,6 +1,3 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 /// 显示场景树面板（左侧实体列表）
 pub fn show(ui: &mut egui::Ui, entities: &[String], selected: &mut Option<usize>) {
     ui.heading("场景树");

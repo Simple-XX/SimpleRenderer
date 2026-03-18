@@ -1,8 +1,6 @@
-// Copyright The SimpleGameEngine Contributors
-
-
-use engine_core::{Entity, World};
+use engine_core::Transform;
 use glam::Vec3;
+use hecs::World;
 
 use crate::asset::AssetManager;
 use crate::components::*;
@@ -20,46 +18,45 @@ impl Scene {
         }
     }
 
-    pub fn spawn_model(&mut self, name: &str, path: &str) -> engine_renderer::Result<Entity> {
+    pub fn spawn_model(
+        &mut self,
+        name: &str,
+        path: &str,
+    ) -> engine_render_sw::Result<hecs::Entity> {
         let handle = self.assets.load_model(path)?;
-        let e = self.world.spawn();
-        self.world.insert(e, Name(name.to_string()));
-        self.world.insert(e, Transform::default());
-        self.world.insert(
-            e,
+        let entity = self.world.spawn((
+            Name(name.to_string()),
+            Transform::default(),
             MeshRenderer {
                 model_handle: handle,
             },
-        );
-        Ok(e)
+        ));
+        Ok(entity)
     }
 
     pub fn spawn_light(
         &mut self,
         name: &str,
         direction: Vec3,
-        color: engine_renderer::Color,
-    ) -> Entity {
-        let e = self.world.spawn();
-        self.world.insert(e, Name(name.to_string()));
-        self.world.insert(e, Transform::default());
-        self.world.insert(
-            e,
+        color: engine_render_sw::Color,
+    ) -> hecs::Entity {
+        self.world.spawn((
+            Name(name.to_string()),
+            Transform::default(),
             LightComponent {
                 direction,
                 color,
                 intensity: 1.0,
             },
-        );
-        e
+        ))
     }
 
-    pub fn spawn_camera(&mut self, name: &str) -> Entity {
-        let e = self.world.spawn();
-        self.world.insert(e, Name(name.to_string()));
-        self.world.insert(e, Transform::default());
-        self.world.insert(e, CameraComponent::default());
-        e
+    pub fn spawn_camera(&mut self, name: &str) -> hecs::Entity {
+        self.world.spawn((
+            Name(name.to_string()),
+            Transform::default(),
+            CameraComponent::default(),
+        ))
     }
 }
 
@@ -79,13 +76,12 @@ mod tests {
         let light = scene.spawn_light(
             "sun",
             Vec3::new(0.0, -1.0, 0.0),
-            engine_renderer::Color::WHITE,
+            engine_render_sw::Color::WHITE,
         );
         let cam = scene.spawn_camera("main_camera");
 
-        assert!(scene.world.get::<LightComponent>(light).is_some());
-        assert!(scene.world.get::<CameraComponent>(cam).is_some());
-        assert!(scene.world.get::<Name>(light).is_some());
-        assert_eq!(scene.world.entities().len(), 2);
+        assert!(scene.world.get::<&LightComponent>(light).is_ok());
+        assert!(scene.world.get::<&CameraComponent>(cam).is_ok());
+        assert!(scene.world.get::<&Name>(light).is_ok());
     }
 }

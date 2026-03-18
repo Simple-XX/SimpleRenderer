@@ -1,10 +1,7 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 pub mod asset;
 pub mod components;
 pub mod scene;
 
-pub use asset::{AssetId, AssetManager, Handle};
+pub use asset::AssetManager;
 pub use components::*;
 pub use scene::Scene;

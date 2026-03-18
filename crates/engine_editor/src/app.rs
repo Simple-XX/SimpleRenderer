@@ -1,11 +1,8 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 use std::path::PathBuf;
 use std::time::Instant;
 
 use egui::TextureHandle;
-use engine_renderer::{Color, Light, RenderingMode};
+use engine_render_sw::{Color, Light, RenderingMode};
 use glam::Vec3;
 
 use crate::camera_control::EditorCamera;

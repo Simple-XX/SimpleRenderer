@@ -1,8 +1,5 @@
-// Copyright The SimpleGameEngine Contributors
-
-
 use minifb::{Key, MouseButton, MouseMode, Window, WindowOptions};
-use engine_renderer::RenderingMode;
+use engine_render_sw::RenderingMode;
 
 use crate::camera::{Camera, CameraMovement};
 

@@ -6,3 +6,4 @@ rust-version = "1.73"
 
 [dependencies]
 glam = "0.29"
+hecs = "0.10"

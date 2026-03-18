@@ -1,12 +1,20 @@
 [workspace]
 members = [
-    "crates/engine_renderer",
+    "crates/engine_math",
     "crates/engine_core",
+    "crates/engine_render_api",
+    "crates/engine_input",
+    "crates/engine_render_sw",
     "crates/engine_scene",
     "crates/engine_editor",
     "system_test",
 ]
 resolver = "2"
+
+[workspace.package]
+license = "MIT"
+authors = ["Simple-XX"]
+repository = "https://github.com/Simple-XX/SimpleGameEngine"
 
 [profile.dev]
 opt-level = 2
